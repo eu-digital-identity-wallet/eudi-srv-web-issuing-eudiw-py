@@ -1,0 +1,59 @@
+# https://sequencediagram.org
+#
+title PID issuance
+
+actor Alice
+participant EUDIWallet-app
+participant EUDIWallet-browser
+participantgroup #lightgrey PID Provider backend
+participant Document Signer
+participant CBOR Formatter
+participant PID issuer
+end 
+participant "eIDAS Node /\n MS IDP" as participantMultiline
+#
+Alice->>EUDIWallet-app:Issue PID
+activate EUDIWallet-app
+EUDIWallet-app->>EUDIWallet-browser:country, pubKey, returnURL
+activate EUDIWallet-browser
+deactivate EUDIWallet-app
+ref over participantMultiline,EUDIWallet-browser:All callbackURLs/returnURL go through the EUDIWallet-browser
+
+EUDIWallet-browser->>PID issuer:country, pubKey, returnURL
+activate PID issuer
+
+PID issuer->>participantMultiline:data according to eIDAS Node /\n MS IdP spec, callbackURL
+
+activate participantMultiline
+deactivate PID issuer
+
+Alice<<--participantMultiline:Request permission
+Alice-->>participantMultiline:User gives permission
+PID issuer<<--participantMultiline:callbackURL: token
+activate PID issuer
+deactivate participantMultiline
+PID issuer->participantMultiline:Get PID attributes
+activate participantMultiline
+PID issuer<-participantMultiline:PID attributes
+deactivate participantMultiline
+PID issuer->>CBOR Formatter:PID in json format, callbackURL
+deactivate PID issuer
+activate CBOR Formatter
+CBOR Formatter->Document Signer:Sign MSO
+activate Document Signer
+CBOR Formatter<-Document Signer:Signed MSO
+deactivate Document Signer
+PID issuer<<--CBOR Formatter:callbackURL: PID in CBOR/mdoc format
+activate PID issuer
+deactivate CBOR Formatter
+linear
+end
+EUDIWallet-browser<<--PID issuer:returnURL: PID in CBOR/mdoc format
+
+EUDIWallet-app<<--EUDIWallet-browser:PID in CBOR/mdoc format
+linear off
+deactivate PID issuer
+deactivate EUDIWallet-browser
+activate EUDIWallet-app
+EUDIWallet-app<-EUDIWallet-app:Store PID
+deactivate EUDIWallet-app

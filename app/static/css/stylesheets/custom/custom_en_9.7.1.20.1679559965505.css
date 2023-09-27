@@ -1,0 +1,3593 @@
+html {
+    font-size: 62.5%
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    color: #404040
+}
+
+h1 {
+    font-size: 4rem;
+    line-height: 4.8rem;
+    font-weight: bold
+}
+
+h2 {
+    font-size: 3rem;
+    line-height: 3.8rem
+}
+
+h3 {
+    font-size: 2.4rem;
+    line-height: 3.2rem
+}
+
+.relying-party {
+    font-size: 2.2rem;
+    line-height: 3rem;
+    text-align: center
+}
+
+.eu-login,
+h1,
+h2,
+h3 {
+    color: #333
+}
+
+a {
+    color: #004494;
+    text-decoration: underline
+}
+
+a:hover,
+a:focus {
+    color: #000;
+    text-decoration: none
+}
+
+table,
+td,
+th {
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto
+}
+
+.navigation .dropdown-content {
+    word-wrap: normal;
+    hyphens: none
+}
+
+#skip a {
+    position: absolute;
+    left: -100000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden
+}
+
+#skip a:focus {
+    position: static;
+    width: auto;
+    height: auto
+}
+
+html {
+    position: relative;
+    min-height: 100%
+}
+
+body {
+    margin-bottom: 165px;
+    background: #d8d8d8;
+    background: -moz-radial-gradient(center, ellipse cover, #f2f2f2 0, #afafaf 100%);
+    background: -webkit-radial-gradient(center, ellipse cover, #f2f2f2 0, #afafaf 100%);
+    background: radial-gradient(ellipse at center, #f2f2f2 0, #afafaf 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f2f2f2', endColorstr='#afafaf', GradientType=1)
+}
+
+body {
+    background: #d8d8d8\9;
+    filter: none\9
+}
+
+.notification {
+    color: #000;
+    background: #ffd617
+}
+
+.notification .container {
+    padding: 10px 0
+}
+
+.notification p {
+    float: left;
+    display: inline;
+    margin: 0;
+    width: 80%
+}
+
+.notification a {
+    color: #000 !important;
+    font-weight: bold;
+    cursor: pointer
+}
+
+.notification .btn-notification {
+    float: right;
+    padding-right: 40px;
+    color: #000
+}
+
+.notification .btn-notification:after {
+    content: '';
+    position: absolute;
+    margin-left: 5px;
+    width: 16px;
+    height: 16px;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-close.png);
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+.main-header {
+    margin-bottom: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #b3b3b3
+}
+
+.main-header .container {
+    position: relative
+}
+
+.eu-login {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 2.6rem;
+    font-weight: bold
+}
+
+.eu-login a {
+    color: inherit;
+    text-decoration: none
+}
+
+.eu-login a:hover {
+    text-decoration: underline
+}
+
+.eu-login,
+.baseline {
+    letter-spacing: .2rem
+}
+
+.baseline {
+    display: block
+}
+
+.whatsnew {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    padding: 5px 10px;
+    text-align: center;
+    line-height: 1.6rem;
+    text-decoration: none;
+    color: #000;
+    background: #ffd617
+}
+
+.whatsnew:hover {
+    text-decoration: underline
+}
+
+.whatsnew span {
+    display: block;
+    font-size: 70%
+}
+
+#btn-contrast {
+    position: absolute;
+    top: 8px;
+    right: 0;
+    text-decoration: none;
+    display: block;
+    width: 24px;
+    height: 24px;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-contrast-black.png);
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+#btn-contrast:hover {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-contrast-black-hover.png)
+}
+
+.language-selection form {
+    margin-top: 0;
+    background: #FFF
+}
+
+.language-selection select {
+    margin-bottom: 0 !important
+}
+
+.navigation {
+    margin-bottom: 20px;
+    min-height: 20px;
+    text-align: right
+}
+
+.anonav ul {
+    margin-bottom: 0
+}
+
+.anonav li {
+    margin-left: 10px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 5px;
+    list-style: none
+}
+
+.anonav li:hover {
+    border-bottom: 2px solid rgba(0, 68, 148, 0.5)
+}
+
+.anonav li.btn-hover:hover {
+    border-bottom: 0
+}
+
+.anonav li.selected {
+    color: #004494;
+    border-bottom: 2px solid #004494
+}
+
+.anonav li a {
+    position: relative;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    text-decoration: none
+}
+
+.anonav li a:hover {
+    color: #004494
+}
+
+.anonav li a.btn {
+    margin: 0;
+    padding-bottom: 10px
+}
+
+.anonav li a.btn:hover {
+    color: #FFF
+}
+
+.first-last-name {
+    margin-right: 30px;
+    padding-bottom: 30px;
+    vertical-align: bottom;
+    cursor: pointer
+}
+
+.dropbtn {
+    position: absolute;
+    top: -2px;
+    right: 0;
+    padding-left: 50px;
+    padding-bottom: 60px;
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-gear-black.png);
+    background-repeat: no-repeat;
+    background-position: top right;
+    border: 0;
+    cursor: pointer
+}
+
+.dropbtn:hover {
+    background-color: transparent;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-gear-black-hover.png)
+}
+
+.dropdown {
+    display: inline-block;
+    z-index: 10000
+}
+
+.dropdown:hover .dropdown-content {
+    display: block
+}
+
+.dropdown-content:after {
+    bottom: 100%;
+    right: 3%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    padding: 15px;
+    background-color: #FFF;
+    min-width: 200px;
+    text-align: left;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12)
+}
+
+.dropdown-content li {
+    padding: 5px 0;
+    width: 100%
+}
+
+.dropdown-content li {
+    margin-bottom: 10px;
+    padding-left: 10px;
+    list-style: none;
+    border-left: 4px solid #fff
+}
+
+.dropdown-content li:hover,
+.dropdown-content li.selected {
+    border-left: 4px solid #004494
+}
+
+.dropdown-content li.selected {
+    font-weight: bold
+}
+
+.dropdown-content a {
+    display: block;
+    text-decoration: none
+}
+
+.dropdown-content a:hover {
+    text-decoration: underline
+}
+
+.dropdown-content li.identifier {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important
+}
+
+.dropdown-content li.identifier:hover {
+    border-left: 4px solid #fff
+}
+
+.dropdown-content li.headerDomain {
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #ececec
+}
+
+.main {
+    padding: 0
+}
+
+.main h1 {
+    margin: 0 0 20px 0;
+    text-align: center
+}
+
+.main h1 span,
+h2 span {
+    font-weight: normal
+}
+
+.content-wrap {
+    float: none;
+    margin: 0 auto 20px auto;
+    padding: 40px;
+    background: #FFF;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12)
+}
+
+.content-wrap h2 {
+    margin-top: 0;
+    text-align: center
+}
+
+.content-wrap .inner {
+    float: none
+}
+
+.content-wrap.content-center .inner {
+    float: none;
+    margin: 0 auto
+}
+
+.content-fluid {
+    margin: 0 0 20px 0;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    background: #FFF;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12)
+}
+
+.content-fluid h2:first-child {
+    margin-top: 0
+}
+
+.content-fluid h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ececec
+}
+
+.content-fluid .inner {
+    float: none;
+    margin: 0 auto
+}
+
+.content-wrap:hover,
+.content-fluid:hover {
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+}
+
+nav.navigation-left {
+    padding: 20px;
+    background: #f2f2f2
+}
+
+nav.navigation-left ul {
+    padding: 0
+}
+
+nav.navigation-left li {
+    margin-bottom: 10px;
+    padding-left: 10px;
+    list-style: none;
+    border-left: 4px solid #f2f2f2
+}
+
+nav.navigation-left li:hover,
+nav.navigation-left li.active {
+    border-left: 4px solid #004494
+}
+
+nav.navigation-left li.active {
+    font-weight: bold
+}
+
+nav.navigation-left a {
+    display: block;
+    text-decoration: none
+}
+
+nav.navigation-left a:hover {
+    display: block;
+    text-decoration: underline
+}
+
+.main-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    min-height: 145px;
+    color: #FFF;
+    background: #012b58
+}
+
+.main-footer .container {
+    padding-top: 20px;
+    padding-bottom: 20px
+}
+
+.main-footer li {
+    display: inline;
+    margin-right: 15px
+}
+
+.main-footer a {
+    text-decoration: none
+}
+
+.main-footer a:hover {
+    text-decoration: underline
+}
+
+.main-footer a,
+.main-footer a:hover {
+    color: #FFF
+}
+
+.eu-login-link {
+    margin-bottom: 20px;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2)
+}
+
+.external-link {
+    display: inline;
+    float: left;
+    padding: 0
+}
+
+.server-information {
+    float: right
+}
+
+.ec-logo {
+    text-align: right
+}
+
+.ec-logo img {
+    height: 70px
+}
+
+.powered-by {
+    display: block
+}
+
+.or {
+    position: relative;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 2.8rem
+}
+
+.span-or {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    margin-left: -60px;
+    background-color: #FFF;
+    width: 110px;
+    text-align: center
+}
+
+.hr-or {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    background-color: #FFF;
+    height: 1px;
+    border-top: 1px solid rgba(0, 0, 0, 0.4)
+}
+
+span.ico {
+    margin: 20px auto 10px;
+    display: block;
+    height: 90px;
+    width: 160px;
+    background-repeat: no-repeat;
+    background-position: center top
+}
+
+.password span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-password.png)
+}
+
+.text_message span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-text-message.png)
+}
+
+.token span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-token.png)
+}
+
+.software_token span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-software-token.png)
+}
+
+.mobile span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-mobile.png)
+}
+
+.remote span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-remote.png)
+}
+
+.token_cram span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-token-cram.png)
+}
+
+.webauthn span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-webauthn.png)
+}
+
+.announcement .inner {
+    float: none;
+    margin: 0 auto 0 auto;
+    border-bottom: 1px solid #b5b6b7
+}
+
+.announcement .inner.last {
+    border-bottom: 0
+}
+
+.announcement .item {
+    padding: 0 0 20px 0
+}
+
+.announcement .item p {
+    margin-bottom: 0
+}
+
+.announcement h2 {
+    margin: 0;
+    padding: 0
+}
+
+.announcement h3 {
+    margin: 0
+}
+
+.announcement .category {
+    text-transform: uppercase
+}
+
+.app-badge .container {
+    padding-top: 20px;
+    padding-bottom: 20px
+}
+
+.app-badge .inner {
+    float: none;
+    margin: 0 auto
+}
+
+.app-badge img {
+    margin: 0 10px 10px 0;
+    height: 35px
+}
+
+.app-badge ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0
+}
+
+.app-badge ul li {
+    display: inline
+}
+
+.faq {
+    list-style-type: none;
+    padding: 0
+}
+
+.faq h4 {
+    font-size: inherit
+}
+
+.faq h4:hover {
+    text-decoration: underline
+}
+
+.faq h4:before {
+    position: relative;
+    top: -0.1em;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 10px 0 0;
+    font: 20px/20px sans-serif;
+    content: "\25B7";
+    color: #333
+}
+
+.faq h4.on:before {
+    content: "\25BD"
+}
+
+.faq li {
+    color: #004494;
+    cursor: pointer
+}
+
+.faq li div {
+    color: #333;
+    cursor: default
+}
+
+.faq li div li {
+    color: #333;
+    cursor: default
+}
+
+.faq_segment_title {
+    color: #004494
+}
+
+.faq_segment_title:before {
+    position: relative;
+    top: -0.1em;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 10px 0 0;
+    content: "\232A";
+    color: #333
+}
+
+.faq_segment_title:hover {
+    text-decoration: underline;
+    cursor: pointer
+}
+
+.faq_segment_title.on:before {
+    content: "\232A"
+}
+
+.faq_segment_items {
+    margin-left: 25px;
+    overflow: hidden
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 85px;
+    height: 34px
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 34px
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%
+}
+
+input:checked+.slider {
+    background-color: #2196f3
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196f3
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(50px);
+    -ms-transform: translateX(50px);
+    transform: translateX(50px)
+}
+
+.generate-sample {
+    padding: 0
+}
+
+.generate-sample li {
+    margin-bottom: 10px;
+    padding: 10px;
+    list-style-type: none;
+    font-weight: bold;
+    color: #004494;
+    border: 1px dashed #404040
+}
+
+.form-control {
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    min-height: 40px;
+    color: inherit;
+    background-color: #fff;
+    border: 1px solid #404040;
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+.form-control:focus {
+    border: 2px solid #ffd617;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+select.form-control {
+    display: block;
+    padding: 6px 12px;
+    height: 40px;
+    border: 1px solid #575757;
+    border-radius: 0;
+    cursor: pointer;
+    -moz-appearance: none;
+    background: url(https://webgate.ec.europa.eu/cas/images/arrow-down--white.svg), linear-gradient(to bottom, #575757, #575757);
+    background-repeat: no-repeat;
+    background-position: right .764em center, right;
+    background-size: 1.1em .6134969325em, 2.75em 100% !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -o-appearance: none;
+    -moz-appearance: none;
+    text-overflow: ""
+}
+
+select::-ms-expand {
+    display: none
+}
+
+select:focus::-ms-value {
+    background-color: transparent;
+    color: #000
+}
+
+label {
+    display: inherit;
+    margin-bottom: 0;
+    padding-top: 0
+}
+
+label.label-checkbox {
+    font-weight: normal
+}
+
+.label-email-address {
+    padding-top: 0
+}
+
+.welcome-user-email {
+    text-align: center
+}
+
+input[type="checkbox"] {
+    margin-right: 10px
+}
+
+.errorField,
+.errorField.form-control:focus {
+    border: 2px solid #ef5350;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+.input-information {
+    margin-top: -8px;
+    margin-bottom: 20px;
+    line-height: 1.8rem
+}
+
+.lost-password-link {
+    display: block;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    line-height: 1.8rem
+}
+
+.user-logout-link {
+    display: block;
+    padding-bottom: 10px;
+    text-align: center
+}
+
+.create-account-link {
+    display: block;
+    margin-top: 10px;
+    text-align: center
+}
+
+.btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    text-decoration: none;
+    white-space: normal !important;
+    word-wrap: break-word;
+    font-size: inherit;
+    border-radius: 0;
+    border-width: 2px
+}
+
+.btn-primary {
+    font-weight: bold;
+    color: #FFF;
+    background: #004494;
+    border: 2px solid #004494
+}
+
+.btn-primary:hover {
+    text-decoration: underline;
+    color: #FFF;
+    background-color: #012b58;
+    border: 2px solid #012b58
+}
+
+.btn-primary:focus,
+.btn-primary.focus {
+    color: #FFF !important;
+    background-color: #004494 !important;
+    border: 2px solid #ffd617 !important
+}
+
+.btn-primary:active,
+.btn-primary.active,
+.open>.dropdown-toggle.btn-primary {
+    color: #FFF;
+    background-color: #004494;
+    border: 2px solid #ffd617
+}
+
+.btn-default {
+    font-weight: bold;
+    color: #004494;
+    background: transparent;
+    border: 2px solid #004494
+}
+
+.btn-default:hover {
+    text-decoration: underline;
+    color: #FFF !important;
+    background: #004494;
+    border: 2px solid #004494
+}
+
+.btn-default:focus,
+.btn-default.focus {
+    color: #FFF !important;
+    background-color: #004494 !important;
+    border: 2px solid #ffd617 !important
+}
+
+.btn-cancel {
+    font-weight: bold;
+    color: inherit;
+    background: #e2e2e2;
+    border: 2px solid #e2e2e2
+}
+
+.btn-cancel:hover {
+    color: inherit !important;
+    text-decoration: underline;
+    background: #d2d2d2;
+    border: 2px solid #d2d2d2 !important
+}
+
+.btn-cancel:focus,
+.btn-cancel.focus {
+    color: inherit !important;
+    background-color: #e2e2e2 !important;
+    border: 2px solid #ffd617 !important
+}
+
+.btn-alternate {
+    margin-left: 10px
+}
+
+.btn-back.btn {
+    margin-top: 20px;
+    margin-bottom: 0
+}
+
+.btn-back:before {
+    display: inline-block;
+    position: relative;
+    top: -.1em;
+    margin: 0 10px 0 0;
+    font-size: 20px;
+    line-height: 20px;
+    vertical-align: middle
+}
+
+.btn-back:before {
+    content: "\2039"
+}
+
+.btn-next.btn {
+    margin-top: 20px;
+    margin-bottom: 0
+}
+
+.btn-next:after {
+    display: inline-block;
+    position: relative;
+    margin: 0 0 0 5px;
+    vertical-align: middle
+}
+
+.btn-next:after {
+    content: "\232A"
+}
+
+.btn-danger {
+    font-weight: bold;
+    color: #FFF;
+    background: #ef5350;
+    border: 2px solid #ef5350
+}
+
+.btn-danger:hover {
+    text-decoration: underline;
+    color: #FFF !important;
+    background-color: #c62828;
+    border: 2px solid #c62828
+}
+
+.btn-danger:focus,
+.btn-danger.focus {
+    color: #FFF !important;
+    background-color: #ef5350 !important;
+    border: 2px solid #000 !important
+}
+
+.btn-edit {
+    float: right
+}
+
+.more-submit {
+    display: block;
+    text-align: center
+}
+
+.box_captcha {
+    margin-bottom: 10px;
+    padding: 20px;
+    background: #f2f2f2
+}
+
+.box_captcha .btn {
+    margin-top: 0
+}
+
+.play-button,
+.pause-button,
+.reset_code {
+    margin: 0 5px 10px 0;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    background: #575757;
+    border-color: #575757;
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+.play-button {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-play-white.png)
+}
+
+.pause-button {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-pause-white.png)
+}
+
+.reset_code {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-reset-white.png)
+}
+
+.smsChallenge input {
+    display: inline;
+    padding: 10px 20px;
+    width: 29%;
+    min-height: 40px;
+    border: 1px solid #404040
+}
+
+ol.cram {
+    margin-top: 20px
+}
+
+.tokenCramResponse {
+    position: relative
+}
+
+.tokenCramResponse input {
+    display: inline;
+    padding: 10px 20px;
+    width: 29%;
+    min-height: 40px;
+    border: 1px solid #404040
+}
+
+.cram-challenge {
+    display: block;
+    font-size: 2rem;
+    line-height: 2.8rem
+}
+
+ol.software-token-signature {
+    margin-top: 20px
+}
+
+.software-token-signature-field-name {
+    font-weight: bold
+}
+
+.software-token-signature-challenge {
+    position: relative
+}
+
+.software-token-response {
+    position: relative
+}
+
+.software-token-response input {
+    display: inline;
+    padding: 10px 20px;
+    width: 22%;
+    min-height: 40px;
+    border: 1px solid #404040
+}
+
+.software-token-signature-challenge {
+    display: block;
+    font-size: 2rem;
+    line-height: 2.8rem
+}
+
+.software-token-signature-qrcode img {
+    width: 285px !important;
+    height: auto
+}
+
+table th {
+    width: 30%
+}
+
+.table-striped>tbody>tr:nth-of-type(2n+1) {
+    background-color: #f2f2f2
+}
+
+.table>thead>tr>th,
+.table>tbody>tr>th,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>tbody>tr>td,
+.table>tfoot>tr>td {
+    border-top: 1px solid #e9e9e9
+}
+
+.table-hover>tbody>tr:hover {
+    background-color: #dbdbdb
+}
+
+.separation {
+    border-bottom: 2px solid #c8c8c8
+}
+
+.social-network {
+    margin-bottom: 10px
+}
+
+ul.social-network {
+    list-style-type: none;
+    padding: 0;
+    margin: 0
+}
+
+.btn-social span {
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+.btn-social {
+    position: relative;
+    margin-top: 1px !important;
+    margin-bottom: 0;
+    padding-left: 65px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 0
+}
+
+.btn-social>:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 45px;
+    font-size: 2.2rem;
+    line-height: 44px;
+    text-align: center;
+    border-right: 1px solid #FFF
+}
+
+.btn-social-icon {
+    position: relative;
+    padding-left: 44px;
+    padding: 0;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 34px;
+    width: 34px
+}
+
+.btn-social-icon>:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    text-align: center;
+    width: 32px;
+    line-height: 34px;
+    font-size: 1.6em;
+    border-right: 1px solid rgba(0, 0, 0, 0.2)
+}
+
+.btn-social-icon>:first-child {
+    text-align: center;
+    width: 100% !important;
+    border: 0
+}
+
+.btn-facebook,
+.btn-twitter,
+.btn-google,
+.btn-eid {
+    text-decoration: underline;
+    color: #004494
+}
+
+.btn-eid:focus,
+.btn-eid:focus>span,
+.btn-eid:active,
+.btn-eid:hover,
+.btn-facebook:focus,
+.btn-facebook:focus>span,
+.btn-facebook:active,
+.btn-facebook:hover,
+.btn-twitter:focus,
+.btn-twitter:focus>span,
+.btn-twitter:active,
+.btn-twitter:hover,
+.btn-google:focus,
+.btn-google:focus>span,
+.btn-google:active,
+.btn-google:hover {
+    color: #004494;
+    text-decoration: none
+}
+
+.btn-facebook .container {
+    display: inline-block;
+    background-color: #4267b2;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle
+}
+
+.btn-facebook .container .icon {
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-facebook.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-facebook.svg') no-repeat center / contain
+}
+
+.btn-twitter .container {
+    display: inline-block;
+    background-color: #0b7bc1;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle
+}
+
+.btn-twitter .container .icon {
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-twitter.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-twitter.svg') no-repeat center / contain
+}
+
+.btn-google .container {
+    display: inline-block;
+    background-color: #d83a2c;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle
+}
+
+.btn-google .container .icon {
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-google.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-google.svg') no-repeat center / contain
+}
+
+.btn-eid {
+    margin-bottom: 15px
+}
+
+.btn-eid .container {
+    display: inline-block;
+    background-color: #287f86;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle
+}
+
+.btn-eid .container .icon {
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-eidas.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-eidas.svg') no-repeat center / contain
+}
+
+.my-account {
+    margin: 10px auto 0 auto;
+    width: 100%
+}
+
+.my-account .col {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 5px;
+    min-height: 250px;
+    list-style: none;
+    text-align: center
+}
+
+.my-account .col span.ico {
+    margin: 0 auto 10px;
+    display: block;
+    height: 72px;
+    width: 105px;
+    background-repeat: no-repeat;
+    background-position: center top
+}
+
+.my-account .col:hover {
+    background: #f0f0f0
+}
+
+.my-account .col:hover span.ico {
+    background-position: center -72px
+}
+
+.my-account .col .wrap {
+    padding: 0 70px
+}
+
+.my-account .col h3 {
+    font-size: 2rem;
+    line-height: 2.4rem
+}
+
+.my-account .col p {
+    color: #333
+}
+
+.my-account a {
+    text-decoration: none
+}
+
+.my-account a:hover {
+    text-decoration: underline
+}
+
+.my-account .reset a {
+    min-height: 0
+}
+
+.my-account .delete-all span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-all.png)
+}
+
+.my-account .delete-account span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-account.png)
+}
+
+.my-account .account-information span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-account-information.png)
+}
+
+.my-account .my-account span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account.png)
+}
+
+.my-account .edit-user span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-edit-user.png)
+}
+
+.my-account .manage-mobile-numbers span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-manage-mobile-numbers.png)
+}
+
+.my-account .add-mobile-number span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-mobile-number.png)
+}
+
+.my-account .delete-mobile-number span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-mobile-number.png)
+}
+
+.my-account .manage-mobile-devices span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-manage-mobile-devices.png)
+}
+
+.my-account .add-mobile span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-mobile-device.png)
+}
+
+.my-account .delete-mobile span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-mobile-device.png)
+}
+
+.my-account .change-pin-code-mobile span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-change-mobile-device-pin-code.png)
+}
+
+.my-account .manage-token span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-manage-token.png)
+}
+
+.my-account .add-token span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-token.png)
+}
+
+.my-account .delete-token span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-token.png)
+}
+
+.my-account .display-session span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-display-session.png)
+}
+
+.my-account .sms-report span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-display-session.png)
+}
+
+.my-account .manage-webauthn-devices span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-manage-webauthn-devices.png)
+}
+
+.my-account .add-security-key span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-security-key.png)
+}
+
+.my-account .add-security-key.disabled {
+    color: #404040;
+    text-decoration: none;
+    cursor: not-allowed
+}
+
+.my-account .add-security-key.disabled span.ico {
+    background-position: center -287px
+}
+
+.my-account .add-security-key.disabled:hover span.ico {
+    background-position: center -287px
+}
+
+.my-account .add-trusted-platform span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-trusted-platform.png)
+}
+
+.my-account .add-trusted-platform.disabled {
+    color: #404040;
+    text-decoration: none;
+    cursor: not-allowed
+}
+
+.my-account .add-trusted-platform.disabled span.ico {
+    background-position: center -287px
+}
+
+.my-account .add-trusted-platform.disabled:hover span.ico {
+    background-position: center -287px
+}
+
+.my-account .delete-webauthn span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-webauthn-device.png)
+}
+
+.my-account .manage-eids span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-manage-eids.png)
+}
+
+.my-account .reconciliation-eid span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-reconciliation-eid.png)
+}
+
+.my-account .add-eid span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-add-eid.png)
+}
+
+.my-account .delete-eid span.ico {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/my-account-delete-eid.png)
+}
+
+.delete-mobile-btn {
+    white-space: normal !important;
+    display: block;
+    padding: 30px 20px 30px 80px;
+    width: 100%;
+    text-align: left;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile.png);
+    background-size: 52px;
+    background-position: 20px center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer
+}
+
+.delete-mobile-btn:hover {
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-delete.png);
+    background-color: #f0f0f0
+}
+
+.delete-mobile-btn.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android.png)
+}
+
+.delete-mobile-btn:hover.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-delete.png)
+}
+
+.delete-mobile-btn.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios.png)
+}
+
+.delete-mobile-btn:hover.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-delete.png)
+}
+
+.delete-mobile-btn.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows.png)
+}
+
+.delete-mobile-btn:hover.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-delete.png)
+}
+
+.select-mobile-btn {
+    white-space: normal !important;
+    display: block;
+    padding: 30px 20px 30px 80px;
+    width: 100%;
+    text-align: left;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile.png);
+    background-size: 52px;
+    background-position: 20px center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer
+}
+
+.select-mobile-btn:hover {
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-hover.png);
+    background-color: #f0f0f0
+}
+
+.select-mobile-btn.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android.png)
+}
+
+.select-mobile-btn:hover.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-hover.png)
+}
+
+.select-mobile-btn.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios.png)
+}
+
+.select-mobile-btn:hover.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-hover.png)
+}
+
+.select-mobile-btn.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows.png)
+}
+
+.select-mobile-btn:hover.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-hover.png)
+}
+
+.delete-webauthn-btn {
+    white-space: normal !important;
+    display: block;
+    padding: 30px 20px 30px 80px;
+    width: 100%;
+    text-align: left;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn.png);
+    background-size: 52px;
+    background-position: 20px center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer
+}
+
+.delete-webauthn-btn:hover {
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-delete.png);
+    background-color: #f0f0f0
+}
+
+.delete-webauthn-btn.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key.png)
+}
+
+.delete-webauthn-btn:hover.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-delete.png)
+}
+
+.delete-webauthn-btn.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform.png)
+}
+
+.delete-webauthn-btn:hover.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-delete.png)
+}
+
+.webAuthnDevice {
+    color: #404040;
+    text-decoration: none
+}
+
+.webAuthnDevice.disabled {
+    color: #404040;
+    text-decoration: none;
+    cursor: not-allowed
+}
+
+.webAuthnDevice:hover.disabled {
+    color: #404040;
+    text-decoration: none
+}
+
+.select-webauthn-btn {
+    white-space: normal !important;
+    display: block;
+    padding: 30px 20px 30px 80px;
+    width: 100%;
+    text-align: left;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn.png);
+    background-size: 52px;
+    background-position: 20px center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer
+}
+
+.select-webauthn-btn:hover {
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-hover.png);
+    background-color: #f0f0f0
+}
+
+.select-webauthn-btn.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key.png)
+}
+
+.select-webauthn-btn:hover.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-hover.png)
+}
+
+.select-webauthn-btn.security-key.disabled {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-disabled.png)
+}
+
+.select-webauthn-btn.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform.png)
+}
+
+.select-webauthn-btn:hover.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-hover.png)
+}
+
+.select-webauthn-btn.trusted-platform.disabled {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-disabled.png)
+}
+
+.delete-eid-btn {
+    white-space: normal !important;
+    display: block;
+    padding: 30px 20px 30px 80px;
+    width: 100%;
+    text-align: left;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid.png);
+    background-size: 52px;
+    background-position: 20px center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    word-break: break-all
+}
+
+.delete-eid-btn:hover {
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid-delete.png);
+    background-color: #f0f0f0;
+    word-break: break-all
+}
+
+.smsChallenge.sms-signature input {
+    padding: 10px 5px;
+    width: 21%
+}
+
+a.print {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 0 5px 0 28px;
+    height: 20px;
+    background: url(https://webgate.ec.europa.eu/cas/images/ico-print.png) no-repeat top left
+}
+
+#show_transaction {
+    margin-top: 10px;
+    padding: 20px;
+    background: #FFF;
+    border: 1px dashed #404040;
+    text-align: left
+}
+
+span.toggle_transaction {
+    display: inline-block;
+    margin-right: 10px;
+    height: 20px
+}
+
+span.toggle_transaction,
+span.toggle_transaction_active {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 0 0 0 28px;
+    height: 20px;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-show-transaction.png);
+    background-repeat: no-repeat;
+    background-position: top left
+}
+
+span.toggle_transaction {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-show-transaction.png)
+}
+
+span.toggle_transaction_active {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-hide-transaction.png)
+}
+
+.cram-digipass {
+    text-align: center
+}
+
+.cram-digipass img {
+    width: 180px
+}
+
+ol.cram {
+    margin-top: 20px;
+    padding-left: 1.5em
+}
+
+ol.cram li {
+    padding-bottom: 10px
+}
+
+.text-highlight-1 {
+    color: #0388ab;
+    font-weight: bold
+}
+
+.text-highlight-2 {
+    color: #ff760c;
+    font-weight: bold
+}
+
+#stamp {
+    position: absolute;
+    top: -20px;
+    left: 10%;
+    z-index: 1000
+}
+
+.loading {
+    margin: 20px 0;
+    color: #014495
+}
+
+.mt {
+    margin-top: 20px
+}
+
+.center-element {
+    display: block;
+    text-align: center
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto
+}
+
+span.center,
+p.center {
+    display: block;
+    margin: 20px 0;
+    text-align: center
+}
+
+span.center img {
+    margin: 10px 0;
+    max-width: 260px
+}
+
+.cltErrors,
+.srvErrors,
+.fldErrors {
+    position: relative;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    padding: 0;
+    color: #ef5350;
+    border: 0
+}
+
+.cltErrors li,
+.srvErrors li,
+.fldErrors li {
+    margin: 0 0 10px 0;
+    width: 100%;
+    list-style: none;
+    line-height: 1.8rem;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(0, 0, 0, 0.12)
+}
+
+.cltErrors a,
+.fldErrors a {
+    color: #ef5350
+}
+
+label+div>.cltErrors {
+    margin-top: 0
+}
+
+.srvErrors {
+    margin-bottom: 10px;
+    padding: 5px 10px 5px 40px;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-danger-message.png);
+    background-repeat: no-repeat;
+    background-position: 10px 4px;
+    border-color: #ef5350;
+    border-left-style: solid;
+    border-left-width: 5px
+}
+
+.srvErrors,
+.srvErrors a {
+    color: #404040
+}
+
+.informationMessage,
+.successMessage,
+.actionMessage,
+.warningMessage {
+    padding: 5px 10px 5px 40px;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    background-repeat: no-repeat;
+    background-position: 10px 4px;
+    border-left-style: solid;
+    border-left-width: 5px
+}
+
+.informationMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-information-message.png);
+    border-color: #64b5f6
+}
+
+.successMessage,
+.actionMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-success-message.png);
+    border-color: #4caf50
+}
+
+.warningMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-warning-message.png);
+    border-color: #ff9800
+}
+
+a,
+.btn {
+    transition: all .3s ease
+}
+
+#zpassword,
+#zppassword,
+#ztpassword,
+#zzpassword,
+#zzzpassword {
+    display: none !important
+}
+
+.invalidLoc {
+    visibility: hidden
+}
+
+.nodisplay {
+    display: none !important
+}
+
+.disabledStrength {
+    display: none;
+    !important
+}
+
+.red-text,
+.debugOtp {
+    color: #ef5350
+}
+
+body.contrast {
+    color: #FFF
+}
+
+body.contrast .eu-login,
+body.contrast h1,
+body.contrast h2,
+body.contrast h3 {
+    color: #FFF
+}
+
+body.contrast a {
+    color: #FFF
+}
+
+body.contrast a:hover,
+body.contrast a:focus {
+    color: #FFF
+}
+
+body.contrast {
+    background: #000
+}
+
+body.contrast .main-header {
+    border-bottom: 0
+}
+
+body.contrast .whatsnew,
+body.contrast .whatsnew:hover {
+    color: #000;
+    background: #fff
+}
+
+body.contrast #btn-contrast {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-contrast-white.png)
+}
+
+body.contrast .language-selection form {
+    margin-top: 0;
+    background: #000
+}
+
+body.contrast .anonav li:hover {
+    border-bottom: 2px solid #FFF
+}
+
+body.contrast .anonav li.selected {
+    color: #FFF;
+    border-bottom: 2px solid #FFF
+}
+
+body.contrast .anonav li a:hover {
+    color: #FFF
+}
+
+body.contrast .anonav li a.btn:hover {
+    color: #FFF
+}
+
+body.contrast .anonav li.btn-hover:hover {
+    border-bottom: 0
+}
+
+body.contrast .dropbtn {
+    position: absolute;
+    top: -2px;
+    right: 0;
+    padding-left: 50px;
+    padding-bottom: 60px;
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-gear-white.png);
+    background-repeat: no-repeat;
+    background-position: top right;
+    border: 0;
+    cursor: pointer
+}
+
+body.contrast .dropbtn:hover {
+    background-color: transparent;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-gear-white.png)
+}
+
+body.contrast .dropdown-content li {
+    margin-bottom: 10px;
+    padding-left: 10px;
+    list-style: none;
+    color: #000;
+    border-left: 4px solid #fff
+}
+
+body.contrast .dropdown-content li:hover,
+body.contrast .dropdown-content li.selected {
+    color: #000;
+    border-left: 4px solid #000
+}
+
+body.contrast .dropdown-content a {
+    display: block;
+    text-decoration: none;
+    color: #000
+}
+
+body.contrast .dropdown-content a:hover {
+    text-decoration: underline
+}
+
+body.contrast .dropdown:hover .dropdown-content {
+    display: block
+}
+
+body.contrast .dropdown-content li.identifier {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important
+}
+
+body.contrast .dropdown-content li.identifier:hover {
+    border-left: 4px solid #fff
+}
+
+body.contrast .dropdown-content li.headerDomain {
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid #000
+}
+
+body.contrast .content-wrap {
+    background: #000;
+    border: 1px solid #FFF
+}
+
+body.contrast .content-fluid {
+    background: #000;
+    border: 1px solid #FFF
+}
+
+body.contrast .content-fluid h2 {
+    border-bottom: 1px solid #FFF
+}
+
+body.contrast .main-footer {
+    background: #000;
+    border-top: 1px solid #FFF
+}
+
+body.contrast .main-footer a {
+    text-decoration: underline
+}
+
+body.contrast .main-footer a:hover {
+    text-decoration: none
+}
+
+body.contrast .eu-login-link {
+    border-bottom: 1px dashed #FFF
+}
+
+body.contrast .span-or {
+    background-color: #000
+}
+
+body.contrast .hr-or {
+    background-color: #000;
+    height: 1px;
+    border-top: 1px solid #FFF
+}
+
+body.contrast .announcement .inner {
+    border-bottom: 1px dashed #FFF
+}
+
+body.contrast .announcement .inner.last {
+    border-bottom: 0
+}
+
+body.contrast nav.navigation-left {
+    background: #000;
+    border: 1px dashed #FFF
+}
+
+body.contrast nav.navigation-left li {
+    border-left: 4px solid #000
+}
+
+body.contrast nav.navigation-left li:hover,
+body.contrast nav.navigation-left li.active {
+    border-left: 4px solid #FFF
+}
+
+body.contrast nav.navigation-left a {
+    text-decoration: underline
+}
+
+body.contrast nav.navigation-left a:hover {
+    text-decoration: none
+}
+
+body.contrast .help h4 {
+    text-decoration: underline
+}
+
+body.contrast .help h4:hover {
+    text-decoration: none
+}
+
+body.contrast .help h4:before {
+    color: #FFF
+}
+
+body.contrast .help li {
+    color: #FFF;
+    border-bottom: 0
+}
+
+body.contrast .help li p {
+    color: #FFF
+}
+
+body.contrast .form-control {
+    color: #000;
+    border: 1px solid #FFF
+}
+
+body.contrast .form-control:focus {
+    border: 2px solid #ffd617;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+body.contrast select.form-control {
+    color: #FFF;
+    border: 1px solid #FFF;
+    cursor: pointer;
+    -moz-appearance: none;
+    background: url(https://webgate.ec.europa.eu/cas/images/arrow-down--white.svg), linear-gradient(to bottom, #000, #000);
+    background-repeat: no-repeat;
+    background-position: right .764em center, right;
+    background-size: 1.1em .6134969325em, 2.75em 100% !important;
+    background-color: #000
+}
+
+body.contrast .btn-primary,
+body.contrast .btn-default,
+body.contrast .btn-danger {
+    text-decoration: underline;
+    color: #000;
+    background: #FFF;
+    border: 2px solid #FFF
+}
+
+body.contrast .btn-cancel {
+    text-decoration: underline;
+    color: #FFF;
+    background: transparent;
+    border: 2px solid transparent
+}
+
+body.contrast .btn-primary:hover,
+body.contrast .btn-default:hover,
+body.contrast .btn-cancel:hover,
+body.contrast .btn-danger:hover {
+    text-decoration: none;
+    color: #FFF;
+    background-color: #000;
+    border: 2px solid #FFF
+}
+
+body.contrast .btn-primary:focus,
+body.contrast .btn-primary.focus,
+body.contrast .btn-default:focus,
+body.contrast .btn-default.focus,
+body.contrast .btn-cancel:focus,
+body.contrast .btn-cancel.focus,
+body.contrast .btn-danger:focus,
+body.contrast .btn-danger.focus {
+    text-decoration: none;
+    color: #FFF !important;
+    background-color: #000 !important;
+    border: 2px solid #FFF !important
+}
+
+body.contrast .btn-primary:active,
+body.contrast .btn-primary.active,
+.open>.dropdown-toggle.btn-primary {
+    text-decoration: none;
+    color: #FFF !important;
+    background-color: #000 !important;
+    border: 2px solid #FFF !important
+}
+
+body.contrast .btn-social span,
+body.contrast .btn-social:hover {
+    color: #000 !important;
+    background-color: #FFF
+}
+
+body.contrast .btn-social:focus,
+body.contrast .btn-social:focus>span,
+body.contrast .btn-social:active {
+    color: #000 !important;
+    background-color: #FFF
+}
+
+body.contrast .btn-facebook span {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/logo-facebook-black.png)
+}
+
+body.contrast .btn-twitter span {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/logo-twitter-black.png)
+}
+
+body.contrast .btn-google span {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/logo-google-black.png)
+}
+
+body.contrast .btn-eid span {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/logo-eid-black.png)
+}
+
+body.contrast .box_captcha {
+    background: #000;
+    border: 1px dashed #FFF
+}
+
+body.contrast .play-button,
+body.contrast .pause-button,
+body.contrast .reset_code {
+    margin: 0 5px 10px 0;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    background: #FFF;
+    border-color: #FFF;
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+body.contrast .play-button {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-play-black.png)
+}
+
+body.contrast .pause-button {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-pause-black.png)
+}
+
+body.contrast .reset_code {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-reset-black.png)
+}
+
+body.contrast .play-button:hover,
+body.contrast .pause-button:hover,
+body.contrast .reset_code:hover {
+    margin: 0 5px 10px 0;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    background: #000;
+    border-color: #FFF;
+    background-repeat: no-repeat;
+    background-position: center center
+}
+
+body.contrast .play-button:hover {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-play-white.png)
+}
+
+body.contrast .pause-button:hover {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-pause-white.png)
+}
+
+body.contrast .reset_code:hover {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-reset-white.png)
+}
+
+body.contrast .my-account a {
+    text-decoration: none
+}
+
+body.contrast .my-account .col span.ico {
+    background-position: center -144px
+}
+
+body.contrast .my-account .col:hover span.ico {
+    background-position: center -216px
+}
+
+body.contrast .my-account .col p {
+    color: #FFF
+}
+
+body.contrast .my-account .col:hover {
+    background: #FFF
+}
+
+body.contrast .my-account .col:hover h3,
+body.contrast .my-account .col:hover p {
+    color: #000
+}
+
+body.contrast .delete-mobile-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-contrast.png)
+}
+
+body.contrast .delete-mobile-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .delete-mobile-btn.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-contrast.png)
+}
+
+body.contrast .delete-mobile-btn:hover.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-hover.png)
+}
+
+body.contrast .delete-mobile-btn.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-contrast.png)
+}
+
+body.contrast .delete-mobile-btn:hover.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-hover.png)
+}
+
+body.contrast .delete-mobile-btn.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-contrast.png)
+}
+
+body.contrast .delete-mobile-btn:hover.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-hover.png)
+}
+
+body.contrast .select-mobile-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-contrast.png)
+}
+
+body.contrast .select-mobile-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-mobile-btn.android {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-contrast.png)
+}
+
+body.contrast .select-mobile-btn:hover.android {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-android-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-mobile-btn.ios {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-contrast.png)
+}
+
+body.contrast .select-mobile-btn:hover.ios {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-ios-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-mobile-btn.windows {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-contrast.png)
+}
+
+body.contrast .select-mobile-btn:hover.windows {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-mobile-windows-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .add-security-key.disabled span.ico {
+    background-position: center -287px
+}
+
+body.contrast .add-security-key.disabled:hover span.ico {
+    background-position: center -287px
+}
+
+body.contrast .add-trusted-platform.disabled span.ico {
+    background-position: center -287px
+}
+
+body.contrast .add-trusted-platform.disabled:hover span.ico {
+    background-position: center -287px
+}
+
+body.contrast .delete-webauthn-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-contrast.png)
+}
+
+body.contrast .delete-webauthn-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .delete-webauthn-btn.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-contrast.png)
+}
+
+body.contrast .delete-webauthn-btn:hover.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-hover.png)
+}
+
+body.contrast .delete-webauthn-btn.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-contrast.png)
+}
+
+body.contrast .delete-webauthn-btn:hover.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-hover.png)
+}
+
+body.contrast .select-webauthn-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-contrast.png)
+}
+
+body.contrast .select-webauthn-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-webauthn-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-webauthn-btn.security-key {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-contrast.png)
+}
+
+body.contrast .select-webauthn-btn:hover.security-key {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-security-key-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-webauthn-btn.trusted-platform {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-contrast.png)
+}
+
+body.contrast .select-webauthn-btn:hover.trusted-platform {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-trusted-platform-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .delete-eid-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid-contrast.png)
+}
+
+body.contrast .delete-eid-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid-hover.png);
+    background-color: #FFF
+}
+
+body.contrast .select-eid-btn {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid-contrast.png)
+}
+
+body.contrast .select-eid-btn:hover {
+    color: #000;
+    text-decoration: underline;
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-select-eid-hover.png);
+    background-color: #FFF
+}
+
+body.contrast #show_transaction {
+    color: #404040
+}
+
+body.contrast a.print {
+    background: url(https://webgate.ec.europa.eu/cas/images/ico-print-contrast.png) no-repeat top left
+}
+
+body.contrast span.toggle_transaction {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-show-transaction-contrast.png)
+}
+
+body.contrast span.toggle_transaction_active {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-hide-transaction-contrast.png)
+}
+
+body.contrast .generate-sample li {
+    color: #FFF;
+    border: 1px dashed #FFF
+}
+
+body.contrast .srvErrors {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-danger-message-contrast.png);
+    background-color: transparent;
+    border-color: #FFF
+}
+
+body.contrast .srvErrors,
+body.contrast .srvErrors a {
+    color: #FFF
+}
+
+body.contrast .informationMessage,
+body.contrast .successMessage,
+body.contrast .actionMessage,
+body.contrast .warningMessage {
+    background-color: transparent;
+    border-color: #FFF
+}
+
+body.contrast .informationMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-information-message-contrast.png)
+}
+
+body.contrast .successMessage,
+body.contrast .actionMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-success-message-contrast.png)
+}
+
+body.contrast .warningMessage {
+    background-image: url(https://webgate.ec.europa.eu/cas/images/ico-warning-message-contrast.png)
+}
+
+body.contrast span.ico {
+    background-position: center bottom
+}
+
+body.contrast .table-striped>tbody>tr:nth-of-type(2n+1) {
+    color: inherit;
+    background-color: #000
+}
+
+body.contrast .table>thead>tr>th,
+body.contrast .table>tbody>tr>th,
+body.contrast .table>tfoot>tr>th,
+body.contrast .table>thead>tr>td,
+body.contrast .table>tbody>tr>td,
+body.contrast .table>tfoot>tr>td {
+    border-top: 1px solid #e9e9e9
+}
+
+body.contrast .table-hover>tbody>tr:hover {
+    color: #000;
+    background-color: #FFF
+}
+
+body.contrast .separation {
+    border-bottom: 4px solid #FFF
+}
+
+@media only screen and (max-width :1440px) {
+    h1 {
+        font-size: 3.2rem;
+        line-height: 4rem
+    }
+
+    h2 {
+        font-size: 2.7rem;
+        line-height: 3.5rem
+    }
+
+    h3 {
+        font-size: 2.3rem;
+        line-height: 3.1rem
+    }
+
+    .relying-party {
+        font-size: 2rem;
+        line-height: 2.8rem
+    }
+
+    .main-header {
+        margin-bottom: 20px;
+        padding-top: 10px;
+        padding-bottom: 0;
+        border-bottom: 0
+    }
+
+    .branding {
+        padding-top: 0
+    }
+
+    .eu-login {
+        font-size: 2rem
+    }
+
+    nav.navigation-left {
+        margin-bottom: 20px
+    }
+
+    .or {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 1.8rem
+    }
+
+    .app-badge img {
+        height: 30px
+    }
+
+    .box_captcha {
+        padding: 20px 10px
+    }
+
+    .hidden-smartphone {
+        display: none
+    }
+
+    .ec-logo,
+    .announcement .inner,
+    .app-badge .inner,
+    .main-footer {
+        text-align: center
+    }
+
+    .my-account .col {
+        min-height: 70px
+    }
+}
+
+@media only screen and (max-width :1024px) {
+    .content-wrap {
+        padding: 30px
+    }
+
+    .content-fluid {
+        padding-top: 30px;
+        padding-bottom: 30px
+    }
+
+    .my-account .col .wrap {
+        padding: 0 20px
+    }
+}
+
+@media only screen and (max-width :767px) {
+    body {
+        margin-bottom: 0;
+        font-size: 1.2rem;
+        line-height: 2rem
+    }
+
+    h1 {
+        font-size: 2.6rem;
+        line-height: 3.4rem
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        line-height: 3rem
+    }
+
+    h3 {
+        font-size: 1.8rem;
+        line-height: 2.6rem
+    }
+
+    .relying-party {
+        font-size: 1.6rem;
+        line-height: 2.4rem
+    }
+
+    .notification .btn-notification {
+        padding-right: 20px
+    }
+
+    .notification a span {
+        display: none
+    }
+
+    .eu-login {
+        margin-bottom: 0
+    }
+
+    .baseline {
+        padding-bottom: 5px;
+        font-size: 1.2rem
+    }
+
+    .whatsnew {
+        display: none
+    }
+
+    #btn-contrast {
+        top: 10px;
+        right: 15px
+    }
+
+    .main h1 {
+        margin: 0 0 10px 0
+    }
+
+    .content-wrap {
+        padding: 20px 10px
+    }
+
+    .content-fluid {
+        padding-top: 20px;
+        padding-bottom: 20px
+    }
+
+    .main-footer {
+        position: relative;
+        bottom: 0;
+        min-height: auto
+    }
+
+    .main-footer .container {
+        padding: 10px 0
+    }
+
+    .main-footer li {
+        margin-right: 10px
+    }
+
+    .eu-login-link {
+        margin-bottom: 10px;
+        padding: 0 0 10px 0
+    }
+
+    .external-link {
+        display: block;
+        float: none;
+        margin-bottom: 0;
+        padding: 0
+    }
+
+    .server-information {
+        margin-bottom: 10px;
+        width: 100%
+    }
+
+    .ec-logo img {
+        height: 50px
+    }
+
+    .powered-by {
+        display: inline;
+        margin-right: 10px;
+        font-size: 1.2rem
+    }
+
+    .my-account .col {
+        display: block;
+        min-height: 70px;
+        text-align: left
+    }
+
+    .my-account .col span.ico {
+        float: left;
+        height: 50px;
+        width: 70px;
+        background-position: left top;
+        background-size: 52px
+    }
+
+    .my-account .col:hover span.ico {
+        background-position: left -50px
+    }
+
+    .my-account .col .wrap {
+        padding: 0
+    }
+
+    .my-account .col h3 {
+        margin-top: 0;
+        font-size: 1.8rem;
+        line-height: 2.2rem
+    }
+
+    body.contrast .my-account .col span.ico {
+        background-position: left -100px
+    }
+
+    body.contrast .my-account .col:hover span.ico {
+        background-position: left -50px
+    }
+}
+
+.captcha-image {
+    display: inline
+}
+
+.flag {
+    float: left;
+    width: 33%
+}
+
+ul.errorMessage li:before {
+    border-color: #cd4237 transparent transparent transparent
+}
+
+ul.errorMessage {
+    margin: 0 0 20px 0 !important;
+    min-height: 26px;
+    padding: 0;
+    width: 80%;
+    color: #fff
+}
+
+ul.errorMessage li,
+form ul.errorMessage li {
+    padding: 5px 10px;
+    display: inline-block;
+    background: #cd4237;
+    list-style-type: none;
+    overflow: visible;
+    position: relative;
+    line-height: 1.1em
+}
+
+form ul.errorMessage li:before {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    top: -6px;
+    border-style: solid;
+    border-width: 0 6px 6px 6px;
+    border-color: transparent transparent #cd4237 transparent
+}
+
+form ul.errorMessage {
+    margin: 0 0 10px 344px;
+    width: 100%
+}
+
+form ul.error {
+    margin: 0;
+    width: 100%
+}
+
+.countryName {
+    background: url("/static/images/sprite_eidas.png") no-repeat
+}
+
+.AT,
+.BE,
+.BG,
+.CY,
+.CZ,
+.DE,
+.DK,
+.EE,
+.ES,
+.FI,
+.FR,
+.GB,
+.GR,
+.HR,
+.HU,
+.IE,
+.IS,
+.IT,
+.LI,
+.LT,
+.LU,
+.LV,
+.MT,
+.NL,
+.NO,
+.PO,
+.PT,
+.RO,
+.SE,
+.SI,
+.SK,
+.EC,
+.CW,
+.FC,
+.CH {
+    display: block;
+    float: left;
+    margin: 0 0 10px 5px;
+    padding: 2px 0 10px 35px
+}
+
+.AT {
+    background-position: 0 -2px
+}
+
+.BE {
+    background-position: 0 -672px
+}
+
+.BG {
+    background-position: 0 -1456px
+}
+
+.CY {
+    background-position: 0 -1512px
+}
+
+.CZ {
+    background-position: 0 -952px
+}
+
+.DE {
+    background-position: 0 -784px
+}
+
+.DK {
+    background-position: 0 -1400px
+}
+
+.EE {
+    background-position: 0 -58px
+}
+
+.ES {
+    background-position: 0 -561px
+}
+
+.FI {
+    background-position: 0 -113px
+}
+
+.FR {
+    background-position: 0 -728px
+}
+
+.GB {
+    background-position: 0 -168px
+}
+
+.GR {
+    background-position: 0 -1344px
+}
+
+.HR {
+    background-position: 0 -1795px
+}
+
+.HU {
+    background-position: 0 -1286px
+}
+
+.IE {
+    background-position: 0 -1232px
+}
+
+.IS {
+    background-position: 0 -224px
+}
+
+.IT {
+    background-position: 0 -280px
+}
+
+.LI {
+    background-position: 0 -1739px
+}
+
+.LT {
+    background-position: 0 -334px
+}
+
+.LU {
+    background-position: 0 -391px
+}
+
+.LV {
+    background-position: 0 -1120px
+}
+
+.MT {
+    background-position: 0 -1176px
+}
+
+.NL {
+    background-position: 0 -1064px
+}
+
+.NO {
+    background-position: 0 -1683px
+}
+
+.PO {
+    background-position: 0 -840px
+}
+
+.PT {
+    background-position: 0 -447px
+}
+
+.RO {
+    background-position: 0 -1008px
+}
+
+.SE {
+    background-position: 0 -616px
+}
+
+.SI {
+    background-position: 0 -503px
+}
+
+.SK {
+    background-position: 0 -896px
+}
+
+.EC {
+    background-position: 0 -1568px
+}
+
+.CW {
+    background-position: 0 -1568px
+}
+
+.FC {
+    background-position: 0 -1568px
+}
+
+.CH {
+    background-position: 0 -1626px
+}
+
+@media(max-width:768px) {
+    .flag {
+        width: 50%
+    }
+}
+
+@media(max-width:640px) {
+    .flag {
+        width: 100%
+    }
+}
+
+.chevron-gt {
+    float: right;
+    width: 4px;
+    height: 20px;
+    position: relative;
+    background: #004494
+}
+
+.chevron-gt:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 10px solid white;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent
+}
+
+.chevron-gt:before {
+    content: "";
+    position: absolute;
+    right: -10px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 10px solid #004494;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent
+}
+
+button:focus>.chevron-gt,
+button:hover>.chevron-gt {
+    background: maroon
+}
+
+button:focus>.chevron-gt:after,
+button:hover>.chevron-gt:after {
+    border-left-color: #f5f5f5
+}
+
+button:focus>.chevron-gt:before,
+button:hover>.chevron-gt:before {
+    border-left-color: maroon
+}
+
+.modal {
+    text-align: center
+}
+
+@media screen and (min-width:768px) {
+    .modal:before {
+        display: inline-block;
+        vertical-align: middle;
+        content: " ";
+        height: 100%
+    }
+}
+
+.modal-dialog {
+    display: inline-block;
+    text-align: left;
+    vertical-align: middle
+}
+
+body.contrast .modal-dialog {
+    border: 1px solid #FFF
+}
+
+.modal-content {
+    border-radius: 0
+}
+
+body.contrast .modal-content {
+    background: #000
+}
+
+.progressBarIco {
+    font-size: 24px
+}
+
+.progressBarEnd {
+    display: none
+}
+
+.flex {
+    display: flex
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal
+}
+
+.verif-method-dd {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 999;
+    margin-bottom: 1rem
+}
+
+.verif-method-dd-placeholder {
+    display: flex;
+    align-items: center;
+    border: 1px solid black;
+    padding: 1rem
+}
+
+.verif-method-dd:focus {
+    border: 2px solid #ffd617;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+.verif-method-dd:focus>.verif-method-dd-placeholder {
+    border: 2px solid #ffd617;
+    box-shadow: none;
+    -webkit-box-shadow: none
+}
+
+.verif-method-dd-placeholder__icon-container {
+    background-color: #404040;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -1
+}
+
+.verif-method-dd-placeholder__icon-container>.verif-method-dd-placeholder__icon {
+    fill: white
+}
+
+.verif-method-dd-placeholder__icon {
+    width: 48px;
+    height: 48px;
+    fill: #004494
+}
+
+.verif-method-dd-placeholder__container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2.5rem;
+    margin-right: 15%;
+    width: 75%
+}
+
+.verif-method-dd-placeholder__title {
+    font-weight: 600;
+    font-size: 1.4rem
+}
+
+.verif-method-dd-placeholder__subtitle {
+    font-size: 1.2rem;
+    line-height: 1.8rem
+}
+
+.verif-method-dd-options {
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    border: 1px solid #000;
+    border-radius: .4rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(0, -50%)
+}
+
+.verif-method-dd.open .verif-method-dd-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all
+}
+
+.verif-method-dd-option {
+    display: flex;
+    padding: 1rem;
+    align-items: center;
+    background-color: #FFF
+}
+
+.verif-method-dd-option__icon {
+    width: 48px;
+    height: 48px;
+    fill: #404040
+}
+
+.verif-method-dd-option__onmobile_icon {
+    width: 3rem;
+    height: 3rem;
+    fill: #FFF
+}
+
+.verif-method-dd-option__onmobile_icon_container {
+    padding-top: inherit
+}
+
+.verif-method-dd-option__onmobile_icon_label {
+    padding-top: inherit;
+    padding-left: inherit;
+    text-align: left
+}
+
+.verif-method-dd-option__container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2.5rem;
+    width: 75%
+}
+
+.verif-method-dd-option__title {
+    font-weight: 600;
+    font-size: 1.4rem
+}
+
+.verif-method-dd-option__subtitle {
+    font-size: 1.2rem;
+    line-height: 1.8rem
+}
+
+.verif-method-dd-option:hover {
+    background-color: #f2f5f9
+}
+
+.verif-method-dd-option:hover .verif-method-dd-option__icon {
+    fill: #004494
+}
+
+.verif-method-dd-option:focus {
+    background-color: #f2f5f9;
+    outline: 2px dashed #000;
+    outline-offset: 2px
+}
+
+.verif-method-dd-option:focus .verif-method-dd-option__icon {
+    fill: #004494
+}
+
+.verif-method-dd-option.selected {
+    color: #FFF;
+    background-color: #004494
+}
+
+.verif-method-dd-option.selected .verif-method-dd-option__icon {
+    fill: #FFF
+}
+
+.verif-method-dd-option__svg-icon-stroke_nofill {
+    fill: none;
+    stroke: #404040;
+    stroke-width: 3px
+}
+
+body.contrast .verif-method-dd-options {
+    border: 1px solid #FFF
+}
+
+body.contrast .verif-method-dd-placeholder {
+    display: flex;
+    align-items: center;
+    border: 1px solid #FFF;
+    padding: 1rem
+}
+
+body.contrast .verif-method-dd-placeholder__icon-container {
+    background-color: #000;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -1
+}
+
+body.contrast .verif-method-dd-placeholder__icon {
+    width: 48px;
+    height: 48px;
+    fill: #FFF
+}
+
+body.contrast .verif-method-dd-option {
+    display: flex;
+    padding: 1rem;
+    align-items: center;
+    background-color: #FFF;
+    color: #000;
+    border: 1px solid #FFF
+}
+
+body.contrast .verif-method-dd-option__icon {
+    width: 48px;
+    height: 48px;
+    fill: #000
+}
+
+body.contrast .verif-method-dd-option__onmobile_icon {
+    width: 3rem;
+    height: 3rem;
+    fill: #FFF
+}
+
+body.contrast .verif-method-dd-option:hover {
+    background-color: #000;
+    color: #FFF
+}
+
+body.contrast .verif-method-dd-option:hover .verif-method-dd-option__icon {
+    fill: #FFF
+}
+
+body.contrast .verif-method-dd-option:focus {
+    background-color: #000;
+    outline: 2px dashed #FFF;
+    outline-offset: 2px
+}
+
+body.contrast .verif-method-dd-option:focus .verif-method-dd-option__icon {
+    fill: #FFF
+}
+
+body.contrast .verif-method-dd-option.selected {
+    color: #FFF;
+    background-color: #000
+}
+
+body.contrast .verif-method-dd-option.selected .verif-method-dd-option__icon {
+    fill: #FFF
+}
+
+body.contrast .verif-method-dd-option__svg-icon-stroke_nofill {
+    fill: none;
+    stroke: #000;
+    stroke-width: 3px
+}
+
+.link-external {
+    display: inline-block !important;
+    margin-right: 20px;
+    position: relative
+}
+
+.link-external:after {
+    position: absolute;
+    top: 0;
+    right: -21px;
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: url("/static/images/open-in-new-white-18dp.svg") left no-repeat;
+    background-size: 18px;
+    transition: all .1s linear
+}
+
+.link-external-blue {
+    display: inline-block !important;
+    margin-right: 20px;
+    position: relative
+}
+
+.link-external-blue:after {
+    position: absolute;
+    top: 0;
+    right: -21px;
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: url("https://webgate.ec.europa.eu/cas/images/open-in-new-blue-18dp.svg") left no-repeat;
+    background-size: 18px;
+    transition: all .1s linear
+}
+
+.announcement-box {
+    background: #FFF;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-bottom: 15px
+}
+
+.announcement-box span.category {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding-left: 6px;
+    padding-bottom: 10px
+}
+
+.announcement-box p.content {
+    padding-left: 35px;
+    padding-right: 10px
+}
+
+.announcement-box.announcement-info {
+    border: 2px solid #006fb4
+}
+
+.announcement-box.announcement-warn {
+    border: 2px solid #f29527
+}
+
+.announcement-box.announcement-info div.icon {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-color: #006fb4;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-info.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-info.svg') no-repeat center / contain
+}
+
+.announcement-box.announcement-warn div.icon {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-color: #f29527;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-warning.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-warning.svg') no-repeat center / contain
+}
+
+body.contrast .announcement-box {
+    background: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+    padding-left: 10px
+}
+
+body.contrast .announcement-box.announcement-info {
+    border: 2px solid #FFF
+}
+
+body.contrast .announcement-box.announcement-warn {
+    border: 2px solid #FFF
+}
+
+body.contrast .announcement-box.announcement-info div.icon {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-info.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-info.svg') no-repeat center / contain
+}
+
+body.contrast .announcement-box.announcement-warn div.icon {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-color: #FFF;
+    mask: url('https://webgate.ec.europa.eu/cas/images/ico-warning.svg') no-repeat center / contain;
+    -webkit-mask: url('https://webgate.ec.europa.eu/cas/images/ico-warning.svg') no-repeat center / contain
+}
+
+.mt-0,
+.my-0 {
+    margin-top: 0 !important
+}
+
+.pt-10 {
+    padding-top: 10px
+}
