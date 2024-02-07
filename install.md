@@ -60,20 +60,15 @@ To run the eudiw-issuer application, follow these simple steps (some of which ma
     ```
 
 
-5. Install Flask in virtual environment
+5. Install Flask, gunicorn and other dependencies in virtual environment
 
     ```shell
-    pip install Flask-Cors requests jwt cbor2 pytz flask pyignite tinyec pycryptodome  config flask_api cbor_diag validators Flask-Session jsonschema
+    pip install -r requirements.txt
     ```
 
-6. Install other dependencies
+    Note: The original pyMDOC-CBOR library will be forked into the eu-digital-identity-wallet repo (and the modifications will be applied), when it is made public, since a public repo cannot be forket into a private repo.
 
-    ```shell
-    pip install git+https://github.com/devisefutures/pyMDOC-CBOR.git@cert_arg
-    pip install git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git
-    ```
-
-7. Run the eudiw-issuer application (on <http://127.0.0.1:5000>)
+6. Run the eudiw-issuer application (on <http://127.0.0.1:5000>)
 
     ```shell
     flask --app app run

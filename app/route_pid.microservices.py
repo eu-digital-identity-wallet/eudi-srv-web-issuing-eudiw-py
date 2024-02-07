@@ -34,15 +34,15 @@ from flask_cors import CORS
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from .validate import validate_getpidtest_result, validate_params_getpid, validate_params_showpid, validate_mandatory_args
-from .crypto_func import eccEnc, pubkeyDER, pubkeyPoint, decrypt_ECC
-from .app_config.config_devtest import ConfTest as cfgdev
-from .app_config.config_service import ConfService as cfgserv
-from .app_config.config_countries import ConfCountries as cfgcountries
-from .redirect_func import redirect_getpid, url_get
-from .misc import create_dict
-from .formatter_func import cbor2elems
-from .pid_func import process_pid_form
+from validate import validate_getpidtest_result, validate_params_getpid, validate_params_showpid, validate_mandatory_args
+from crypto_func import eccEnc, pubkeyDER, pubkeyPoint, decrypt_ECC
+from app_config.config_devtest import ConfTest as cfgdev
+from app_config.config_service import ConfService as cfgserv
+from app_config.config_countries import ConfCountries as cfgcountries
+from redirect_func import redirect_getpid_or_mdl, url_get
+from misc import create_dict
+from formatter_func import cbor2elems
+from pid_func import process_pid_form
 
 # /pid blueprint
 pid = Blueprint('pid', __name__, url_prefix='/pid')
@@ -235,7 +235,7 @@ def getPidTest():
 
 
     if request.args.get('version') == "0.1": # result is not ciphered
-        return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', base64.urlsafe_b64encode(plaintext.encode()).decode('utf-8')), ('mdoc_nonce', ""), ('mdoc_authTag', ""), ('mdoc_ciphertextPubKey', "")])
+        return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', base64.urlsafe_b64encode(plaintext.encode()).decode('utf-8')), ('mdoc_nonce', ""), ('mdoc_authTag', ""), ('mdoc_ciphertextPubKey', "")])
     if request.args.get('version') == "0.2":
         encryptedMsg = eccEnc(base64.urlsafe_b64decode(request.args.get('certificate')), plaintext)
         ciphertext = base64.urlsafe_b64encode(encryptedMsg[0]).decode('utf-8')
@@ -243,7 +243,7 @@ def getPidTest():
         authTag = base64.urlsafe_b64encode(encryptedMsg[2]).decode('utf-8')
         pub64 = base64.urlsafe_b64encode(pubkeyDER(encryptedMsg[3].x, encryptedMsg[3].y)).decode("utf-8")
 
-        return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('mdoc_nonce', nonce), ('mdoc_authTag', authTag), ('mdoc_ciphertextPubKey', pub64)])
+        return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('mdoc_nonce', nonce), ('mdoc_authTag', authTag), ('mdoc_ciphertextPubKey', pub64)])
 
     encryptedMsg = eccEnc(base64.urlsafe_b64decode(request.args.get('certificate')), plaintext)
     ciphertext = base64.urlsafe_b64encode(encryptedMsg[0]).decode('utf-8')
@@ -251,7 +251,7 @@ def getPidTest():
     authTag = base64.urlsafe_b64encode(encryptedMsg[2]).decode('utf-8')
     pub64 = base64.urlsafe_b64encode(pubkeyDER(encryptedMsg[3].x, encryptedMsg[3].y)).decode("utf-8")    
 
-    return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
+    return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -361,8 +361,8 @@ def pid_form():
         (error_code, ciphertext, nonce, authTag, pub64, sd_jwt) = process_pid_form(request.form)
 
     if not error_code == 0:
-        return redirect_getpid(session['version'], session['returnURL'], error_code, [])
+        return redirect_getpid_or_mdl(session['version'], session['returnURL'], error_code, [])
 
-    return redirect_getpid(session['version'], session['returnURL'], 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
+    return redirect_getpid_or_mdl(session['version'], session['returnURL'], 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
 
 

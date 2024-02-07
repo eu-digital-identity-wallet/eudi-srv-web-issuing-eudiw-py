@@ -31,7 +31,7 @@ The **pid/getpid** GET request contains the following fields:
 + *certificate* (mandatory) - Wallet instance (device) certificate (PEM format) encoded in base64urlsafe format. The wallet instance public key will be:
   + may be validated, when the Wallet Issuer Trusted list (or similar) is available
   + used to encrypt fields *mdoc* and *sd_jwt* of the response (ECC-Based Hybrid Encryption + AES-256-GCM) sent to the returnURL (see section 1.1.2).
-+ *device_publickey* (mandatory) - User's device public key (PEM format, base64 urlsafe encode). Will be included in the mdoc and sd-jwt, according the relevant standards.
+  + *device_publickey* (mandatory) - User's device public key (PEM format, base64 urlsafe encode). Will be included in the mdoc and sd-jwt, according the relevant standards.
 + *returnURL* (mandatory) - URL where the response will be redirected. If the returnURL is not present, an HTTP_400_BAD_REQUEST error will be returned.
 
 Supported API *version*, for testing:
@@ -117,6 +117,7 @@ The **pid/getpid** POST request contains the following JSON body:
 + *DateOfBirth* - Birthdate.
 + *PersonIdentifier* - National person identifier.
 
+
 Supported API *version*, for testing:
 
 + see section 1.1.1
@@ -133,14 +134,13 @@ Supported device public key algorithms for testing:
 
 + see section 1.1.1
 
-
 Example:
 
 POST to  <https://issuer.eudiw.dev/pid/form> with the following JSON body:
 
 ```
 {'CurrentGivenName': 'John', 'CurrentFamilyName': 'Doe', 'DateOfBirth': '1974-04-25', 'PersonIdentifier': '11223344Ab', 'version': '0.2', 'country': 'FC', 'certificate': 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS...', 'device_publickey': 'MIIT4dCCBpT0PTA...', 'returnURL': 'https://url.redirect.to/route'}
-```
+```	```
 
 #### 1.2.2 (GET) returnURL
 
@@ -179,7 +179,7 @@ o2d2ZXJzaW9uYzEuMGlkb2N1bWVudHOBo2dkb2NUeXBleBhldS5ldXJvcGEuZWMuZXVkaXcucGlkLjFs
 ```
 eyJhbGciOiAiRVMyNTYiLCAidHlwIjogInZjK3NkLWp3dCJ9.eyJpc3MiOiAiVGVzdCBQSUQgaXNzdWVyIiwgImp0aSI6ICJkYzdiYTc3ZC0wZmE2LTRkY2ItYjgyYS0zN2I3MGUzMjgxYWEiLCAiaWF0IjogMTk1OTEsICJleHAiOiAxOTU5OCwgInN0YXR1cyI6ICJleGFtcGxlIiwgInR5cGUiOiAiZXUuZXVyb3BhLmVjLmV1ZGl3LnBpZC4xIiwgInZlcmlmaWVkX2NsYWltcyI6IHsidmVyaWZpY2F0aW9uIjogeyJfc2QiOiBbIjVFdWtMMTRHcmJtZ2YtaDhyZWEtbHdZeFM2QlNEQmUwQzRLZmV0cmVLeHMiXSwgInRydXN0X2ZyYW1ld29yayI6ICJlaWRhcyIsICJhc3N1cmFuY2VfbGV2ZWwiOiAiaGlnaCJ9LCAiY2xhaW1zIjogeyJldS5ldXJvcGEuZWMuZXVkaXcucGlkLjEiOiB7Il9zZCI6IFsiSHdqclAwQU9MZEduaWJfc2llX0hpS0ZQc1l2bE5KTXVsV3psV2tuY2JxNCIsICJQLTZaQ0p1SFY2TmtlbTlvYlF0QkNLbHVaNHZQcU1LQ0ZzMnVRUXNqbHFrIiwgIlIzaVBoQ0RzRmZNclNFNFpXcXFBbnRWMjhjMmY2QUduVTY4NFdzbnZ2cGsiLCAiVk0wNlJWc1RfaUQtVkJjN1JwWF9HWHZscUw3Y3pLWlpNTnl3Sjc0SXIyTSIsICJXNnk5MVJ2NlNsUWNlbkdPdjByaUk0U0tJMlQ5MlVVRUlaWXNjUHp3Y2s0IiwgIlc4a194ZlEtWmhTLVVmLWtMSm9fYy1KdWw1UGVzdWlYcTNFWlVJRDlsQmsiLCAiZl8tdHE0eDV5VXRlcW1fNXFiOUZSSmE4S3hxd0p6OHlINjM4S2tuY3JQTSJdfSwgImV1LmV1cm9wYS5lYy5ldWRpdy5ERS4xIjogeyJfc2QiOiBbImdMU2dHTngxS2w1RmlUcEpwb2tFUUxycjdTRmx4RTJ5aWVyYlUxWVdYU2siXX19fSwgIl9zZF9hbGciOiAic2hhLTI1NiIsICJjbmYiOiB7Imp3ayI6IHsia3R5IjogIkVDIiwgImNydiI6ICJQLTI1NiIsICJ4IjogInVGd0dNN1VuMDJHNUYxa0o1b3lZTXdyTnlUYUw0b0F6MXhmWm9xcnNSTVU9IiwgInkiOiAiVnRBMVZyVU9Wa1JoenFNVVN0aGNGNEw2QllRajdkUmk0TU1neVdydUtwOD0ifX19.7Yd1tbs5nWS8Z9RCbtDhdjYtw2Yl_pHBDL_tbupRQtaaMYK5nASOSYzb2PPL27Mb5Dth6iQ7cy2niBApe40_jA~WyJMSm5GX0hFS3hSd1FxYWpkY3d6WWZ3IiwgImV2aWRlbmNlIiwgeyJ0eXBlIjogImxpbmsgZG8gaXNzdWVyIiwgInNvdXJjZSI6IHsib3JnYW5pemF0aW9uX25hbWUiOiAiVGVzdCBQSUQgaXNzdWVyIiwgIm9yZ2FuaXphdGlvbl9pZCI6ICJJUEEgQ29kZSIsICJjb3VudHJ5X2NvZGUiOiAiRkMifX1d~WyJIYXpOYVlIcHpPRnAzeS1WZ2N0OEV3IiwgImZhbWlseV9uYW1lIiwgInVnYSJd~WyJLUDJ2SnY0clFMX1pHZm1RZ3dLb1RRIiwgImdpdmVuX25hbWUiLCAidWdhIl0~WyJwVVZtVDB0WE96VVZnWFJVOXVqZEJRIiwgImJpcnRoX2RhdGUiLCAiMjIyMi0wMi0yMiJd~WyJMd0ZzNzBVbzdPc2puR2hHOWltWTVRIiwgInVuaXF1ZV9pZCIsICJ1Z2EiXQ~WyJyX0hSakdHRHpvb3VXN09yOWFVT0FBIiwgImFnZV9vdmVyXzE4IiwgZmFsc2Vd~WyJwZ3BTRTNkR1hScVhEcVVuWUtVTGJnIiwgImlzc3VhbmNlX2RhdGUiLCAiMjAyMy0wOC0yMyJd~WyJxUWtoTnJRTXpnb3k2WVdiMER0QWRnIiwgImV4cGlyeV9kYXRlIiwgIjIwMjMtMDgtMzAiXQ~WyJRampZcng1a0ZIRlpVbTZraGdyaU1BIiwgInNpZ25hdHVyZV91c3VhbF9tYXJrIiwgImEzNjc3NjY1NzI3MzY5NmY2ZTYzMzEyZTMwNjk2NDZmNjM3NTZkNjU2ZS4uLiJd~
 ```
-    
+
 
 #### 1.2.2 (GET) returnURL
 
@@ -198,3 +198,102 @@ A special test case has be put in place in order to verify if the cipher/deciphe
 ```
 curl -L -v -b "session=random" https://issuer.eudiw.dev/pid/getpidtest?version=0.3\&country=PT\&certificate=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUIzakNDQVlXZ0F3SUJBZ0lVWWJFTlJQN3VWOTUrQ3BBVlFDcHl6VmNRVmlVd0NnWUlLb1pJemowRUF3SXcKUlRFTE1Ba0dBMVVFQmhNQ1FWVXhFekFSQmdOVkJBZ01DbE52YldVdFUzUmhkR1V4SVRBZkJnTlZCQW9NR0VsdQpkR1Z5Ym1WMElGZHBaR2RwZEhNZ1VIUjVJRXgwWkRBZUZ3MHlNekEzTVRBeE1EUTFOVFZhRncweU5EQTNNRFF4Ck1EUTFOVFZhTUVVeEN6QUpCZ05WQkFZVEFrRlZNUk13RVFZRFZRUUlEQXBUYjIxbExWTjBZWFJsTVNFd0h3WUQKVlFRS0RCaEpiblJsY201bGRDQlhhV1JuYVhSeklGQjBlU0JNZEdRd1dUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqTwpQUU1CQndOQ0FBVHdnUkFHUGdKbDNkaUo5ZWVPcEdXMGdpSWtQcGFGa1RFU1E5U0E5SEw5akM1NFd3azNvOTZICkNxMjlUVVhQYlNkYjFseFFzck9ncUphQ0dJM0xmem5RbzFNd1VUQWRCZ05WSFE0RUZnUVV5VkgxV0drQ1FOcnoKNjJFTHkvd1lmekFRYVZVd0h3WURWUjBqQkJnd0ZvQVV5VkgxV0drQ1FOcno2MkVMeS93WWZ6QVFhVlV3RHdZRApWUjBUQVFIL0JBVXdBd0VCL3pBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlCYXZLbU5TSWxCWXh6TmcxdU1Fd3BJCkZGNlZFdmlRQllwWnNYYURvQmRhQ1FJZ00rZUFBUE5zNXErNnZ0SVR1R1pTUkdoN1U3U1VMdWNqWGZJNmU0N2IKSjI4PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t\&returnURL=https://issuer.eudiw.dev/pid/returnpidtest\&device_publickey=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFdUZ3R003VW4wMkc1RjFrSjVveVlNd3JOeVRhTAo0b0F6MXhmWm9xcnNSTVZXMERWV3RRNVdSR0hPb3hSSzJGd1hndm9GaENQdDFHTGd3eURKYXU0cW53PT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
 ```
+
+# PID issuer - version 0.4
+
+The functionality of the PID issuer is defined in the issuing-pid repo.
+
+
+![PID issuer sequence diagram](../images/pid-seq-diagram.v0.2.svg)
+
+## 1. Web Service APIs
+
++ Pre-production / tests URL: <https://issuer.eudiw.dev/>
+
+### 1.1 Get PID in CBOR and SD-JWT format
+
+Issues PID in CBOR (ISO 18013-5 mdoc) and SD-JWT format.
+
+The request contains the API version, Issuer country, the EUDI Wallet instance certificate and a returnURL.
+After receiving the request, the user's (EUDI Wallet holder) browser will be redirect to the Issuer country eIDAS Node (or to the Issuer country Identity Provider) to authenticate itself and to consent to share the PID attributes with the PID issuer.
+
+After creating the signed PID in CBOR and SD-JWT format, the PID issuer will redirect the user's browser to the returnURL (PID in CBOR and SD-JWT format will be ciphered with the EUDI Wallet instance certificate).
+
+#### 1.1.1 (GET) V04/getpid
+
+Starts the process of issuance of the PID in CBOR (ISO 18013-5 mdoc) and SD-JWT format.
+
++ Pre-production / tests URL: <https://issuer.eudiw.dev/V04/getpid>
+
+The **V04/getpid** GET request contains the following fields:
+
++ *version* (mandatory) - API version
++ *country* (mandatory) - Two-letter country code according to ISO 3166-1 alpha-2.
++ *certificate* (mandatory) - Wallet instance (device) certificate (PEM format) encoded in base64urlsafe format. The wallet instance public key will be:
+  + validated, when the Wallet Issuer Trusted list (or similar) is available
+  + included in the mdoc MSO and in the SD-JWT (to be decided, according to the ARF - no decision yet -);
+  + used to encrypt fields *cbor* and *sd-jwt* of the response (ECC-Based Hybrid Encryption + AES-256-GCM) sent to the returnURL (see section 1.1.2).
++ *returnURL* (mandatory) - URL where the response will be redirected. If the returnURL is not present, an HTTP_400_BAD_REQUEST error will be returned.
+
+
+Available *country* codes, for testing:
+
++ FC (Form Country) - a form, with the necessary PID attributes, will be presented to the user (EUDI Wallet holder). The user will insert the values, that will not be verified;
+
+Supported certificate algorithms and public key curves for testing:
+
++ Algorithm: ecdsa-with-SHA256 (OID: 1.2.840.10045.4.3.2), and EC Curve P-256 (secp256r1, OID: 1.2.840.10045.3.1.7)
+
+Example:
+
+```https://issuer.eudiw.dev/pid/getpid?version=0.2&country=PT&certificate=MIIH6DCCBdCgAwIBAgIIO0P-pTW...&returnURL=https://url.redirect.to/route```
+
+
+### 1.2 Get PID in CBOR and SD-JWT format (without UI/UX for the end user)
+
+Issues PID in CBOR (ISO 18013-5 mdoc) and SD-JWT format.
+
+The request contains the API version, Issuer country, the EUDI Wallet instance certificate, returnURL and the basic information for PID issuance (First name, Family name, Birthday).
+After receiving the request, the signed PID is created in CBOR and SD-JWT format, and the PID issuer will redirect the user's browser to the returnURL (PID in CBOR and SD-JWT format will be ciphered with the EUDI Wallet instance certificate).
+
+#### 1.2.1 (POST) V04/form
+
+Issues the PID in CBOR (ISO 18013-5 mdoc) and SD-JWT format.
+
++ Pre-production / tests URL: <https://issuer.eudiw.dev/pid/form>
+
+The **V0.4/getpid** POST request contains the following JSON body:
+
++ *version* (mandatory) - API version
++ *country* (mandatory) - Two-letter country code according to ISO 3166-1 alpha-2.
++ *certificate* (mandatory) - Wallet instance (device) certificate (PEM format) encoded in base64urlsafe format. The wallet instance public key will be:
+  + validated, when the Wallet Issuer Trusted list (or similar) is available
+  + included in the mdoc MSO and in the SD-JWT (to be decided, according to the ARF - no decision yet -);
+  + used to encrypt fields *cbor* and *sd-jwt* of the response (ECC-Based Hybrid Encryption + AES-256-GCM) sent to the returnURL (see section 1.2.1).
++ *returnURL* (mandatory) - URL where the response will be redirected. If the returnURL is not present, an HTTP_400_BAD_REQUEST error will be returned.
++ *CurrentGivenName* - First name.
++ *CurrentFamilyName* - Family name.
++ *DateOfBirth* - Birthdate.
+
+Available *country* codes, for testing:
+
++ FC (Form country) - a form, with the necessary PID attributes, will be presented to the user (EUDI Wallet holder). The user will insert the values, that will not be verified;
+
+Supported certificate algorithms and public key curves for testing:
+
++ Algorithm: ecdsa-with-SHA256 (OID: 1.2.840.10045.4.3.2), and EC Curve P-256 (secp256r1, OID: 1.2.840.10045.3.1.7)
+
+Example:
+
+POST to  <https://issuer.eudiw.dev/pid/form> with the following JSON body:
+
+```
+{'CurrentGivenName': 'John', 'CurrentFamilyName': 'Doe', 'DateOfBirth': '1974-04-25', 'version': '0.4', 'country': 'FC', 'certificate': 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS...', 'returnURL': 'https://url.redirect.to/route'}
+```
+
+#### 1.2.2 (GET) returnURL
+
+See section 1.1.2.
+
+--------------
+

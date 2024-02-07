@@ -2,15 +2,17 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-The EUDIW issuer implements the PID and mDL provider backend and includes the functionalities of the following components:
+
+The EUDIW issuer implements the PID and mDL provider backend (as defined in the issuing-mdl and issuing-pid repositories) and includes the functionalities of the following components:
 
 
 | Component |    API  Documentation      |
 |----------|-------------|
-| PID issuer | [API](api_docs/pid_issuer.md) |
-| mDL issuer |  |
+| PID/mDL OID4VCI with dynamic registration | [API](api_docs/pid_oidc_auth.md) |
+| PID/mDL OID4VCI without dynamic registration | [API](api_docs/pid_oidc_no_auth.md) |
 | CBOR Formatter | [API](api_docs/cbor_formatter.md)  |
 | SD-JWT VC Formatter |  |
+| Document Signer |  |
 
 
 ## 1. Installation
@@ -45,6 +47,7 @@ Examples:
     ```
     flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/key.pem --host=127.0.0.1 --port=4430
     ```
+
 
 ## How to contribute
 

@@ -17,12 +17,13 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend. 
-Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This route_pid.py file is the blueprint for the route /pid of the PID Issuer Web service.
 """
 
+import datetime
 import logging
 import base64
 
@@ -34,22 +35,22 @@ from flask_cors import CORS
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from .validate import validate_getpidtest_result, validate_params_getpid, validate_params_showpid, validate_mandatory_args
-from .crypto_func import eccEnc, pubkeyDER, pubkeyPoint, decrypt_ECC
-from .app_config.config_devtest import ConfTest as cfgdev
-from .app_config.config_service import ConfService as cfgserv
-from .app_config.config_countries import ConfCountries as cfgcountries
-from .redirect_func import redirect_getpid, url_get
-from .misc import create_dict
-from .formatter_func import cbor2elems
-from .pid_func import process_pid_form
+from validate import validate_getpidtest_result, validate_params_getpid_or_mdl, validate_params_showpid_or_mdl, validate_mandatory_args
+from crypto_func import eccEnc, pubkeyDER, pubkeyPoint, decrypt_ECC
+from app_config.config_devtest import ConfTest as cfgdev
+from app_config.config_service import ConfService as cfgserv
+from app_config.config_countries import ConfCountries as cfgcountries
+from redirect_func import redirect_getpid_or_mdl, url_get
+from misc import create_dict
+from formatter_func import cbor2elems
+from pid_func import process_pid_form
 
 # /pid blueprint
 pid = Blueprint('pid', __name__, url_prefix='/pid')
 CORS(pid) # enable CORS on the blue print
 
 # Log
-logger = logging.getLogger()
+from app_config.config_service import ConfService as log
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -60,31 +61,23 @@ logger = logging.getLogger()
 def pid_root():
     """Initial PID page. 
     Loads country config information and renders pid_index.html so that the user can select the PID issuer country."""
-    countries_name = create_dict(cfgcountries.supported_countries, 'name')
+    countries_name={
+        'FC': 'Form Country',
+    }
     form_keys = request.form.keys()
     form_country = request.form.get('country')
+    
 
 
     # if country was selected
     if 'country' in form_keys and 'proceed' in form_keys and form_country in countries_name.keys():
         session['privkey'] = base64.b64encode(cfgdev.privkeystr).decode('utf-8') 
         #print(base64.urlsafe_b64encode(cfgdev.device_publickey.encode('utf-8')).decode('utf-8'))
-
-        
-        # #if country is empty
-        # if (session['country'] == ""):
-
-        #     return redirect(url_get(cfgserv.service_url + "pid/getpid", 
-        #                         {'returnURL': session['returnURL'] , 
-        #                          'version': session['version'] ,
-        #                          'country': form_country,
-        #                          'certificate': session ['certificate'],
-        #                          'device_publickey': session['device_publickey']}))
         
         #print("pid_root: " + session['privkey'])    
         return redirect(url_get(cfgserv.service_url + "pid/getpid", 
                                 {'returnURL': cfgserv.service_url + 'pid/show', 
-                                 'version': cfgserv.current_version,
+                                 'version': "0.3",
                                  'country': form_country,
                                  'certificate': base64.urlsafe_b64encode(cfgdev.certificate).decode('utf-8'),
                                  'device_publickey': cfgdev.device_publickey}))
@@ -133,10 +126,14 @@ def getPid():
 
     Return: HTTP_400_BAD_REQUEST if returnURL is missing. Otherwise, GET redirect to returnURL.
     """
+    session['route'] = "/pid/getpid"
+    
+    v = validate_params_getpid_or_mdl(request.args, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
 
-    v = validate_params_getpid(request.args, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
     if not isinstance(v, bool): # getpid params were not correctly validated
         return v
+    
+    log.logger_info.info(" - INFO - " + session["route"] + " - Version: " + request.args['version'] + " - Country: " + request.args['country'] + " - Certificate: " + request.args['certificate'] + " - Return Url: " + request.args['returnURL'] + " - Device Public Key: " + request.args['device_publickey'] + " -  entered the route")
 
     # getpid params correctly validated
     session['version'] = request.args['version']
@@ -173,14 +170,26 @@ def showPid():
 
     Return: Render web page
     """
-    v = validate_params_showpid(request.args, ['mdoc', 'nonce', 'authTag', 'ciphertextPubKey','sd_jwt', 'error', 'error_str'])
-    if not isinstance(v, bool): # getpid params were not correctly validated
-        return v
-    
+    session['route'] = "/pid/show"
+    log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+  
+
+    if session['version'] == "0.3":
+        v = validate_params_showpid_or_mdl(request.args, ['mdoc', 'nonce', 'authTag', 'ciphertextPubKey','sd_jwt', 'error', 'error_str'])
+        if not isinstance(v, bool): # getpid params were not correctly validated
+            return v
+    else:
+        v = validate_params_showpid_or_mdl(request.args, ['mdoc', 'mdoc_nonce', 'mdoc_authTag', 'mdoc_ciphertextPubKey','error', 'error_str'])
+        if not isinstance(v, bool): # getpid params were not correctly validated
+            return v
+  
+    sd_jwt=request.args.get('sd_jwt')
+
     if session['version'] == "0.1": # mdoc not ciphered
         mdoc = base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8'))
         sd_jwt=request.args.get('sd_jwt')
         return render_template('route_pid/pid-show.html', elems = cbor2elems(mdoc), mdoc = mdoc, sd_jwt= sd_jwt )
+    
     if session['version'] == "0.2":
         privkey = serialization.load_pem_private_key(base64.b64decode(session['privkey']), password=None, backend=default_backend())
         mdoc = decrypt_ECC(base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8')), 
@@ -188,7 +197,8 @@ def showPid():
                         base64.urlsafe_b64decode(request.args.get('authTag').encode('utf-8')), 
                         pubkeyPoint(serialization.load_der_public_key(base64.urlsafe_b64decode(request.args.get('ciphertextPubKey').encode("utf-8")))),
                         privkey.private_numbers().private_value)
-        return render_template('route_pid/pid-show.html', elems = cbor2elems(mdoc), mdoc = mdoc) 
+        return render_template('route_pid/pid-show.html', elems = cbor2elems(mdoc), mdoc = mdoc.decode('utf-8'), sd_jwt= sd_jwt) 
+    
     else:
         # decipher mdoc
         privkey = serialization.load_pem_private_key(base64.b64decode(session['privkey']), password=None, backend=default_backend())
@@ -197,10 +207,7 @@ def showPid():
                         base64.urlsafe_b64decode(request.args.get('authTag').encode('utf-8')), 
                         pubkeyPoint(serialization.load_der_public_key(base64.urlsafe_b64decode(request.args.get('ciphertextPubKey').encode("utf-8")))),
                         privkey.private_numbers().private_value)
-        sd_jwt=request.args.get('sd_jwt')
-        return render_template('route_pid/pid-show.html', elems = cbor2elems(mdoc), mdoc = mdoc, sd_jwt= sd_jwt ) 
-
-    
+        return render_template('route_pid/pid-show.html', elems = cbor2elems(mdoc), mdoc = mdoc.decode('utf-8'), sd_jwt= sd_jwt ) 
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -214,47 +221,46 @@ def getPidTest():
     + country (mandatory) - Two-letter country code according to ISO 3166-1 alpha-2.
     + certificate (mandatory) - certificate (PEM format) encoded in base64urlsafe. 
     + returnURL (mandatory) - URL where the response will be redirected.
-    + device_publickey -  Device public key (PEM format), encoded in base64urlsafe 
+    + device_publickey -  PID in sd-jwt format (with disclosures), ciphered with the Wallet instance public key - ECC-Based Hybrid Encryption (using ECDH) + AES-256-GCM - (bytes encoded in base64urlsafe format).
 
+    
     Return: HTTP_400_BAD_REQUEST if returnURL is missing. Otherwise, GET redirect to returnURL.
     """
+    session['route'] = "/pid/getpidtest"
     session['version']= request.args.get('version')
     
-    v = validate_params_getpid(request.args, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
+    v = validate_params_getpid_or_mdl(request.args, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
     if not isinstance(v, bool): # getpid params were not correctly validated
         return v
+    
+    log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+
 
     # use test cbor mdoc
     plaintext = cfgdev.mdoc64
     sd_jwt=cfgdev.sd_jwt
 
-
-
     if request.args.get('version') == "0.1": # result is not ciphered
-        return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', base64.urlsafe_b64encode(plaintext.encode()).decode('utf-8')), ('mdoc_nonce', ""), ('mdoc_authTag', ""), ('mdoc_ciphertextPubKey', "")])
-    if request.args.get('version') == "0.2":
-        encryptedMsg = eccEnc(base64.urlsafe_b64decode(request.args.get('certificate')), plaintext)
-        ciphertext = base64.urlsafe_b64encode(encryptedMsg[0]).decode('utf-8')
-        nonce = base64.urlsafe_b64encode(encryptedMsg[1]).decode('utf-8')
-        authTag = base64.urlsafe_b64encode(encryptedMsg[2]).decode('utf-8')
-        pub64 = base64.urlsafe_b64encode(pubkeyDER(encryptedMsg[3].x, encryptedMsg[3].y)).decode("utf-8")
-
-        return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('mdoc_nonce', nonce), ('mdoc_authTag', authTag), ('mdoc_ciphertextPubKey', pub64)])
-
+        return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', base64.urlsafe_b64encode(plaintext.encode()).decode('utf-8')), ('mdoc_nonce', ""), ('mdoc_authTag', ""), ('mdoc_ciphertextPubKey', "")])
+    
     encryptedMsg = eccEnc(base64.urlsafe_b64decode(request.args.get('certificate')), plaintext)
     ciphertext = base64.urlsafe_b64encode(encryptedMsg[0]).decode('utf-8')
     nonce = base64.urlsafe_b64encode(encryptedMsg[1]).decode('utf-8')
     authTag = base64.urlsafe_b64encode(encryptedMsg[2]).decode('utf-8')
-    pub64 = base64.urlsafe_b64encode(pubkeyDER(encryptedMsg[3].x, encryptedMsg[3].y)).decode("utf-8")    
+    pub64 = base64.urlsafe_b64encode(pubkeyDER(encryptedMsg[3].x, encryptedMsg[3].y)).decode("utf-8")
 
-    return redirect_getpid(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
+
+    if request.args.get('version') == "0.2":
+        return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('mdoc_nonce', nonce), ('mdoc_authTag', authTag), ('mdoc_ciphertextPubKey', pub64)])  
+    
+    return redirect_getpid_or_mdl(request.args.get('version'), request.args.get('returnURL'), 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
 # route to /pid/returnpidtest
 #
 # Can be tested with the following curl command line
-# curl -L -v https://issuer.eudiw.dev/pid/getpidtest?version="0.2"\&country="PT"\&returnURL="https://issuer.eudiw.dev/pid/returnpidtest"\&certificate="LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUIzakNDQVlXZ0F3SUJBZ0lVWWJFTlJQN3VWOTUrQ3BBVlFDcHl6VmNRVmlVd0NnWUlLb1pJemowRUF3SXcKUlRFTE1Ba0dBMVVFQmhNQ1FWVXhFekFSQmdOVkJBZ01DbE52YldVdFUzUmhkR1V4SVRBZkJnTlZCQW9NR0VsdQpkR1Z5Ym1WMElGZHBaR2RwZEhNZ1VIUjVJRXgwWkRBZUZ3MHlNekEzTVRBeE1EUTFOVFZhRncweU5EQTNNRFF4Ck1EUTFOVFZhTUVVeEN6QUpCZ05WQkFZVEFrRlZNUk13RVFZRFZRUUlEQXBUYjIxbExWTjBZWFJsTVNFd0h3WUQKVlFRS0RCaEpiblJsY201bGRDQlhhV1JuYVhSeklGQjBlU0JNZEdRd1dUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqTwpQUU1CQndOQ0FBVHdnUkFHUGdKbDNkaUo5ZWVPcEdXMGdpSWtQcGFGa1RFU1E5U0E5SEw5akM1NFd3azNvOTZICkNxMjlUVVhQYlNkYjFseFFzck9ncUphQ0dJM0xmem5RbzFNd1VUQWRCZ05WSFE0RUZnUVV5VkgxV0drQ1FOcnoKNjJFTHkvd1lmekFRYVZVd0h3WURWUjBqQkJnd0ZvQVV5VkgxV0drQ1FOcno2MkVMeS93WWZ6QVFhVlV3RHdZRApWUjBUQVFIL0JBVXdBd0VCL3pBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlCYXZLbU5TSWxCWXh6TmcxdU1Fd3BJCkZGNlZFdmlRQllwWnNYYURvQmRhQ1FJZ00rZUFBUE5zNXErNnZ0SVR1R1pTUkdoN1U3U1VMdWNqWGZJNmU0N2IKSjI4PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t"
+# curl -L -v https://preprod.issuer.eudiw.dev/pid/getpidtest?version="0.2"\&country="PT"\&returnURL="https://preprod.issuer.eudiw.dev/pid/returnpidtest"\&certificate="LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUIzakNDQVlXZ0F3SUJBZ0lVWWJFTlJQN3VWOTUrQ3BBVlFDcHl6VmNRVmlVd0NnWUlLb1pJemowRUF3SXcKUlRFTE1Ba0dBMVVFQmhNQ1FWVXhFekFSQmdOVkJBZ01DbE52YldVdFUzUmhkR1V4SVRBZkJnTlZCQW9NR0VsdQpkR1Z5Ym1WMElGZHBaR2RwZEhNZ1VIUjVJRXgwWkRBZUZ3MHlNekEzTVRBeE1EUTFOVFZhRncweU5EQTNNRFF4Ck1EUTFOVFZhTUVVeEN6QUpCZ05WQkFZVEFrRlZNUk13RVFZRFZRUUlEQXBUYjIxbExWTjBZWFJsTVNFd0h3WUQKVlFRS0RCaEpiblJsY201bGRDQlhhV1JuYVhSeklGQjBlU0JNZEdRd1dUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqTwpQUU1CQndOQ0FBVHdnUkFHUGdKbDNkaUo5ZWVPcEdXMGdpSWtQcGFGa1RFU1E5U0E5SEw5akM1NFd3azNvOTZICkNxMjlUVVhQYlNkYjFseFFzck9ncUphQ0dJM0xmem5RbzFNd1VUQWRCZ05WSFE0RUZnUVV5VkgxV0drQ1FOcnoKNjJFTHkvd1lmekFRYVZVd0h3WURWUjBqQkJnd0ZvQVV5VkgxV0drQ1FOcno2MkVMeS93WWZ6QVFhVlV3RHdZRApWUjBUQVFIL0JBVXdBd0VCL3pBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlCYXZLbU5TSWxCWXh6TmcxdU1Fd3BJCkZGNlZFdmlRQllwWnNYYURvQmRhQ1FJZ00rZUFBUE5zNXErNnZ0SVR1R1pTUkdoN1U3U1VMdWNqWGZJNmU0N2IKSjI4PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t"
 #
 @pid.route('/returnpidtest', methods=['GET'])
 def returnPidTest():
@@ -272,15 +278,17 @@ def returnPidTest():
     Return: HTTP_200 with Info about the correct decipher of the mdoc.
     """
 
+    session['route'] = "/pid/returnpidtest"
+    log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+
+    if('version' not in session):
+        session['version'] = "0.3"
+
     if session['version'] == "0.3":
-        v = validate_params_showpid(request.args, ['mdoc', 'nonce', 'authTag', 'ciphertextPubKey','sd_jwt', 'error', 'error_str'])
+        v = validate_params_showpid_or_mdl(request.args, ['mdoc', 'nonce', 'authTag', 'ciphertextPubKey','sd_jwt', 'error', 'error_str'])
         if not isinstance(v, bool): # getpid params were not correctly validated
             return v
-
-
-        if request.args.get('nonce') == "": # assume that mdoc was not ciphered
-            return "/pid/getpidtest result validated: " + str(base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8')).decode() == cfgdev.mdoc64) + "\n", status.HTTP_200_OK
-
+        
         val = validate_getpidtest_result(
             base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8')), 
             base64.urlsafe_b64decode(request.args.get('nonce').encode('utf-8')), 
@@ -293,7 +301,7 @@ def returnPidTest():
         return "/pid/getpidtest result validated: " + str(val) + "\n", status.HTTP_200_OK
     
     else:
-        v = validate_params_showpid(request.args, ['mdoc', 'mdoc_nonce', 'mdoc_authTag', 'mdoc_ciphertextPubKey','error', 'error_str'])
+        v = validate_params_showpid_or_mdl(request.args, ['mdoc', 'mdoc_nonce', 'mdoc_authTag', 'mdoc_ciphertextPubKey','error', 'error_str'])
         
         if not isinstance(v, bool): # getpid params were not correctly validated
             return v
@@ -301,6 +309,7 @@ def returnPidTest():
 
         if request.args.get('mdoc_nonce') == "": # assume that mdoc was not ciphered
             return "/pid/getpidtest result validated: " + str(base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8')).decode() == cfgdev.mdoc64) + "\n", status.HTTP_200_OK
+
 
         val = validate_getpidtest_result(
             base64.urlsafe_b64decode(request.args.get('mdoc').encode('utf-8')), 
@@ -316,40 +325,53 @@ def returnPidTest():
 
 # --------------------------------------------------------------------------------------------------------------------------------------
 # route to /pid/form
+# Can be tested with the following curl command line
+# curl -L -v -b "session=random" https://issuer.eudiw.dev/pid/form \
+# -H "Content-Type: application/x-www-form-urlencoded" \
+#   -d "CurrentGivenName=John&CurrentFamilyName=Doe&DateOfBirth=1974-04-25&PersonIdentifier=11223344Ab&version=0.3&country=FC&certificate=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUIzakNDQVlXZ0F3SUJBZ0lVWWJFTlJQN3VWOTUrQ3BBVlFDcHl6VmNRVmlVd0NnWUlLb1pJemowRUF3SXcKUlRFTE1Ba0dBMVVFQmhNQ1FWVXhFekFSQmdOVkJBZ01DbE52YldVdFUzUmhkR1V4SVRBZkJnTlZCQW9NR0VsdQpkR1Z5Ym1WMElGZHBaR2RwZEhNZ1VIUjVJRXgwWkRBZUZ3MHlNekEzTVRBeE1EUTFOVFZhRncweU5EQTNNRFF4Ck1EUTFOVFZhTUVVeEN6QUpCZ05WQkFZVEFrRlZNUk13RVFZRFZRUUlEQXBUYjIxbExWTjBZWFJsTVNFd0h3WUQKVlFRS0RCaEpiblJsY201bGRDQlhhV1JuYVhSeklGQjBlU0JNZEdRd1dUQVRCZ2NxaGtqT1BRSUJCZ2dxaGtqTwpQUU1CQndOQ0FBVHdnUkFHUGdKbDNkaUo5ZWVPcEdXMGdpSWtQcGFGa1RFU1E5U0E5SEw5akM1NFd3azNvOTZICkNxMjlUVVhQYlNkYjFseFFzck9ncUphQ0dJM0xmem5RbzFNd1VUQWRCZ05WSFE0RUZnUVV5VkgxV0drQ1FOcnoKNjJFTHkvd1lmekFRYVZVd0h3WURWUjBqQkJnd0ZvQVV5VkgxV0drQ1FOcno2MkVMeS93WWZ6QVFhVlV3RHdZRApWUjBUQVFIL0JBVXdBd0VCL3pBS0JnZ3Foa2pPUFFRREFnTkhBREJFQWlCYXZLbU5TSWxCWXh6TmcxdU1Fd3BJCkZGNlZFdmlRQllwWnNYYURvQmRhQ1FJZ00rZUFBUE5zNXErNnZ0SVR1R1pTUkdoN1U3U1VMdWNqWGZJNmU0N2IKSjI4PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t&device_publickey=LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFdUZ3R003VW4wMkc1RjFrSjVveVlNd3JOeVRhTAo0b0F6MXhmWm9xcnNSTVZXMERWV3RRNVdSR0hPb3hSSzJGd1hndm9GaENQdDFHTGd3eURKYXU0cW53PT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t&returnURL=https://127.0.0.1/view"
+#
+
 @pid.route('/form', methods=['GET','POST'])
 def pid_form():
     """Form PID page. 
     Form page where the user can enter its PID data.
     """
-    #print("/pid/form POST: " + str(request.form))
-    #print("/pid/form GET: " + str(request.args))
-    #print("/pid/form session:  " + session['version'])
+    session['route'] = "/pid/form"
+    log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+
+
+    # print("/pid/form: " + str(request.method))
+    # print("/pid/form session:  " + session['version'])
 
 
     # if GET
     if request.method == 'GET':
+        # print("/pid/form GET: " + str(request.args))
         if session.get('version') is None or session.get('country') is None or session.get('certificate') is None or session.get('returnURL') is None or session.get('device_publickey') is None: # someone is trying to connect directly to this endpoint
             return "Error 101: " + cfgserv.error_list['101'] + "\n", status.HTTP_400_BAD_REQUEST
         # all the session needed elements exist
         return render_template('route_pid/pid-form.html', hidden_elems=[('version', session.get('version')), ('country', session.get('country')), ('certificate', session.get('certificate')), ('returnURL', session.get('returnURL')), ('device_publickey', session.get('device_publickey'))])
 
-    # if POST    
+    # if POST   
+    # print("/pid/form POST: " + str(request.form)) 
     if 'Cancelled' in request.form.keys(): # Form request Cancelled
         return render_template('route_pid/pid-countries.html', countries = create_dict(cfgcountries.supported_countries, 'name'))
-    (b, l) = validate_mandatory_args(request.form, ['CurrentGivenName', 'CurrentFamilyName', 'DateOfBirth', 'PersonIdentifier', 'version', 'country', 'certificate', 'returnURL', 'device_publickey'])
+    (b, l) = validate_mandatory_args(request.form, ['CurrentGivenName', 'CurrentFamilyName', 'DateOfBirth', 'version', 'country', 'certificate', 'returnURL', 'device_publickey'])
     if not b: # valid form has not been submitted 
         # render page where user can select pid_countries
+        #print("/pid/form POST - mandatory args do not exist: " + str(l))
         return render_template('route_pid/pid-form.html', hidden_elems=[('version', cfgserv.current_version), ('country', cfgcountries.formCountry), ('certificate', base64.urlsafe_b64encode(cfgdev.certificate).decode('utf-8')), ('returnURL', cfgserv.service_url + 'pid/show'), ('device_publickey', cfgdev.device_publickey)])
 
     # if submitted form is valid
-    v = validate_params_getpid(request.form, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
+    v = validate_params_getpid_or_mdl(request.form, ['version', 'country', 'certificate', 'returnURL', 'device_publickey'])
     if not isinstance(v, bool): # getpid params were not correctly validated
         return v
 
-    #session['version'] = request.form['version']
-    #session['country'] = request.form['country']
-    #session['certificate'] = request.form['certificate']
-    #session['returnURL'] = request.form['returnURL']
+    session['version'] = request.form['version']
+    session['country'] = request.form['country']
+    session['certificate'] = request.form['certificate']
+    session['returnURL'] = request.form['returnURL']
+    session['device_publickey'] = request.form['device_publickey']
 
     if session['version'] == "0.1": # result is not ciphered
         (error_code, ciphertext, nonce, authTag, pub64, sd_jwt) = process_pid_form(request.form, cipher=False)
@@ -357,8 +379,10 @@ def pid_form():
         (error_code, ciphertext, nonce, authTag, pub64, sd_jwt) = process_pid_form(request.form)
 
     if not error_code == 0:
-        return redirect_getpid(session['version'], session['returnURL'], error_code, [])
+        return redirect_getpid_or_mdl(session['version'], session['returnURL'], error_code, [])
 
-    return redirect_getpid(session['version'], session['returnURL'], 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
-
+    if session['version'] == "0.3":
+        return redirect_getpid_or_mdl(session['version'], session['returnURL'], 0, [('mdoc', ciphertext), ('nonce', nonce), ('authTag', authTag), ('ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
+    else:
+        return redirect_getpid_or_mdl(session['version'], session['returnURL'], 0, [('mdoc', ciphertext), ('mdoc_nonce', nonce), ('mdoc_authTag', authTag), ('mdoc_ciphertextPubKey', pub64), ('sd_jwt', sd_jwt)])
 

@@ -17,7 +17,7 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend. 
-Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This redirect_func.py file manages the redirection of the flow.
@@ -28,11 +28,11 @@ from flask import (
     redirect, session
 )
 
-from .app_config.config_service import ConfService as cfgserv
+from app_config.config_service import ConfService as cfgserv
 
 
-def redirect_getpid(version, returnURL, error_num: int, l):
-    """Redirect to the returnURL, with error error_num, when the request was made to route pit/getpid.
+def redirect_getpid_or_mdl(version, returnURL, error_num: int, l):
+    """Redirect to the returnURL, with error error_num, when the request was made to route pid/getpid or to route mdl/getmdl.
     
     Keyword arguments:
     + version -- API version
@@ -43,7 +43,7 @@ def redirect_getpid(version, returnURL, error_num: int, l):
     Return: Redirect to returnURL with error
     """
     rlist = {}
-    for field in cfgserv.getpid_response_field[version]:
+    for field in cfgserv.getpid_or_mdl_response_field[version]:
         rlist[field] = ''
     rlist['error'] = str(error_num)
     if str(error_num) in cfgserv.error_list.keys():
@@ -78,6 +78,6 @@ def json_post(url_path:str, json:dict):
 
     Return: Returns the answer to the HTTP POST
     """
-    return requests.post(url_path, json=json, headers={'Content-Type': 'application/json'}, verify=False)
+    return requests.post(url_path, json=json, headers={'Content-Type': 'application/json'})
 
 

@@ -1,5 +1,10 @@
 # Local
 app/keys
+app/certs/PID-DS-0001_CZ.pem
+app/certs/PID-DS-0001_EE.pem
+app/certs/PID-DS-0001_EU.pem
+app/certs/PID-DS-0001_PT.pem
+app/certs/PID-DS-0001_UT.pem
 flask_session/
 nohup.out
 
@@ -179,3 +184,21 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+app/certs/PID-DS-0001_CZ.pem
+app/certs/PID-DS-0001_EE.pem
+app/certs/PID-DS-0001_EU.pem
+app/certs/PID-DS-0001_PT.pem
+app/certs/PID-DS-0001_UT.pem
+app/certs/cert.pem
+app/certs/certHttps.pem
+app/certs/IACA mDL DS - 001.privateKey.pem
+app/certs/key.pem
+app/certs/private-key_teste.pem
+app/certs/private-key.pem
+app/certs/public-key_teste.pem
+app/certs/public-key.pem
+app/tests/log.html
+app/tests/output.xml
+app/tests/output.xml
+app/tests/report.html
+log

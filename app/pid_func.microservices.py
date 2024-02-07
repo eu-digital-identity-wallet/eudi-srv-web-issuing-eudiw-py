@@ -25,10 +25,10 @@ This pid_func.py file contains PID related auxiliary functions.
 import datetime
 import base64
 from flask import session
-from .app_config.config_service import ConfService as cfgserv
-from .misc import calculate_age
-from .redirect_func import json_post
-from .crypto_func import eccEnc, pubkeyDER
+from app_config.config_service import ConfService as cfgserv
+from misc import calculate_age
+from redirect_func import json_post
+from crypto_func import eccEnc, pubkeyDER
 
 
 def format_pid_data(dict, country):
