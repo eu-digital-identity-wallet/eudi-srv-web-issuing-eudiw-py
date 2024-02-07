@@ -1,0 +1,193 @@
+{
+"eu.europa.ec.eudiw.pid_mdoc": {
+    "format": "mso_mdoc",
+    "doctype": "eu.europa.ec.eudiw.pid.1",
+    "scope": "eu.europa.ec.eudiw.pid.1",
+    "cryptographic_binding_methods_supported": [
+      "mso",
+      "jwk"
+    ],
+    "cryptographic_suites_supported": [
+      "ES256"
+    ],
+    "display": [
+      {
+        "name": "PID",
+        "locale": "en",
+        "logo": {
+          "url": "https://examplestate.com/public/pid.png",
+          "alt_text": "A square figure of a PID"
+        }
+      }
+    ],
+    "claims": {
+      "eu.europa.ec.eudiw.pid.1": {
+        "family_name": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Current Family Name",
+              "locale": "en"
+            }
+          ]
+        },
+        "given_name": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Current First Names",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_date": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Date of Birth",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_over_18": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Adult or minor",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_birth_year": {
+          "mandatory": false
+        },
+        "family_name_birth": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
+              "locale": "en"
+            }
+          ]
+        },
+        "given_name_birth": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_place": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The country, state, and city where the PID User was born.",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_country": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The country where the PID User was born, as an Alpha-2 country code.",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_state": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The state, province, district, or local area where the PID User was born. ",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_city": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The municipality, city, town, or village where the PID User was born. ",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_country": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "he country where the PID User currently resides, as an Alpha-2 country code as specified in ISO 3166-1.",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_state": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The state, province, district, or local area where the PID User currently resides",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_city": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The municipality, city, town, or village where the PID User currently resides.",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_postal_code": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Postal code of the place where the PID User currently resides.",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_street": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The name of the street where the PID User currently resides",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_house_number": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The house number where the PID User currently resides, including any affix or suffix.",
+              "locale": "en"
+            }
+          ]
+        },
+        "gender": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
+              "locale": "en"
+            }
+          ]
+        },
+        "nationality": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "locale": "en"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

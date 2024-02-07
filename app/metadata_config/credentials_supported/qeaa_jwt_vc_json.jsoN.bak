@@ -1,0 +1,135 @@
+{
+    "eu.europa.ec.eudiw.qeaa_jwt_vc_json": {
+    "format": "vc+sd-jwt",
+    "scope": "eu.europa.ec.eudiw.qeaa.1",
+    "cryptographic_binding_methods_supported": [
+      "jwk"
+    ],
+    "cryptographic_suites_supported": [
+      "ES256"
+    ],
+    "proof_types_supported": [
+      "jwt"
+    ],
+    "display": [
+      {
+        "name": "QEAA",
+        "locale": "en",
+        "logo": {
+          "url": "https://examplestate.com/public/qeaa.png",
+          "alt_text": "A square figure of a QEAA"
+        }
+      }
+    ],
+    "credential_definition": {
+      "type": "eu.europa.ec.eudiw.qeaa.worker.1",
+      "credentialSubject": {
+        "family_name": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Current Family Name",
+              "locale": "en"
+            }
+          ]
+        },
+        "given_name": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Current First Names",
+              "locale": "en"
+            }
+          ]
+        },
+        "birthdate": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Date of Birth",
+              "locale": "en"
+            }
+          ]
+        },
+        "address": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Resident street_address, country, region, locality and postal_code",
+              "locale": "en"
+            }
+          ]
+        },
+        "gender": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
+              "locale": "en"
+            }
+          ]
+        },
+        "nationalities": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Array of nationalities",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_family_name": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
+              "locale": "en"
+            }
+          ]
+        },
+        "birth_given_name": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_over_18": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Adult or minor",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_in_years": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The subject’s current age in years.",
+              "locale": "en"
+            }
+          ]
+        },
+        "place_of_birth": {
+          "mandatory": false,
+          "display": [
+            {
+              "name": "The country, region, and locality",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuance_date": {
+          "mandatory": true
+        },
+        "birthdate_year": {
+          "mandatory": false
+        }
+      }
+    }
+  }
+}

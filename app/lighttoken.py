@@ -17,7 +17,7 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend. 
-Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This lighttoken.py file contains the eIDAS-node lightToken auxiliary functions.
@@ -30,7 +30,7 @@ import hashlib
 import uuid
 import xml.etree.ElementTree as ET
 
-from .app_config.config_service import ConfService as cfgserv
+from app_config.config_service import ConfService as cfgserv
 
 
 def create_request(country, loa):

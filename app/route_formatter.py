@@ -17,10 +17,10 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend. 
-Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
-This route_fromatter.py file is the blueprint for the route /formatter of the PID Issuer Web service.
+This route_formatter.py file is the blueprint for the route /formatter of the PID Issuer Web service.
 """
 import logging
 
@@ -29,10 +29,11 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
 
-from .validate import validate_mandatory_args
-from .app_config.config_service import ConfService as cfgservice
-from .formatter_func import mdocFormatter,sdjwtFormatter
+from validate import validate_mandatory_args
+from app_config.config_service import ConfService as cfgservice
+from formatter_func import mdocFormatter,sdjwtFormatter
 
+from app_config.config_countries import ConfCountries as cfcountries
 
 # /formatter blueprint
 formatter = Blueprint('formatter', __name__, url_prefix='/formatter')
@@ -82,11 +83,22 @@ def cborformatter():
     if not b: # nota all mandatory args are present
         return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
     
-
+    if request.json['version'] not in cfgservice.getpid_or_mdl_response_field:
+        return jsonify({'error_code': 13, 'error_message': cfgservice.error_list['13'], 'mdoc': ''})
+    
+    if request.json['country'] not in cfcountries.supported_countries:    
+        return jsonify({'error_code': 102, 'error_message': cfgservice.error_list['102'], 'mdoc': ''})
+        
+    
+    if request.json['doctype'] == "org.iso.18013.5.1.mDL":
+        (b, l) = validate_mandatory_args(request.json["data"]["org.iso.18013.5.1"], ['family_name', 'given_name', 'birth_date', 'issue_date', 'expiry_date', 'issuing_country','issuing_authority','document_number', 'portrait', 'driving_privileges', 'un_distinguishing_sign'])
+    if request.json['doctype'] == "eu.europa.ec.eudiw.pid.1":
+        (b, l) = validate_mandatory_args(request.json['data']["eu.europa.ec.eudiw.pid.1"], ['family_name', 'given_name', 'birth_date', 'age_over_18'])
+    if not b: # nota all mandatory args are present
+        return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
+   
     base64_mdoc = mdocFormatter(request.json['data'], request.json['doctype'], request.json['country'], request.json['device_publickey'])
-
     return jsonify({'error_code': 0, 'error_message': cfgservice.error_list['0'], 'mdoc': base64_mdoc})
-
 
 # --------------------------------------------------------------------------------------------------------------------------------------
 # route to /formatter/sd-jwt
@@ -97,17 +109,30 @@ def sd_jwtformatter():
     POST json parameters:
     + version (mandatory) - API version.
     + country (mandatory) - Two-letter country code according to ISO 3166-1 alpha-2.
-    + doctype (mandatory) - sd-jwt doctype
+    + doctype (mandatory) - Sd-jwt doctype
     + device_publickey(mandatory) - Public key from user device 
     + data (mandatory) - doctype data "dictionary" with one or more "namespace": {"namespace data and fields"} tuples
 
     Return: Returns the sd-jwt, error_code and error_message in a JSON object:
-    + sd-jwt - sd-jwt
+    + sd-jwt - Signed sd-jwt
     + error_code - error number. 0 if no error. Additional errors defined below. If error != 0, mdoc field may have an empty value.
     + error_message - Error information.
     """
-
+    
+    (b, l) = validate_mandatory_args(request.json, ['version', 'country', 'doctype','device_publickey', 'data'])
+    if not b: # nota all mandatory args are present
+        return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
+    
     PID= request.get_json()
+
+    if PID['doctype'] == 'org.iso.18013.5.1.mDL':
+        print(PID['data']['claims']['org.iso.18013.5.1'])
+        (b, l) = validate_mandatory_args(PID['data']['claims']['org.iso.18013.5.1'], ['family_name', 'given_name', 'birth_date', 'issue_date', 'expiry_date', 'issuing_country','issuing_authority','document_number', 'portrait', 'driving_privileges', 'un_distinguishing_sign'])
+    
+    if PID['doctype'] == 'eu.europa.ec.eudiw.pid.1':
+        (b, l) = validate_mandatory_args(PID['data']['claims']['eu.europa.ec.eudiw.pid.1'], ['family_name', 'given_name', 'birth_date', 'age_over_18'])
+    if not b: # nota all mandatory args are present
+        return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
 
     #try:
 
@@ -121,13 +146,8 @@ def sd_jwtformatter():
         
         #return error_message
 
-    sd_jwt=sdjwtFormatter(PID)
+    sd_jwt=sdjwtFormatter(PID, request.json['country'])
     
-    response = {
-        "sd-jwt":sd_jwt, 
-        "error_code": 0, 
-        "error_message": ""
-    }
+    return jsonify({'error_code': 0, 'error_message': cfgservice.error_list['0'], 'sd-jwt': sd_jwt})
 
-    return response
 

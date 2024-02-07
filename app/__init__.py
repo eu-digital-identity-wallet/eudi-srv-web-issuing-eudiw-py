@@ -19,27 +19,111 @@
 The PID Issuer Web service is a component of the PID Provider backend. 
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
-This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flaskr directory should be treated as a package.
+This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
 """
 
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, session
+
+from flask import Flask, render_template, session
 from flask_session import Session
 from flask_cors import CORS
+from werkzeug.debug import *
+from werkzeug.exceptions import HTTPException
+from idpyoidc.configure import Configuration
+from idpyoidc.configure import create_from_config_file
+from idpyoidc.server.configure import OPConfiguration
+from idpyoidc.server import Server
+from urllib.parse import urlparse
 
+# Log
+from .app_config.config_service import ConfService as log
+
+
+oidc_metadata = {}
+openid_metadata = {}
+
+
+def setup_metadata():
+    global oidc_metadata
+    global openid_metadata
+
+    try:
+        credentials_supported = {}
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+
+        with open(
+            dir_path + "/metadata_config/openid-configuration.json"
+        ) as openid_metadata:
+            openid_metadata = json.load(openid_metadata)
+
+        with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
+            oidc_metadata = json.load(metadata)
+
+        for file in os.listdir(dir_path + "/metadata_config/credentials_supported/"):
+            if file.endswith("json"):
+                json_path = os.path.join(
+                    dir_path + "/metadata_config/credentials_supported/", file
+                )
+                with open(json_path) as json_file:
+                    credential = json.load(json_file)
+                    credentials_supported.update(credential)
+
+    except FileNotFoundError as e:
+        print(f"Metadata Error: file not found. {e}")
+    except json.JSONDecodeError as e:
+        print(f"Metadata Error: Metadata Unable to decode JSON. {e}")
+    except Exception as e:
+        print(f"Metadata Error: MetadataAn unexpected error occurred. {e}")
+
+    oidc_metadata["credentials_supported"] = credentials_supported
+
+
+setup_metadata()
+
+
+def handle_exception(e):
+    # pass through HTTP errors
+    if isinstance(e, HTTPException):
+        return e
+    log.logger_info.exception("- WARN - Error 500")
+    # now you're handling non-HTTP exceptions only
+    return (
+        render_template(
+            "route_pid/500.html",
+            error="Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
+            error_code="Internal Server Error",
+        ),
+        500,
+    )
+
+
+def page_not_found(e):
+    log.logger_info.exception("- WARN - Error 404")
+    return (
+        render_template(
+            "route_pid/500.html",
+            error_code="Page not found",
+            error="Page not found.We're sorry, we couldn't find the page you requested.",
+        ),
+        404,
+    )
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev'
-    )
+
+    app.register_error_handler(Exception, handle_exception)
+    app.register_error_handler(404, page_not_found)
+
+    app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:
         # load the instance config (in instance directory), if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
@@ -51,32 +135,73 @@ def create_app(test_config=None):
         pass
 
     # a simple page that says hello
-    #@app.route('/hello')
-    #def hello():
+    # @app.route('/hello')
+    # def hello():
     #    return 'Hello, World!'
 
-    # register blueprint for the /pid route 
-    from . import route_pid, route_eidasnode, route_formatter, route_ee_tara, route_pt_cmd
-    app.register_blueprint(route_pid.pid)
+    # register blueprint for the /pid route
+    from . import (
+        route_eidasnode,
+        route_formatter,
+        route_ee_tara,
+        route_pt_cmd,
+        route_mdl,
+        route_qeaa,
+        route_pidV04,
+        route_oidc,
+    )
+
+    app.register_blueprint(route_pidV04.openid)
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_ee_tara.tara)
     app.register_blueprint(route_pt_cmd.cmd)
+    app.register_blueprint(route_mdl.mdl)
+    app.register_blueprint(route_qeaa.qeaa)
+    app.register_blueprint(route_oidc.oidc)
 
     # config session
-    app.config['SESSION_FILE_THRESHOLD'] = 50
-    app.config['SESSION_PERMANENT'] = False
+    app.config["SESSION_FILE_THRESHOLD"] = 50
+    app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
     app.config.update(SESSION_COOKIE_SAMESITE="None", SESSION_COOKIE_SECURE=True)
     Session(app)
 
-    # CORS is a mechanism implemented by browsers to block requests from domains other than the server's one. 
+    # CORS is a mechanism implemented by browsers to block requests from domains other than the server's one.
     CORS(app, supports_credentials=True)
 
+    log.logger_info.info(" - DEBUG - FLASK started")
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    config = create_from_config_file(
+        Configuration,
+        entity_conf=[
+            {"class": OPConfiguration, "attr": "op", "path": ["op", "server_info"]}
+        ],
+        filename=dir_path + "/app_config/oid_config.json",
+        base_path=dir_path,
+    )
+
+    app.srv_config = config.op
+
+    server = Server(config.op, cwd=dir_path)
+
+    for endp in server.endpoint.values():
+        p = urlparse(endp.endpoint_path)
+        _vpath = p.path.split("/")
+        if _vpath[0] == "":
+            endp.vpath = _vpath[1:]
+        else:
+            endp.vpath = _vpath
+
+    app.server = server
+
     return app
+
 
 #
 # Usage examples:
 # flask --app app run --debug
 # flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/key.pem --host=127.0.0.1 --port=4430
-# 
+#

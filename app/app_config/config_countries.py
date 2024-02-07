@@ -33,43 +33,64 @@ class ConfCountries:
     # supported countries
     supported_countries = {
         "CW": {
-            "name": "eIDAS CW",
-            "pid_url": cfgserv.service_url + "eidasnode/lightrequest?country=CW",
+            "name": "nodeEU",
+            "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CW",
             "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_EU.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_EU.pem',
+            "pid_mdoc_privkey_passwd": None,  # None or bytes,
             "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_EU_cert.der',
             "loa": "http://eidas.europa.eu/LoA/high",
             "mdl_url": "",
         },
         formCountry: {
-            "name": "Form Country",
+            "name": "FormEU",
             "pid_url": cfgserv.service_url  + "pid/form",
             "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_UT.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
+
+            "pid_mdoc_privkey_passwd": None,  # None or bytes         
             "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der',
-            "mdl_url": cfgserv.service_url  + "fakeC-MDL",
+            "mdl_url": cfgserv.service_url  + "V04/mdl/form",
+            "qeaa_func": cfgserv.service_url  + "V04/qeaa/form",
+            "un_distinguishing_sign":"FC",
+            "pid_url_oidc": cfgserv.service_url  + "V04/form"
          },
-        "PT": {
+         "PT": {
             "name": "Portugal",
-            "pid_url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "cmd/redirect&client_id=6285415231191573957&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NomeApelido http://interop.gov.pt/MDC/Cidadao/NomeProprio http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIC",
+            "pid_url_oidc": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "cmd/redirect&client_id=6285415231191573957&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NomeApelido http://interop.gov.pt/MDC/Cidadao/NomeProprio http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIC",
             "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_PT.pem',
+            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_PT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_PT_cert.der',
-            "mdl_url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "urlMdl?ct=pt/id={id}&client_id=6285415231191573957&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIF http://interop.gov.pt/IMTT/Cidadao/NomeApelido http://interop.gov.pt/IMTT/Cidadao/NomeProprio http://interop.gov.pt/IMTT/Cidadao/EntidadeEmissora http://interop.gov.pt/IMTT/Cidadao/NoCarta http://interop.gov.pt/DadosCC/Cidadao/Foto http://interop.gov.pt/IMTT/Cidadao/Categorias http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+            "mdl_url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "cmd/redirectmdl&client_id=6285415231191573957&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIF http://interop.gov.pt/IMTT/Cidadao/NomeApelido http://interop.gov.pt/IMTT/Cidadao/NomeProprio http://interop.gov.pt/IMTT/Cidadao/EntidadeEmissora http://interop.gov.pt/IMTT/Cidadao/NoCarta http://interop.gov.pt/DadosCC/Cidadao/Foto http://interop.gov.pt/IMTT/Cidadao/Categorias http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+            "qeaa_func": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri="+ cfgserv.service_url + "V04/qeaa/redirectqeaa&client_id=6285415231191573957&response_type=token&scope=http://interop.gov.pt/SCAP/FAF",
+            "un_distinguishing_sign":"P"
         },
+
+#        "PT": {
+#            "name": "Portugal",
+#            "pid_url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "cmd/redirect&client_id=12345678910&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/NomeApelido http://interop.gov.pt/MDC/Cidadao/NomeProprio http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIC",
+#            "pid_mdoc_privkey": 'app/certs/PID-DS-0001_PT.pem',
+#            "pid_mdoc_privkey_passwd": None,  # None or bytes
+#            "mdl_url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri=" + cfgserv.service_url  + "cmd/redirectmdl&client_id=12345678910&response_type=token&scope=http://interop.gov.pt/MDC/Cidadao/DataNascimento http://interop.gov.pt/MDC/Cidadao/NIF http://interop.gov.pt/IMTT/Cidadao/NomeApelido http://interop.gov.pt/IMTT/Cidadao/NomeProprio http://interop.gov.pt/IMTT/Cidadao/EntidadeEmissora http://interop.gov.pt/IMTT/Cidadao/NoCarta http://interop.gov.pt/DadosCC/Cidadao/Foto http://interop.gov.pt/IMTT/Cidadao/Categorias http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+#            "qeaa_func": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?redirect_uri="+ cfgserv.service_url + "qeaa/redirectqeaa&client_id=12345678910&response_type=token&scope=http://interop.gov.pt/SCAP/FAF",
+#            "un_distinguishing_sign":"P"
+#        },
         "EE": {
             "name": "Estonia",
-            "pid_url": "https://tara-test.ria.ee/oidc/authorize?redirect_uri=" + urlReturnEE + "&scope=openid&state=hkMVY7vjuN7xyLl5&response_type=code&client_id=eu_europa_ec_eudiw_pid_provider_1_ppr",
+            "pid_url_oidc": "https://tara-test.ria.ee/oidc/authorize?redirect_uri=" + urlReturnEE + "&scope=openid&state=hkMVY7vjuN7xyLl5&response_type=code&client_id=eu_europa_ec_eudiw_pid_provider_1_ppr",
             "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_EE.pem',
+            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der',
             "mdl_url": "",
         },
         "CZ": {
             "name": "Czechia",
-            "pid_url": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
+            "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
             "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_CZ.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
+            "pid_mdoc_privkey_passwd": None,  # None or bytes          
             "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_CZ_cert.der',
             "loa": "http://eidas.europa.eu/LoA/high",
             "mdl_url": "",

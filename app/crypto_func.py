@@ -17,7 +17,7 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend. 
-Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This crypto_func.py file includes the needed crypto functions.

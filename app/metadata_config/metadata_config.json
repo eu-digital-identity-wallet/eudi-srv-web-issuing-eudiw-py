@@ -1,0 +1,8 @@
+{
+  "credential_issuer": "https://issuer.eudiw.dev/oidc",
+  "credential_endpoint": "https://issuer.eudiw.dev/oidc/credential",
+  "credentials_supported": {
+    
+
+  }
+}
