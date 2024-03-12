@@ -63,7 +63,7 @@ To run the eudiw-issuer application, follow these simple steps (some of which ma
 5. Install Flask, gunicorn and other dependencies in virtual environment
 
     ```shell
-    pip install -r requirements.txt
+    pip install -r ./app/requirements.txt
     ```
 
     Note: The original pyMDOC-CBOR library will be forked into the eu-digital-identity-wallet repo (and the modifications will be applied), when it is made public, since a public repo cannot be forket into a private repo.
