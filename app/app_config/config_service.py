@@ -27,6 +27,7 @@ NOTE: You should only change it if you understand what you're doing.
 import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import os
 
 
 class ConfService:
@@ -184,6 +185,12 @@ class ConfService:
     log_file_info = "logs.log"
 
     backup_count = 7
+
+    # check if the log directory exists
+    try:
+        os.makedirs(log_dir)
+    except FileExistsError:
+        pass
 
     log_handler_info = TimedRotatingFileHandler(
         filename=f"{log_dir}/{log_file_info}",
