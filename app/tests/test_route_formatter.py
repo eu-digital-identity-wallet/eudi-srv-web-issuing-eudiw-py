@@ -83,10 +83,10 @@ def test_cbor_formatter_error_401():
                     "Type": "B"
                     }
                 ],
-                "expiry_date": "Fri, 25 Aug 2023 10:15:53 GMT",
+                "expiry_date": "2023-08-28",
                 "family_name": "Lima",
                 "given_name": "João",
-                "issue_date": "Wed, 26 Jul 2023 10:15:53 GMT",
+                "issue_date": "2023-07-26",
                 "issuing_authority": "IMTT-Lisboa",
                 "issuing_country": "PT",
                 "portrait": "/9j/4AAQSkZJRgABAQAAAQAB...",
@@ -196,7 +196,7 @@ def test_cbor_formatter_error_306_date_formatting():
                     "Type": "B"
                     }
                 ],
-                "expiry_date": "Fri, 25 Aug 2023 10:15:53 GMT",
+                "expiry_date": "2023-08-28",
                 "family_name": "Lima",
                 "given_name": "João",
                 "issue_date": "2024-01-01",
