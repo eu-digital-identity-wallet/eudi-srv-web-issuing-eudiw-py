@@ -121,10 +121,10 @@ def test_cbor_formatter_error_401_country():
                     "Type": "B"
                     }
                 ],
-                "expiry_date": "Fri, 25 Aug 2023 10:15:53 GMT",
+                "expiry_date": "2024-12-31",
                 "family_name": "Lima",
                 "given_name": "João",
-                "issue_date": "Wed, 26 Jul 2023 10:15:53 GMT",
+                "issue_date": "2024-01-01",
                 "issuing_authority": "IMTT-Lisboa",
                 "issuing_country": "PT",
                 "portrait": "/9j/4AAQSkZJRgABAQAAAQAB...",
@@ -158,10 +158,10 @@ def test_cbor_formatter_error_401_doctype():
                     "Type": "B"
                     }
                 ],
-                "expiry_date": "Fri, 25 Aug 2023 10:15:53 GMT",
+                "expiry_date": "2024-12-31",
                 "family_name": "Lima",
                 "given_name": "João",
-                "issue_date": "Wed, 26 Jul 2023 10:15:53 GMT",
+                "issue_date": "2024-01-01",
                 "issuing_authority": "IMTT-Lisboa",
                 "issuing_country": "PT",
                 "portrait": "/9j/4AAQSkZJRgABAQAAAQAB...",
@@ -174,6 +174,44 @@ def test_cbor_formatter_error_401_doctype():
     
     assert response.json()["error_code"] == 401
     assert response.json()["error_message"] == "Missing mandatory formatter fields."
+    assert response.json()["mdoc"] == ''
+
+#   expiry_date is not in the correct format
+def test_cbor_formatter_error_306_date_formatting():
+
+    payload_306_D = {
+        "version":"0.2",
+        "country":"PT",
+        "device_publickey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFOElFUUJqNENaZDNZaWZYbmpxUmx0SUlpSkQ2VwpoWkV4RWtQVWdQUnkvWXd1ZUZzSk42UGVod3F0dlUxRnoyMG5XOVpjVUxLem9LaVdnaGlOeTM4NTBBPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t",
+        "data": {
+            "org.iso.18013.5.1": {
+                "birth_date": "13-12-2000",
+                "birth_place": "Lisboa",
+                "document_number": "18923",
+                "driving_privileges": [
+                    {
+                    "ExpiryDate": "2099-12-31",
+                    "IssueDate": "2000-01-01",
+                    "Restriction": [],
+                    "Type": "B"
+                    }
+                ],
+                "expiry_date": "Fri, 25 Aug 2023 10:15:53 GMT",
+                "family_name": "Lima",
+                "given_name": "João",
+                "issue_date": "2024-01-01",
+                "issuing_authority": "IMTT-Lisboa",
+                "issuing_country": "PT",
+                "portrait": "/9j/4AAQSkZJRgABAQAAAQAB...",
+                "un_distinguishing_sign": "P"
+            }
+        }
+    }
+    
+    response= requests.post(ENDPOINT, json=payload_306_D, verify=False)
+    
+    assert response.json()["error_code"] == 306
+    assert response.json()["error_message"] == "Date is not in the correct format. Should be YYYY-MM-DD."
     assert response.json()["mdoc"] == ''
 
 #   Missing field: data

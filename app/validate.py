@@ -24,6 +24,7 @@ This validate.py file includes different validation functions.
 """
 
 import base64
+import datetime
 from flask import session
 import validators
 
@@ -224,4 +225,15 @@ def is_valid_pem_public_key(pem_key):
     except Exception as e:
         return False
 
+def validate_date_format(date):
+    """ Validate if date is in the correct format
 
+    Return: Return True or return value.
+    + If date have the correct format , return True.
+    + If date have the incorrect format, return False
+    """
+    try:
+        datetime.datetime.strptime(date, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False

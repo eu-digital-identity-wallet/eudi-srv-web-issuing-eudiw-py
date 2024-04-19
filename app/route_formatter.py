@@ -24,16 +24,12 @@ This route_formatter.py file is the blueprint for the route /formatter of the PI
 """
 import logging
 
-
-from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
-)
-
-from validate import validate_mandatory_args
-from app_config.config_service import ConfService as cfgservice
-from formatter_func import mdocFormatter,sdjwtFormatter
-
 from app_config.config_countries import ConfCountries as cfcountries
+from app_config.config_service import ConfService as cfgservice
+from flask import (Blueprint, flash, g, jsonify, redirect, render_template,
+                   request, session, url_for)
+from formatter_func import mdocFormatter, sdjwtFormatter
+from validate import validate_date_format, validate_mandatory_args
 
 # /formatter blueprint
 formatter = Blueprint('formatter', __name__, url_prefix='/formatter')
@@ -88,12 +84,23 @@ def cborformatter():
     
     if request.json['country'] not in cfcountries.supported_countries:    
         return jsonify({'error_code': 102, 'error_message': cfgservice.error_list['102'], 'mdoc': ''})
-        
     
     if request.json['doctype'] == "org.iso.18013.5.1.mDL":
         (b, l) = validate_mandatory_args(request.json["data"]["org.iso.18013.5.1"], ['family_name', 'given_name', 'birth_date', 'issue_date', 'expiry_date', 'issuing_country','issuing_authority','document_number', 'portrait', 'driving_privileges', 'un_distinguishing_sign'])
     if request.json['doctype'] == "eu.europa.ec.eudiw.pid.1":
         (b, l) = validate_mandatory_args(request.json['data']["eu.europa.ec.eudiw.pid.1"], ['family_name', 'given_name', 'birth_date', 'age_over_18'])
+
+    if request.json['doctype'] == "org.iso.18013.5.1.mDL":
+        expiry_date = request.json['data']["org.iso.18013.5.1"].get('expiry_date')
+        issue_date = request.json['data']["org.iso.18013.5.1"].get('issue_date')
+
+        if expiry_date is not None:
+            if not validate_date_format(expiry_date):
+                return jsonify({'error_code': 306, 'error_message': cfgservice.error_list['306'], 'mdoc': ''})
+        if issue_date is not None:
+            if not validate_date_format(issue_date):
+                return jsonify({'error_code': 306, 'error_message': cfgservice.error_list['306'], 'mdoc': ''})
+
     if not b: # nota all mandatory args are present
         return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
    
