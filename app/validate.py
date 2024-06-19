@@ -24,6 +24,7 @@ This validate.py file includes different validation functions.
 """
 
 import base64
+import datetime
 from flask import session
 import validators
 
@@ -36,7 +37,6 @@ from tinyec import (registry, ec)
 from flask_api import status 
 from urllib.parse import urlparse
 
-from crypto_func import decrypt_ECC
 from redirect_func import redirect_getpid_or_mdl
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
@@ -94,30 +94,6 @@ def validate_cert_algo(certificate, lalgo):
 
     return (True, algname, curvname)
 
-
-def validate_getpidtest_result(ciphertext, nonce, authTag, ciphertextPubKey, plaintext, privatekey):
-    """Validate text ciphered (ECC-Based Hybrid Encryption (using ECDH) + AES-256-GCM) by /pid/getpidtest using eccEnc function (in crypto_func.py)
-    
-    Keyword arguments:
-    + ciphertext - ciphered plaintext (AES-256-GCM) with a symetric key derived from the certificate public key
-    + nonce - random AES initialization vector
-    + authTag - MAC code of the encrypted text, obtained by the GCM block mode
-    + ciphertextPubKey - randomly generated ephemeral public key (DER format), that will be used by the ciphertext receiver to derive the symmetric encryption key, using the ECDH key agreement scheme.
-    + plaintext - original plaintext
-    + privatekey - private key (PEM format) to derive the symmetric encryption key
-
-    Return: True if decrypted ciphertext is equal to plaintex. False, otherwise
-    """
-    # ciphertextPubKey in Point type
-    pub = ec.Point(registry.get_curve(
-        ciphertextPubKey.public_numbers().curve.name), 
-        ciphertextPubKey.public_numbers().x, 
-        ciphertextPubKey.public_numbers().y
-        )
-
-    decryptedMsg = decrypt_ECC(ciphertext, nonce, authTag, pub, privatekey.private_numbers().private_value)
-
-    return decryptedMsg.decode() == plaintext
 
 
 def validate_params_getpid_or_mdl(args, list):
@@ -224,4 +200,14 @@ def is_valid_pem_public_key(pem_key):
     except Exception as e:
         return False
 
-
+def validate_date_format(date):
+    """ Validate if date is in the correct format
+    Return: Return True or return value.
+    + If date have the correct format , return True.
+    + If date have the incorrect format, return False
+    """
+    try:
+        datetime.datetime.strptime(date, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
