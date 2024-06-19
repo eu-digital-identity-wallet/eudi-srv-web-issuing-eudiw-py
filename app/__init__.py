@@ -22,12 +22,13 @@ Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT for
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
 """
 
+import json
 import os
 import sys
+
 sys.path.append(os.path.dirname(__file__))
 
-
-from flask import Flask, render_template, session
+from flask import Flask, render_template, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -37,6 +38,13 @@ from idpyoidc.configure import create_from_config_file
 from idpyoidc.server.configure import OPConfiguration
 from idpyoidc.server import Server
 from urllib.parse import urlparse
+from pycose.keys import EC2Key
+
+from cryptography.hazmat.backends import default_backend
+from cryptography import x509
+from app_config.config_service import ConfService as cfgserv
+
+
 
 # Log
 from .app_config.config_service import ConfService as log
@@ -44,7 +52,7 @@ from .app_config.config_service import ConfService as log
 
 oidc_metadata = {}
 openid_metadata = {}
-
+trusted_CAs = {}
 
 def setup_metadata():
     global oidc_metadata
@@ -67,21 +75,81 @@ def setup_metadata():
                 json_path = os.path.join(
                     dir_path + "/metadata_config/credentials_supported/", file
                 )
-                with open(json_path) as json_file:
+                with open(json_path, encoding="utf-8") as json_file:
                     credential = json.load(json_file)
                     credentials_supported.update(credential)
 
     except FileNotFoundError as e:
-        print(f"Metadata Error: file not found. {e}")
+        print(f"Metadata Error: file not found. \n{e}")
     except json.JSONDecodeError as e:
-        print(f"Metadata Error: Metadata Unable to decode JSON. {e}")
+        print(f"Metadata Error: Metadata Unable to decode JSON. \n{e}")
     except Exception as e:
-        print(f"Metadata Error: MetadataAn unexpected error occurred. {e}")
+        print(f"Metadata Error: An unexpected error occurred. \n{e}")
 
-    oidc_metadata["credentials_supported"] = credentials_supported
+    oidc_metadata["credential_configurations_supported"] = credentials_supported
 
 
 setup_metadata()
+
+def setup_trusted_CAs():
+    global trusted_CAs
+    
+    try:
+        ec_keys = {}
+        for file in os.listdir(cfgserv.trusted_CAs_path):
+            if file.endswith("pem"):
+                CA_path = os.path.join(
+                    cfgserv.trusted_CAs_path, file
+                    
+                )
+
+                with open(CA_path) as pem_file:
+
+                    pem_data = pem_file.read()
+
+                    pem_data=pem_data.encode()
+
+                    certificate = x509.load_pem_x509_certificate(pem_data, default_backend())
+                    
+                    public_key = certificate.public_key()
+
+                    issuer=certificate.issuer
+
+                    not_valid_before=certificate.not_valid_before
+
+                    not_valid_after=certificate.not_valid_after
+
+                    x = public_key.public_numbers().x.to_bytes(
+                        (public_key.public_numbers().x.bit_length() + 7) // 8,  # Number of bytes needed
+                        "big",  # Byte order
+                    )
+
+                    y = public_key.public_numbers().y.to_bytes(
+                        (public_key.public_numbers().y.bit_length() + 7) // 8,  # Number of bytes needed
+                        "big",  # Byte order
+                    )
+
+                    ec_key = EC2Key(x=x, y=y, crv=1)  # SECP256R1 curve is equivalent to P-256
+                    
+                    ec_keys.update({issuer:{
+                        "certificate":certificate,
+                        "public_key":public_key,
+                        "not_valid_before":not_valid_before,
+                        "not_valid_after":not_valid_after,
+                        "ec_key":ec_key
+                    }})
+                    
+
+    except FileNotFoundError as e:
+        print(f"TrustedCA Error: file not found.\n {e}")
+    except json.JSONDecodeError as e:
+        print(f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}")
+    except Exception as e:
+        print(f"TrustedCA Error: An unexpected error occurred.\n {e}")
+
+    trusted_CAs=ec_keys
+
+setup_trusted_CAs()
 
 
 def handle_exception(e):
@@ -92,7 +160,7 @@ def handle_exception(e):
     # now you're handling non-HTTP exceptions only
     return (
         render_template(
-            "route_pid/500.html",
+            "misc/500.html",
             error="Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
             error_code="Internal Server Error",
         ),
@@ -104,7 +172,7 @@ def page_not_found(e):
     log.logger_info.exception("- WARN - Error 404")
     return (
         render_template(
-            "route_pid/500.html",
+            "misc/500.html",
             error_code="Page not found",
             error="Page not found.We're sorry, we couldn't find the page you requested.",
         ),
@@ -118,6 +186,14 @@ def create_app(test_config=None):
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
+
+    @app.route("/", methods=["GET", "POST"])
+    def initial_page():
+        return render_template("misc/initial_page.html", oidc=cfgserv.oidc)
+    
+    @app.route("/favicon.ico", methods=["GET", "POST"])
+    def favicon():
+        return send_from_directory('static/images', 'favicon.ico')
 
     app.config.from_mapping(SECRET_KEY="dev")
 
@@ -143,22 +219,14 @@ def create_app(test_config=None):
     from . import (
         route_eidasnode,
         route_formatter,
-        route_ee_tara,
-        route_pt_cmd,
-        route_mdl,
-        route_qeaa,
-        route_pidV04,
         route_oidc,
+        route_dynamic,
     )
 
-    app.register_blueprint(route_pidV04.openid)
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
-    app.register_blueprint(route_ee_tara.tara)
-    app.register_blueprint(route_pt_cmd.cmd)
-    app.register_blueprint(route_mdl.mdl)
-    app.register_blueprint(route_qeaa.qeaa)
     app.register_blueprint(route_oidc.oidc)
+    app.register_blueprint(route_dynamic.dynamic)
 
     # config session
     app.config["SESSION_FILE_THRESHOLD"] = 50

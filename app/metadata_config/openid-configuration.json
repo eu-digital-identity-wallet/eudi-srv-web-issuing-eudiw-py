@@ -13,7 +13,7 @@
         "urn:ietf:params:oauth:grant-type:jwt-bearer",
         "refresh_token"
     ],
-    "jwks_uri": "https://issuer.eudiw.dev/oidc/static/jwks.json",
+    "jwks_uri": "https://issuer.eudiw.dev/static/jwks.json",
     "scopes_supported": [
         "openid"
     ],
@@ -78,13 +78,13 @@
     "code_challenge_methods_supported": [
         "S256"
     ],
-    "issuer": "https://issuer.eudiw.dev/oidc",
-    "registration_endpoint": "https://issuer.eudiw.dev/oidc/registration",
-    "introspection_endpoint": "https://issuer.eudiw.dev/oidc/introspection",
-    "authorization_endpoint": "https://issuer.eudiw.dev/oidc/authorizationV3",
-    "token_endpoint": "https://issuer.eudiw.dev/oidc/token",
-    "userinfo_endpoint": "https://issuer.eudiw.dev/oidc/userinfo",
-    "end_session_endpoint": "https://issuer.eudiw.dev/oidc/session",
-    "pushed_authorization_request_endpoint": "https://issuer.eudiw.dev/oidc/pushed_authorizationv2",
-    "credential_endpoint": "https://issuer.eudiw.dev/oidc/credential"
+    "issuer": "https://issuer.eudiw.dev",
+    "registration_endpoint": "https://issuer.eudiw.dev/registration",
+    "introspection_endpoint": "https://issuer.eudiw.dev/introspection",
+    "authorization_endpoint": "https://issuer.eudiw.dev/authorizationV3",
+    "token_endpoint": "https://issuer.eudiw.dev/token",
+    "userinfo_endpoint": "https://issuer.eudiw.dev/userinfo",
+    "end_session_endpoint": "https://issuer.eudiw.dev/session",
+    "pushed_authorization_request_endpoint": "https://issuer.eudiw.dev/pushed_authorizationv2",
+    "credential_endpoint": "https://issuer.eudiw.dev/credential"
 }

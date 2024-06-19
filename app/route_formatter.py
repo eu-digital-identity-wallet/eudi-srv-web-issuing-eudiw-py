@@ -29,7 +29,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
 
-from validate import validate_mandatory_args
+from validate import validate_mandatory_args, validate_date_format
 from app_config.config_service import ConfService as cfgservice
 from formatter_func import mdocFormatter,sdjwtFormatter
 
@@ -94,6 +94,18 @@ def cborformatter():
         (b, l) = validate_mandatory_args(request.json["data"]["org.iso.18013.5.1"], ['family_name', 'given_name', 'birth_date', 'issue_date', 'expiry_date', 'issuing_country','issuing_authority','document_number', 'portrait', 'driving_privileges', 'un_distinguishing_sign'])
     if request.json['doctype'] == "eu.europa.ec.eudiw.pid.1":
         (b, l) = validate_mandatory_args(request.json['data']["eu.europa.ec.eudiw.pid.1"], ['family_name', 'given_name', 'birth_date', 'age_over_18'])
+
+    if request.json['doctype'] == "org.iso.18013.5.1.mDL":
+        expiry_date = request.json['data']["org.iso.18013.5.1"].get('expiry_date')
+        issue_date = request.json['data']["org.iso.18013.5.1"].get('issue_date')
+
+        if expiry_date is not None:
+            if not validate_date_format(expiry_date):
+                return jsonify({'error_code': 306, 'error_message': cfgservice.error_list['306'], 'mdoc': ''})
+        if issue_date is not None:
+            if not validate_date_format(issue_date):
+                return jsonify({'error_code': 306, 'error_message': cfgservice.error_list['306'], 'mdoc': ''})
+            
     if not b: # nota all mandatory args are present
         return jsonify({'error_code': 401, 'error_message': cfgservice.error_list['401'], 'mdoc': ''})
    
@@ -126,7 +138,6 @@ def sd_jwtformatter():
     PID= request.get_json()
 
     if PID['doctype'] == 'org.iso.18013.5.1.mDL':
-        print(PID['data']['claims']['org.iso.18013.5.1'])
         (b, l) = validate_mandatory_args(PID['data']['claims']['org.iso.18013.5.1'], ['family_name', 'given_name', 'birth_date', 'issue_date', 'expiry_date', 'issuing_country','issuing_authority','document_number', 'portrait', 'driving_privileges', 'un_distinguishing_sign'])
     
     if PID['doctype'] == 'eu.europa.ec.eudiw.pid.1':

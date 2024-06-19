@@ -7,11 +7,11 @@
         "console",
         "file"
       ],
-      "level": "DEBUG"
+      "level": "ERROR"
     },
     "loggers": {
       "idp": {
-        "level": "DEBUG"
+        "level": "ERROR"
       }
     },
     "handlers": {
@@ -34,11 +34,11 @@
   },
   "port": 5000,
   "domain": "issuer.eudiw.dev",
-  "server_name": "{domain}:{port}",
-  "base_url": "https://{domain}:{port}",
+  "server_name": "{domain}",
+  "base_url": "https://{domain}",
   "op": {
     "server_info": {
-      "add_on": {
+      "add_ons": {
         "pkce": {
           "function": "idpyoidc.server.oauth2.add_on.pkce.add_support",
           "kwargs": {
@@ -264,6 +264,16 @@
               ]
           }
         },
+        "notification": {
+          "path": "notification",
+          "class": "openid4v.openid_credential_issuer.notification.Notification",
+          "kwargs":{}
+        },
+        "deferred_credential": {
+          "path": "deferred_credential",
+          "class": "openid4v.openid_credential_issuer.deferred_credential.Deferred_Credential",
+          "kwargs":{}
+        },
         "credential": {
           "path": "credential",
           "class": "openid4v.openid_credential_issuer.credential.Credential",
@@ -278,7 +288,7 @@
       "httpc_params": {
         "verify": false
       },
-      "issuer": "https://{domain}:{port}/oidc",
+      "issuer": "https://{domain}",
       "keys": {
         "private_path": "private/jwks.json",
         "key_defs": [
@@ -299,16 +309,6 @@
         "public_path": "static/jwks.json",
         "read_only": false,
         "uri_path": "static/jwks.json"
-      },
-      "login_hint2acrs": {
-        "class": "idpyoidc.server.login_hint.LoginHint2Acrs",
-        "kwargs": {
-          "scheme_map": {
-            "email": [
-              "urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword"
-            ]
-          }
-        }
       },
       "template_dir": "templates",
       "token_handler_args": {

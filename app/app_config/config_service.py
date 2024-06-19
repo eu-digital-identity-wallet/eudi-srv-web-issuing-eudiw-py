@@ -27,24 +27,29 @@ NOTE: You should only change it if you understand what you're doing.
 import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import os
 
 
 class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
-    service_url = "https://preprod.issuer.eudiw.dev/"
-    #service_url = "https://issuer.eudiw.dev/"
-    # service_url = "https://127.0.0.1:4430/"
+    #service_url = "https://preprod.issuer.eudiw.dev:4443/"
+    service_url = "https://issuer.eudiw.dev/"
+    #service_url = "https://127.0.0.1:5000/"
+    #service_url =  "https://dev.issuer.eudiw.dev/"
+
+    #---------------------------------------------------------------------------
+    trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
     # ------------------------------------------------------------------------------------------------
     # eIDAS Node base href (used in lightrequest)
     eidasnode_url = "https://preprod.issuer.eudiw.dev/EidasNode/"
 
-    #Number of Tries for login in eidas node
-    eidasnode_retry= 3
+    # Number of Tries for login in eidas node
+    eidasnode_retry = 3
 
-    #openid endpoint in case of eidas node login error
-    eidasnode_openid_error_endpoint=service_url+"oidc/error_redirect"
+    # openid endpoint in case of eidas node login error
+    eidasnode_openid_error_endpoint = service_url + "error_redirect"
 
     # eIDAS secret connector request
     # Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
@@ -53,7 +58,7 @@ class ConfService:
 
     # eIDAS node connector endpoint (for lightrequest)
     eidasnode_lightToken_connectorEndpoint = (
-        "https://preprod.issuer.eudiw.dev/EidasNode/SpecificConnectorRequest"
+        "https://issuer.eudiw.dev/EidasNode/SpecificConnectorRequest"
     )
 
     # eIDAS node PID attributes
@@ -62,8 +67,12 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # OpenID endpoints
 
-    OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev/oidc/verify/user"
-    # OpenID_first_endpoint= "https://127.0.0.1:4430//oidc/verify/user"
+    OpenID_first_endpoint = service_url + "verify/user"
+    #OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev:4443/verify/user"
+    # OpenID_first_endpoint = "https://127.0.0.1:5000/verify/user"
+
+    # Deferred endpoint expiry time (minutes)
+    deffered_expiry = 60
 
     # ------------------------------------------------------------------------------------------------
     # PID namespace
@@ -104,6 +113,10 @@ class ConfService:
 
     # QEAA doctype
     qeaa_doctype = "eu.europa.ec.eudiw.qeaa.1"
+
+    # OIDC4VC URL for initial page
+    oidc = service_url + ".well-known/openid-credential-issuer"
+    #oidc = "https://preprod.issuer.eudiw.dev:4443/.well-known/openid-credential-issuer"
 
     # ------------------------------------------------------------------------------------------------
     # current version
@@ -149,6 +162,105 @@ class ConfService:
         ],
     }
 
+    document_mappings = {
+        "eu.europa.ec.eudiw.pid.1": {
+            "fields": ["CurrentGivenName", "CurrentFamilyName", "DateOfBirth"],
+            "formatting_functions": {
+                "mso_mdoc": {"formatting_function": "pid_mdoc"},
+                "vc+sd-jwt": {"formatting_function": "pid_sd_jwt"},
+            },
+        },
+        "eu.europa.ec.eudiw.qeaa.1": {
+            "formatting_functions": {
+                "mso_mdoc": {"formatting_function": "qeaa_18_mdoc"},
+                "vc+sd-jwt": {"formatting_function": "qeaa_18_sd_jwt"},
+            },
+        },
+        "eu.europa.ec.eudiw.pseudonym.1": {
+            "fields": ["user_pseudonym"],
+            "formatting_functions": {
+                "mso_mdoc": {"formatting_function": "pseudonym_mdoc"},
+                "vc+sd-jwt": {"formatting_function": "pseudonym_mdoc_sd_jwt"},
+            },
+        },
+        "org.iso.18013.5.1.mDL": {
+            "fields": [
+                "CurrentGivenName",
+                "CurrentFamilyName",
+                "DateOfBirth",
+                "IssuingAuthority",
+                "DocumentNumber",
+                "Portrait",
+                "DrivingPrivileges",
+            ],
+            "formatting_functions": {
+                "mso_mdoc": {"formatting_function": "mdl_mdoc"},
+                "vc+sd-jwt": {"formatting_function": "mdl_sd_jwt"},
+            },
+        },
+    }
+
+    config_doctype={
+        "eu.europa.ec.eudiw.pid.1": {
+            "issuing_authority": pid_issuing_authority,
+            "organization_id":pid_organization_id,
+            "validity":pid_validity,
+            "organization_name":pid_issuing_authority,
+            "namespace":pid_namespace
+        },
+        "eu.europa.ec.eudiw.qeaa.1": {
+            "issuing_authority": qeaa_issuing_authority,
+            "organization_id":pid_organization_id,
+            "validity":qeaa_validity,
+            "organization_name":qeaa_issuing_authority,
+            "namespace":qeaa_namespace
+        },
+        "org.iso.18013.5.1.mDL": {
+            "issuing_authority": mdl_issuing_authority,
+            "organization_id":pid_organization_id,
+            "validity":mdl_validity,
+            "organization_name":mdl_issuing_authority,
+            "namespace":mdl_namespace
+        },
+        "eu.europa.ec.eudiw.pseudonym.age_over_18.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id":pid_organization_id,
+            "validity":qeaa_validity,
+            "organization_name":"Test QEAA issuer",
+            "namespace":"eu.europa.ec.eudiw.pseudonym.age_over_18.1"
+        },
+        "eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id":pid_organization_id,
+            "validity":qeaa_validity,
+            "organization_name":"Test QEAA issuer",
+            "namespace":"eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint"
+        },
+        "eu.europa.ec.eudiw.loyalty.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id":pid_organization_id,
+            "validity":qeaa_validity,
+            "organization_name":"Test QEAA issuer",
+            "namespace":"eu.europa.ec.eudiw.loyalty.1"
+        }
+
+    }
+
+    auth_method_supported_credencials={
+        "PID_login":[
+            "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
+            "eu.europa.ec.eudiw.pseudonym_over18_mdoc_deferred_endpoint"
+        ],
+        "country_selection":[
+            "eu.europa.ec.eudiw.loyalty_mdoc",
+            "eu.europa.ec.eudiw.mdl_jwt_vc_json",
+            "eu.europa.ec.eudiw.mdl_mdoc",
+            "eu.europa.ec.eudiw.pid_jwt_vc_json",
+            "eu.europa.ec.eudiw.pid_mdoc",
+            "eu.europa.ec.eudiw.pseudonym_over18_mdoc"
+        ]
+    }
+
     # Supported certificate algorithms and curves
     cert_algo_list = {"ecdsa-with-SHA256": ["secp256r1"]}
 
@@ -172,6 +284,7 @@ class ConfService:
         "303": "Error obtaining attributes.",
         "304": "PID attribute(s) missing.",
         "305": "Certificate not available.",
+        "306": "Date is not in the correct format. Should be YYYY-MM-DD.",
         "401": "Missing mandatory formatter fields.",
         "501": "Missing mandatory IdP fields",
     }
@@ -180,10 +293,15 @@ class ConfService:
     # LOGS
 
     log_dir = "/tmp/log"
-    # log_dir = '../../log'
+    # log_dir = "../../log"
     log_file_info = "logs.log"
 
     backup_count = 7
+
+    try:
+        os.makedirs(log_dir)
+    except FileExistsError:
+        pass
 
     log_handler_info = TimedRotatingFileHandler(
         filename=f"{log_dir}/{log_file_info}",
@@ -197,6 +315,10 @@ class ConfService:
     logger_info = logging.getLogger("info")
     logger_info.addHandler(log_handler_info)
     logger_info.setLevel(logging.INFO)
+
+    logger_error = logging.getLogger("error")
+    logger_error.addHandler(log_handler_info)
+    logger_error.setLevel(logging.INFO)
 
     max_time_data = 5  # maximum minutes allowed for saved information
     schedule_check = 5  # minutes, where every x time the code runs to check the time the data was created
