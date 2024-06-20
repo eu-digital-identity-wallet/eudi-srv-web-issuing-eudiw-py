@@ -46,8 +46,16 @@ from boot_validate import (
 from app_config.config_devtest import ConfTest as cfgdev
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from redirect_func import  url_get
-from misc import authentication_error_redirect, convert_png_to_jpeg, credential_error_resp, generate_unique_id, getAttributesForm, scope2details, validate_image
+from redirect_func import url_get
+from misc import (
+    authentication_error_redirect,
+    convert_png_to_jpeg,
+    credential_error_resp,
+    generate_unique_id,
+    getAttributesForm,
+    scope2details,
+    validate_image,
+)
 from dynamic_func import dynamic_formatter
 from . import oidc_metadata
 
@@ -58,8 +66,11 @@ CORS(dynamic)  # enable CORS on the blue print
 # Log
 from app_config.config_service import ConfService as log
 
+# secrets
+from app_config.config_secrets import flask_secret_key
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "chave_secreta"
+app.config["SECRET_KEY"] = flask_secret_key
 app.config["dynamic"] = {}
 
 
@@ -70,8 +81,10 @@ def Supported_Countries():
     """
 
     if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template("misc/auth_method.html", redirect_url= cfgserv.service_url)
-    
+        return render_template(
+            "misc/auth_method.html", redirect_url=cfgserv.service_url
+        )
+
     authorization_params = session["authorization_params"]
     authorization_details = []
     if "authorization_details" in authorization_params:
@@ -146,7 +159,7 @@ def Supported_Countries():
         "dynamic/dynamic-countries.html",
         countries=display_countries,
         authorization_details=json.dumps(authorization_details),
-        redirect_url= cfgserv.service_url
+        redirect_url=cfgserv.service_url,
     )
 
 
@@ -172,8 +185,12 @@ def dynamic_R1(country):
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym":uuid4()})
-        return render_template("dynamic/dynamic-form.html", attributes=attributesForm, redirect_url= cfgserv.service_url+"dynamic/form")
+            attributesForm.update({"user_pseudonym": uuid4()})
+        return render_template(
+            "dynamic/dynamic-form.html",
+            attributes=attributesForm,
+            redirect_url=cfgserv.service_url + "dynamic/form",
+        )
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
         return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
@@ -182,7 +199,6 @@ def dynamic_R1(country):
         country_data = cfgcountries.supported_countries[country]["oidc_auth"].copy()
 
         url = country_data["url"] + "redirect_uri=" + country_data["redirect_uri"]
-        
 
         pt_attributes = list()
 
@@ -272,7 +288,6 @@ def red():
             json={"token": token},
         )
 
-
         log.logger_info.info(
             " - INFO - "
             + session["route"]
@@ -310,9 +325,11 @@ def red():
             error="Missing fields",
             error_description="Missing mandatory IdP fields",
         )
-    
 
-    metadata_url = cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"] + "/.well-known/openid-configuration"
+    metadata_url = (
+        cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"]
+        + "/.well-known/openid-configuration"
+    )
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
@@ -321,7 +338,7 @@ def red():
         "oidc_redirect"
     ]
 
-    #url = redirect_data["url"]
+    # url = redirect_data["url"]
     headers = redirect_data["headers"]
 
     data = "code=" + request.args.get("code")
@@ -439,39 +456,48 @@ def dynamic_R2_data_collect(country, user_id, json_request):
         (b, data) = handle_response(user_id)
 
         if "custom_modifiers" in cfgcountries.supported_countries[country]:
-                custom_modifiers = cfgcountries.supported_countries[country]["custom_modifiers"]
-                for modifier in custom_modifiers:
-                    if custom_modifiers[modifier] in data:
-                        data[modifier] = data[custom_modifiers[modifier]]
-                        data.pop(custom_modifiers[modifier])
+            custom_modifiers = cfgcountries.supported_countries[country][
+                "custom_modifiers"
+            ]
+            for modifier in custom_modifiers:
+                if custom_modifiers[modifier] in data:
+                    data[modifier] = data[custom_modifiers[modifier]]
+                    data.pop(custom_modifiers[modifier])
         return data
-    
+
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
         attribute_request = cfgcountries.supported_countries[country][
             "attribute_request"
         ]
         url = attribute_request["url"] + user_id
-        #headers = attribute_request["header"]
+        # headers = attribute_request["header"]
         try:
             r2 = requests.get(url)
 
             json_response = r2.json()
             for attribute in json_response:
                 if attribute["state"] == "Pending":
-                    return {"error":"Pending"}
+                    return {"error": "Pending"}
 
             data = json_response
-            
+
             return data
         except:
-            credential_error_resp("invalid_credential_request","openid connection failed")
-        
+            credential_error_resp(
+                "invalid_credential_request", "openid connection failed"
+            )
+
     elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
         attribute_request = cfgcountries.supported_countries[country][
             "attribute_request"
         ]
 
-        metadata_url = cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"] + "/.well-known/openid-configuration"
+        metadata_url = (
+            cfgcountries.supported_countries[session["country"]]["oidc_auth"][
+                "base_url"
+            ]
+            + "/.well-known/openid-configuration"
+        )
         metadata_json = requests.get(metadata_url).json()
 
         userinfo_endpoint = metadata_json["userinfo_endpoint"]
@@ -482,15 +508,20 @@ def dynamic_R2_data_collect(country, user_id, json_request):
             headers = attribute_request["header"]
         else:
             url = userinfo_endpoint
-            headers =attribute_request["header"]
-            headers["Authorization"] = f'Bearer {user_id}'
-            
+            headers = attribute_request["header"]
+            headers["Authorization"] = f"Bearer {user_id}"
+
         try:
             r2 = requests.get(url, headers=headers)
             json_response = json.loads(r2.text)
             data = json_response
-            if "custom_modifiers" in cfgcountries.supported_countries[country]["attribute_request"]:
-                custom_modifiers = cfgcountries.supported_countries[country]["attribute_request"]["custom_modifiers"]
+            if (
+                "custom_modifiers"
+                in cfgcountries.supported_countries[country]["attribute_request"]
+            ):
+                custom_modifiers = cfgcountries.supported_countries[country][
+                    "attribute_request"
+                ]["custom_modifiers"]
                 for modifier in custom_modifiers:
                     if custom_modifiers[modifier] in data:
                         data[modifier] = data[custom_modifiers[modifier]]
@@ -498,9 +529,11 @@ def dynamic_R2_data_collect(country, user_id, json_request):
 
             return data
         except:
-            credential_error_resp("invalid_credential_request","openid connection failed")
+            credential_error_resp(
+                "invalid_credential_request", "openid connection failed"
+            )
     else:
-        credential_error_resp("invalid_credential_request","Not supported")
+        credential_error_resp("invalid_credential_request", "Not supported")
 
 
 def credentialCreation(credential_request, data, country):
@@ -544,7 +577,7 @@ def credentialCreation(credential_request, data, country):
 
         device_publickey = credential["device_publickey"]
 
-        #formatting_functions = document_mappings[doctype]["formatting_functions"]
+        # formatting_functions = document_mappings[doctype]["formatting_functions"]
 
         form_data = {}
         if country == "FC":
@@ -558,14 +591,16 @@ def credentialCreation(credential_request, data, country):
         elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
             if country == "PT":
 
-                portuguese_fields = cfgcountries.supported_countries[country]["oidc_auth"]["scope"][doctype]
+                portuguese_fields = cfgcountries.supported_countries[country][
+                    "oidc_auth"
+                ]["scope"][doctype]
 
                 for fields_pt in portuguese_fields:
                     for item in data:
                         if item["name"] == portuguese_fields[fields_pt]:
                             form_data[fields_pt] = item["value"]
                             break
-                
+
                 if "birth_date" in form_data:
                     form_data["birth_date"] = datetime.strptime(
                         form_data["birth_date"], "%d-%m-%Y"
@@ -621,9 +656,7 @@ def credentialCreation(credential_request, data, country):
 
         pdata = dynamic_formatter(format, doctype, form_data, device_publickey)
 
-        credential_response["credential_responses"].append(
-        {"credential": pdata}
-        )
+        credential_response["credential_responses"].append({"credential": pdata})
 
         """ formatting_function_data = formatting_functions.get(format)
 
@@ -640,103 +673,138 @@ def credentialCreation(credential_request, data, country):
 
     return credential_response
 
+
 @dynamic.route("/getpidoid4vp", methods=["GET", "POST"])
 def getpidoid4vp():
     presentation_id = request.args.get("presentation_id")
-    url = "https://dev.verifier-backend.eudiw.dev/ui/presentations/" + presentation_id + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    url = (
+        "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+        + presentation_id
+        + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    )
 
     headers = {
-    'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
 
     response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
-        error_msg= str(response.status_code)
-        return jsonify({"error": error_msg}),400
-    
-    error, error_msg= validate_vp_token(response.json())
+        error_msg = str(response.status_code)
+        return jsonify({"error": error_msg}), 400
+
+    error, error_msg = validate_vp_token(response.json())
 
     if error == True:
         return authentication_error_redirect(
-                        jws_token=session["authorization_params"]["token"],
-                        error="invalid_request",
-                        error_description=error_msg)
-    
+            jws_token=session["authorization_params"]["token"],
+            error="invalid_request",
+            error_description=error_msg,
+        )
+
     mdoc_json = cbor2elems(response.json()["vp_token"])
 
+    attributesForm = {}
 
-    attributesForm={}
-
-    if "authorization_params" in session and "authorization_details" in session["authorization_params"]:
-        cred_request_json = json.loads(session["authorization_params"]["authorization_details"])
+    if (
+        "authorization_params" in session
+        and "authorization_details" in session["authorization_params"]
+    ):
+        cred_request_json = json.loads(
+            session["authorization_params"]["authorization_details"]
+        )
 
         for cred_request in cred_request_json:
             if "credential_configuration_id" in cred_request:
-                if cred_request["credential_configuration_id"] == "eu.europa.ec.eudiw.pseudonym_over18_mdoc" or cred_request["credential_configuration_id"] == "eu.europa.ec.eudiw.pseudonym_over18_mdoc_deferred_endpoint":
-                    attributesForm.update({"user_pseudonym":uuid4()})
+                if (
+                    cred_request["credential_configuration_id"]
+                    == "eu.europa.ec.eudiw.pseudonym_over18_mdoc"
+                    or cred_request["credential_configuration_id"]
+                    == "eu.europa.ec.eudiw.pseudonym_over18_mdoc_deferred_endpoint"
+                ):
+                    attributesForm.update({"user_pseudonym": uuid4()})
             elif "vct" in cred_request:
                 if cred_request["vct"] == "eu.europa.ec.eudiw.pseudonym_jwt_vc_json":
-                    attributesForm.update({"user_pseudonym":uuid4()})
+                    attributesForm.update({"user_pseudonym": uuid4()})
 
-    elif "authorization_params" in session and "scope" in session["authorization_params"]:
+    elif (
+        "authorization_params" in session and "scope" in session["authorization_params"]
+    ):
         cred_scopes = session["authorization_params"]["scope"]
-        if "eu.europa.ec.eudiw.pseudonym.age_over_18.1" in cred_scopes or "eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint" in cred_scopes:
-            attributesForm.update({"user_pseudonym":uuid4()})
+        if (
+            "eu.europa.ec.eudiw.pseudonym.age_over_18.1" in cred_scopes
+            or "eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint"
+            in cred_scopes
+        ):
+            attributesForm.update({"user_pseudonym": uuid4()})
 
     for doctype in mdoc_json:
         for attribute, value in mdoc_json[doctype]:
             if attribute == "age_over_18":
-                attributesForm.update({attribute:value})
+                attributesForm.update({attribute: value})
 
-    return render_template("dynamic/form_authorize.html", attributes=attributesForm, redirect_url= cfgserv.service_url)
+    return render_template(
+        "dynamic/form_authorize.html",
+        attributes=attributesForm,
+        redirect_url=cfgserv.service_url,
+    )
+
 
 @dynamic.route("/auth_method", methods=["GET", "POST"])
 def auth():
 
-    authorization_params= session["authorization_params"]
+    authorization_params = session["authorization_params"]
     if "Cancelled" in request.form.keys():  # Form request Cancelled
         return authentication_error_redirect(
-                        jws_token=authorization_params["token"],
-                        error="Process Canceled",
-                        error_description="User canceled authentication")
-    choice= request.form.get("optionsRadios")
+            jws_token=authorization_params["token"],
+            error="Process Canceled",
+            error_description="User canceled authentication",
+        )
+    choice = request.form.get("optionsRadios")
 
-    choice= request.form.get("optionsRadios")
+    choice = request.form.get("optionsRadios")
     if choice == "link1":
-            return redirect(cfgserv.service_url + "oid4vp")
+        return redirect(cfgserv.service_url + "oid4vp")
     elif choice == "link2":
         return redirect(cfgserv.service_url + "dynamic/")
-    
+
 
 @dynamic.route("/preauth", methods=["GET"])
 def preauthRed():
-    
+
     url = cfgserv.service_url + "pushed_authorizationv2"
 
-    payload = 'response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=https%3A%2F%2Fissuer.eudiw.dev%2Fpreauth-code&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudiw.loyalty_mdoc%22%0A%20%20%7D%0A%5D'
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-    }
+    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=https%3A%2F%2Fissuer.eudiw.dev%2Fpreauth-code&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudiw.loyalty_mdoc%22%0A%20%20%7D%0A%5D"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
     par_response = response.json()
 
-    return redirect(cfgserv.service_url +"authorization-preauth?client_id=ID&request_uri=" + par_response["request_uri"])
-    
+    return redirect(
+        cfgserv.service_url
+        + "authorization-preauth?client_id=ID&request_uri="
+        + par_response["request_uri"]
+    )
 
 
 @dynamic.route("/preauth-form", methods=["GET"])
 def preauthForm():
-    """ Form used for pre-authorization
+    """Form used for pre-authorization
     Form page where the user information is parsed.
     """
-    attributesForm={"given_name":"string",
-                    "family_name":"string",
-                    "company":"string",
-                    "client_id":"string"}
+    attributesForm = {
+        "given_name": "string",
+        "family_name": "string",
+        "company": "string",
+        "client_id": "string",
+    }
 
-    return render_template("dynamic/dynamic-form.html", attributes=attributesForm, redirect_url= cfgserv.service_url+"dynamic/form2")
+    return render_template(
+        "dynamic/dynamic-form.html",
+        attributes=attributesForm,
+        redirect_url=cfgserv.service_url + "dynamic/form2",
+    )
+
 
 @dynamic.route("/form2", methods=["GET", "POST"])
 def Dynamic_form2():
@@ -758,7 +826,7 @@ def Dynamic_form2():
             )
 
     if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('Misc/Auth_method.html')
+        return render_template("Misc/Auth_method.html")
 
     # if submitted form is valid
     """  v = validate_params_getpid_or_mdl(
@@ -783,25 +851,27 @@ def Dynamic_form2():
             elif form_data[item] == "Port2":
                 cleaned_data["portrait"] = cfgdev.portrait2
             elif form_data[item] == "Port3":
-                portrait= request.files["Image"]
+                portrait = request.files["Image"]
 
                 img = Image.open(portrait)
-                #imgbytes = img.tobytes()
+                # imgbytes = img.tobytes()
                 bio = io.BytesIO()
                 img.save(bio, format="JPEG")
                 del img
 
-                response,error_msg = validate_image(portrait)
+                response, error_msg = validate_image(portrait)
 
-                if response==False:
+                if response == False:
                     return authentication_error_redirect(
                         jws_token=session["jws_token"],
                         error="Invalid Image",
                         error_description=error_msg,
                     )
-                else :
-                    imgurlbase64=base64.urlsafe_b64encode(bio.getvalue()).decode('utf-8')
-                    cleaned_data["portrait"]=imgurlbase64
+                else:
+                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
+                        "utf-8"
+                    )
+                    cleaned_data["portrait"] = imgurlbase64
 
         elif item == "Category1":
             DrivingPrivileges = []
@@ -831,12 +901,11 @@ def Dynamic_form2():
 
     app.config["dynamic"][user_id] = cleaned_data
 
-    
     if "jws_token" not in session or "authorization_params" in session:
         session["jws_token"] = session["authorization_params"]["token"]
 
     session["returnURL"] = cfgserv.OpenID_first_endpoint
-    
+
     return redirect(
         url_get(
             session["returnURL"],
@@ -846,6 +915,7 @@ def Dynamic_form2():
             },
         )
     )
+
 
 @dynamic.route("/form", methods=["GET", "POST"])
 def Dynamic_form():
@@ -867,7 +937,7 @@ def Dynamic_form():
             )
 
     if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('misc/auth_method.html')
+        return render_template("misc/auth_method.html")
 
     # if submitted form is valid
     """  v = validate_params_getpid_or_mdl(
@@ -892,25 +962,27 @@ def Dynamic_form():
             elif form_data[item] == "Port2":
                 cleaned_data["portrait"] = cfgdev.portrait2
             elif form_data[item] == "Port3":
-                portrait= request.files["Image"]
+                portrait = request.files["Image"]
 
                 img = Image.open(portrait)
-                #imgbytes = img.tobytes()
+                # imgbytes = img.tobytes()
                 bio = io.BytesIO()
                 img.save(bio, format="JPEG")
                 del img
 
-                response,error_msg = validate_image(portrait)
+                response, error_msg = validate_image(portrait)
 
-                if response==False:
+                if response == False:
                     return authentication_error_redirect(
                         jws_token=session["jws_token"],
                         error="Invalid Image",
                         error_description=error_msg,
                     )
-                else :
-                    imgurlbase64=base64.urlsafe_b64encode(bio.getvalue()).decode('utf-8')
-                    cleaned_data["portrait"]=imgurlbase64
+                else:
+                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
+                        "utf-8"
+                    )
+                    cleaned_data["portrait"] = imgurlbase64
 
         elif item == "Category1":
             DrivingPrivileges = []
@@ -925,7 +997,7 @@ def Dynamic_form():
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
-        
+
         elif item == "age_over_18":
             if form_data[item] == "on":
                 cleaned_data["age_over_18"] = True
@@ -953,7 +1025,7 @@ def Dynamic_form():
         session["jws_token"] = session["authorization_params"]["token"]
 
     session["returnURL"] = cfgserv.OpenID_first_endpoint
-    
+
     return redirect(
         url_get(
             session["returnURL"],
@@ -963,7 +1035,6 @@ def Dynamic_form():
             },
         )
     )
-
 
 
 def clear_data():
