@@ -70,7 +70,6 @@ import requests
 
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
-from .app_config.config_devtest import ConfTest as cfgtest
 
 from . import oidc_metadata, openid_metadata
 
@@ -199,7 +198,7 @@ def verify(authn_method):
     return do_response(endpoint, request, **args)
 
 
-@oidc.route("/verify/user", methods=["GET", "POST"])
+@oidc.route("/verify/user", methods=["GET"])
 def verify_user():
     authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
         "user"
@@ -512,7 +511,7 @@ def authorizationpre():
     # return response.content
 
 
-@oidc.route("/oid4vp", methods=["GET", "POST"])
+@oidc.route("/oid4vp", methods=["GET"])
 def oid4vp():
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
@@ -642,7 +641,7 @@ def pid_authorization_get():
         return jsonify({"message": data}), 200
 
 
-@oidc.route("/auth_choice", methods=["GET", "POST"])
+@oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
     token = request.args.get("token")
 
@@ -705,7 +704,7 @@ def auth_choice():
     # return render_template("misc/auth_method.html")
 
 
-@oidc.route("/token_service", methods=["GET", "POST"])
+@oidc.route("/token_service", methods=["POST"])
 def token_service():
 
     # session_id = request.cookies.get("session")
@@ -783,12 +782,12 @@ def session_endpoint():
     return service_endpoint(current_app.server.get_endpoint("session"))
 
 
-@oidc.route("/pushed_authorization", methods=["GET", "POST"])
+@oidc.route("/pushed_authorization", methods=["POST"])
 def par_endpoint():
     return service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
 
-@oidc.route("/pushed_authorizationv2", methods=["GET", "POST"])
+@oidc.route("/pushed_authorizationv2", methods=["POST"])
 def par_endpointv2():
 
     log.logger_info.info(
@@ -830,7 +829,7 @@ def par_endpointv2():
     return response
 
 
-@oidc.route("/credential", methods=["GET", "POST"])
+@oidc.route("/credential", methods=["POST"])
 def credential():
 
     if request.data:
@@ -875,7 +874,7 @@ def credential():
     return _response
 
 
-@oidc.route("/batch_credential", methods=["GET", "POST"])
+@oidc.route("/batch_credential", methods=["POST"])
 def batchCredential():
     log.logger_info.info(
         "Batch credential request data: "
@@ -918,7 +917,7 @@ def batchCredential():
     return _response
 
 
-@oidc.route("/notification", methods=["GET", "POST"])
+@oidc.route("/notification", methods=["POST"])
 def notification():
     log.logger_info.info(
         "Notification request data: "
@@ -937,7 +936,7 @@ def notification():
     return _resp
 
 
-@oidc.route("/deferred_credential", methods=["GET", "POST"])
+@oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
 
     log.logger_info.info(
@@ -958,7 +957,7 @@ def deferred_credential():
     return _resp
 
 
-@oidc.route("credential_offer_choice", methods=["GET", "POST"])
+@oidc.route("credential_offer_choice", methods=["GET"])
 def credential_offer():
     """Page for selecting credentials
 
@@ -1088,7 +1087,7 @@ def credentialOffer():
         return redirect(cfgservice.service_url + "credential_offer_choice")
 
 
-@oidc.route("/preauth-code", methods=["GET", "POST"])
+@oidc.route("/preauth-code", methods=["GET"])
 def preauthCode():
     request
 
@@ -1328,81 +1327,6 @@ def service_endpoint(endpoint):
 @oidc.errorhandler(werkzeug.exceptions.BadRequest)
 def handle_bad_request(e):
     return "bad request!", 400
-
-
-@oidc.route("/check_session_iframe", methods=["GET", "POST"])
-def check_session_iframe():
-    if request.method == "GET":
-        req_args = request.args.to_dict()
-    else:
-        if request.data:
-            req_args = json.loads(as_unicode(request.data))
-        else:
-            req_args = dict([(k, v) for k, v in request.form.items()])
-
-    if req_args:
-        _context = current_app.server.get_context()
-        # will contain client_id and origin
-        if req_args["origin"] != _context.issuer:
-            return "error"
-        if req_args["client_id"] != _context.cdb:
-            return "error"
-        return "OK"
-
-    current_app.logger.debug("check_session_iframe: {}".format(req_args))
-    doc = open("templates/check_session_iframe.html").read()
-    current_app.logger.debug(f"check_session_iframe response: {doc}")
-    return doc
-
-
-@oidc.route("/verify_logout", methods=["GET", "POST"])
-def verify_logout():
-    part = urlparse(current_app.server.get_context().issuer)
-    page = render_template(
-        "route_oidc/logout.html",
-        op=part.hostname,
-        do_logout="rp_logout",
-        sjwt=request.args["sjwt"],
-    )
-    return page
-
-
-@oidc.route("/rp_logout", methods=["GET", "POST"])
-def rp_logout():
-    _endp = current_app.server.get_endpoint("session")
-    _info = _endp.unpack_signed_jwt(request.form["sjwt"])
-    try:
-        request.form["logout"]
-    except KeyError:
-        alla = False
-    else:
-        alla = True
-
-    _iframes = _endp.do_verified_logout(alla=alla, **_info)
-
-    if _iframes:
-        res = render_template(
-            "route_oidc/frontchannel_logout.html",
-            frames=" ".join(_iframes),
-            size=len(_iframes),
-            timeout=5000,
-            postLogoutRedirectUri=_info["redirect_uri"],
-        )
-    else:
-        res = redirect(_info["redirect_uri"])
-
-        # rohe are you sure that _kakor is the right word? :)
-        _kakor = _endp.kill_cookies()
-        for cookie in _kakor:
-            _add_cookie(res, cookie)
-
-    return res
-
-
-@oidc.route("/post_logout", methods=["GET"])
-def post_logout():
-    page = render_template("route_oidc/post_logout.html")
-    return page
 
 
 ################################################

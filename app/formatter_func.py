@@ -46,7 +46,6 @@ from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 
 
-
 def mdocFormatter(data, doctype, country, device_publickey):
     """Construct and sign the mdoc with the country private key
 
@@ -75,12 +74,12 @@ def mdocFormatter(data, doctype, country, device_publickey):
     if doctype == "org.iso.18013.5.1.mDL":
 
         data["org.iso.18013.5.1"]["portrait"] = base64.urlsafe_b64decode(
-        data["org.iso.18013.5.1"]["portrait"]
+            data["org.iso.18013.5.1"]["portrait"]
         )
-        
-        #data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
-        #data["org.iso.18013.5.1"]["signature_usual_mark"]
-        #) 
+
+        # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
+        # data["org.iso.18013.5.1"]["signature_usual_mark"]
+        # )
 
         if "issuance_date" in data["org.iso.18013.5.1"]:
             issuance_date = data["org.iso.18013.5.1"]["issuance_date"]
@@ -120,7 +119,6 @@ def mdocFormatter(data, doctype, country, device_publickey):
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
-    
     mdoci.new(
         doctype=doctype,
         data=data,
@@ -141,9 +139,9 @@ def cbor2elems(mdoc):
     Return: Returns a dict with (element, values) contained in the namespaces of the mdoc. E.g. {'ns1': [('e1', 'v1'), ('e2', 'v2')], 'ns2': [('e3', 'v3')]}
     """
     d = {}
-    namespaces = cbor2.decoder.loads(base64.urlsafe_b64decode(mdoc + "=="))["documents"][0][
-        "issuerSigned"
-    ]["nameSpaces"]
+    namespaces = cbor2.decoder.loads(base64.urlsafe_b64decode(mdoc + "=="))[
+        "documents"
+    ][0]["issuerSigned"]["nameSpaces"]
     for n in namespaces.keys():
         l = []
         for e in namespaces[n]:  # e is a CBORTag
@@ -189,9 +187,6 @@ def sdjwtFormatter(PID, country):
     if doctype == "eu.europa.ec.eudiw.qeaa.1":
         PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.qeaa.1"]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-
-
-    
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 

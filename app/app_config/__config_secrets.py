@@ -21,3 +21,8 @@ Configuration of service secrets
 """
 
 flask_secret_key = "secret_here"
+
+# eIDAS secret connector request
+# Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
+#                                   entry key="lightToken.connector.request.secret"
+eidasnode_lightToken_secret = "secret_here"

@@ -26,6 +26,7 @@ NOTE: You should only change it if you understand what you're doing.
 
 from .config_service import ConfService as cfgserv
 
+
 class ConfCountries:
     urlReturnEE = "https://pprpid.provider.eudiw.projj.eu/tara/redirect"
 
@@ -40,14 +41,15 @@ class ConfCountries:
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
-            "mdl_url": "",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
             ],
-            "custom_modifiers": {"family_name":'CurrentFamilyName',
-                                "given_name":'CurrentGivenName',
-                                'birth_date':"DateOfBirth"},
+            "custom_modifiers": {
+                "family_name": "CurrentFamilyName",
+                "given_name": "CurrentGivenName",
+                "birth_date": "DateOfBirth",
+            },
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
         },
@@ -58,10 +60,7 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der",
-            "mdl_url": cfgserv.service_url + "V04/mdl/form",
-            "qeaa_func": cfgserv.service_url + "V04/qeaa/form",
             "un_distinguishing_sign": "FC",
-            "pid_url_oidc": cfgserv.service_url + "V04/form",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
@@ -69,9 +68,8 @@ class ConfCountries:
                 "eu.europa.ec.eudiw.mdl_mdoc",
                 "eu.europa.ec.eudiw.over18_mdoc",
                 "eu.europa.ec.eudiw.loyalty_mdoc",
-                "eu.europa.ec.eudiw.pseudonym_over18_mdoc"
+                "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
             ],
-            "pid_url_oidc": cfgserv.service_url + "V04/form",
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
         "PT": {
@@ -91,7 +89,8 @@ class ConfCountries:
             "connection_type": "oauth",
             "oidc_auth": {
                 "url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?",
-                "redirect_uri": "https://preprod.issuer.eudiw.dev/" + "dynamic/redirect",
+                "redirect_uri": "https://preprod.issuer.eudiw.dev/"
+                + "dynamic/redirect",
                 "scope": {
                     "eu.europa.ec.eudiw.pid.1": {
                         "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
@@ -107,7 +106,6 @@ class ConfCountries:
                         "document_number": "http://interop.gov.pt/IMTT/Cidadao/NoCarta",
                         "portrait": "http://interop.gov.pt/DadosCC/Cidadao/Foto",
                         "driving_privileges": "http://interop.gov.pt/IMTT/Cidadao/Categorias",
-                        
                     },
                 },
                 "response_type": "token",
@@ -125,7 +123,6 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
-            "mdl_url": "",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
@@ -140,31 +137,28 @@ class ConfCountries:
                 "client_id": "eu_europa_ec_eudiw_pid_provider_1_ppr",
             },
             "attribute_request": {
-                "url": "https://tara-test.ria.ee/oidc/profile?access_token=",
                 "header": {"Host": "tara-test.ria.ee"},
                 "custom_modifiers": {
                     "birth_date": "date_of_birth",
                 },
             },
             "oidc_redirect": {
-                "url":"https://tara-test.ria.ee/oidc/token",
-                "headers":{
+                "headers": {
                     "Host": "tara-test.ria.ee",
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Authorization": "Basic ZXVfZXVyb3BhX2VjX2V1ZGl3X3BpZF9wcm92aWRlcl8xX3BwcjpINUVpVjdPaGZMTUs1TFBvcXB0NG5WT1FJeEdicEZ3MQ==",
                 },
-                "grant_type":"authorization_code",
-                "redirect_uri":"https://pprpid.provider.eudiw.projj.eu/tara/redirect"
-
+                "grant_type": "authorization_code",
+                "redirect_uri": "https://pprpid.provider.eudiw.projj.eu/tara/redirect",
             },
         },
         "CZ": {
             "name": "Czechia",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
-            "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_CZ.pem',
-            #"pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes          
-            "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_CZ_cert.der',
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_CZ.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_CZ_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
@@ -176,9 +170,9 @@ class ConfCountries:
         "NL": {
             "name": "Netherland",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=NL",
-            "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_NL.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes          
-            "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_NL_cert.der',
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_NL.pem",
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_NL_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
@@ -190,17 +184,19 @@ class ConfCountries:
         "LU": {
             "name": "Luxembourg",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=LU",
-            "pid_mdoc_privkey": '/etc/eudiw/pid-issuer/privkey/PID-DS-0001_LU.pem',
-            "pid_mdoc_privkey_passwd": None,  # None or bytes          
-            "pid_mdoc_cert": '/etc/eudiw/pid-issuer/cert/PID-DS-0001_LU_cert.der',
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_LU.pem",
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
             ],
-            "custom_modifiers": {"family_name":'CurrentFamilyName',
-                                "given_name":'CurrentGivenName',
-                                'birth_date':"DateOfBirth"},
+            "custom_modifiers": {
+                "family_name": "CurrentFamilyName",
+                "given_name": "CurrentGivenName",
+                "birth_date": "DateOfBirth",
+            },
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
         },
