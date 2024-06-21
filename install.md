@@ -72,7 +72,10 @@ To run the eudiw-issuer application, follow these simple steps (some of which ma
    
    -  Copy ```/app/app_config/__config_secrets.py``` to ```/app/app_config/config_secrets.py``` and modify secrets.
 
-8. Run the eudiw-issuer application (on <http://127.0.0.1:5000>)
+7. Service Configuration
+   - Configure the service according to [documentation](api_docs/configuration.md)  
+
+9. Run the eudiw-issuer application (on <http://127.0.0.1:5000>)
 
     ```shell
     flask --app app run
