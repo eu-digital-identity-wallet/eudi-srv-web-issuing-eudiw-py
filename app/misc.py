@@ -23,7 +23,8 @@ Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD
 This misc.py file includes different miscellaneous functions.
 """
 import datetime
-#from app.route_oidc import authentication_error_redirect
+
+# from app.route_oidc import authentication_error_redirect
 from io import BytesIO
 import secrets
 from urllib import request
@@ -38,7 +39,7 @@ import uuid
 
 def create_dict(dict, item):
     """Create dictionary with key and value element. The key will be the key of dict and the value will be dict[item]
-    
+
     Keyword arguments:
     + dict -- dictionary
     + item -- dictionary item
@@ -54,9 +55,9 @@ def create_dict(dict, item):
     return d
 
 
-def calculate_age(date_of_birth:str):
+def calculate_age(date_of_birth: str):
     """returns the age, based on the date_of_birth
-    
+
     Keyword arguments:
     + date_of_birth -- date of birth in the format Year-Month-Day
 
@@ -69,6 +70,7 @@ def calculate_age(date_of_birth:str):
         age -= 1
     return age
 
+
 def convert_png_to_jpeg(png_bytes):
     # Open the PNG image from bytes
     png_image = Image.open(BytesIO(png_bytes))
@@ -77,12 +79,13 @@ def convert_png_to_jpeg(png_bytes):
     jpeg_buffer = BytesIO()
 
     # Convert the PNG image to JPEG format and save to the buffer
-    png_image.convert('RGB').save(jpeg_buffer, format='JPEG')
+    png_image.convert("RGB").save(jpeg_buffer, format="JPEG")
 
     # Get the JPEG bytes from the buffer
     jpeg_bytes = jpeg_buffer.getvalue()
 
     return jpeg_bytes
+
 
 def getMandatoryAttributes(attributes):
     """
@@ -102,8 +105,9 @@ def getMandatoryAttributes(attributes):
 
         if attribute_data["mandatory"] == True:    
             attributes_form.update({attribute_name}) """
-    
+
     return attributes_form
+
 
 def getAttributesForm(credentials_requested):
     """
@@ -146,7 +150,7 @@ def getAttributes(attributes):
     """
     Function to get mandatory attributes from credential
     """
-    
+
     attributes_form = {}
 
     for x, value in enumerate(list(attributes.keys())):
@@ -165,19 +169,20 @@ def generate_unique_id():
 
     return str(uuid.uuid4())
 
+
 def validate_image(file):
     """
     Converts input file value into base64url
     """
     try:
-        if file.filename== "":
+        if file.filename == "":
             return False, "No selected file"
 
         img = Image.open(file)
 
-        width, height =img.size
+        width, height = img.size
         if width != 360 or height != 433:
-            return False, "Image dimensions are invalid."  
+            return False, "Image dimensions are invalid."
     except:
         return False, "Failed to open image."
 
@@ -188,7 +193,7 @@ def validate_image(file):
 # First supported credential found of that doctype
 def scope2details(scope):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
-    configuration_ids =[]
+    configuration_ids = []
     if "openid" not in scope:
         configuration_ids.append("openid")
 
@@ -197,7 +202,9 @@ def scope2details(scope):
             for credential in credentialsSupported:
                 if "doctype" in credentialsSupported[credential]:
                     if credentialsSupported[credential]["doctype"] == item:
-                        configuration_ids.append({"credential_configuration_id": credential})
+                        configuration_ids.append(
+                            {"credential_configuration_id": credential}
+                        )
 
     return configuration_ids
     """ return authentication_error_redirect(
@@ -206,11 +213,19 @@ def scope2details(scope):
         error_description="Authorization details or scope not supported",
     ) """
 
-def credential_error_resp(error,desc):
-    return jsonify({'error': error,
-                    "error_description": desc,
-                    "c_nonce": secrets.token_urlsafe(16),
-                    "c_nonce_expires_in": 86400,}), 400
+
+def credential_error_resp(error, desc):
+    return (
+        jsonify(
+            {
+                "error": error,
+                "error_description": desc,
+                "c_nonce": secrets.token_urlsafe(16),
+                "c_nonce_expires_in": 86400,
+            }
+        ),
+        400,
+    )
 
 
 # Error redirection to the wallet during authentication
@@ -248,18 +263,15 @@ def authentication_error_redirect(jws_token, error, error_description):
 
 # Error redirection to the wallet during authentication without jws_token
 def auth_error_redirect(return_uri, error, error_description=None):
-    
+
     error_msg = {
-                "error": error,
-            }
-    
+        "error": error,
+    }
+
     if error_description is not None:
         error_msg["error_description"] = error_description
-    
+
     return redirect(
-        url_get(
-            return_uri,
-            error_msg
-        ),
+        url_get(return_uri, error_msg),
         code=302,
     )

@@ -26,6 +26,7 @@ import datetime
 from app_config.config_service import ConfService as cfgserv
 from misc import calculate_age
 
+
 def format_pid_data(dict):
     """Formats PID data, from the format received from the eIDAS node, into the format expected by the CBOR formatter (route formatter/cbor)
 

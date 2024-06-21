@@ -36,69 +36,88 @@ import datetime
 import hashlib
 from . import trusted_CAs
 
-def validate_vp_token(response_json):
 
+def validate_vp_token(response_json):
     """
     Validate VP token, checking document and presentation_submission attributes
     """
 
-    auth_request_values = {"definition_id":"32f54163-7166-48f1-93d8-ff217bdb0653",
-                           "id":"eu.europa.ec.eudiw.pid.1",
-                           "input_descriptor":["family_name", "given_name", "birth_date", "age_over_18", "issuing_authority", "issuing_country"]}
-    
-    if response_json["presentation_submission"]["definition_id"] != auth_request_values["definition_id"]:
-        
-        return True, "Definition id received is different from the requested."
-    
-    elif response_json["presentation_submission"]["descriptor_map"][0]["id"] != auth_request_values["id"]:
+    auth_request_values = {
+        "definition_id": "32f54163-7166-48f1-93d8-ff217bdb0653",
+        "id": "eu.europa.ec.eudiw.pid.1",
+        "input_descriptor": [
+            "family_name",
+            "given_name",
+            "birth_date",
+            "age_over_18",
+            "issuing_authority",
+            "issuing_country",
+        ],
+    }
 
-        return True, "Id from descriptor is not same as the id in the authorization request."
-    
+    if (
+        response_json["presentation_submission"]["definition_id"]
+        != auth_request_values["definition_id"]
+    ):
+
+        return True, "Definition id received is different from the requested."
+
+    elif (
+        response_json["presentation_submission"]["descriptor_map"][0]["id"]
+        != auth_request_values["id"]
+    ):
+
+        return (
+            True,
+            "Id from descriptor is not same as the id in the authorization request.",
+        )
+
     elif response_json["presentation_submission"]["descriptor_map"][0]["path"] == "$":
-            
-            pos = 0
+
+        pos = 0
 
     else:
-        matcher = re.search(r"\d+", response_json["presentation_submission"]["descriptor_map"][0]["path"])
+        matcher = re.search(
+            r"\d+",
+            response_json["presentation_submission"]["descriptor_map"][0]["path"],
+        )
         if matcher:
             pos = int(matcher.group())
         else:
             pos = -1
-        
+
     if pos == -1:
-        
-        return True,"The path value from presentation_submission is not valid."
-    
+
+        return True, "The path value from presentation_submission is not valid."
+
     else:
 
-        mdoc=response_json ["vp_token"]
-        mdoc_ver=None
+        mdoc = response_json["vp_token"]
+        mdoc_ver = None
 
         try:
-            mdoc_ver=base64.urlsafe_b64decode(mdoc)
-            
+            mdoc_ver = base64.urlsafe_b64decode(mdoc)
+
         except:
-            mdoc_ver=base64.urlsafe_b64decode(mdoc + '==')    
-        
+            mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
+
         mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
 
-        if mdoc_cbor["status"]!= 0:
+        if mdoc_cbor["status"] != 0:
 
             return True, "Status invalid:" + str(mdoc_cbor["status"])
-       
-        error,errorMsg=validate_certificate(mdoc_cbor["documents"][pos])
+
+        error, errorMsg = validate_certificate(mdoc_cbor["documents"][pos])
 
         if error == False:
 
             return True, errorMsg
-        
 
-        #Validate values received are the same values requested
-        namespaces=mdoc_cbor["documents"][pos]["issuerSigned"]["nameSpaces"]
-        attributes_requested=auth_request_values["input_descriptor"]
-        attributes_received=[]
+        # Validate values received are the same values requested
+        namespaces = mdoc_cbor["documents"][pos]["issuerSigned"]["nameSpaces"]
+        attributes_requested = auth_request_values["input_descriptor"]
+        attributes_received = []
 
-        
         for n in namespaces.keys():
             l = []
             for e in namespaces[n]:  # e is a CBORTag
@@ -109,130 +128,150 @@ def validate_vp_token(response_json):
         if len(attributes_received) != len(attributes_requested):
 
             if set(attributes_received).issubset(set(attributes_requested)):
-                
-                #missing_attributes = list(set(attributes_requested) - set(attributes_received))
-                return True, "Missing attributes" #missing_attributes
+
+                # missing_attributes = list(set(attributes_requested) - set(attributes_received))
+                return True, "Missing attributes"  # missing_attributes
             else:
-                return True, "There are values that weren't requested."   
+                return True, "There are values that weren't requested."
 
-        if all(x in attributes_requested for x in attributes_received) and all(x in attributes_received for x in attributes_requested):
+        if all(x in attributes_requested for x in attributes_received) and all(
+            x in attributes_received for x in attributes_requested
+        ):
 
-            return False,""
-        
+            return False, ""
+
+
 def validate_certificate(mdoc):
     """
     Function to validate certificate in MSO Header, the siganture and digests
-    
+
     """
 
-    certificate_data=mdoc["issuerSigned"]["issuerAuth"]
+    certificate_data = mdoc["issuerSigned"]["issuerAuth"]
 
     tagged_data = cbor2.CBORTag(18, certificate_data)
     message = Sign1Message.decode(cbor2.dumps(tagged_data))
 
-    payload=message.payload
-    protected=message.phdr
-    unprotected=message.uhdr
-    signature=message.signature
+    payload = message.payload
+    protected = message.phdr
+    unprotected = message.uhdr
+    signature = message.signature
 
-    #Certificate 
-    certificate = x509.load_der_x509_certificate(unprotected[X5chain], default_backend())
+    # Certificate
+    certificate = x509.load_der_x509_certificate(
+        unprotected[X5chain], default_backend()
+    )
 
-
-    #Validate Certificate (MSO Header)
+    # Validate Certificate (MSO Header)
     if certificate.issuer not in trusted_CAs:
 
         return False, "Certificate wasn't emitted by a Trusted CA "
-    
+
     else:
 
-        public_key_CA=trusted_CAs[certificate.issuer]["public_key"]
+        public_key_CA = trusted_CAs[certificate.issuer]["public_key"]
 
-        x = certificate.public_key().public_numbers().x.to_bytes(
-                        (certificate.public_key().public_numbers().x.bit_length() + 7) // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+        x = (
+            certificate.public_key()
+            .public_numbers()
+            .x.to_bytes(
+                (certificate.public_key().public_numbers().x.bit_length() + 7)
+                // 8,  # Number of bytes needed
+                "big",  # Byte order
+            )
+        )
 
-        y = certificate.public_key().public_numbers().y.to_bytes(
-                        (certificate.public_key().public_numbers().y.bit_length() + 7) // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+        y = (
+            certificate.public_key()
+            .public_numbers()
+            .y.to_bytes(
+                (certificate.public_key().public_numbers().y.bit_length() + 7)
+                // 8,  # Number of bytes needed
+                "big",  # Byte order
+            )
+        )
 
-        ec_key = EC2Key(x=x, y=y, crv=1) 
+        ec_key = EC2Key(x=x, y=y, crv=1)
 
         try:
             public_key_CA.verify(
                 certificate.signature,
                 certificate.tbs_certificate_bytes,
-                ec.ECDSA(certificate.signature_hash_algorithm)
+                ec.ECDSA(certificate.signature_hash_algorithm),
             )
         except:
             return False, "Certificate wasn't emitted by a Trusted CA "
-        
-        message.key=ec_key
-      
-        not_valid_after=trusted_CAs[certificate.issuer]["not_valid_after"].replace(tzinfo=datetime.timezone.utc)
-        not_valid_before=trusted_CAs[certificate.issuer]["not_valid_before"].replace(tzinfo=datetime.timezone.utc)
+
+        message.key = ec_key
+
+        not_valid_after = trusted_CAs[certificate.issuer]["not_valid_after"].replace(
+            tzinfo=datetime.timezone.utc
+        )
+        not_valid_before = trusted_CAs[certificate.issuer]["not_valid_before"].replace(
+            tzinfo=datetime.timezone.utc
+        )
         now = datetime.datetime.now(datetime.timezone.utc)
 
         if now < not_valid_before or not_valid_after < now:
-                
+
             return False, "Certificate not valid"
-        
+
         try:
             message.verify_signature()
-            
+
         except Exception as e:
             return False, "Signature not valid"
-        
-    #Validate payload
-    payload_decoded=cbor2.decoder.loads(cbor2.decoder.loads(payload).value)
-    
-    namespaces=mdoc["issuerSigned"]["nameSpaces"]
 
-    doctype_MSO= payload_decoded["docType"]
+    # Validate payload
+    payload_decoded = cbor2.decoder.loads(cbor2.decoder.loads(payload).value)
+
+    namespaces = mdoc["issuerSigned"]["nameSpaces"]
+
+    doctype_MSO = payload_decoded["docType"]
 
     if doctype_MSO != mdoc["docType"]:
         return False, "Doctype from MSO not equal to doctype in document"
-    
+
     algorithm = payload_decoded["digestAlgorithm"]
 
-    #Validate Digests
+    # Validate Digests
     for n in namespaces.keys():
-            i=0
-            for e in namespaces[n]:
-                new_cbor_tag=cbor2.CBORTag(e.tag, e.value)
+        i = 0
+        for e in namespaces[n]:
+            new_cbor_tag = cbor2.CBORTag(e.tag, e.value)
 
-                if algorithm=="SHA-256":
-                    calculated_digest= hashlib.sha256(cbor2.dumps(new_cbor_tag)).digest()
+            if algorithm == "SHA-256":
+                calculated_digest = hashlib.sha256(cbor2.dumps(new_cbor_tag)).digest()
 
-                elif algorithm =="SHA-512":
-                    calculated_digest= hashlib.sha512(cbor2.dumps(new_cbor_tag)).digest()
-                
-                for digests in payload_decoded["valueDigests"][n].values():
+            elif algorithm == "SHA-512":
+                calculated_digest = hashlib.sha512(cbor2.dumps(new_cbor_tag)).digest()
 
-                    if calculated_digest == digests:
-                        i+=1
-                        break
+            for digests in payload_decoded["valueDigests"][n].values():
 
-            if i != len(namespaces[n]):
-                return False, "Missing digests or there aren't enough digests that correspond to the values in document"
+                if calculated_digest == digests:
+                    i += 1
+                    break
 
-    #Validity Info 
-    ValidityInfo= payload_decoded["validityInfo"]
+        if i != len(namespaces[n]):
+            return (
+                False,
+                "Missing digests or there aren't enough digests that correspond to the values in document",
+            )
 
-    signed=ValidityInfo["signed"]
-    validFrom= ValidityInfo["validFrom"]
-    validUntil= ValidityInfo["validUntil"]
+    # Validity Info
+    ValidityInfo = payload_decoded["validityInfo"]
+
+    signed = ValidityInfo["signed"]
+    validFrom = ValidityInfo["validFrom"]
+    validUntil = ValidityInfo["validUntil"]
 
     if signed < not_valid_before or not_valid_after < signed:
         return False, "Signed date isn't within validity period of the certificate"
-    
+
     now = datetime.datetime.now(datetime.timezone.utc)
 
     if now < validFrom or validUntil < now:
-                
+
         return False, "Period defined in ValidityInfo is invalid"
 
-    return True,""
-    
+    return True, ""

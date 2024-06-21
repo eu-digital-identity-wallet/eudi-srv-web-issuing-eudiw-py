@@ -43,7 +43,6 @@ from boot_validate import (
     validate_mandatory_args,
 )
 
-from app_config.config_devtest import ConfTest as cfgdev
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
 from redirect_func import url_get
@@ -257,7 +256,7 @@ def dynamic_R1(country):
         return redirect(url)
 
 
-@dynamic.route("/redirect", methods=["GET", "POST"])
+@dynamic.route("/redirect", methods=["GET"])
 def red():
     """Receives token from different IDPs
 
@@ -674,7 +673,7 @@ def credentialCreation(credential_request, data, country):
     return credential_response
 
 
-@dynamic.route("/getpidoid4vp", methods=["GET", "POST"])
+@dynamic.route("/getpidoid4vp", methods=["GET"])
 def getpidoid4vp():
     presentation_id = request.args.get("presentation_id")
     url = (
@@ -847,9 +846,9 @@ def Dynamic_form2():
 
         if item == "portrait":
             if form_data[item] == "Port1":
-                cleaned_data["portrait"] = cfgdev.portrait1
+                cleaned_data["portrait"] = cfgserv.portrait1
             elif form_data[item] == "Port2":
-                cleaned_data["portrait"] = cfgdev.portrait2
+                cleaned_data["portrait"] = cfgserv.portrait2
             elif form_data[item] == "Port3":
                 portrait = request.files["Image"]
 
@@ -958,9 +957,9 @@ def Dynamic_form():
 
         if item == "portrait":
             if form_data[item] == "Port1":
-                cleaned_data["portrait"] = cfgdev.portrait1
+                cleaned_data["portrait"] = cfgserv.portrait1
             elif form_data[item] == "Port2":
-                cleaned_data["portrait"] = cfgdev.portrait2
+                cleaned_data["portrait"] = cfgserv.portrait2
             elif form_data[item] == "Port3":
                 portrait = request.files["Image"]
 

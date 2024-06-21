@@ -18,6 +18,7 @@
 
 from .config_service import ConfService as cfgserv
 
+
 class ConfService:
     # Country Selection URLs
 
