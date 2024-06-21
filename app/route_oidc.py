@@ -70,7 +70,6 @@ import requests
 
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
-from .app_config.config_devtest import ConfTest as cfgtest
 
 from . import oidc_metadata, openid_metadata
 

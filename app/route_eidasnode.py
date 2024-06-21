@@ -41,7 +41,6 @@ from flask_cors import CORS
 from validate import validate_mandatory_args
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
-from app_config.config_devtest import ConfTest as cfgdev
 from redirect_func import redirect_getpid_or_mdl, json_post, url_get
 from lighttoken import create_request, handle_response
 from pid_func import format_pid_data, format_sd_jwt_pid_data
