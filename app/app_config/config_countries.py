@@ -42,8 +42,8 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "custom_modifiers": {
                 "family_name": "CurrentFamilyName",
@@ -62,13 +62,31 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der",
             "un_distinguishing_sign": "FC",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
-                "eu.europa.ec.eudiw.mdl_jwt_vc_json",
-                "eu.europa.ec.eudiw.mdl_mdoc",
-                "eu.europa.ec.eudiw.over18_mdoc",
-                "eu.europa.ec.eudiw.loyalty_mdoc",
-                "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_mdoc",
+                "eu.europa.ec.eudi.over18_mdoc",
+                "eu.europa.ec.eudi.loyalty_mdoc",
+                "eu.europa.ec.eudi.pseudonym_over18_mdoc",
+                "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+            ],
+            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
+        },
+        "sample": {
+            "name": "Sample",
+            "pid_url": cfgserv.service_url + "pid/form",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_UT.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der",
+            "qeaa_func": cfgserv.service_url + "V04/qeaa/form",
+            "un_distinguishing_sign": "FC",
+            "supported_credentials": [
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_mdoc",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
@@ -80,11 +98,11 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_PT_cert.der",
             "un_distinguishing_sign": "P",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
-                "eu.europa.ec.eudiw.mdl_jwt_vc_json",
-                "eu.europa.ec.eudiw.mdl_mdoc",
-                "eu.europa.ec.eudiw.over18_mdoc",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_jwt_vc_json",
+                "eu.europa.ec.eudi.mdl_mdoc",
+                "eu.europa.ec.eudi.over18_mdoc",
             ],
             "connection_type": "oauth",
             "oidc_auth": {
@@ -92,7 +110,7 @@ class ConfCountries:
                 "redirect_uri": "https://preprod.issuer.eudiw.dev/"
                 + "dynamic/redirect",
                 "scope": {
-                    "eu.europa.ec.eudiw.pid.1": {
+                    "eu.europa.ec.eudi.pid.1": {
                         "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
                         "family_name": "http://interop.gov.pt/MDC/Cidadao/NomeApelido",
                         "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
@@ -124,8 +142,8 @@ class ConfCountries:
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "connection_type": "openid",
             "oidc_auth": {
@@ -161,8 +179,8 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_CZ_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
@@ -175,8 +193,8 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_NL_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
@@ -189,8 +207,8 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
-                "eu.europa.ec.eudiw.pid_mdoc",
-                "eu.europa.ec.eudiw.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_mdoc",
+                "eu.europa.ec.eudi.pid_jwt_vc_json",
             ],
             "custom_modifiers": {
                 "family_name": "CurrentFamilyName",

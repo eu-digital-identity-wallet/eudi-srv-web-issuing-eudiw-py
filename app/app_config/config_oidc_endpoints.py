@@ -23,25 +23,11 @@ class ConfService:
     # Country Selection URLs
 
     country_redirect = {
-        # "org.iso.18013.5.1.mDL openid": "https://preprod.issuer.eudiw.dev/V04/mdl",
-        "org.iso.18013.5.1.mDL openid": "https://127.0.0.1:5000/V04/mdl",
-        # "eu.europa.ec.eudiw.pid.1 openid": "https://preprod.issuer.eudiw.dev/V04/pid",
-        "eu.europa.ec.eudiw.pid.1 openid": "https://127.0.0.1:5000/V04/pid",
-        "eu.europa.ec.eudiw.qeaa.1 openid": "https://preprod.issuer.eudiw.dev/V04/qeaa",
         "dynamic": cfgserv.service_url + "auth_choice",
     }
 
     # Credential URLs
 
     credential_urls = {
-        "org.iso.18013.5.1.mDL.PT": "https://preprod.issuer.eudiw.dev/cmd/mdl_R2?user_id=",
-        "org.iso.18013.5.1.mDL.FC": "https://preprod.issuer.eudiw.dev/V04/mdl/form_R2?user_id=",
-        "eu.europa.ec.eudiw.pid.1.PT": "https://preprod.issuer.eudiw.dev/cmd/R2?user_id=",
-        "eu.europa.ec.eudiw.pid.1.EE": "https://preprod.issuer.eudiw.dev/tara/R2?user_id=",
-        "eu.europa.ec.eudiw.pid.1.CW": "https://preprod.issuer.eudiw.dev/eidasnode/eidasR2?user_id=",
-        # "eu.europa.ec.eudiw.pid.1.FC": "https://preprod.issuer.eudiw.dev/V04/form_R2?user_id=",
-        "eu.europa.ec.eudiw.pid.1.FC": "https://127.0.0.1:5000/V04/form_R2?user_id=",
-        "eu.europa.ec.eudiw.qeaa.1.PT": "https://preprod.issuer.eudiw.dev/V04/qeaa/R2?user_id=",
-        "eu.europa.ec.eudiw.qeaa.1.FC": "https://preprod.issuer.eudiw.dev/V04/qeaa/form_R2?user_id=",
         "dynamic": cfgserv.service_url + "dynamic/dynamic_R2",
     }

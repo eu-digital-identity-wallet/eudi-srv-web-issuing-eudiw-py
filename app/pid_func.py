@@ -68,7 +68,7 @@ def format_sd_jwt_pid_data(dict):
     pdata = {
         "evidence": [
             {
-                "type": "eu.europa.ec.eudiw.pid.1",
+                "type": "eu.europa.ec.eudi.pid.1",
                 "source": {
                     "organization_name": cfgserv.pid_issuing_authority,
                     "organization_id": cfgserv.pid_organization_id,
@@ -77,7 +77,7 @@ def format_sd_jwt_pid_data(dict):
             }
         ],
         "claims": {
-            "eu.europa.ec.eudiw.pid.1": {
+            "eu.europa.ec.eudi.pid.1": {
                 "family_name": dict["family_name"],
                 "given_name": dict["given_name"],
                 "birth_date": birthdate,

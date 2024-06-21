@@ -130,9 +130,9 @@ def cborformatter():
                 "un_distinguishing_sign",
             ],
         )
-    if request.json["doctype"] == "eu.europa.ec.eudiw.pid.1":
+    if request.json["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
-            request.json["data"]["eu.europa.ec.eudiw.pid.1"],
+            request.json["data"]["eu.europa.ec.eudi.pid.1"],
             ["family_name", "given_name", "birth_date", "age_over_18"],
         )
 
@@ -234,9 +234,9 @@ def sd_jwtformatter():
             ],
         )
 
-    if PID["doctype"] == "eu.europa.ec.eudiw.pid.1":
+    if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
-            PID["data"]["claims"]["eu.europa.ec.eudiw.pid.1"],
+            PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"],
             ["family_name", "given_name", "birth_date", "age_over_18"],
         )
     if not b:  # nota all mandatory args are present

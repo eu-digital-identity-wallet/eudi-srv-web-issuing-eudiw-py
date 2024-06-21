@@ -90,10 +90,10 @@ def mdocFormatter(data, doctype, country, device_publickey):
             "issuance_date": issuance_date,
             "expiry_date": data["org.iso.18013.5.1"]["expiry_date"],
         }
-    elif doctype == "eu.europa.ec.eudiw.pid.1":
+    elif doctype == "eu.europa.ec.eudi.pid.1":
         validity = {
-            "issuance_date": data["eu.europa.ec.eudiw.pid.1"]["issuance_date"],
-            "expiry_date": data["eu.europa.ec.eudiw.pid.1"]["expiry_date"],
+            "issuance_date": data["eu.europa.ec.eudi.pid.1"]["issuance_date"],
+            "expiry_date": data["eu.europa.ec.eudi.pid.1"]["expiry_date"],
         }
     elif doctype == "eu.europa.ec.eudiw.qeaa.1":
         validity = {
@@ -139,9 +139,9 @@ def cbor2elems(mdoc):
     Return: Returns a dict with (element, values) contained in the namespaces of the mdoc. E.g. {'ns1': [('e1', 'v1'), ('e2', 'v2')], 'ns2': [('e3', 'v3')]}
     """
     d = {}
-    namespaces = cbor2.decoder.loads(base64.urlsafe_b64decode(mdoc + "=="))[
-        "documents"
-    ][0]["issuerSigned"]["nameSpaces"]
+    namespaces = cbor2.decoder.loads(base64.urlsafe_b64decode(mdoc))["documents"][0][
+        "issuerSigned"
+    ]["nameSpaces"]
     for n in namespaces.keys():
         l = []
         for e in namespaces[n]:  # e is a CBORTag
@@ -181,8 +181,8 @@ def sdjwtFormatter(PID, country):
     if doctype == "org.iso.18013.5.1.mDL":
         PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
         iat = DatestringFormatter(PID_Claims_data["issue_date"])
-    if doctype == "eu.europa.ec.eudiw.pid.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.pid.1"]
+    if doctype == "eu.europa.ec.eudi.pid.1":
+        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
     if doctype == "eu.europa.ec.eudiw.qeaa.1":
         PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.qeaa.1"]

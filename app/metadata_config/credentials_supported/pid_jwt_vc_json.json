@@ -1,7 +1,7 @@
 {
-    "eu.europa.ec.eudiw.pid_jwt_vc_json": {
+    "eu.europa.ec.eudi.pid_jwt_vc_json": {
     "format": "vc+sd-jwt",
-    "scope": "eu.europa.ec.eudiw.pid.1",
+    "scope": "eu.europa.ec.eudi.pid.1",
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"
     ],
@@ -17,6 +17,12 @@
       "cwt": {
         "proof_signing_alg_values_supported": [
           "ES256"
+        ],
+        "proof_alg_values_supported": [
+          -7
+        ],
+        "proof_crv_values_supported": [
+          1
         ]
       }
     },
@@ -30,7 +36,7 @@
         }
       }
     ],
-    "vct": "eu.europa.ec.eudiw.pid_jwt_vc_json",
+    "vct": "eu.europa.ec.eudi.pid_jwt_vc_json",
     "claims": {
       "family_name": {
         "mandatory": true,

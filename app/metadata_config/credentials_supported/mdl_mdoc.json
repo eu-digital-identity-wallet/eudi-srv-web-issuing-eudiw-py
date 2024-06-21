@@ -1,5 +1,5 @@
 {
-"eu.europa.ec.eudiw.mdl_mdoc": {
+"eu.europa.ec.eudi.mdl_mdoc": {
     "format": "mso_mdoc",
     "doctype": "org.iso.18013.5.1.mDL",
     "scope": "org.iso.18013.5.1.mDL",
@@ -18,6 +18,12 @@
       "cwt": {
         "proof_signing_alg_values_supported": [
           "ES256"
+        ],
+        "proof_alg_values_supported": [
+          -7
+        ],
+        "proof_crv_values_supported": [
+          1
         ]
       }
     },
