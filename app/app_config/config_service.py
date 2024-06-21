@@ -33,12 +33,12 @@ import os
 class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
-    #service_url = "https://preprod.issuer.eudiw.dev:4443/"
+    # service_url = "https://preprod.issuer.eudiw.dev:4443/"
     service_url = "https://issuer.eudiw.dev/"
-    #service_url = "https://127.0.0.1:5000/"
-    #service_url =  "https://dev.issuer.eudiw.dev/"
+    # service_url = "https://127.0.0.1:5000/"
+    # service_url =  "https://dev.issuer.eudiw.dev/"
 
-    #---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
     # ------------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ class ConfService:
     # OpenID endpoints
 
     OpenID_first_endpoint = service_url + "verify/user"
-    #OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev:4443/verify/user"
+    # OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev:4443/verify/user"
     # OpenID_first_endpoint = "https://127.0.0.1:5000/verify/user"
 
     # Deferred endpoint expiry time (minutes)
@@ -116,7 +116,7 @@ class ConfService:
 
     # OIDC4VC URL for initial page
     oidc = service_url + ".well-known/openid-credential-issuer"
-    #oidc = "https://preprod.issuer.eudiw.dev:4443/.well-known/openid-credential-issuer"
+    # oidc = "https://preprod.issuer.eudiw.dev:4443/.well-known/openid-credential-issuer"
 
     # ------------------------------------------------------------------------------------------------
     # current version
@@ -200,65 +200,64 @@ class ConfService:
         },
     }
 
-    config_doctype={
+    config_doctype = {
         "eu.europa.ec.eudiw.pid.1": {
             "issuing_authority": pid_issuing_authority,
-            "organization_id":pid_organization_id,
-            "validity":pid_validity,
-            "organization_name":pid_issuing_authority,
-            "namespace":pid_namespace
+            "organization_id": pid_organization_id,
+            "validity": pid_validity,
+            "organization_name": pid_issuing_authority,
+            "namespace": pid_namespace,
         },
         "eu.europa.ec.eudiw.qeaa.1": {
             "issuing_authority": qeaa_issuing_authority,
-            "organization_id":pid_organization_id,
-            "validity":qeaa_validity,
-            "organization_name":qeaa_issuing_authority,
-            "namespace":qeaa_namespace
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": qeaa_issuing_authority,
+            "namespace": qeaa_namespace,
         },
         "org.iso.18013.5.1.mDL": {
             "issuing_authority": mdl_issuing_authority,
-            "organization_id":pid_organization_id,
-            "validity":mdl_validity,
-            "organization_name":mdl_issuing_authority,
-            "namespace":mdl_namespace
+            "organization_id": pid_organization_id,
+            "validity": mdl_validity,
+            "organization_name": mdl_issuing_authority,
+            "namespace": mdl_namespace,
         },
         "eu.europa.ec.eudiw.pseudonym.age_over_18.1": {
             "issuing_authority": "Test QEAA issuer",
-            "organization_id":pid_organization_id,
-            "validity":qeaa_validity,
-            "organization_name":"Test QEAA issuer",
-            "namespace":"eu.europa.ec.eudiw.pseudonym.age_over_18.1"
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudiw.pseudonym.age_over_18.1",
         },
         "eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint": {
             "issuing_authority": "Test QEAA issuer",
-            "organization_id":pid_organization_id,
-            "validity":qeaa_validity,
-            "organization_name":"Test QEAA issuer",
-            "namespace":"eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint"
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudiw.pseudonym.age_over_18.deferred_endpoint",
         },
         "eu.europa.ec.eudiw.loyalty.1": {
             "issuing_authority": "Test QEAA issuer",
-            "organization_id":pid_organization_id,
-            "validity":qeaa_validity,
-            "organization_name":"Test QEAA issuer",
-            "namespace":"eu.europa.ec.eudiw.loyalty.1"
-        }
-
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudiw.loyalty.1",
+        },
     }
 
-    auth_method_supported_credencials={
-        "PID_login":[
+    auth_method_supported_credencials = {
+        "PID_login": [
             "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
-            "eu.europa.ec.eudiw.pseudonym_over18_mdoc_deferred_endpoint"
+            "eu.europa.ec.eudiw.pseudonym_over18_mdoc_deferred_endpoint",
         ],
-        "country_selection":[
+        "country_selection": [
             "eu.europa.ec.eudiw.loyalty_mdoc",
             "eu.europa.ec.eudiw.mdl_jwt_vc_json",
             "eu.europa.ec.eudiw.mdl_mdoc",
             "eu.europa.ec.eudiw.pid_jwt_vc_json",
             "eu.europa.ec.eudiw.pid_mdoc",
-            "eu.europa.ec.eudiw.pseudonym_over18_mdoc"
-        ]
+            "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
+        ],
     }
 
     # Supported certificate algorithms and curves

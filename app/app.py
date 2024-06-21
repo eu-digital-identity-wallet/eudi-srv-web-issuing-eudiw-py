@@ -33,13 +33,11 @@ from idpyoidc.configure import create_from_config_file
 from idpyoidc.server.configure import OPConfiguration
 from idpyoidc.server import Server
 from urllib.parse import urlparse
-import route_eidasnode, route_formatter, route_qeaa,route_oidc
+import route_eidasnode, route_formatter, route_qeaa, route_oidc
 
 
 # Log
 from app_config.config_service import ConfService as log
-
-
 
 
 def handle_exception(e):
@@ -68,7 +66,8 @@ def page_not_found(e):
         ),
         404,
     )
-    
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -141,14 +140,12 @@ def create_app(test_config=None):
 
     return app
 
+
 app = create_app()
 
 
 #
 # Usage examples:
 # gunicorn app:app -b 127.0.0.1:5000
-# flask run 
+# flask run
 #
-
-
-
