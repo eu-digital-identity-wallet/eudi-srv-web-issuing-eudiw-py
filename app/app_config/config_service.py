@@ -51,11 +51,6 @@ class ConfService:
     # openid endpoint in case of eidas node login error
     eidasnode_openid_error_endpoint = service_url + "error_redirect"
 
-    # eIDAS secret connector request
-    # Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
-    #                                   entry key="lightToken.connector.request.secret"
-    eidasnode_lightToken_secret = "scaN+LhrJL+f9c1pULJ8MU5RQN+igrDoZZMUTw5MboY="
-
     # eIDAS node connector endpoint (for lightrequest)
     eidasnode_lightToken_connectorEndpoint = (
         "https://issuer.eudiw.dev/EidasNode/SpecificConnectorRequest"
@@ -120,7 +115,7 @@ class ConfService:
 
     # ------------------------------------------------------------------------------------------------
     # current version
-    current_version = "0.4"
+    current_version = "0.5"
 
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
@@ -152,6 +147,15 @@ class ConfService:
             "error_str",
         ],
         "0.4": [
+            "mdoc",
+            "nonce",
+            "authTag",
+            "ciphertextPubKey",
+            "sd_jwt",
+            "error",
+            "error_str",
+        ],
+        "0.5": [
             "mdoc",
             "nonce",
             "authTag",

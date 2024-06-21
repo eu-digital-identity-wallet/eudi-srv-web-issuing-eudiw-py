@@ -31,6 +31,7 @@ import uuid
 import xml.etree.ElementTree as ET
 
 from app_config.config_service import ConfService as cfgserv
+from app_config.config_secrets import eidasnode_lightToken_secret
 
 
 def create_request(country, loa):
@@ -90,7 +91,7 @@ def create_request(country, loa):
 
     # calculation of digest id|issuer|timestamp|secret
     bltForDigest = (
-        id + "|" + issuer + "|" + timestamp + "|" + cfgserv.eidasnode_lightToken_secret
+        id + "|" + issuer + "|" + timestamp + "|" + eidasnode_lightToken_secret
     )
     digest = hashlib.sha256(bltForDigest.encode())
     digestBase64 = base64.b64encode(digest.digest())

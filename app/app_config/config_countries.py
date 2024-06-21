@@ -41,7 +41,6 @@ class ConfCountries:
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
-            "mdl_url": "",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
@@ -61,10 +60,7 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der",
-            "mdl_url": cfgserv.service_url + "V04/mdl/form",
-            "qeaa_func": cfgserv.service_url + "V04/qeaa/form",
             "un_distinguishing_sign": "FC",
-            "pid_url_oidc": cfgserv.service_url + "V04/form",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
@@ -74,7 +70,6 @@ class ConfCountries:
                 "eu.europa.ec.eudiw.loyalty_mdoc",
                 "eu.europa.ec.eudiw.pseudonym_over18_mdoc",
             ],
-            "pid_url_oidc": cfgserv.service_url + "V04/form",
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
         "PT": {
@@ -128,7 +123,6 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
-            "mdl_url": "",
             "supported_credentials": [
                 "eu.europa.ec.eudiw.pid_mdoc",
                 "eu.europa.ec.eudiw.pid_jwt_vc_json",
@@ -143,14 +137,12 @@ class ConfCountries:
                 "client_id": "eu_europa_ec_eudiw_pid_provider_1_ppr",
             },
             "attribute_request": {
-                "url": "https://tara-test.ria.ee/oidc/profile?access_token=",
                 "header": {"Host": "tara-test.ria.ee"},
                 "custom_modifiers": {
                     "birth_date": "date_of_birth",
                 },
             },
             "oidc_redirect": {
-                "url": "https://tara-test.ria.ee/oidc/token",
                 "headers": {
                     "Host": "tara-test.ria.ee",
                     "Content-Type": "application/x-www-form-urlencoded",
