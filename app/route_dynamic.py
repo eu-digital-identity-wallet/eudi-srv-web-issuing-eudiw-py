@@ -257,7 +257,7 @@ def dynamic_R1(country):
         return redirect(url)
 
 
-@dynamic.route("/redirect", methods=["GET", "POST"])
+@dynamic.route("/redirect", methods=["GET"])
 def red():
     """Receives token from different IDPs
 
@@ -674,7 +674,7 @@ def credentialCreation(credential_request, data, country):
     return credential_response
 
 
-@dynamic.route("/getpidoid4vp", methods=["GET", "POST"])
+@dynamic.route("/getpidoid4vp", methods=["GET"])
 def getpidoid4vp():
     presentation_id = request.args.get("presentation_id")
     url = (

@@ -45,7 +45,6 @@ from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
 
 
-
 # Log
 from .app_config.config_service import ConfService as log
 
@@ -53,6 +52,7 @@ from .app_config.config_service import ConfService as log
 oidc_metadata = {}
 openid_metadata = {}
 trusted_CAs = {}
+
 
 def setup_metadata():
     global oidc_metadata
@@ -91,54 +91,61 @@ def setup_metadata():
 
 setup_metadata()
 
+
 def setup_trusted_CAs():
     global trusted_CAs
-    
+
     try:
         ec_keys = {}
         for file in os.listdir(cfgserv.trusted_CAs_path):
             if file.endswith("pem"):
-                CA_path = os.path.join(
-                    cfgserv.trusted_CAs_path, file
-                    
-                )
+                CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
                 with open(CA_path) as pem_file:
 
                     pem_data = pem_file.read()
 
-                    pem_data=pem_data.encode()
+                    pem_data = pem_data.encode()
 
-                    certificate = x509.load_pem_x509_certificate(pem_data, default_backend())
-                    
+                    certificate = x509.load_pem_x509_certificate(
+                        pem_data, default_backend()
+                    )
+
                     public_key = certificate.public_key()
 
-                    issuer=certificate.issuer
+                    issuer = certificate.issuer
 
-                    not_valid_before=certificate.not_valid_before
+                    not_valid_before = certificate.not_valid_before
 
-                    not_valid_after=certificate.not_valid_after
+                    not_valid_after = certificate.not_valid_after
 
                     x = public_key.public_numbers().x.to_bytes(
-                        (public_key.public_numbers().x.bit_length() + 7) // 8,  # Number of bytes needed
+                        (public_key.public_numbers().x.bit_length() + 7)
+                        // 8,  # Number of bytes needed
                         "big",  # Byte order
                     )
 
                     y = public_key.public_numbers().y.to_bytes(
-                        (public_key.public_numbers().y.bit_length() + 7) // 8,  # Number of bytes needed
+                        (public_key.public_numbers().y.bit_length() + 7)
+                        // 8,  # Number of bytes needed
                         "big",  # Byte order
                     )
 
-                    ec_key = EC2Key(x=x, y=y, crv=1)  # SECP256R1 curve is equivalent to P-256
-                    
-                    ec_keys.update({issuer:{
-                        "certificate":certificate,
-                        "public_key":public_key,
-                        "not_valid_before":not_valid_before,
-                        "not_valid_after":not_valid_after,
-                        "ec_key":ec_key
-                    }})
-                    
+                    ec_key = EC2Key(
+                        x=x, y=y, crv=1
+                    )  # SECP256R1 curve is equivalent to P-256
+
+                    ec_keys.update(
+                        {
+                            issuer: {
+                                "certificate": certificate,
+                                "public_key": public_key,
+                                "not_valid_before": not_valid_before,
+                                "not_valid_after": not_valid_after,
+                                "ec_key": ec_key,
+                            }
+                        }
+                    )
 
     except FileNotFoundError as e:
         print(f"TrustedCA Error: file not found.\n {e}")
@@ -147,7 +154,8 @@ def setup_trusted_CAs():
     except Exception as e:
         print(f"TrustedCA Error: An unexpected error occurred.\n {e}")
 
-    trusted_CAs=ec_keys
+    trusted_CAs = ec_keys
+
 
 setup_trusted_CAs()
 
@@ -187,13 +195,13 @@ def create_app(test_config=None):
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
 
-    @app.route("/", methods=["GET", "POST"])
+    @app.route("/", methods=["GET"])
     def initial_page():
         return render_template("misc/initial_page.html", oidc=cfgserv.oidc)
-    
-    @app.route("/favicon.ico", methods=["GET", "POST"])
+
+    @app.route("/favicon.ico")
     def favicon():
-        return send_from_directory('static/images', 'favicon.ico')
+        return send_from_directory("static/images", "favicon.ico")
 
     app.config.from_mapping(SECRET_KEY="dev")
 
