@@ -48,6 +48,8 @@ _20 Jun 2024_
 -  Update current flows to OID4VCI draft 13
 -  Remove /oidc route
 -  A more dynamically built form and country selection
+-  Changed doctype and namespace from "eudiw" to "eudi" in pid and age verification credentials. 
+
 
 ### Fixed
 -  UI scalling for mobile devices
