@@ -485,69 +485,69 @@ def oid4vp():
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
     payload = json.dumps(
-    {
-        "type": "vp_token",
-        "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-        "presentation_definition": {
-            "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-            "input_descriptors": [
-            {
-                "id": "eu.europa.ec.eudiw.pid.1",
-                "format": {
-                "mso_mdoc": {
-                    "alg": [
-                    "ES256",
-                    "ES384",
-                    "ES512",
-                    "EdDSA"
-                    ]
-                }
-                },
-                "name": "EUDI PID",
-                "purpose": "We need to verify your identity",
-                "constraints": {
-                "fields": [
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['family_name']"
-                    ],
-                    "intent_to_retain": False
-                    },
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['given_name']"
-                    ],
-                    "intent_to_retain": False
-                    },
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['birth_date']"
-                    ],
-                    "intent_to_retain": False
-                    },
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['age_over_18']"
-                    ],
-                    "intent_to_retain": False
-                    },
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['issuing_authority']"
-                    ],
-                    "intent_to_retain": False
-                    },
-                    {
-                    "path": [
-                        "$['eu.europa.ec.eudiw.pid.1']['issuing_country']"
-                    ],
-                    "intent_to_retain": False
+        {
+            "type": "vp_token",
+            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
+            "presentation_definition": {
+                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
+                "input_descriptors": [
+                {
+                    "id": "eu.europa.ec.eudi.pid.1",
+                    "format": {
+                    "mso_mdoc": {
+                        "alg": [
+                        "ES256",
+                        "ES384",
+                        "ES512",
+                        "EdDSA"
+                        ]
                     }
-                ]
+                    },
+                    "name": "EUDI PID",
+                    "purpose": "We need to verify your identity",
+                    "constraints": {
+                    "fields": [
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['family_name']"
+                        ],
+                        "intent_to_retain": False
+                        },
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['given_name']"
+                        ],
+                        "intent_to_retain": False
+                        },
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['birth_date']"
+                        ],
+                        "intent_to_retain": False
+                        },
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['age_over_18']"
+                        ],
+                        "intent_to_retain": False
+                        },
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['issuing_authority']"
+                        ],
+                        "intent_to_retain": False
+                        },
+                        {
+                        "path": [
+                            "$['eu.europa.ec.eudi.pid.1']['issuing_country']"
+                        ],
+                        "intent_to_retain": False
+                        }
+                    ]
+                    }
                 }
+                ]
             }
-            ]
-        }
         }
     )
 
@@ -981,7 +981,7 @@ def preauthCode():
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url,
-        "credential_configuration_ids": ["eu.europa.ec.eudiw.loyalty_mdoc"],
+        "credential_configuration_ids": ["eu.europa.ec.eudi.loyalty_mdoc"],
         "grants" : {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code" : {
                  "pre-authorized_code": code

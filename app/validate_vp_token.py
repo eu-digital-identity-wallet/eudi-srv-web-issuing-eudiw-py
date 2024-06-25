@@ -44,7 +44,7 @@ def validate_vp_token(response_json):
 
     auth_request_values = {
         "definition_id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-        "id": "eu.europa.ec.eudiw.pid.1",
+        "id": "eu.europa.ec.eudi.pid.1",
         "input_descriptor": [
             "family_name",
             "given_name",
