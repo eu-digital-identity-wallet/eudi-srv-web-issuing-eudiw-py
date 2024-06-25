@@ -28,4 +28,4 @@
 | idpyoidc                  | 3.0.0     | Apache Software License 2.0                             | https://github.com/IdentityPython/idpy-oidc/                   | https://github.com/IdentityPython/idpy-oidc/blob/main/LICENSE|
 | openid4v                  | 0.0.1     | Apache Software License 2.0                            | https://github.com/rohe/openid4v/                              |  https://github.com/rohe/openid4v/blob/main/LICENSE|
 | fedservice                | 4.0.0     | Apache Software License 2.0                            | https://github.com/rohe/fedservice/                            | https://github.com/rohe/fedservice/blob/master/LICENSE
-| idpysdjwt                 | 0.0.1     | Apache Software License 2.0                            | https://github.com/rohe/idpy-sdjwt/                             | https://github.com/rohe/idpy-sdjwt/blob/main/pyproject.toml|
+| idpysdjwt                 | 0.0.1     | Apache Software License 2.0                            | https://github.com/rohe/idpy-sdjwt/                             | https://github.com/rohe/idpy-sdjwt/blob/main/LICENSE|
