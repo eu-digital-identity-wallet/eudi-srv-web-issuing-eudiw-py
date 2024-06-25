@@ -32,8 +32,8 @@
       }
     }
   },
-  "port": 6000,
-  "domain": "dev.issuer.eudiw.dev",
+  "port": 5000,
+  "domain": "issuer.eudiw.dev",
   "server_name": "{domain}",
   "base_url": "https://{domain}",
   "op": {
@@ -363,7 +363,7 @@
     "server_key": "certs/client.key",
     "ca_bundle": null,
     "verify_user": false,
-    "port": 6000,
+    "port": 5000,
     "domain": "issuer.eudiw.dev",
     "debug": true
   }
