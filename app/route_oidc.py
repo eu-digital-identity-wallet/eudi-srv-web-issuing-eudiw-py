@@ -691,12 +691,13 @@ def token():
         code = req_args["pre-authorized_code"]
 
         url = cfgservice.service_url + "token_service"
+        redirect_url = urllib.parse.quote(cfgservice.service_url) + "preauth-code"
 
-        payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=https%3A%2F%2Fdev.issuer.eudiw.dev%2Fpreauth-code&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
+        payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
         headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
         }
-
+        
         response = requests.request("POST", url, headers=headers, data=payload)
 
         if response.status_code != 200:

@@ -36,6 +36,7 @@ from flask import Blueprint, Flask, redirect, render_template, request, session,
 from flask_api import status
 from flask_cors import CORS
 import requests
+import urllib.parse
 from app.lighttoken import handle_response
 from app.validate_vp_token import validate_vp_token
 
@@ -805,8 +806,9 @@ def auth():
 def preauthRed():
 
     url = cfgserv.service_url + "pushed_authorizationv2"
+    redirect_url = urllib.parse.quote(cfgserv.service_url) + "preauth-code"
 
-    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=https%3A%2F%2Fdev.issuer.eudiw.dev%2Fpreauth-code&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudi.loyalty_mdoc%22%0A%20%20%7D%0A%5D"
+    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=" + redirect_url + "&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudi.loyalty_mdoc%22%0A%20%20%7D%0A%5D"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.request("POST", url, headers=headers, data=payload)
