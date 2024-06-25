@@ -70,7 +70,7 @@ To run the eudiw-issuer application, follow these simple steps (some of which ma
 
 6. Setup secrets
    
-   -  Copy ```/app/app_config/__config_secrets.py``` to ```/app/app_config/config_secrets.py``` and modify secrets.
+   -  Copy ```app/app_config/__config_secrets.py``` to ```app/app_config/config_secrets.py``` and modify secrets.
 
 7. Service Configuration
    - Configure the service according to [documentation](api_docs/configuration.md)  
