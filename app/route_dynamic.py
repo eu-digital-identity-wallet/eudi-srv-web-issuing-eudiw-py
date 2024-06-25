@@ -750,13 +750,13 @@ def getpidoid4vp():
             if "credential_configuration_id" in cred_request:
                 if (
                     cred_request["credential_configuration_id"]
-                    == "eu.europa.ec.eudiw.pseudonym_over18_mdoc"
+                    == "eu.europa.ec.eudi.pseudonym_over18_mdoc"
                     or cred_request["credential_configuration_id"]
                     == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
                 ):
                     attributesForm.update({"user_pseudonym": uuid4()})
             elif "vct" in cred_request:
-                if cred_request["vct"] == "eu.europa.ec.eudiw.pseudonym_jwt_vc_json":
+                if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
                     attributesForm.update({"user_pseudonym": uuid4()})
 
     elif (
@@ -764,7 +764,7 @@ def getpidoid4vp():
     ):
         cred_scopes = session["authorization_params"]["scope"]
         if (
-            "eu.europa.ec.eudiw.pseudonym.age_over_18.1" in cred_scopes
+            "eu.europa.ec.eudi.pseudonym.age_over_18.1" in cred_scopes
             or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
             in cred_scopes
         ):
@@ -806,7 +806,7 @@ def preauthRed():
 
     url = cfgserv.service_url + "pushed_authorizationv2"
 
-    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=https%3A%2F%2Fdev.issuer.eudiw.dev%2Fpreauth-code&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudiw.loyalty_mdoc%22%0A%20%20%7D%0A%5D"
+    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=https%3A%2F%2Fdev.issuer.eudiw.dev%2Fpreauth-code&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudi.loyalty_mdoc%22%0A%20%20%7D%0A%5D"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.request("POST", url, headers=headers, data=payload)
