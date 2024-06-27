@@ -16,7 +16,7 @@ Parameters that should be changed:
 ## 2. Configuration of Countries
 This file configures the supported countries of the issuer.
 
-Located in ```/app/app_config/config_countried.py```
+Located in ```/app/app_config/config_countries.py```
 
 Parameters that should be changed for each country:
 - pid_mdoc_privkey (Private key used to sign the credential)
