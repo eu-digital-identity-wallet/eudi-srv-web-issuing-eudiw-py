@@ -1,4 +1,4 @@
-## 0. Configuration
+# Configuration
 
 The following document specifies the changes needed to add a new credential to the issuer.
 We will use a generic loyalty card credential as an example for this configuration.
