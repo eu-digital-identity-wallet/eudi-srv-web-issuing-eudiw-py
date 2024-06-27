@@ -24,7 +24,7 @@ The EUDIW issuer implements the PID and mDL provider backend (as defined in the 
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
 | [Token Endpoint](api_docs/token.md)                               | ✅                                                              |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ❌ `pre-authorized_code`              |
+| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
 | [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations                  |
 | Credential Issuer MetaData                                        | ✅                                                              | 
 | [Batch Endpoint](api_docs/batch_credential.m)                     | ✅                                                              | 
@@ -65,7 +65,9 @@ Examples:
     ```
     flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/key.pem --host=127.0.0.1 --port=4430
     ```
+## How to add a new credential to the issuer
 
+Documentation for this use case in [api_docs/add_credential.md](api_docs/add_credential.md) 
 
 ## How to contribute
 
