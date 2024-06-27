@@ -1,6 +1,8 @@
 ## Credential Offer 
 
-<https://issuer.eudiw.dev/credential_offer_choice>
+<https://issuer.eudiw.dev/credential_offer>
+
+If running your own version of the issuer locally, it can be accessed on ```http://127.0.0.1:{flask_port}/credential_offer```
 
 A form is presented showing the Request Credentials for your EUDI Wallet that can be requested.
 
