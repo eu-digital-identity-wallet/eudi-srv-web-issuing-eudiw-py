@@ -1,6 +1,7 @@
-## Credential Request (Post)
+# Credential Request (Post)
 
-<https://issuer.eudiw.dev/credential>
+**Endpoint**: <https://issuer.eudiw.dev/credential> (or <https://localhost/credential> if installed locally)
+
 
 Header:
 
@@ -17,7 +18,7 @@ Payload:
 
 ![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/0c667f28-fc80-4ae8-a2ec-c1ba59f9a8d8)
 
-+ *Example Requests:*
+**Example Requests:**
   
   header:
   ```
@@ -28,7 +29,7 @@ Payload:
   payload:
   ```Json
   {
-      "credential_identifier": "eu.europa.ec.eudiw.pid_jwt_vc_json",
+      "credential_identifier": "eu.europa.ec.eudi.pid_jwt_vc_json",
       "proof": {
         "proof_type": "jwt",
         "jwt": "eyJ0eXAiOiJvcGVuaWQ0dmNpLXByb29mK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4Ijoid1V1UDJPbHdIZWZlRS1ZMTZXajdQSEF6WjBKQVF5ZXZxV01mZDUtS21LWSIsInkiOiJZVy1iOE8zVWszTlVyazlvWnBBVDFsYVBlQWdpTlF3RGNvdFdpd0JGUTZFIn19.eyJhdWQiOiJodHRwczovL3ByZXByb2QuaXNzdWVyLmV1ZGl3LmRldi9vaWRjIiwibm9uY2UiOiJTcUdTMzc0eUFheFpIc254aUs5NWVnIiwiaWF0IjoxNzA0ODg2ODU1fQ.IdmxwbfJIKwcaqvADp6bzV2u-o0UwKIVmo_kQkc1rZHQ9MtBDNbO21NoVr99ZEgumTX8UYNFJcr_R95xfO1NiA"
@@ -39,7 +40,7 @@ Payload:
   payload:
   ```Json
   {
-      "credential_identifier": "eu.europa.ec.eudiw.pid_jwt_vc_json",
+      "credential_identifier": "eu.europa.ec.eudi.pid_jwt_vc_json",
       "proof": {
         "proof_type": "jwt",
         "jwt": "eyJ0eXAiOiJvcGVuaWQ0dmNpLXByb29mK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4Ijoid1V1UDJPbHdIZWZlRS1ZMTZXajdQSEF6WjBKQVF5ZXZxV01mZDUtS21LWSIsInkiOiJZVy1iOE8zVWszTlVyazlvWnBBVDFsYVBlQWdpTlF3RGNvdFdpd0JGUTZFIn19.eyJhdWQiOiJodHRwczovL3ByZXByb2QuaXNzdWVyLmV1ZGl3LmRldi9vaWRjIiwibm9uY2UiOiJTcUdTMzc0eUFheFpIc254aUs5NWVnIiwiaWF0IjoxNzA0ODg2ODU1fQ.IdmxwbfJIKwcaqvADp6bzV2u-o0UwKIVmo_kQkc1rZHQ9MtBDNbO21NoVr99ZEgumTX8UYNFJcr_R95xfO1NiA"
@@ -51,7 +52,7 @@ Payload:
   ```Json
   {
       "format": "vc+sd-jwt",
-      "vct": "eu.europa.ec.eudiw.mdl_jwt_vc_json",
+      "vct": "eu.europa.ec.eudi.mdl_jwt_vc_json",
       "proof": {
         "proof_type": "jwt",
         "jwt": "eyJ0eXAiOiJvcGVuaWQ0dmNpLXByb29mK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4Ijoid1V1UDJPbHdIZWZlRS1ZMTZXajdQSEF6WjBKQVF5ZXZxV01mZDUtS21LWSIsInkiOiJZVy1iOE8zVWszTlVyazlvWnBBVDFsYVBlQWdpTlF3RGNvdFdpd0JGUTZFIn19.eyJhdWQiOiJodHRwczovL3ByZXByb2QuaXNzdWVyLmV1ZGl3LmRldi9vaWRjIiwibm9uY2UiOiJTcUdTMzc0eUFheFpIc254aUs5NWVnIiwiaWF0IjoxNzA0ODg2ODU1fQ.IdmxwbfJIKwcaqvADp6bzV2u-o0UwKIVmo_kQkc1rZHQ9MtBDNbO21NoVr99ZEgumTX8UYNFJcr_R95xfO1NiA"
@@ -61,8 +62,8 @@ Payload:
 
 Response:
 
-+ *c_nonce* - Required. JSON string containing a nonce
-+ *c_nonce_expires_in* - Required. Json integer denoting lifetime of c_nonce
++ *c_nonce* - JSON string containing a nonce
++ *c_nonce_expires_in* - Json integer denoting lifetime of c_nonce
 + *credential* - Optional. Contains issued Credential
 + *notification_id* - Used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance.
 + *transaction_id* - Optional, String identifying a Deferred Issuance transaction

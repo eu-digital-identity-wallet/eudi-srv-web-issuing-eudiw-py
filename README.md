@@ -1,9 +1,14 @@
-# EUDIW issuer
+# EUDIW Issuer
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
-The EUDIW issuer implements the PID and mDL provider backend (as defined in the issuing-mdl and issuing-pid repositories) and includes the functionalities of the following components:
+### Overview
+
+The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service, supporting the OpenId4VCI (draft 13) protocol.
+
+The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for the following credentials:
+
 
 | Credential/Attestation | Format    |
 |------------------------|-----------|
@@ -11,9 +16,16 @@ The EUDIW issuer implements the PID and mDL provider backend (as defined in the 
 | PID                    | SD-JWT-VC |
 | mDL                    | mso_mdoc  | 
 | mDL                    | SD-JWT-VC  | 
-| QEAA age over 18 pseudonym | mso_mdoc |
+| (Q)EAA age-over-18 pseudonym | mso_mdoc |
+| (Q)EAA loyalty card | mso_mdoc |
 
-### OpenId4VCI draft 13 coverage
+For authenticating the user, it requires the use of eIDAS node, OAUTH2 server or a simple form (for testing purposes).
+
+
+### OpenId4VCI coverage
+
+This version of the EUDIW Issuer supports the [OpenId for Verifiable Credential Issuance (draft 13)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
+
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
@@ -27,11 +39,13 @@ The EUDIW issuer implements the PID and mDL provider backend (as defined in the 
 | [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
 | [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations                  |
 | Credential Issuer MetaData                                        | ✅                                                              | 
-| [Batch Endpoint](api_docs/batch_credential.m)                     | ✅                                                              | 
+| [Batch Endpoint](api_docs/batch_credential.md)                     | ✅                                                              | 
 | [Deferred Endpoint](api_docs/deferred.md)                         | ✅                                                              |
 | Proof                                                             | ✅ JWT, ✅ CWT                                                  |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
 
+
+You can use the EUDIW Issuer at https://issuer.eudiw.dev/, or install it locally.
 
 ## 1. Installation
 
@@ -45,29 +59,12 @@ Click [here](install.md) for detailed installation instructions.
 
 ## 2. Run
 
-After installation, on the root directory of the clone repository, insert the following command line to run the eudiw-issuer application.
-Examples:
+Click [here](install.md) for detailed instructions.
 
-+ Linux/macOS/Windows (on <http://127.0.0.1:5000>)
 
-    ```
-    flask --app app run
-    ```
+## How to add a new credential to the issuer ?
 
-+ Linux/macOS/Windows (on <http://127.0.0.1:5000> with flag debug)
-
-    ```
-    flask --app app run --debug
-    ```
-
-+ Linux/macOS/Windows (on <http://127.0.0.1:4430> with flag debug, using ssl and defining the port)
-
-    ```
-    flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/key.pem --host=127.0.0.1 --port=4430
-    ```
-## How to add a new credential to the issuer
-
-Documentation for this use case in [api_docs/add_credential.md](api_docs/add_credential.md) 
+Please see detailed instructions in [api_docs/add_credential.md](api_docs/add_credential.md) 
 
 ## How to contribute
 
