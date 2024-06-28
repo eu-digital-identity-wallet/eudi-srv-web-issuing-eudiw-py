@@ -32,7 +32,7 @@ The following parameters are supported:
 
     Payload:
   
-      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&scope=eu.europa.ec.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudi.mdl_jwt_vc_json"}]
+      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&scope=eu.europa.ec.eudi.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudi.mdl_jwt_vc_json"}]
 
 
 Response:
