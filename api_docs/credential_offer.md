@@ -19,7 +19,7 @@ This generated DeepLink contains information about the credentials chosen in the
    if the selected options are Personal Identification Data and the Mobile Driver's License in both sd-jwt and mdoc format:
 
 ```
-openid-credential-offer://credential_offer?credential_offer=%7B%22credential_issuer%22:%20%22https://issuer.eudiw.dev%22%2C%20%22credential_configuration_ids%22:%20%5B%22eu.europa.ec.eudiw.pid_jwt_vc_json%22%2C%20%22eu.europa.ec.eudiw.mdl_jwt_vc_json%22%2C%20%22eu.europa.ec.eudiw.pid_mdoc%22%2C%20%22eu.europa.ec.eudiw.mdl_mdoc%22%5D%2C%20%22grants%22:%20%7B%22authorization_code%22:%20%7B%7D%7D%7D>
+openid-credential-offer://credential_offer?credential_offer=%7B%22credential_issuer%22:%20%22https://issuer.eudiw.dev%22%2C%20%22credential_configuration_ids%22:%20%5B%22eu.europa.ec.eudi.pid_jwt_vc_json%22%2C%20%22eu.europa.ec.eudi.mdl_jwt_vc_json%22%2C%20%22eu.europa.ec.eudi.pid_mdoc%22%2C%20%22eu.europa.ec.eudi.mdl_mdoc%22%5D%2C%20%22grants%22:%20%7B%22authorization_code%22:%20%7B%7D%7D%7D>
 ```
 
 ## 2. Pre-Authorized Code Flow

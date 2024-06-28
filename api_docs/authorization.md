@@ -32,7 +32,7 @@ The following parameters are supported:
 
     Payload:
   
-      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&scope=eu.europa.ec.eudiw.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudiw.mdl_jwt_vc_json"}]
+      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&scope=eu.europa.ec.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudi.mdl_jwt_vc_json"}]
 
 
 Response:
@@ -64,7 +64,7 @@ The following parameters are supported:
 
     Payload:
   
-      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&scope= eu.europa.ec.eudiw.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudiw.mdl_jwt_vc_json"}]
+      response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=...&scope= eu.europa.ec.eudi.pid.1 openid&authorization_details=[{"type": "openid_credential", "format": "vc+sd-jwt", "vct": "eu.europa.ec.eudi.mdl_jwt_vc_json"}]
 
 
 Response:
@@ -108,7 +108,7 @@ The following parameters are supported:
 
 **Example:**
   
-      https://issuer.eudiw.dev/authorizationV3?response_type=code&client_id=ID&redirect_uri=...&scope=eu.europa.ec.eudiw.pid.1&code_challenge_method=S256&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&authorization_details=[{"type": "openid_credential","credential_configuration_id": "eu.europa.ec.eudiw.pid_mdoc"},{"type": "openid_credential","credential_configuration_id":"eu.europa.ec.eudiw.mdl_mdoc"}]
+      https://issuer.eudiw.dev/authorizationV3?response_type=code&client_id=ID&redirect_uri=...&scope=eu.europa.ec.eudi.pid.1&code_challenge_method=S256&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&authorization_details=[{"type": "openid_credential","credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc"},{"type": "openid_credential","credential_configuration_id":"eu.europa.ec.eudi.mdl_mdoc"}]
 
 At the end of user authentication, the following parameters are returned:
 
@@ -132,7 +132,7 @@ The following parameters are supported:
 
 **Example:**
   
-      https://issuer.eudiw.dev/authorizationV3?response_type=code&client_id=ID&redirect_uri=...&scope=eu.europa.ec.eudiw.pid.1&authorization_details=[{"type": "openid_credential","credential_configuration_id": "eu.europa.ec.eudiw.pid_mdoc"},{"type": "openid_credential","credential_configuration_id":"eu.europa.ec.eudiw.mdl_mdoc"}]
+      https://issuer.eudiw.dev/authorizationV3?response_type=code&client_id=ID&redirect_uri=...&scope=eu.europa.ec.eudi.pid.1&authorization_details=[{"type": "openid_credential","credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc"},{"type": "openid_credential","credential_configuration_id":"eu.europa.ec.eudi.mdl_mdoc"}]
 
 At the end of user authentication, the following parameters are returned:
 
