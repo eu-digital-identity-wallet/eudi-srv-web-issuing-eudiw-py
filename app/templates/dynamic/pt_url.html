@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PT</title>
+    <script type="text/javascript" id="jqueryId" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.min.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript">
+
+        var hash = window.location.hash;
+
+        var params = new URLSearchParams(window.location.search);
+        var id = params.get('id');
+
+        window.location.replace(location.origin + "/dynamic/redirect?id=" + id + "&" + hash.substring(1));
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

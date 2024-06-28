@@ -1,16 +1,31 @@
 {
-    "eu.europa.ec.eudiw.pid_jwt_vc_json": {
+    "eu.europa.ec.eudi.pid_jwt_vc_json": {
     "format": "vc+sd-jwt",
-    "scope": "eu.europa.ec.eudiw.pid.1",
+    "scope": "eu.europa.ec.eudi.pid.1",
     "cryptographic_binding_methods_supported": [
-      "jwk"
+      "jwk", "cose_key"
     ],
-    "cryptographic_suites_supported": [
+    "credential_signing_alg_values_supported": [
       "ES256"
     ],
-    "proof_types_supported": [
-      "jwt"
-    ],
+    "proof_types_supported": {
+      "jwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ]
+      },
+      "cwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ],
+        "proof_alg_values_supported": [
+          -7
+        ],
+        "proof_crv_values_supported": [
+          1
+        ]
+      }
+    },
     "display": [
       {
         "name": "PID",
@@ -21,114 +36,196 @@
         }
       }
     ],
-    "credential_definition": {
-      "type": "eu.europa.ec.eudiw.pid.1",
-      "credentialSubject": {
-        "family_name": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Current Family Name",
-              "locale": "en"
-            }
-          ]
-        },
-        "given_name": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Current First Names",
-              "locale": "en"
-            }
-          ]
-        },
-        "birthdate": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Date of Birth",
-              "locale": "en"
-            }
-          ]
-        },
-        "address": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Resident street_address, country, region, locality and postal_code",
-              "locale": "en"
-            }
-          ]
-        },
-        "gender": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
-              "locale": "en"
-            }
-          ]
-        },
-        "nationalities": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Array of nationalities",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_family_name": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_given_name": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
-              "locale": "en"
-            }
-          ]
-        },
-        "age_over_18": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Adult or minor",
-              "locale": "en"
-            }
-          ]
-        },
-        "age_in_years": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "The subject’s current age in years.",
-              "locale": "en"
-            }
-          ]
-        },
-        "place_of_birth": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "The country, region, and locality",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true
-        },
-        "birthdate_year": {
-          "mandatory": false
-        }
+    "vct": "eu.europa.ec.eudi.pid_jwt_vc_json",
+    "claims": {
+      "family_name": {
+        "mandatory": true,
+        "value_type":"string",
+        "display": [
+          {
+            "name": "Current Family Name",
+            "locale": "en"          }
+        ]
+      },
+      "given_name": {
+        "mandatory": true,
+        "value_type":"string",
+        "display": [
+          {
+            "name": "Current First Names",
+            "locale": "en"          }
+        ]
+      },
+      "birth_date": {
+        "mandatory": true,
+        "value_type":"full-date",
+        "display": [
+          {
+            "name": "Date of Birth",
+            "locale": "en"          }
+        ]
+      },
+      "address": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Resident street_address, country, region, locality and postal_code",
+            "locale": "en"
+          }
+        ]
+      },
+      "gender": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
+            "locale": "en"
+          }
+        ]
+      },
+      "nationalities": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Array of nationalities",
+            "locale": "en"
+          }
+        ]
+      },
+      "birth_family_name": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
+            "locale": "en"
+          }
+        ]
+      },
+      "birth_given_name": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
+            "locale": "en"
+          }
+        ]
+      },
+      "age_over_18": {
+        "mandatory": true,
+        "display": [
+          {
+            "name": "Adult or minor",
+            "locale": "en"
+          }
+        ]
+      },
+      "age_in_years": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "The subject’s current age in years.",
+            "locale": "en"
+          }
+        ]
+      },
+      "place_of_birth": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "The country, region, and locality",
+            "locale": "en"
+          }
+        ]
+      },
+      "birthdate_year": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "test",
+            "locale": "en"
+          }
+        ]
+      },
+      "issuance_date": {
+        "mandatory": true,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "expiry_date": {
+        "mandatory": true,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "issuing_jurisdiction": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "issuing_authority": {
+        "mandatory": true,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "document_number": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "administrative_number": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "issuing_country": {
+        "mandatory": true,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "portrait_capture_date": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
+      },
+      "portrait": {
+        "mandatory": false,
+        "display": [
+          {
+            "name": "Alpha-2 country code, representing the nationality of the PID User.",
+            "locale": "en"
+          }
+        ]
       }
     }
   }

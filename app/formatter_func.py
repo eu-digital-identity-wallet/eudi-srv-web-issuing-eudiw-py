@@ -40,8 +40,10 @@ from sd_jwt.holder import SDJWTHolder
 from sd_jwt.verifier import SDJWTVerifier
 from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
+import jwt
 
 from app_config.config_countries import ConfCountries as cfgcountries
+from app_config.config_service import ConfService as cfgservice
 
 
 def mdocFormatter(data, doctype, country, device_publickey):
@@ -72,12 +74,12 @@ def mdocFormatter(data, doctype, country, device_publickey):
     if doctype == "org.iso.18013.5.1.mDL":
 
         data["org.iso.18013.5.1"]["portrait"] = base64.urlsafe_b64decode(
-        data["org.iso.18013.5.1"]["portrait"]
+            data["org.iso.18013.5.1"]["portrait"]
         )
-        
-        #data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
-        #data["org.iso.18013.5.1"]["signature_usual_mark"]
-        #) 
+
+        # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
+        # data["org.iso.18013.5.1"]["signature_usual_mark"]
+        # )
 
         if "issuance_date" in data["org.iso.18013.5.1"]:
             issuance_date = data["org.iso.18013.5.1"]["issuance_date"]
@@ -88,15 +90,21 @@ def mdocFormatter(data, doctype, country, device_publickey):
             "issuance_date": issuance_date,
             "expiry_date": data["org.iso.18013.5.1"]["expiry_date"],
         }
-    if doctype == "eu.europa.ec.eudiw.pid.1":
+    elif doctype == "eu.europa.ec.eudi.pid.1":
         validity = {
-            "issuance_date": data["eu.europa.ec.eudiw.pid.1"]["issuance_date"],
-            "expiry_date": data["eu.europa.ec.eudiw.pid.1"]["expiry_date"],
+            "issuance_date": data["eu.europa.ec.eudi.pid.1"]["issuance_date"],
+            "expiry_date": data["eu.europa.ec.eudi.pid.1"]["expiry_date"],
         }
-    if doctype == "eu.europa.ec.eudiw.qeaa.1":
+    elif doctype == "eu.europa.ec.eudiw.qeaa.1":
         validity = {
             "issuance_date": data["eu.europa.ec.eudiw.qeaa.1"]["issuance_date"],
             "expiry_date": data["eu.europa.ec.eudiw.qeaa.1"]["expiry_date"],
+        }
+    else:
+        first_key = list(data.keys())[0]
+        validity = {
+            "issuance_date": data[first_key]["issuance_date"],
+            "expiry_date": data[first_key]["expiry_date"],
         }
 
     # Construct the COSE private key
@@ -110,8 +118,6 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
-
-    
 
     mdoci.new(
         doctype=doctype,
@@ -175,15 +181,12 @@ def sdjwtFormatter(PID, country):
     if doctype == "org.iso.18013.5.1.mDL":
         PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
         iat = DatestringFormatter(PID_Claims_data["issue_date"])
-    if doctype == "eu.europa.ec.eudiw.pid.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.pid.1"]
+    if doctype == "eu.europa.ec.eudi.pid.1":
+        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
     if doctype == "eu.europa.ec.eudiw.qeaa.1":
         PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.qeaa.1"]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-
-
-    
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 
@@ -193,7 +196,7 @@ def sdjwtFormatter(PID, country):
     device_key = PID["device_publickey"]
 
     claims = {
-        "iss": pid_data["evidence"][0]["source"]["organization_name"],
+        "iss": cfgservice.service_url[:-1],
         "jti": jti,
         "iat": iat,
         # "nbf": iat,
@@ -261,18 +264,18 @@ def sdjwtFormatter(PID, country):
     jwk_kwargs = {
         "issuer_key": {
             "kty": "EC",
-            "d": base64.b64encode(
+            "d": jwt.utils.base64url_encode(
                 priv_d.to_bytes((priv_d.bit_length() + 7) // 8, "big")
             ).decode("utf-8"),
             "crv": private_key_curve_identifier,
-            "x": base64.b64encode(private_key_x).decode("utf-8"),
-            "y": base64.b64encode(private_key_y).decode("utf-8"),
+            "x": jwt.utils.base64url_encode(private_key_x).decode("utf-8"),
+            "y": jwt.utils.base64url_encode(private_key_y).decode("utf-8"),
         },
         "holder_key": {
             "kty": "EC",
             "crv": public_key_curve_identifier,
-            "x": base64.b64encode(public_key_x).decode("utf-8"),
-            "y": base64.b64encode(public_key_y).decode("utf-8"),
+            "x": jwt.utils.base64url_encode(public_key_x).decode("utf-8"),
+            "y": jwt.utils.base64url_encode(public_key_y).decode("utf-8"),
         },
         "key_size": 256,
         "kty": "EC",

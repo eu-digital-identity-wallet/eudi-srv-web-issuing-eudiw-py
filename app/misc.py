@@ -23,12 +23,23 @@ Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD
 This misc.py file includes different miscellaneous functions.
 """
 import datetime
+
+# from app.route_oidc import authentication_error_redirect
 from io import BytesIO
+import secrets
+from urllib import request
 from PIL import Image
+from app import oidc_metadata
+from flask import jsonify, current_app, redirect
+from flask.helpers import make_response
+from redirect_func import url_get
+import json
+import uuid
+
 
 def create_dict(dict, item):
     """Create dictionary with key and value element. The key will be the key of dict and the value will be dict[item]
-    
+
     Keyword arguments:
     + dict -- dictionary
     + item -- dictionary item
@@ -44,9 +55,9 @@ def create_dict(dict, item):
     return d
 
 
-def calculate_age(date_of_birth:str):
+def calculate_age(date_of_birth: str):
     """returns the age, based on the date_of_birth
-    
+
     Keyword arguments:
     + date_of_birth -- date of birth in the format Year-Month-Day
 
@@ -59,6 +70,7 @@ def calculate_age(date_of_birth:str):
         age -= 1
     return age
 
+
 def convert_png_to_jpeg(png_bytes):
     # Open the PNG image from bytes
     png_image = Image.open(BytesIO(png_bytes))
@@ -67,9 +79,199 @@ def convert_png_to_jpeg(png_bytes):
     jpeg_buffer = BytesIO()
 
     # Convert the PNG image to JPEG format and save to the buffer
-    png_image.convert('RGB').save(jpeg_buffer, format='JPEG')
+    png_image.convert("RGB").save(jpeg_buffer, format="JPEG")
 
     # Get the JPEG bytes from the buffer
     jpeg_bytes = jpeg_buffer.getvalue()
 
     return jpeg_bytes
+
+
+def getMandatoryAttributes(attributes):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = []
+    for attribute in attributes:
+        if attributes[attribute]["mandatory"] == True:
+            attributes_form.append(attribute)
+
+    """ attributes_form = {}
+
+    for x, value in enumerate(list(attributes.keys())):
+        attribute_name = list(attributes.keys())[x]
+        attribute_data = attributes.get(attribute_name, {})
+
+        if attribute_data["mandatory"] == True:    
+            attributes_form.update({attribute_name}) """
+
+    return attributes_form
+
+
+def getAttributesForm(credentials_requested):
+    """
+    Function to get attributes needed to populate form depending credentials requested by user
+
+    Keyword arguments:"
+    credentials_requested --credentials requested by the user
+
+    """
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+
+    attributes = {}
+    for request in credentials_requested:
+        format = credentialsSupported[request]["format"]
+        namescapes = credentialsSupported[request]["claims"]
+        attributes_req = {}
+        if format == "mso_mdoc":
+
+            for namescape in namescapes:
+                attributes_req = getAttributes(
+                    credentialsSupported[request]["claims"][namescape]
+                )
+
+        elif format == "vc+sd-jwt":
+            attributes_req.update(
+                getAttributes(credentialsSupported[request]["claims"])
+            )
+
+        for attribute in attributes_req:
+            if attribute not in attributes:
+                attributes.update({attribute: attributes_req[attribute]})
+
+        if "birth_date" in attributes and "birthdate" in attributes:
+            attributes.pop("birthdate")
+
+    return attributes
+
+
+def getAttributes(attributes):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = {}
+
+    for x, value in enumerate(list(attributes.keys())):
+        attribute_name = list(attributes.keys())[x]
+        attribute_data = attributes.get(attribute_name, {})
+
+        if attribute_data["mandatory"] == True:
+            if "value_type" in attribute_data:
+                attributes_form.update({attribute_name: attribute_data["value_type"]})
+
+    return attributes_form
+
+
+def generate_unique_id():
+    """Function to generate a random uuid"""
+
+    return str(uuid.uuid4())
+
+
+def validate_image(file):
+    """
+    Converts input file value into base64url
+    """
+    try:
+        if file.filename == "":
+            return False, "No selected file"
+
+        img = Image.open(file)
+
+        width, height = img.size
+        if width != 360 or height != 433:
+            return False, "Image dimensions are invalid."
+    except:
+        return False, "Failed to open image."
+
+    return True, None
+
+
+# Generates authorization details from a scope
+# First supported credential found of that doctype
+def scope2details(scope):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    configuration_ids = []
+    if "openid" not in scope:
+        configuration_ids.append("openid")
+
+    for item in scope:
+        if item != "openid":
+            for credential in credentialsSupported:
+                if "doctype" in credentialsSupported[credential]:
+                    if credentialsSupported[credential]["doctype"] == item:
+                        configuration_ids.append(
+                            {"credential_configuration_id": credential}
+                        )
+
+    return configuration_ids
+    """ return authentication_error_redirect(
+        jws_token=request.args.get("token"),
+        error="invalid authentication",
+        error_description="Authorization details or scope not supported",
+    ) """
+
+
+def credential_error_resp(error, desc):
+    return (
+        jsonify(
+            {
+                "error": error,
+                "error_description": desc,
+                "c_nonce": secrets.token_urlsafe(16),
+                "c_nonce_expires_in": 86400,
+            }
+        ),
+        400,
+    )
+
+
+# Error redirection to the wallet during authentication
+def authentication_error_redirect(jws_token, error, error_description):
+    authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
+        "user"
+    )
+    try:
+        auth_args = authn_method.unpack_token(jws_token)
+    except:
+        return make_response(
+            json.dumps(
+                {"error": "invalid_request", "error_description": "Cookie Lost"}
+            ),
+            400,
+        )
+
+    if error is None:
+        error = "invalid_request"
+
+    if error_description is None:
+        error_description = "invalid_request"
+
+    return redirect(
+        url_get(
+            auth_args["return_uri"],
+            {
+                "error": error,
+                "error_description": error_description,
+            },
+        ),
+        code=302,
+    )
+
+
+# Error redirection to the wallet during authentication without jws_token
+def auth_error_redirect(return_uri, error, error_description=None):
+
+    error_msg = {
+        "error": error,
+    }
+
+    if error_description is not None:
+        error_msg["error_description"] = error_description
+
+    return redirect(
+        url_get(return_uri, error_msg),
+        code=302,
+    )

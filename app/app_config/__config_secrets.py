@@ -16,18 +16,13 @@
 #
 ###############################################################################
 
-from .config_service import ConfService as cfgserv
+"""
+Configuration of service secrets
+"""
 
+flask_secret_key = "secret_here"
 
-class ConfService:
-    # Country Selection URLs
-
-    country_redirect = {
-        "dynamic": cfgserv.service_url + "auth_choice",
-    }
-
-    # Credential URLs
-
-    credential_urls = {
-        "dynamic": cfgserv.service_url + "dynamic/dynamic_R2",
-    }
+# eIDAS secret connector request
+# Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
+#                                   entry key="lightToken.connector.request.secret"
+eidasnode_lightToken_secret = "secret_here"

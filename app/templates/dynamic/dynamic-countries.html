@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+    <meta name="Title" content="Request Credentials" />
+    <meta name="Keywords" content="EUDI Wallet, Credentials, Enrolment" />
+    <meta name="Description" content="Request Credentials for EUDI Wallet" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/vnd.microsoft.icon" />
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.gif') }}" type="image/gif" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}" />
+    <link href="{{ url_for('static', filename='bootstrap-3.4.1-dist/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='css/stylesheets/custom/custom_en_9.7.1.20.1679559965505.css') }}" media="all" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='fontawesome-free-5.15.4-web/css/fontawesome.min.css') }}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" id="jqueryId" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.min.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/promiz/promiz-1.0.6.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-3.4.1-dist/js/bootstrap.min.js') }}" charset="UTF-8" defer="true"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/html5shiv/html5shiv-3.7.3.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/respond/respond-1.4.2.js') }}" charset="UTF-8"></script>
+    <meta name="referrer" content="no-referrer">
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/loc/loc_en_9.7.1.20.1679559965505.js') }}" charset="UTF-8"></script>
+    <title>Request Credentials for your EUDI Wallet</title>
+</head>
+
+<body id="responsive-main-nav">
+    <div class="main container-fluid">
+        <header role="banner" class="main-header">
+            <div class="container">
+                <div class="row">
+                </div>
+            </div>
+        </header>
+        <div role="main" class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Request Credentials for your EUDI Wallet</h1>
+                    <div id="content" class="content-wrap content-center col-md-6 col-sm-7">
+                        <div class="genericErrors" id="genericErrorsDesc">
+                        </div>
+                        <h2>Please select your country of origin</h2>
+                       <form id="selectCountryForm" method="post" action="{{redirect_url}}dynamic/?authorization_details={{authorization_details}}" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
+                            <h3>Test Credentials Provider</h3>
+                            <p>This Credentials Provider should only be used for issuing Credentials for testing purposes.</p>
+                            <div id="eidasCountries">
+                                {% for key, value in countries.items() %}
+                                <div class="flag">
+                                    <input type="radio" value="{{ key }}" id="{{ key }}" name="country" class="{{ key }}">
+                                    <label for="{{ key }}" class="{{ key }} countryName">{{ value }}</label>
+                                </div>
+                                {% endfor %}
+                                <!-- <div class="flag">
+                                    <input type="radio" value="AT" id="AT" name="country" class="AT">
+                                    <label for="AT" class="AT countryName">Austria</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="BE" id="BE" name="country" class="BE">
+                                    <label for="BE" class="BE countryName">Belgium</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="HR" id="HR" name="country" class="HR">
+                                    <label for="HR" class="HR countryName">Croatia</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="CZ" id="CZ" name="country" class="CZ">
+                                    <label for="CZ" class="CZ countryName">Czechia</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="EE" id="EE" name="country" class="EE">
+                                    <label for="EE" class="EE countryName">Estonia</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="DE" id="DE" name="country" class="DE">
+                                    <label for="DE" class="DE countryName">Germany</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="IT" id="IT" name="country" class="IT">
+                                    <label for="IT" class="IT countryName">Italy</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="LV" id="LV" name="country" class="LV">
+                                    <label for="LV" class="LV countryName">Latvia</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="LT" id="LT" name="country" class="LT">
+                                    <label for="LT" class="LT countryName">Lithuania</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="LU" id="LU" name="country" class="LU">
+                                    <label for="LU" class="LU countryName">Luxembourg</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="MT" id="MT" name="country" class="MT">
+                                    <label for="MT" class="MT countryName">Malta</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="NL" id="NL" name="country" class="NL">
+                                    <label for="NL" class="NL countryName">Netherlands</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="PT" id="PT" name="country" class="PT">
+                                    <label for="PT" class="PT countryName">Portugal</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="SK" id="SK" name="country" class="SK">
+                                    <label for="SK" class="SK countryName">Slovakia</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="ES" id="ES" name="country" class="ES">
+                                    <label for="ES" class="ES countryName">Spain</label>
+                                </div>
+                                <div class="flag">
+                                    <input type="radio" value="SE" id="SE" name="country" class="SE">
+                                    <label for="SE" class="SE countryName">Sweden</label>
+                                </div> -->
+                            </div>
+                            <div class="clearfix"></div>
+
+
+                            <span class="more-submit">
+                                <input type="submit" name="proceed" accesskey="S" value="Submit" class="btn btn-primary" title="Submit" /><input type="submit" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" />
+                            </span>
+                        </form>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer container-fluid" role="contentinfo">
+        <div class="container">
+            <div class="row">
+            </div>
+        </div>
+    </footer>
+    <!-- Version 9.7.1.20 - 23/03/2023 - 09:26 -->
+</body>
+
+</html>

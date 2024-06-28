@@ -7,7 +7,30 @@ body {
     font-weight: 400;
     font-size: 1.4rem;
     line-height: 2.2rem;
-    color: #404040
+    color: #404040;
+    width: auto;
+}
+
+label{
+    word-break: break-all;
+}
+
+#responsive-main-nav1{
+    background: #FFF;
+}
+
+.vcenter {
+    display:table-cell;
+    vertical-align: middle;
+    text-align: center;
+    float: none;
+}
+
+#error_auth {
+    font-size: 2.5rem;
+    line-height: 3.2rem;
+    font-weight: bold;
+    color:red;
 }
 
 h1 {
@@ -402,6 +425,14 @@ h2 span {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12)
 }
 
+.content-wrap1 {
+    float: none;
+    margin: 0 auto 20px auto;
+    padding: 40px;
+    background: #ebebeb;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12)
+}
+
 .content-wrap h2 {
     margin-top: 0;
     text-align: center
@@ -416,6 +447,27 @@ h2 span {
     margin: 0 auto
 }
 
+.content-wrap1 h2 {
+    margin-top: 0;
+    text-align: center
+}
+
+.content-wrap1 .inner {
+    float: none;
+    text-align:center
+}
+
+.content-wrap1 .content-center .inner {
+    float: none;
+    margin: 0 auto
+}
+
+.form-check-label{
+    font-size: medium;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+}
 .content-fluid {
     margin: 0 0 20px 0;
     padding-top: 40px;
@@ -993,6 +1045,13 @@ input[type="checkbox"] {
     margin-bottom: 0
 }
 
+.btn-back {
+    font-weight: bold;
+    color: #FFF;
+    background: #c46f6f;
+    border: 2px solid #000
+  }
+
 .btn-back:before {
     display: inline-block;
     position: relative;
@@ -1050,7 +1109,8 @@ input[type="checkbox"] {
 
 .more-submit {
     display: block;
-    text-align: center
+    text-align: center;
+    margin-bottom: 1em;
 }
 
 .box_captcha {
@@ -2934,6 +2994,7 @@ form ul.error {
 .PO,
 .PT,
 .RO,
+.EU,
 .SE,
 .SI,
 .SK,
@@ -2945,6 +3006,17 @@ form ul.error {
     float: left;
     margin: 0 0 10px 5px;
     padding: 2px 0 10px 35px
+}
+
+.sample {
+    display: block;
+    float: left;
+    margin: 0 0 10px 5px;
+    padding: 2px 0 10px 35px
+}
+
+.sample {
+    background-image: url("/static/images/SCY.png") ;
 }
 
 .AT {
@@ -3072,6 +3144,10 @@ form ul.error {
 }
 
 .EC {
+    background-position: 0 -1568px
+}
+
+.EU {
     background-position: 0 -1568px
 }
 

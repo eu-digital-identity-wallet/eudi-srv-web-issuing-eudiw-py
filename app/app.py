@@ -33,51 +33,11 @@ from idpyoidc.configure import create_from_config_file
 from idpyoidc.server.configure import OPConfiguration
 from idpyoidc.server import Server
 from urllib.parse import urlparse
+import route_eidasnode, route_formatter, route_qeaa, route_oidc
+
 
 # Log
 from app_config.config_service import ConfService as log
-
-
-oidc_metadata = {}
-openid_metadata = {}
-
-
-def setup_metadata():
-    global oidc_metadata
-    global openid_metadata
-
-    try:
-        credentials_supported = {}
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-
-        with open(
-            dir_path + "/metadata_config/openid-configuration.json"
-        ) as openid_metadata:
-            openid_metadata = json.load(openid_metadata)
-
-        with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
-            oidc_metadata = json.load(metadata)
-
-        for file in os.listdir(dir_path + "/metadata_config/credentials_supported/"):
-            if file.endswith("json"):
-                json_path = os.path.join(
-                    dir_path + "/metadata_config/credentials_supported/", file
-                )
-                with open(json_path) as json_file:
-                    credential = json.load(json_file)
-                    credentials_supported.update(credential)
-
-    except FileNotFoundError as e:
-        print(f"Metadata Error: file not found. {e}")
-    except json.JSONDecodeError as e:
-        print(f"Metadata Error: Metadata Unable to decode JSON. {e}")
-    except Exception as e:
-        print(f"Metadata Error: MetadataAn unexpected error occurred. {e}")
-
-    oidc_metadata["credentials_supported"] = credentials_supported
-
-
-setup_metadata()
 
 
 def handle_exception(e):
@@ -136,14 +96,8 @@ def create_app(test_config=None):
     #    return 'Hello, World!'
 
     # register blueprint for the /pid route
-    import route_eidasnode, route_formatter, route_ee_tara, route_pt_cmd, route_mdl, route_qeaa, route_pidV04,route_oidc
-
-    app.register_blueprint(route_pidV04.openid)
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
-    app.register_blueprint(route_ee_tara.tara)
-    app.register_blueprint(route_pt_cmd.cmd)
-    app.register_blueprint(route_mdl.mdl)
     app.register_blueprint(route_qeaa.qeaa)
     app.register_blueprint(route_oidc.oidc)
 
@@ -186,14 +140,12 @@ def create_app(test_config=None):
 
     return app
 
+
 app = create_app()
 
 
 #
 # Usage examples:
 # gunicorn app:app -b 127.0.0.1:5000
-# flask run 
+# flask run
 #
-
-
-

@@ -1,15 +1,32 @@
 {
-"eu.europa.ec.eudiw.mdl_mdoc": {
+"eu.europa.ec.eudi.mdl_mdoc": {
     "format": "mso_mdoc",
     "doctype": "org.iso.18013.5.1.mDL",
     "scope": "org.iso.18013.5.1.mDL",
     "cryptographic_binding_methods_supported": [
-      "mso",
-      "jwk"
+      "jwk", "cose_key"
     ],
-    "cryptographic_suites_supported": [
+    "credential_signing_alg_values_supported": [
       "ES256"
     ],
+    "proof_types_supported": {
+      "jwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ]
+      },
+      "cwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ],
+        "proof_alg_values_supported": [
+          -7
+        ],
+        "proof_crv_values_supported": [
+          1
+        ]
+      }
+    },
     "display": [
       {
         "name": "mDL",
@@ -21,32 +38,32 @@
       }
     ],
     "claims": {
-      "org.iso.18013.5.1.mDL": {
+      "org.iso.18013.5.1": {
         "family_name": {
           "mandatory": true,
+          "value_type":"string",
           "display": [
             {
               "name": "Current Family Name",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "given_name": {
           "mandatory": true,
+          "value_type":"string",
           "display": [
             {
               "name": "Current First Names",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
+          "value_type":"full-date",
           "display": [
             {
               "name": "Date of Birth",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "issue_date": {
@@ -87,29 +104,29 @@
         },
         "document_number": {
           "mandatory": true,
+          "value_type":"string",
           "display": [
             {
               "name": "The number assigned or calculated by the issuing authority. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "portrait": {
           "mandatory": true,
+          "value_type":"jpeg",
           "display": [
             {
               "name": "A reproduction of the mDL holder’s portrait",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "driving_privileges": {
           "mandatory": true,
+          "value_type":"driving_privileges",
           "display": [
             {
               "name": "Driving privileges of the mDL holder.",
-              "locale": "en"
-            }
+              "locale": "en"            }
           ]
         },
         "un_distinguishing_sign": {

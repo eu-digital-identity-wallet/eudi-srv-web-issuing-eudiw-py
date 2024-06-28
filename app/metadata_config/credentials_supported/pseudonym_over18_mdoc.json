@@ -1,0 +1,99 @@
+{
+  "eu.europa.ec.eudi.pseudonym_over18_mdoc": {
+      "format": "mso_mdoc",
+      "doctype": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+      "scope": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+      "cryptographic_binding_methods_supported": [
+        "jwk", "cose_key"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        },
+        "cwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ],
+          "proof_alg_values_supported": [
+            -7
+          ],
+          "proof_crv_values_supported": [
+            1
+          ]
+        }
+      },
+      "display": [
+        {
+          "name": "Age over 18 Pseudonym",
+          "locale": "en",
+          "logo": {
+            "url": "https://examplestate.com/public/pid.png",
+            "alt_text": "A square figure of a Age over 18"
+          }
+        }
+      ],
+      "claims": {
+        "eu.europa.ec.eudi.pseudonym.age_over_18.1": {
+          "user_pseudonym": {
+            "mandatory": true,
+            "value_type":"string",
+            "display": [
+              {
+                "name": "User pseudonym",
+                "locale": "en"              }
+            ]
+          },
+          "age_over_18": {
+            "mandatory": true,
+            "value_type":"bool",
+            "display": [
+              {
+                "name": "Adult or minor",
+                "locale": "en"              }
+            ]
+          },
+          "issuance_date": {
+            "mandatory": true,
+            "display": [
+              {
+                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "locale": "en"
+              }
+            ]
+          },
+          "expiry_date": {
+            "mandatory": true,
+            "display": [
+              {
+                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_country": {
+            "mandatory": true,
+            "display": [
+              {
+                "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_authority": {
+            "mandatory": true,
+            "display": [
+              {
+                "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+                "locale": "en"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
