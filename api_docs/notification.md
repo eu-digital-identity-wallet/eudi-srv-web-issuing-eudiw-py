@@ -1,8 +1,8 @@
-## Notification Request
+# Notification Request
 
-This is a Optional Endpoint used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance. 
+This is an Optional Endpoint used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance. 
 
-<https://issuer.eudiw.dev/notification>
+**Endpoint**: <https://issuer.eudiw.dev/notification> (or <https://localhost/notification> if installed locally)
 
 This data must be present in Json so that the request can be made:
 

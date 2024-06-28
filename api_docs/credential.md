@@ -1,6 +1,7 @@
-## Credential Request (Post)
+# Credential Request (Post)
 
-<https://issuer.eudiw.dev/credential>
+**Endpoint**: <https://issuer.eudiw.dev/credential> (or <https://localhost/credential> if installed locally)
+
 
 Header:
 
@@ -17,7 +18,7 @@ Payload:
 
 ![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/0c667f28-fc80-4ae8-a2ec-c1ba59f9a8d8)
 
-+ *Example Requests:*
+**Example Requests:**
   
   header:
   ```
@@ -61,8 +62,8 @@ Payload:
 
 Response:
 
-+ *c_nonce* - Required. JSON string containing a nonce
-+ *c_nonce_expires_in* - Required. Json integer denoting lifetime of c_nonce
++ *c_nonce* - JSON string containing a nonce
++ *c_nonce_expires_in* - Json integer denoting lifetime of c_nonce
 + *credential* - Optional. Contains issued Credential
 + *notification_id* - Used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance.
 + *transaction_id* - Optional, String identifying a Deferred Issuance transaction

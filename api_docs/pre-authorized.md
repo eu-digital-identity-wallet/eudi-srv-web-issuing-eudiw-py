@@ -1,13 +1,13 @@
-## Pre-authorized
+# Pre-authorized
 
-After filling out the form with the data in https://issuer.eudiw.dev/dynamic/preauth-form:
+For the pre-authorized flow, you can test our example (issuance of loyalty card) by filling out the form in https://issuer.eudiw.dev/dynamic/preauth-form (or <https://localhost/dynamic/preauth-form> if installed locally), with the following data:
 
- + *given_name*
- + *family_name*
- + *company*
- + *client-id*
++ *given_name*
++ *family_name*
++ *company*
++ *client-id*
 
-After submitting, a qrcode and DeepLink is generated:
+After submitting, a QR code and DeepLink is generated:
 
    ![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/c4efc907-43e8-45dc-9255-e1c246914251)
    

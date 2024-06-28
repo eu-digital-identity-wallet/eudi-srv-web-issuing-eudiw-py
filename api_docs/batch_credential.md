@@ -1,6 +1,6 @@
-## Batch Credential Request (Post)
+# Batch Credential Request (Post)
 
-<https://issuer.eudiw.dev/batch_credential>
+**Endpoint**: <https://issuer.eudiw.dev/batch_credential> (or <https://localhost/batch_credential> if installed locally)
 
 Header:
 
@@ -13,7 +13,7 @@ Payload:
 
 ![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/ae731034-2823-420d-9f8b-436c93d36952)
 
-+ *Example Request:*
+**Example Request:**
   
   header:
   ```
@@ -54,8 +54,8 @@ Payload:
 
 Response:
 
-+ *c_nonce* - Required. String containing a nonce
-+ *c_nonce_expires_in* - Required. Json integer denoting lifetime of c_nonce
++ *c_nonce* - String containing a nonce
++ *c_nonce_expires_in* - Json integer denoting lifetime of c_nonce
 + *credential_responses* - Optional. Contains issued Credential
 + *notification_id* - Used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance.
 + *transaction_id* - Optional, String identifying a Deferred Issuance transaction
