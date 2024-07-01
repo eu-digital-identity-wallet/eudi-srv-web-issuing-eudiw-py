@@ -66,8 +66,6 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     pip install -r app/requirements.txt
     ```
 
-    Note: The pyMDOC-CBOR library will be forked into the eu-digital-identity-wallet repo (and the modifications will be applied), when it is made public, since a public repo cannot be forked into a private repo.
-
 6. Setup secrets
    
    -  Copy ```app/app_config/__config_secrets.py``` to ```app/app_config/config_secrets.py``` and modify secrets.
