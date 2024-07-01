@@ -1,6 +1,6 @@
 # Configuration
 
-This document specifies the changes needed to add a new credential to the EUDIW Issuer.
+This document specifies the changes needed to add a new attestation/credential to the EUDIW Issuer.
 We will use a generic loyalty card credential as an example for this configuration.
 
 ## 1. Metadata Configuration
@@ -9,7 +9,7 @@ Add a new json file with the credential metadata to ```app/metadata_config/crede
 
 For this example we will use ```app/metadata_config/credentials_supported/loyalty_mdoc.json```
 
-Example loyalty card metadata for mso_mdoc format (ISO 18013-5):
+Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace `eu.europa.ec.eudi.loyalty_mdoc`:
 
 ```json
 {
@@ -112,6 +112,13 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5):
 }
 ```
 
+If you want to issue a different attestation/credential using this example as a template, please choose a different namespace, doctype, and scope, and modify the claims to include the required attributes.
+
+For more information on the metadata parameters, please refer to https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-metadata.
+
+
+
+
 ## 2. Service Configuration
 
 In the service configuration file (```app/app_config/config_service.py```), you need to configure the issuing authority, organization and validity of the credential.
@@ -155,4 +162,3 @@ For example, to add the loyalty credential to the `formCountry`, you need to add
   "eu.europa.ec.eudi.loyalty_mdoc"
 ]
 ```
-
