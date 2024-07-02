@@ -1094,8 +1094,6 @@ def credentialOffer():
 
 @oidc.route("/preauth-code", methods=["GET"])
 def preauthCode():
-    request
-
     code = request.args.get("code")
 
     credential_offer = {
