@@ -685,7 +685,10 @@ def token():
 
     elif req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code":
 
-        if "pre-authorized_code" not in req_args:
+        if "pre-authorized_code" not in req_args or "tx_code" not in req_args:
+            return make_response("invalid_request", 400)
+        
+        if req_args["tx_code"] != "12345":
             return make_response("invalid_request", 400)
         
         code = req_args["pre-authorized_code"]
@@ -886,7 +889,7 @@ def credential_offer():
 
     return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
 
-""" @oidc.route("/test_dump", methods=["GET", "POST"])
+@oidc.route("/test_dump", methods=["GET", "POST"])
 def dump_test():
     _store = current_app.server.context.dump()
     
@@ -908,7 +911,7 @@ def load_test():
         print("\n-----Data-----\n",data)
         current_app.server.context.load(data)
 
-    return "load" """
+    return "load"
 
 
 @oidc.route("/credential_offer", methods=["GET", "POST"])
@@ -962,10 +965,12 @@ def credentialOffer():
             qr_img_base64 = "data:image/png;base64," + base64.b64encode(
                 out.getvalue()
             ).decode("utf-8")
-        
+
+            wallet_url = cfgservice.wallet_test_url + "credential_offer"
+
             return render_template(
                 "openid/credential_offer_qr_code.html",
-                wallet_dev= "https://tester.issuer.eudiw.dev/credential_offer" + "?credential_offer=" + json.dumps(credential_offer),
+                wallet_dev= wallet_url + "?credential_offer=" + json.dumps(credential_offer),
                 url_data=uri,
                 qrcode=qr_img_base64,
             )
@@ -981,10 +986,15 @@ def preauthCode():
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url,
-        "credential_configuration_ids": ["eu.europa.ec.eudi.loyalty_mdoc"],
+        "credential_configuration_ids": ["eu.europa.ec.eudi.pid_mdoc"],
         "grants" : {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code" : {
-                 "pre-authorized_code": code
+                 "pre-authorized_code": code,
+                 "tx_code": {
+                    "length": 5,
+                    "input_mode": "numeric",
+                    "description": "Please provide the one-time code."
+                }
             }
         }
     }
@@ -1021,9 +1031,11 @@ def preauthCode():
         out.getvalue()
     ).decode("utf-8")
 
+    wallet_url = cfgservice.wallet_test_url + "redirect_preauth"
+
     return render_template(
         "openid/credential_offer_qr_code.html",
-        wallet_dev= "https://tester.issuer.eudiw.dev/redirect_preauth" + "?code=" + code,
+        wallet_dev= wallet_url + "?code=" + code,
         url_data=uri,
         qrcode=qr_img_base64,
     )

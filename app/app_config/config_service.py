@@ -38,6 +38,8 @@ class ConfService:
     # service_url = "https://127.0.0.1:5000/"
     service_url = "https://dev.issuer.eudiw.dev/"
 
+    wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
+
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
@@ -246,6 +248,13 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.loyalty.1",
+        },
+        "teste": {
+            "issuing_authority": "Test EUDIW Issuer",
+            "organization_id":pid_organization_id,
+            "validity":pid_validity,
+            "organization_name":"Test QEAA issuer",
+            "namespace":"teste"
         },
     }
 
