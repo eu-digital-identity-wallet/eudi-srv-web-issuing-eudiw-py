@@ -1,18 +1,20 @@
-## Token request (Post)
-<https://dev.issuer.eudiw.dev/token>
+# Token request (Post)
+
+**Endpoint**: <https://issuer.eudiw.dev/token> (or <https://localhost/token> if installed locally)
 
 ## Token request with PKCE
 
 The following parameters are supported:
 
 + *grant_type* - Required. Value must be set to “authorization_code”
-+ *redirect_uri* - Required. Must be identical value to authorization requrest redirect_uri
++ *redirect_uri* - Required. Must be identical value to authorization request redirect_uri
 + *client_id* - Required.
 + *state* - Recommended. 
 + *code* - Required. The authorization code received from authorization
 + *code_verifier* - Required. RFC 7636 see section 4.1
 
-+ *Example Request:*
+
+**Example Request:**
 
 header:
 ```
@@ -28,7 +30,7 @@ Response:
 
 + *token_type*
 + *scope* - If authorization through scope
-+ *authorization_details* If authorization through authorization details
++ *authorization_details* - If authorization through authorization details
 + *access_token*
 + *expires_in*
 + *refresh_token*
@@ -45,8 +47,9 @@ The following parameters are supported:
 + *client_id* - Required.
 + *state* - Recommended. 
 + *code* - Required. The authorization code received from authorization
-+ 
-+ *Example Request:*
+
+
+**Example Request:**
 
 header:
 ```
@@ -62,14 +65,9 @@ Response:
 
 + *token_type*
 + *scope* - If authorization through scope
-+ *authorization_details* If authorization through authorization details
++ *authorization_details* - If authorization through authorization details
 + *access_token*
 + *expires_in*
 + *refresh_token*
 + *id_token*
 
-
-+ *access_token*
-+ *expires_in*
-+ *refresh_token*
-+ *id_token*

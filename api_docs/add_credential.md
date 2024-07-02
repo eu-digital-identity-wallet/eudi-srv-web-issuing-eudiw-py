@@ -1,14 +1,16 @@
 # Configuration
 
-The following document specifies the changes needed to add a new credential to the issuer.
+This document specifies the changes needed to add a new attestation/credential to the EUDIW Issuer.
 We will use a generic loyalty card credential as an example for this configuration.
 
 ## 1. Metadata Configuration
+
 Add a new json file with the credential metadata to ```app/metadata_config/credentials_supported```
 
 For this example we will use ```app/metadata_config/credentials_supported/loyalty_mdoc.json```
 
-Example loyalty card metadata for mso_mdoc format (ISO.18013-5):
+Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace `eu.europa.ec.eudi.loyalty_mdoc`:
+
 ```json
 {
   "eu.europa.ec.eudi.loyalty_mdoc": {
@@ -110,13 +112,19 @@ Example loyalty card metadata for mso_mdoc format (ISO.18013-5):
 }
 ```
 
+If you want to issue a different attestation/credential using this example as a template, please choose a different namespace, doctype, and scope, and modify the claims to include the required attributes.
+
+For more information on the metadata parameters, please refer to https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-metadata.
+
+
+
+
 ## 2. Service Configuration
 
-Located in ```/app/app_config/config_service.py```
+In the service configuration file (```app/app_config/config_service.py```), you need to configure the issuing authority, organization and validity of the credential.
 
-- Add a new entry to config_doctype (Using the doctype of the credential as key)
+- Add a new entry to config_doctype (using the doctype of the credential as key)
 
-This configures the issuing authority, organization and validity used for the credential.
 ```python
 "eu.europa.ec.eudi.loyalty.1": {
     "issuing_authority": "Test QEAA issuer",
@@ -126,10 +134,13 @@ This configures the issuing authority, organization and validity used for the cr
     "namespace": "eu.europa.ec.eudi.loyalty.1",
 }
 ```
-- Add a new entry to auth_method_supported_credencials (Using the credential identifier specified in the metadata)
 
-This configures the type of user authentication allowed for the credential. Either authentication through a PID using openid4VP or through a country (iDP/eidas node or a simple form)
-The following examples adds the loyalty credential to the country authentication.
+- Add a new entry to auth_method_supported_credencials (using the credential identifier specified in the metadata)
+
+    This configures the type of user authentication allowed for the credential. You may choose authentication through a PID using OpenId4VP, or through a country selection (options are: IDP, eidas node or a simple form).
+
+    In the following examples the authentication allowed for the loyalty credential is country selection.
+
 ```python
 auth_method_supported_credencials = {
     "PID_login": [
@@ -140,14 +151,11 @@ auth_method_supported_credencials = {
 }
 ```
 
-## 3. Configuration of Countries
-Located in ```/app/app_config/config_countries.py```
+## 3. Configuration of Countries supported by the EUDIW Issuer
 
-Here we will configure which countries or if the form supports the loyalty credential.
+Located in ```app/app_config/config_countries.py```, this configuration file contains configuration data related to the countries supported by the PID Issuer, and the credentials supported by each country.
 
-Add an entry to the supported_credentials of a country using the credential id defined in the metadata.
-
-An example for this loyalty credential:
+For example, to add the loyalty credential to the `formCountry`, you need to add the loyalty credential id (defined in the metadata) to the `supported_credentials` of the `formCountry`.
 
 ```python
 "supported_credentials": [

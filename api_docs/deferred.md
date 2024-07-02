@@ -1,4 +1,4 @@
-## Deferred Enpoint
+# Deferred Endpoint
 
 This endpoint is used to issue a Credential previously requested at the Credential Endpoint or Batch Credential Endpoint in cases where the Credential Issuer was not able to immediately issue this Credential. Support for this endpoint is OPTIONAL.
 
@@ -10,9 +10,10 @@ There must be a batch credential request or credential and where its response co
 
 Deferred Endpoint only works if the response contains a *transaction_id* which is then used to make the request.
 
-<https://issuer.eudiw.dev/deferred_credential>
+**Endpoint**: <https://issuer.eudiw.dev/deferred_credential> (or <https://localhost/deferred_credential> if installed locally)
 
-+ *Example Request:*
+
+**Example Request:**
   
   header:
 
@@ -28,8 +29,8 @@ Deferred Endpoint only works if the response contains a *transaction_id* which i
 
 Response:
 
-+ *c_nonce* - Required. String containing a nonce
-+ *c_nonce_expires_in* - Required. Json integer denoting lifetime of c_nonce
++ *c_nonce* - String containing a nonce
++ *c_nonce_expires_in* - Json integer denoting lifetime of c_nonce
 + *credential* - Optional. Contains issued Credential
 + *credential_responses* - Optional. Contains issued Credentials
 + *notification_id* - Used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance.
