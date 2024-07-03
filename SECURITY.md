@@ -60,4 +60,3 @@ reporting vulnerabilities, as well as what you can expect from us in return.
   details to third parties without your permission.
 * In the public information concerning the problem reported, we will publish your name as the
   discoverer of the problem if you have agreed to this in your initial e-mail
-
