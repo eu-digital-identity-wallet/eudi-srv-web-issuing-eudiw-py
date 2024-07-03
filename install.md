@@ -4,9 +4,9 @@
 
 The EUDIW Issuer was tested with
 
-+ Python version 3.10.8
++ Python version 3.9.2
 
-and should only be used with Python 3.10 or higher.
+and should only be used with Python 3.9 or 3.10.
 
 If you don't have it installed, please download it from <https://www.python.org/downloads/> and follow the [Python Developer's Guide](https://devguide.python.org/getting-started/).
 
