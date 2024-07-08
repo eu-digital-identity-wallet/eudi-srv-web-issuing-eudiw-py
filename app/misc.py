@@ -207,11 +207,6 @@ def scope2details(scope):
                         )
 
     return configuration_ids
-    """ return authentication_error_redirect(
-        jws_token=request.args.get("token"),
-        error="invalid authentication",
-        error_description="Authorization details or scope not supported",
-    ) """
 
 
 def credential_error_resp(error, desc):

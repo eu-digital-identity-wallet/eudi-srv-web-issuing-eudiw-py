@@ -71,6 +71,9 @@ class ConfService:
     # Deferred endpoint expiry time (minutes)
     deffered_expiry = 60
 
+    # transaction code expiry time (minutes)
+    tx_code_expiry = 1
+
     # ------------------------------------------------------------------------------------------------
     # PID namespace
     pid_namespace = "eu.europa.ec.eudi.pid.1"

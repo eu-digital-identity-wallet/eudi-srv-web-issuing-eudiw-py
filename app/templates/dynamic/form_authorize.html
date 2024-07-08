@@ -69,7 +69,7 @@
                     <p class="relying-party"><strong>etranslation</strong> requires you to authenticate</p>
                     -->
                     <h1>Authorize data from your EUDI Wallet</h1>
-                    <div id="content" class="content-wrap content-center col-md-6 col-sm-7">
+                    <div id="content" class="content-wrap content-center col-md-6 col-sm-7 col-xs-12">
 
                         <div class="genericErrors" id="genericErrorsDesc">
 
@@ -84,17 +84,17 @@
                             <div id="eidasCountries">
                                 {% for name, value in attributes.items() %}
                                         {%if name == "portrait" %}
-                                            <div class="row g-3 ">
-                                                <div class="col-md-12" style="padding-bottom:5% ;">
+                                            <div class="form-group ">
+                                                <div class="col-md-12 col-xs-12" style="padding-bottom:5% ;">
                                                     <label class="control-label" for="inputError1">{{name}}</label>
                                                     <img style="width: 50%;"  class="img-thumbnail" src="data:image/png;base64,{{value}} " >
                                                 </div>
                                             </div>
                                         {%elif name == "driving_privileges" %}
-                                            <div class="row g-3 ">
-                                                <p>{{name}}</p>
+                                            <h5>{{name}}</h5>
+                                            <div class="form-group">
                                                 {% for i_value in value %}
-                                                    <div class="col-md-12" style="background-color: rgb(213, 213, 213); margin-bottom: 5%; outline: auto;">
+                                                    <div class="col-md-12 col-xs-12" style="background-color: rgb(213, 213, 213); margin-bottom: 5%; outline: auto;">
                                                         {% for name , value in i_value.items() %} 
                                                             <label class="control-label" for="inputError1">{{name}}</label>
                                                             <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
@@ -103,15 +103,15 @@
                                                 {% endfor %}
                                             </div> 
                                         {% else %}   
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
                                                     {{name}}
                                                     <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
                                                 </div>
                                             </div>
                                         {% endif %}
                                 {% endfor %}
-                                <div class="col-md-12" id="hidden_elems">
+                                <div class="col-md-12 col-xs-12" id="hidden_elems">
                                     <div class="col" >
                                         <input type="hidden" value="{{ user_id }}" name="user_id">
                                     </div>

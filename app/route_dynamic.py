@@ -34,7 +34,7 @@ import schedule
 import time
 from uuid import uuid4
 from PIL import Image
-from flask import Blueprint, Flask, redirect, render_template, request, session, jsonify
+from flask import Blueprint, Flask, make_response, redirect, render_template, request, session, jsonify
 from flask_api import status
 from flask_cors import CORS
 import requests
@@ -188,7 +188,7 @@ def dynamic_R1(country):
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": uuid4()})
+            attributesForm.update({"user_pseudonym": str(uuid4())})
         return render_template(
             "dynamic/dynamic-form.html",
             attributes=attributesForm,
@@ -799,10 +799,10 @@ def getpidoid4vp():
                     or cred_request["credential_configuration_id"]
                     == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
                 ):
-                    attributesForm.update({"user_pseudonym": uuid4()})
+                    attributesForm.update({"user_pseudonym": str(uuid4())})
             elif "vct" in cred_request:
                 if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
-                    attributesForm.update({"user_pseudonym": uuid4()})
+                    attributesForm.update({"user_pseudonym": str(uuid4())})
 
     elif (
         "authorization_params" in session and "scope" in session["authorization_params"]
@@ -813,17 +813,40 @@ def getpidoid4vp():
             or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
             in cred_scopes
         ):
-            attributesForm.update({"user_pseudonym": uuid4()})
+            attributesForm.update({"user_pseudonym": str(uuid4())})
 
     for doctype in mdoc_json:
         for attribute, value in mdoc_json[doctype]:
             if attribute == "age_over_18":
                 attributesForm.update({attribute: value})
+    
+    doctype_config = cfgserv.config_doctype["eu.europa.ec.eudi.pseudonym.age_over_18.1"]
+
+    attributesForm.update({"issuing_country": "FC"})
+    attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
+
+    user_id = generate_unique_id()
+    app.config["dynamic"][user_id] = attributesForm
+    
+    presentation_data = attributesForm.copy()
+
+    today = date.today()
+    expiry = today + timedelta(days=doctype_config["validity"])
+    
+
+    presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
+    presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+    presentation_data.update({})
+    presentation_data.update({})
+
+    if "jws_token" not in session and "authorization_params" in session:
+            session["jws_token"] = session["authorization_params"]["token"]
 
     return render_template(
         "dynamic/form_authorize.html",
-        attributes=attributesForm,
-        redirect_url=cfgserv.service_url + "dynamic/form",
+        attributes=presentation_data,
+        user_id="FC." + user_id,
+        redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
     )
 
 
@@ -848,40 +871,77 @@ def auth():
 
 @dynamic.route("/preauth", methods=["GET"])
 def preauthRed():
-
+    
     url = cfgserv.service_url + "pushed_authorizationv2"
+    credentials_id=request.args.get("credentials_id")
+    credential_list=json.loads(credentials_id)
+
+    authorization_details=[]
+
+    for credential in credential_list:
+        authorization_details.append({
+            "type": "openid_credential",
+            "credential_configuration_id":credential
+        })
+    authorization_details=urllib.parse.quote_plus(json.dumps(authorization_details))
+    
     redirect_url = urllib.parse.quote(cfgserv.service_url) + "preauth-code"
 
-    payload = "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=" + redirect_url + "&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details=%5B%0A%20%20%7B%0A%20%20%20%20%22type%22%3A%20%22openid_credential%22%2C%0A%20%20%20%20%22credential_configuration_id%22%3A%20%22eu.europa.ec.eudi.pid_mdoc%22%0A%20%20%7D%0A%5D"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    payload = 'response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=' + redirect_url + '&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details='+ authorization_details
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+    }
+
+    print("\n------ PAR payload -----\n", payload)
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
+    if response.status_code != 200:
+        print("\n",str(response.json()),"\n")
+        return make_response("invalid_request", 400)
+    
     par_response = response.json()
 
-    return redirect(
-        cfgserv.service_url
-        + "authorization-preauth?client_id=ID&request_uri="
-        + par_response["request_uri"]
-    )
+    return redirect(cfgserv.service_url +"authorization-preauth?client_id=ID&request_uri=" + par_response["request_uri"])
 
 
 @dynamic.route("/preauth-form", methods=["GET"])
 def preauthForm():
-    """Form used for pre-authorization
+    """ Form used for pre-authorization
     Form page where the user information is parsed.
     """
-    attributesForm = {
-        "given_name": "string",
-        "family_name": "string",
-        "birth_date": "full-date",
-    }
 
-    return render_template(
-        "dynamic/dynamic-form.html",
-        attributes=attributesForm,
-        redirect_url=cfgserv.service_url + "dynamic/form2",
-    )
+    authorization_params = session["authorization_params"]
+    
+    authorization_details = []
+    if "authorization_details" in authorization_params:
+        authorization_details.extend(
+            json.loads(authorization_params["authorization_details"])
+        )
+
+    if not authorization_details:
+        return authentication_error_redirect(
+            jws_token=authorization_params["token"],
+            error="invalid authentication",
+            error_description="No authorization details or scope found in dynamic route.",
+        )
+
+    session["authorization_details"] = authorization_details
+
+    credentials_requested = []
+    for cred in authorization_details:
+        if "credential_configuration_id" in cred:
+            if cred["credential_configuration_id"] not in credentials_requested:
+                credentials_requested.append(cred["credential_configuration_id"])
+        elif "vct" in cred:
+            if cred["vct"] not in credentials_requested:
+                credentials_requested.append(cred["vct"])
+
+    session["credentials_requested"] = credentials_requested
+
+    attributesForm=getAttributesForm(session["credentials_requested"])
+
+    return render_template("dynamic/dynamic-form.html", attributes=attributesForm, redirect_url= cfgserv.service_url+"dynamic/form2")
 
 
 @dynamic.route("/form2", methods=["GET", "POST"])
@@ -1113,7 +1173,6 @@ def Dynamic_form():
     if "age_over_18" not in cleaned_data:
         cleaned_data["age_over_18"] = False
 
-    #print("\n-----Cleaned Data----\n", cleaned_data)
 
     app.config["dynamic"][user_id] = cleaned_data
 
