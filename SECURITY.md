@@ -20,7 +20,7 @@ reporting vulnerabilities, as well as what you can expect from us in return.
 * E-mail your findings to EC-VULNERABILITY-DISCLOSURE@ec.europa.eu, specifying whether or not you
   agree to your name or pseudonym being made publicly available as the discoverer of the problem.
 * Encrypt your findings using
-  our [PGP key](https://sks.hnet.se/pks/lookup?search=EC-VULNERABILITY-DISCLOSURE%40ec.europa.eu&fingerprint=on&op=index)
+  our [PGP key](https://ec.europa.eu/assets/digit/pgpkey/ec-vulnerability-disclosure-pgp.txt)
   to prevent this critical information from falling into the wrong hands.
 * Provide us sufficient information to reproduce the problem so that we can resolve it as quickly as
   possible. Usually, the IP address or the URL of the affected system and a description of the
@@ -60,4 +60,3 @@ reporting vulnerabilities, as well as what you can expect from us in return.
   details to third parties without your permission.
 * In the public information concerning the problem reported, we will publish your name as the
   discoverer of the problem if you have agreed to this in your initial e-mail
-
