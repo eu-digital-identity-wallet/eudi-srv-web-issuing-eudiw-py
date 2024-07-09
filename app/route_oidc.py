@@ -693,8 +693,14 @@ def token():
         
         code = req_args["pre-authorized_code"]
 
-        print("\n----Token transaction_codes----\n", type(transaction_codes[code]["tx_code"]))
-
+        if code not in transaction_codes:
+            error_message = {
+                    "error": "invalid_request",
+                    "description": "invalid or expired tx_code"
+                }
+            response = make_response(jsonify(error_message), 400)
+            return response
+        
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
             error_message = {
                 "error": "invalid_request",

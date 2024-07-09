@@ -28,7 +28,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, request, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -197,6 +197,8 @@ def create_app(test_config=None):
 
     @app.route("/", methods=["GET"])
     def initial_page():
+        
+        print(f"Client IP: {request.headers}")
         return render_template("misc/initial_page.html", oidc=cfgserv.oidc)
 
     @app.route("/favicon.ico")

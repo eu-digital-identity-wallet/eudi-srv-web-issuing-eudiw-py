@@ -72,7 +72,7 @@ class ConfService:
     deffered_expiry = 60
 
     # transaction code expiry time (minutes)
-    tx_code_expiry = 1
+    tx_code_expiry = 60
 
     # ------------------------------------------------------------------------------------------------
     # PID namespace
@@ -207,6 +207,12 @@ class ConfService:
                 "vc+sd-jwt": {"formatting_function": "mdl_sd_jwt"},
             },
         },
+    }
+
+    common_name={
+        "eu.europa.ec.eudi.pid.1": "National ID",
+        "org.iso.18013.5.1.mDL": "Driving License",
+        "eu.europa.ec.eudi.pseudonym.age_over_18.1": "Age Verification "
     }
 
     config_doctype = {

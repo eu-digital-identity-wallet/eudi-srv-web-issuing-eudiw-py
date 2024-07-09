@@ -279,7 +279,6 @@ def dynamic_R1(country):
 
         return redirect(url)
 
-
 @dynamic.route("/redirect", methods=["GET", "POST"])
 def red():
     """Receives token from different IDPs
@@ -293,6 +292,7 @@ def red():
     """
     session["route"] = "/dynamic/redirect"
     session["country"]="PT"
+
     if session["country"] == "PT":
 
         if not request.args:  # if args is empty
@@ -330,46 +330,40 @@ def red():
 
         portuguese_fields = dict()
         form_data={}
-        f=0
 
         for doctype in cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"]:
             
-            portuguese_fields.update({f:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
-            f=+1
+            portuguese_fields.update({doctype:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
 
-        for fields_pt in portuguese_fields:
-            for fields in portuguese_fields[fields_pt]:
+        for doctype in portuguese_fields:
+            for fields in portuguese_fields[doctype]:
                 for item in data:
-                    if item["name"] == portuguese_fields[fields_pt][fields]:
-                        form_data[fields] = item["value"]
+                    if item["name"] == portuguese_fields[doctype][fields]:
+                        form_data[doctype][fields] = item["value"]
                         break
-
-        if "birth_date" in form_data:
-            form_data["birth_date"] = datetime.strptime(
-                form_data["birth_date"], "%d-%m-%Y"
-            ).strftime("%Y-%m-%d")
-
-        if "driving_privileges" in form_data:
-            json_priv = json.loads(form_data["driving_privileges"])
-            form_data.update({"driving_privileges":json_priv})
-
-        else:
-            for attribute in data:
-                form_data[attribute] = data[attribute]
-
         
-        doctype_config=cfgserv.config_doctype["teste"]
+        for doctype in portuguese_fields:
+            if "birth_date" in form_data[doctype]:
+                form_data[doctype]["birth_date"] = datetime.datetime.strptime(
+                    form_data[doctype]["birth_date"], "%d-%m-%Y"
+                ).strftime("%Y-%m-%d")
 
-        today = date.today()
-        expiry = today + timedelta(days=doctype_config["validity"])
+            if "driving_privileges" in form_data[doctype]:
+                json_priv = json.loads(form_data[doctype]["driving_privileges"])
+                form_data[doctype].update({"driving_privileges":json_priv})
 
-        form_data.update({"age_over_18": True if calculate_age(form_data["birth_date"]) >= 18 else False})
-        form_data.update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-        form_data.update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-        form_data.update({"issuing_country": session["country"]})
-        form_data.update({"issuing_authority":doctype_config["issuing_authority"] })
+            doctype_config=cfgserv.config_doctype[doctype]
 
-        return render_template("dynamic/form_authorize.html", attributes=form_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+            today = date.today()
+            expiry = today + timedelta(days=doctype_config["validity"])
+
+            form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
+            form_data[doctype].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
+            form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
+            form_data[doctype].update({"issuing_country": session["country"]})
+            form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
+
+        return render_template("dynamic/form_authorize.html", presentation_data=form_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
     elif session["country"] is None:
 
@@ -432,20 +426,46 @@ def red():
         country=country, user_id=session["country"] + "." + session["access_token"]
     )
 
-    doctype_config=cfgserv.config_doctype["teste"]
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
+    presentation_data=dict()
 
-    data.update({"age_over_18": True if calculate_age(data["birth_date"]) >= 18 else False})
-    data.update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-    data.update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-    data.update({"issuing_country":session["country"]})
-    data.update({"issuing_authority":doctype_config["issuing_authority"]})
+    for credential_requested in session["credentials_requested"]:
+            
+            scope= credentialsSupported[credential_requested]["scope"]
+
+            if scope in cfgserv.common_name:
+                credential=cfgserv.common_name[scope]
+
+            else:
+                credential = scope
+
+            presentation_data.update({credential:{}})
+
+            test=list()
+            test.append(credential_requested)
+            attributesForm = getAttributesForm(test).keys()
+
+            for attribute in data.keys():
+
+                if attribute in attributesForm:
+                    presentation_data[credential][attribute]= data[attribute]
+
+            doctype_config=cfgserv.config_doctype[credential]
+
+            today = date.today()
+            expiry = today + timedelta(days=doctype_config["validity"])
+
+            presentation_data[credential].update({"age_over_18": True if calculate_age(data["birth_date"]) >= 18 else False})
+            presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
+            presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
+            presentation_data[credential].update({"issuing_country":session["country"]})
+            presentation_data[credential].update({"issuing_authority":doctype_config["issuing_authority"]})
 
     user_id=session["country"] + "." + session["access_token"]
 
-    return render_template("dynamic/form_authorize.html", attributes=data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+
 
 
 @dynamic.route("/dynamic_R2", methods=["GET", "POST"])
@@ -706,7 +726,7 @@ def credentialCreation(credential_request, data, country):
                             form_data[fields_pt] = item["value"]
                             break
 
-                form_data["birth_date"] = datetime.datetime.strptime(
+                form_data["birth_date"] = datetime.strptime(
                     form_data["birth_date"], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
 
@@ -843,7 +863,7 @@ def getpidoid4vp():
             session["jws_token"] = session["authorization_params"]["token"]
 
     return render_template(
-        "dynamic/form_authorize.html",
+        "dynamic/form_authorize_oid4vp.html",
         attributes=presentation_data,
         user_id="FC." + user_id,
         redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
@@ -1043,34 +1063,58 @@ def Dynamic_form2():
 
     session["returnURL"] = cfgserv.OpenID_first_endpoint
 
-    doctype_config=cfgserv.config_doctype["teste"]
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
+    presentation_data=dict()
 
-    presentation_data = cleaned_data.copy()
+    for credential_requested in session["credentials_requested"]:
+        
+        scope= credentialsSupported[credential_requested]["scope"]
 
-    presentation_data.update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-    presentation_data.update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-    if "driving_privileges" in presentation_data:
-        json_priv = json.loads(presentation_data["driving_privileges"])
-        presentation_data.update({"driving_privileges":json_priv})
+        if scope in cfgserv.common_name:
+            credential=cfgserv.common_name[scope]
+
+        else:
+            credential = scope
+
+        presentation_data.update({credential:{}})
+
+        test=list()
+        test.append(credential_requested)
+        attributesForm = getAttributesForm(test).keys()
+
+        for attribute in cleaned_data.keys():
+
+            if attribute in attributesForm:
+                presentation_data[credential][attribute]= cleaned_data[attribute]
+
+        doctype_config=cfgserv.config_doctype[credential]
+
+        today = date.today()
+        expiry = today + timedelta(days=doctype_config["validity"])
     
-    if "portrait" in presentation_data:
-        presentation_data.update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data["portrait"])).decode("utf-8")})
-    
-    if "NumberCategories" in presentation_data:
-        for i in range(int(presentation_data["NumberCategories"])):
-                f = str(i + 1)
-                presentation_data.pop("IssueDate" + f)
-                presentation_data.pop("ExpiryDate" + f)
-        presentation_data.pop("NumberCategories")
+        presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"issuing_country": session["country"]}),
+        presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "birth_date" in presentation_data[credential]:
+            presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
-    presentation_data.pop("version")
-    presentation_data.pop("timestamp")
+        if "driving_privileges" in presentation_data[credential]:
+            json_priv = json.loads(presentation_data[credential]["driving_privileges"])
+            presentation_data[credential].update({"driving_privileges":json_priv})
+        
+        if "portrait" in presentation_data[credential]:
+            presentation_data[credential].update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data[credential]["portrait"])).decode("utf-8")})
+        
+        if "NumberCategories" in presentation_data[credential]:
+            for i in range(int(presentation_data[credential]["NumberCategories"])):
+                    f = str(i + 1)
+                    presentation_data[credential].pop("IssueDate" + f)
+                    presentation_data[credential].pop("ExpiryDate" + f)
+            presentation_data[credential].pop("NumberCategories")
 
-    return render_template("dynamic/form_authorize.html", attributes=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
-
+    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 
 @dynamic.route("/form", methods=["GET", "POST"])
@@ -1079,7 +1123,7 @@ def Dynamic_form():
     Form page where the user can enter its PID data.
     """
     session["route"] = "/dynamic/form"
-    session["version"] = cfgserv.current_version
+    session["version"] = "0.5"
     session["country"] = "FC"
     # if GET
     if request.method == "GET":
@@ -1173,6 +1217,7 @@ def Dynamic_form():
     if "age_over_18" not in cleaned_data:
         cleaned_data["age_over_18"] = False
 
+    print("\n-----Cleaned Data----\n", cleaned_data)
 
     app.config["dynamic"][user_id] = cleaned_data
 
@@ -1181,33 +1226,59 @@ def Dynamic_form():
 
     session["returnURL"] = cfgserv.OpenID_first_endpoint
 
-    doctype_config=cfgserv.config_doctype["teste"]
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
+    presentation_data=dict()
+
+    for credential_requested in session["credentials_requested"]:
+        
+        scope= credentialsSupported[credential_requested]["scope"]
+
+        if scope in cfgserv.common_name:
+            credential=cfgserv.common_name[scope]
+
+        else:
+            credential = scope
+
+        presentation_data.update({credential:{}})
+
+        credential_atributes_form=list()
+        credential_atributes_form.append(credential_requested)
+        attributesForm = getAttributesForm(credential_atributes_form).keys()
+
+        for attribute in cleaned_data.keys():
+
+            if attribute in attributesForm:
+                presentation_data[credential][attribute]= cleaned_data[attribute]
+
+        doctype_config=cfgserv.config_doctype[scope]
+
+        today = date.today()
+        expiry = today + timedelta(days=doctype_config["validity"])
     
-    presentation_data = cleaned_data.copy()
+        presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"issuing_country": session["country"]}),
+        presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "birth_date" in presentation_data[credential]:
+            presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
-    presentation_data.update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-    presentation_data.update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-    if "driving_privileges" in presentation_data:
-        json_priv = json.loads(presentation_data["driving_privileges"])
-        presentation_data.update({"driving_privileges":json_priv})
-    
-    if "portrait" in presentation_data:
-        presentation_data.update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data["portrait"])).decode("utf-8")})
-    
-    if "NumberCategories" in presentation_data:
-        for i in range(int(presentation_data["NumberCategories"])):
-                f = str(i + 1)
-                presentation_data.pop("IssueDate" + f)
-                presentation_data.pop("ExpiryDate" + f)
-        presentation_data.pop("NumberCategories")
 
-    presentation_data.pop("version")
-    presentation_data.pop("timestamp")
+        if "driving_privileges" in presentation_data[credential]:
+            json_priv = json.loads(presentation_data[credential]["driving_privileges"])
+            presentation_data[credential].update({"driving_privileges":json_priv})
+        
+        if "portrait" in presentation_data[credential]:
+            presentation_data[credential].update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data[credential]["portrait"])).decode("utf-8")})
+        
+        if "NumberCategories" in presentation_data[credential]:
+            for i in range(int(presentation_data[credential]["NumberCategories"])):
+                    f = str(i + 1)
+                    presentation_data[credential].pop("IssueDate" + f)
+                    presentation_data[credential].pop("ExpiryDate" + f)
+            presentation_data[credential].pop("NumberCategories")
 
-    return render_template("dynamic/form_authorize.html", attributes=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
 def redirect_wallet():
