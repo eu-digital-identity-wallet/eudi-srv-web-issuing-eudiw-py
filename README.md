@@ -78,7 +78,7 @@ The released software is a initial development release version:
 
 Pre-requisites:
 
-+ Python v. 3.10 or higher
++ Python v. 3.9 or 3.10
 + Flask v. 2.3 or higher
 
 Click [here](install.md) for detailed installation instructions.
@@ -108,6 +108,13 @@ See more information in [api_docs/configuration.md](api_docs/configuration.md#1-
 
 Yes. Please follow the instructions in [api_docs/configuration.md](api_docs/configuration.md#2-configuration-of-countries). If you don't have Document Signer private key and certificate, we provide  test private DS keys and certificates, for country Utopia (UT).
 
+### E. How can I create a credential offer to issue a credential?
+
+Please see detailed instructions in [api_docs/credential_offer.md](api_docs/credential_offer.md).
+
+### F. Can I test the pre-authorized flow?
+
+Yes. Please see how in [api_docs/pre-authorized.md](api_docs/pre-authorized.md).
 
 ## How to contribute
 
