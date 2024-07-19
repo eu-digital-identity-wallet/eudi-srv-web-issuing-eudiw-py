@@ -1,6 +1,6 @@
 # Pre-authorized
 
-For the pre-authorized flow, you can test our example (issuance of loyalty card) by filling out the form in https://issuer.eudiw.dev/dynamic/preauth-form (or <https://localhost/dynamic/preauth-form> if installed locally), with the following data:
+For the pre-authorized flow, you can test our example (issuance of loyalty card) by filling out the form in https://issuer.eudiw.dev/dynamic/preauth (or <https://localhost/dynamic/preauth> if installed locally), with the following data:
 
 + *given_name*
 + *family_name*
