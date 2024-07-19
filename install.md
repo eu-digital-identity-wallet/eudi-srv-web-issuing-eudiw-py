@@ -4,9 +4,9 @@
 
 The EUDIW Issuer was tested with
 
-+ Python version 3.10.8
++ Python version 3.9.2
 
-and should only be used with Python 3.10 or higher.
+and should only be used with Python 3.9 or 3.10.
 
 If you don't have it installed, please download it from <https://www.python.org/downloads/> and follow the [Python Developer's Guide](https://devguide.python.org/getting-started/).
 
@@ -89,13 +89,68 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     ```
     flask --app app run --debug
     ```
+    
+## 4. Running your local EUDIW Issuer over HTTPS
 
+1. Generate a self signed certificate and a private key
+   + Linux/macOS
+     
+       Example: 
+        ```
+        openssl req -x509 -out localhost.crt -keyout localhost.key -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' -extensions EXT -config <( \
+       printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=IP.1:127.0.0.1\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+        ```
 
-## 4. Make your local EUDIW Issuer available on the Internet (optional)
+    + Windows
+
+        Create the file localhost.conf using the following as an example:
+        ```
+        [req]
+        default_bits  = 2048
+        distinguished_name = req_distinguished_name
+        req_extensions = req_ext
+        x509_extensions = v3_req
+        prompt = no
+        [req_distinguished_name]
+        countryName = XX
+        stateOrProvinceName = N/A
+        localityName = N/A
+        organizationName = Self-signed certificate
+        commonName = 120.0.0.1: Self-signed certificate
+        [req_ext]
+        subjectAltName = @alt_names
+        [v3_req]
+        subjectAltName = @alt_names
+        [alt_names]
+        IP.1 = 127.0.0.1
+        ```
+
+        Use the configuration file above to generate the certificate and key
+        ```
+        openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout key.pem -out cert.pem -config localhost.conf 
+        ```
+        
+2. Add certificate to environment variables
+   + Linux/macOS
+       ```
+        export REQUESTS_CA_BUNDLE="/path/to/certificate"
+       ```
+  
+   + Windows
+        ```
+        set REQUESTS_CA_BUNDLE="\path\to\certificate"
+        ```
+  
+3. Run the EUDIW Issuer with certificate and key
+    ```
+    flask --app app run --cert=cert.pem --key=key.pem
+    ```
+    
+## 5. Make your local EUDIW Issuer available on the Internet (optional)
 
 If you want to make your local EUDIW Issuer available on the Internet, we recommend to use NGINX reverse proxy and certbot (to generate an HTTPS certificate).
 
-### 4.1 Install and configure NGINX
+### 5.1 Install and configure NGINX
 
 1. Follow the installation guide in https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
 
@@ -138,4 +193,3 @@ server {
 2. Run `certbot` to get a free HTTPS certificate. The `certbot` will also configure the EUDIW Issuer Nginx configuration file with the HTTPS certificate.
 
 3. Restart the Nginx server and goto `https:\\FQDN\` (FQDN configured in the Nginx configuration file)
-
