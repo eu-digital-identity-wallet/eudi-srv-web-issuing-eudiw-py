@@ -78,7 +78,7 @@ The released software is a initial development release version:
 
 Pre-requisites:
 
-+ Python v. 3.10 or higher
++ Python v. 3.9 or 3.10
 + Flask v. 2.3 or higher
 
 Click [here](install.md) for detailed installation instructions.
