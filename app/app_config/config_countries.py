@@ -70,6 +70,7 @@ class ConfCountries:
                 "eu.europa.ec.eudi.loyalty_mdoc",
                 "eu.europa.ec.eudi.pseudonym_over18_mdoc",
                 "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+                "eu.europa.ec.eudi.photoid",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },

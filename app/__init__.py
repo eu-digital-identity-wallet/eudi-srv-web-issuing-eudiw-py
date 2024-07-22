@@ -199,7 +199,7 @@ def create_app(test_config=None):
     def initial_page():
         
         print(f"Client IP: {request.headers}")
-        return render_template("misc/initial_page.html", oidc=cfgserv.oidc)
+        return render_template("misc/initial_page.html", oidc=cfgserv.oidc, service_url = cfgserv.service_url)
 
     @app.route("/favicon.ico")
     def favicon():
@@ -231,11 +231,13 @@ def create_app(test_config=None):
         route_formatter,
         route_oidc,
         route_dynamic,
+        route_oid4vp
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
+    app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
 
     # config session

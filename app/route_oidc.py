@@ -183,6 +183,13 @@ def verify(authn_method):
     if isinstance(args, ResponseMessage) and "error" in args:
         return make_response(args.to_json(), 400)
     
+    print("\n--------\n")
+    print(endpoint)
+    print("\n--------\n")
+    print(request)
+    print("\n--------\n")
+    print(args)
+
     return do_response(endpoint, request, **args)
 
 
@@ -482,119 +489,6 @@ def authorizationpre():
     return redirect(cfgservice.service_url + "dynamic/preauth-form")
     # return response.content
 
-
-@oidc.route("/oid4vp", methods=["GET"])
-def oid4vp():
-
-    url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
-    payload = json.dumps(
-        {
-            "type": "vp_token",
-            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "presentation_definition": {
-                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": [
-                {
-                    "id": "eu.europa.ec.eudi.pid.1",
-                    "format": {
-                    "mso_mdoc": {
-                        "alg": [
-                        "ES256",
-                        "ES384",
-                        "ES512",
-                        "EdDSA"
-                        ]
-                    }
-                    },
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {
-                    "fields": [
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['family_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['given_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['birth_date']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['age_over_18']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_authority']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_country']"
-                        ],
-                        "intent_to_retain": False
-                        }
-                    ]
-                    }
-                }
-                ]
-            }
-        }
-    )
-
-    headers = {
-        "Content-Type": "application/json",
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload).json()
-
-    deeplink_url = (
-        "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
-        + response["client_id"]
-        + "&request_uri="
-        + response["request_uri"]
-    )
-
-    # Generate QR code
-    # img = qrcode.make("uri")
-    # QRCode.print_ascii()
-
-    qrcode = segno.make(deeplink_url)
-    out = io.BytesIO()
-    qrcode.save(out, kind='png', scale=3)
-
-    """ qrcode.to_artistic(
-        background=cfgtest.qr_png,
-        target=out,
-        kind="png",
-        scale=4,
-    ) """
-    # qrcode.terminal()
-    # qr_img_base64 = qrcode.png_data_uri(scale=4)
-
-    qr_img_base64 = "data:image/png;base64," + base64.b64encode(out.getvalue()).decode(
-        "utf-8"
-    )
-
-    return render_template(
-        "openid/pid_login_qr_code.html",
-        url_data=deeplink_url,
-        qrcode=qr_img_base64,
-        presentation_id=response["presentation_id"],
-        redirect_url= cfgservice.service_url
-    )
 
 @oidc.route("/pid_authorization")
 def pid_authorization_get():
@@ -1069,7 +963,7 @@ def preauthCode():
 
     return render_template(
         "openid/credential_offer_qr_code.html",
-        wallet_dev= wallet_url + "?code=" + code,
+        wallet_dev= wallet_url + "?code=" + code + "&tx_code=" + str(tx_code) + "&credential_offer=" + json.dumps(credential_offer),
         url_data=uri,
         tx_code=tx_code,
         qrcode=qr_img_base64,

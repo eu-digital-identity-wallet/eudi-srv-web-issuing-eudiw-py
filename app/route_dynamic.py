@@ -772,103 +772,6 @@ def credentialCreation(credential_request, data, country):
     return credential_response
 
 
-@dynamic.route("/getpidoid4vp", methods=["GET"])
-def getpidoid4vp():
-    presentation_id = request.args.get("presentation_id")
-    url = (
-        "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
-        + presentation_id
-        + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
-    )
-
-    headers = {
-        "Content-Type": "application/json",
-    }
-
-    response = requests.request("GET", url, headers=headers)
-    if response.status_code != 200:
-        error_msg = str(response.status_code)
-        return jsonify({"error": error_msg}), 400
-
-    error, error_msg = validate_vp_token(response.json())
-
-    if error == True:
-        return authentication_error_redirect(
-            jws_token=session["authorization_params"]["token"],
-            error="invalid_request",
-            error_description=error_msg,
-        )
-
-    mdoc_json = cbor2elems(response.json()["vp_token"] + "==")
-
-    attributesForm = {}
-
-    if (
-        "authorization_params" in session
-        and "authorization_details" in session["authorization_params"]
-    ):
-        cred_request_json = json.loads(
-            session["authorization_params"]["authorization_details"]
-        )
-
-        for cred_request in cred_request_json:
-            if "credential_configuration_id" in cred_request:
-                if (
-                    cred_request["credential_configuration_id"]
-                    == "eu.europa.ec.eudi.pseudonym_over18_mdoc"
-                    or cred_request["credential_configuration_id"]
-                    == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
-                ):
-                    attributesForm.update({"user_pseudonym": str(uuid4())})
-            elif "vct" in cred_request:
-                if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
-                    attributesForm.update({"user_pseudonym": str(uuid4())})
-
-    elif (
-        "authorization_params" in session and "scope" in session["authorization_params"]
-    ):
-        cred_scopes = session["authorization_params"]["scope"]
-        if (
-            "eu.europa.ec.eudi.pseudonym.age_over_18.1" in cred_scopes
-            or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
-            in cred_scopes
-        ):
-            attributesForm.update({"user_pseudonym": str(uuid4())})
-
-    for doctype in mdoc_json:
-        for attribute, value in mdoc_json[doctype]:
-            if attribute == "age_over_18":
-                attributesForm.update({attribute: value})
-    
-    doctype_config = cfgserv.config_doctype["eu.europa.ec.eudi.pseudonym.age_over_18.1"]
-
-    attributesForm.update({"issuing_country": "FC"})
-    attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
-
-    user_id = generate_unique_id()
-    app.config["dynamic"][user_id] = attributesForm
-    
-    presentation_data = attributesForm.copy()
-
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
-    
-
-    presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    presentation_data.update({})
-    presentation_data.update({})
-
-    if "jws_token" not in session and "authorization_params" in session:
-            session["jws_token"] = session["authorization_params"]["token"]
-
-    return render_template(
-        "dynamic/form_authorize_oid4vp.html",
-        attributes=presentation_data,
-        user_id="FC." + user_id,
-        redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
-    )
-
 
 @dynamic.route("/auth_method", methods=["GET", "POST"])
 def auth():
@@ -1088,7 +991,7 @@ def Dynamic_form2():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
-        doctype_config=cfgserv.config_doctype[credential]
+        doctype_config=cfgserv.config_doctype[scope]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])

@@ -265,6 +265,14 @@ class ConfService:
             "organization_name":"Test QEAA issuer",
             "namespace":"teste"
         },
+        "org.iso.23220.2.photoid.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "org.iso.23220.2.photoid.1",
+        }
+        
     }
 
     auth_method_supported_credencials = {
@@ -280,6 +288,7 @@ class ConfService:
             "eu.europa.ec.eudi.pid_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+            "eu.europa.ec.eudi.photoid",
         ],
     }
 
