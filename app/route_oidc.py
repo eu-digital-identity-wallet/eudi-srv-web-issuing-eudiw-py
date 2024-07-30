@@ -72,9 +72,7 @@ oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
 
 # variable for PAR requests
-parRequests = {}
-transaction_codes={}
-deferredRequests = {}
+from app.data_management import parRequests, transaction_codes, deferredRequests
 
 def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}
@@ -106,7 +104,7 @@ def keys():
 def do_response(endpoint, req_args, error="", **args) -> Response:
     info = endpoint.do_response(request=req_args, error=error, **args)
     _log = current_app.logger
-    _log.debug("do_response: {}".format(info))
+    _log.info("do_response: {}".format(info))
 
     try:
         _response_placement = info["response_placement"]
@@ -182,13 +180,6 @@ def verify(authn_method):
 
     if isinstance(args, ResponseMessage) and "error" in args:
         return make_response(args.to_json(), 400)
-    
-    print("\n--------\n")
-    print(endpoint)
-    print("\n--------\n")
-    print(request)
-    print("\n--------\n")
-    print(args)
 
     return do_response(endpoint, request, **args)
 
@@ -425,71 +416,6 @@ def authorizationV3():
 
     return redirect(response["url"])
 
-@oidc.route("/authorization-preauth", methods=["GET"])
-def authorizationpre():
-
-    try:
-        request_uri = request.args.get("request_uri")
-    except:
-        log.logger_error.error("Pre authorization request_uri not found")
-        return make_response("Authorization error", 400)
-
-    if not request_uri in parRequests:  # unknow request_uri => return error
-        # needs to be changed to an appropriate error message, and need to be logged
-        return service_endpoint(current_app.server.get_endpoint("authorization"))
-
-    par_args = parRequests[request_uri]["req_args"]
-
-    if "scope" not in par_args:
-        par_args["scope"] = "openid"
-
-    url = (
-        cfgservice.service_url + "authorization?redirect_uri="
-        + par_args["redirect_uri"]
-        + "&response_type="
-        + par_args["response_type"]
-        + "&scope="
-        + par_args["scope"]
-        + "&client_id="
-        + par_args["client_id"]
-        + "&request_uri="
-        + request_uri
-    )
-
-    payload = {}
-    headers = {}
-    response = requests.request(
-        "GET", url, headers=headers, data=payload
-    )
-
-    if response.status_code != 200:
-        print("\n",str(response.json()),"\n")
-        return make_response("invalid_request", 400)
-
-    response = response.json()
-    args = {}
-    if "authorization_details" in response:
-        args.update({"authorization_details": response["authorization_details"]})
-    if "scope" in response:
-        args.update({"scope": response["scope"]})
-    if not args:
-        return authentication_error_redirect(
-            jws_token=response["token"],
-            error=response["error"],
-            error_description=response["error_description"],
-        )
-
-    params = {"token": response["token"]}
-
-    params.update(args)
-
-    session["authorization_params"] = params
-
-    #return redirect(url_get(response["url"], params))
-    return redirect(cfgservice.service_url + "dynamic/preauth-form")
-    # return response.content
-
-
 @oidc.route("/pid_authorization")
 def pid_authorization_get():
 
@@ -623,7 +549,7 @@ def token():
         return response.json()
     
     else: 
-        return make_response("invalid_request", 400)
+        return service_endpoint(current_app.server.get_endpoint("token"))
     
     log.logger_info.info("Token response: " + str(json.loads(response.get_data())))
 
@@ -847,7 +773,7 @@ def credentialOffer():
             credentials_id_list = json.dumps(form)
             if auth_choice =="pre_auth_code":
                 session["credential_offer_URI"] = credential_offer_URI
-                return redirect(url_for('dynamic.preauthRed', credentials_id=credentials_id_list))
+                return redirect(url_for('preauth.preauthRed', credentials_id=credentials_id_list))
             
             else:
                 
@@ -900,77 +826,8 @@ def credentialOffer():
         return redirect(cfgservice.service_url + "credential_offer_choice")
     
 
-@oidc.route("/preauth-code", methods=["GET"])
-def preauthCode():
-    code = request.args.get("code")
-    print(session)
-    credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
-        "credential_configuration_ids": session["credentials_id"],
-        "grants" : {
-            "urn:ietf:params:oauth:grant-type:pre-authorized_code" : {
-                 "pre-authorized_code": code,
-                 "tx_code": {
-                    "length": 5,
-                    "input_mode": "numeric",
-                    "description": "Please provide the one-time code."
-                }
-            }
-        }
-    }
 
-    tx_code=random.randint(10000,99999)
-
-    transaction_codes.update({code:{"tx_code":str(tx_code),"expires":datetime.now() + timedelta(minutes=cfgservice.tx_code_expiry)}})
-
-    print("\n----- Updating transaction codes-----\n", transaction_codes)
-
-    # create URI
-    json_string = json.dumps(credential_offer)
-    
-    credential_offer_URI = session["credential_offer_URI"]
-
-    uri = f"{credential_offer_URI}credential_offer?credential_offer=" + urllib.parse.quote(
-                    json_string, safe=":/"
-                )
-
-    # Generate QR code
-    # img = qrcode.make("uri")
-    # QRCode.print_ascii()
-
-    qrcode = segno.make(uri)
-    out = io.BytesIO()
-    qrcode.save(out, kind='png', scale=2)
-    
-
-    #print(qrcode.terminal(compact=True))
-
-    """ qrcode.to_artistic(
-        background=cfgtest.qr_png,
-        target=out,
-        kind="png",
-        scale=2,
-    ) """
-
-    # qrcode.terminal()
-    #qr_img_base64 = qrcode.png_data_uri(scale=4)
-
-    qr_img_base64 = "data:image/png;base64," + base64.b64encode(
-        out.getvalue()
-    ).decode("utf-8")
-
-    wallet_url = cfgservice.wallet_test_url + "redirect_preauth"
-
-    return render_template(
-        "openid/credential_offer_qr_code.html",
-        wallet_dev= wallet_url + "?code=" + code + "&tx_code=" + str(tx_code) + "&credential_offer=" + json.dumps(credential_offer),
-        url_data=uri,
-        tx_code=tx_code,
-        qrcode=qr_img_base64,
-    )
-
-
-""" @oidc.route("/testgetauth", methods=["GET"])
+@oidc.route("/testgetauth", methods=["GET"])
 def testget():
     if "error" in request.args:
         response = (
@@ -978,7 +835,7 @@ def testget():
         )
         return response
     else:
-        return request.args.get("code") """
+        return request.args.get("code")
 
 
 IGNORE = ["cookie", "user-agent"]
@@ -1005,6 +862,7 @@ def service_endpoint(endpoint):
             req_args = request.json
             req_args["access_token"] = accessToken
             req_args["oidc_config"] = cfgoidc
+            req_args["aud"] = cfgservice.service_url[:-1]
             args = endpoint.process_request(req_args)
             if "response_args" in args:
                 if "error" in args["response_args"]:
@@ -1154,6 +1012,8 @@ def service_endpoint(endpoint):
             + int(datetime.timestamp(datetime.now())),
         }
 
+        print("\n--------parRequests-----\n", parRequests[args["http_response"]["request_uri"]])
+
     if "redirect_location" in args:
         return redirect(args["redirect_location"])
     if "http_response" in args:
@@ -1166,69 +1026,3 @@ def service_endpoint(endpoint):
 @oidc.errorhandler(werkzeug.exceptions.BadRequest)
 def handle_bad_request(e):
     return "bad request!", 400
-
-
-
-################################################
-## To be moved to a file with scheduled jobs
-
-scheduler_call = 30  # scheduled periodic job will be called every scheduler_call seconds (should be 300; 30 for debug)
-
-
-def clear_par():
-    """Function to clear parRequests"""
-    now = int(datetime.timestamp(datetime.now()))
-    print("Job scheduled: clear_par() at " + str(now))
-
-    for uri in parRequests.copy():
-        expire_time = parRequests[uri]["expires"]
-        if now > expire_time:
-            parRequests.pop(uri)
-            print(
-                "Job scheduled: clear_par: "
-                + uri
-                + " eliminado. "
-                + str(now)
-                + " > "
-                + str(expire_time)
-            )
-        else:
-            print(
-                "Job scheduled: clear_par: "
-                + uri
-                + " não eliminado. "
-                + str(now)
-                + " < "
-                + str(expire_time)
-            )
-
-    for req in deferredRequests.copy():
-            
-            if datetime.now() > deferredRequests[req]["expires"]:
-                deferredRequests.pop(req)
-            else:
-                request_data = json.loads(deferredRequests[req]["data"])
-                request_data.update({"transaction_id": req})
-                request_data = json.dumps(request_data)
-                request_headers = deferredRequests[req]["headers"]
-
-                response = requests.post(cfgservice.service_url+"credential", data=request_data, headers=request_headers)
-                response_data = response.json()
-
-                if response.status_code == 200:
-                    if "credential" in response_data or "credential_responses" in response_data:
-                        deferredRequests.pop(req)
-    
-    for code in transaction_codes.copy():
-        if datetime.now() > transaction_codes[code]["expires"]:
-            log.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
-            log.logger_info.info("Removing tx_code for code: " + str(code))
-            transaction_codes.pop(code)
-
-def run_scheduler():
-    print("Run scheduler.")
-    threading.Timer(scheduler_call, run_scheduler).start()
-    clear_par()
-
-
-run_scheduler()

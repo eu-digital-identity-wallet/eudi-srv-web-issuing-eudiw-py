@@ -231,7 +231,8 @@ def create_app(test_config=None):
         route_formatter,
         route_oidc,
         route_dynamic,
-        route_oid4vp
+        route_oid4vp,
+        preauthorization
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
@@ -239,6 +240,7 @@ def create_app(test_config=None):
     app.register_blueprint(route_oidc.oidc)
     app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
+    app.register_blueprint(preauthorization.preauth)
 
     # config session
     app.config["SESSION_FILE_THRESHOLD"] = 50

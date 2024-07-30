@@ -73,8 +73,10 @@ from app_config.config_service import ConfService as log
 from app_config.config_secrets import flask_secret_key
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = flask_secret_key
-app.config["dynamic"] = {}
+#app.config["SECRET_KEY"] = flask_secret_key
+#app.config["dynamic"] = {}
+
+from app.data_management import form_dynamic_data
 
 
 @dynamic.route("/", methods=["GET", "POST"])
@@ -198,7 +200,7 @@ def dynamic_R1(country):
     elif country == "sample":
         user_id = generate_unique_id()
 
-        app.config["dynamic"][user_id] = cfgserv.sample_data
+        form_dynamic_data[user_id] = cfgserv.sample_data
 
         if "jws_token" not in session or "authorization_params" in session:
             session["jws_token"] = session["authorization_params"]["token"]
@@ -526,7 +528,7 @@ def dynamic_R2_data_collect(country, user_id):
     country -- credential issuing country that user selected
     """
     if country == "FC":
-        data = app.config["dynamic"].get(user_id, "Data not found")
+        data = form_dynamic_data.get(user_id, "Data not found")
 
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
@@ -537,7 +539,7 @@ def dynamic_R2_data_collect(country, user_id):
         return data
 
     if country == "sample":
-        data = app.config["dynamic"].get(user_id, "Data not found")
+        data = form_dynamic_data.get(user_id, "Data not found")
 
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
@@ -791,235 +793,6 @@ def auth():
     elif choice == "link2":
         return redirect(cfgserv.service_url + "dynamic/")
 
-
-@dynamic.route("/preauth", methods=["GET"])
-def preauthRed():
-    
-    url = cfgserv.service_url + "pushed_authorizationv2"
-    credentials_id=request.args.get("credentials_id")
-    credential_list=json.loads(credentials_id)
-
-    authorization_details=[]
-
-    for credential in credential_list:
-        authorization_details.append({
-            "type": "openid_credential",
-            "credential_configuration_id":credential
-        })
-    authorization_details=urllib.parse.quote_plus(json.dumps(authorization_details))
-    
-    redirect_url = urllib.parse.quote(cfgserv.service_url) + "preauth-code"
-
-    payload = 'response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri=' + redirect_url + '&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details='+ authorization_details
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-    }
-
-    print("\n------ PAR payload -----\n", payload)
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-
-    if response.status_code != 200:
-        print("\n",str(response.json()),"\n")
-        return make_response("invalid_request", 400)
-    
-    par_response = response.json()
-
-    return redirect(cfgserv.service_url +"authorization-preauth?client_id=ID&request_uri=" + par_response["request_uri"])
-
-
-@dynamic.route("/preauth-form", methods=["GET"])
-def preauthForm():
-    """ Form used for pre-authorization
-    Form page where the user information is parsed.
-    """
-
-    authorization_params = session["authorization_params"]
-    
-    authorization_details = []
-    if "authorization_details" in authorization_params:
-        authorization_details.extend(
-            json.loads(authorization_params["authorization_details"])
-        )
-
-    if not authorization_details:
-        return authentication_error_redirect(
-            jws_token=authorization_params["token"],
-            error="invalid authentication",
-            error_description="No authorization details or scope found in dynamic route.",
-        )
-
-    session["authorization_details"] = authorization_details
-
-    credentials_requested = []
-    for cred in authorization_details:
-        if "credential_configuration_id" in cred:
-            if cred["credential_configuration_id"] not in credentials_requested:
-                credentials_requested.append(cred["credential_configuration_id"])
-        elif "vct" in cred:
-            if cred["vct"] not in credentials_requested:
-                credentials_requested.append(cred["vct"])
-
-    session["credentials_requested"] = credentials_requested
-
-    attributesForm=getAttributesForm(session["credentials_requested"])
-
-    return render_template("dynamic/dynamic-form.html", attributes=attributesForm, redirect_url= cfgserv.service_url+"dynamic/form2")
-
-
-@dynamic.route("/form2", methods=["GET", "POST"])
-def Dynamic_form2():
-    """Form PID page.
-    Form page where the user can enter its PID data.
-    """
-    session["route"] = "/dynamic/form"
-    session["version"] = "0.4"
-    session["country"] = "FC"
-    # if GET
-    if request.method == "GET":
-        # print("/pid/form GET: " + str(request.args))
-        if (
-            session.get("country") is None or session.get("returnURL") is None
-        ):  # someone is trying to connect directly to this endpoint
-            return (
-                "Error 101: " + cfgserv.error_list["101"] + "\n",
-                status.HTTP_400_BAD_REQUEST,
-            )
-
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('Misc/Auth_method.html')
-
-    # if submitted form is valid
-    """  v = validate_params_getpid_or_mdl(
-        request.form,
-        ["version", "country", "certificate", "returnURL", "device_publickey"],
-    )
-    if not isinstance(v, bool):  # getpid params were not correctly validated
-        return v """
-
-    form_data = request.form.to_dict()
-
-    user_id = generate_unique_id()
-    timestamp = int(datetime.timestamp(datetime.now()))
-
-    form_data.pop("proceed")
-    cleaned_data = {}
-    for item in form_data:
-
-        if item == "portrait":
-            if form_data[item] == "Port1":
-                cleaned_data["portrait"] = cfgserv.portrait1
-            elif form_data[item] == "Port2":
-                cleaned_data["portrait"] = cfgserv.portrait2
-            elif form_data[item] == "Port3":
-                portrait= request.files["Image"]
-
-                img = Image.open(portrait)
-                #imgbytes = img.tobytes()
-                bio = io.BytesIO()
-                img.save(bio, format="JPEG")
-                del img
-
-                response,error_msg = validate_image(portrait)
-
-                if response==False:
-                    return authentication_error_redirect(
-                        jws_token=session["jws_token"],
-                        error="Invalid Image",
-                        error_description=error_msg,
-                    )
-                else :
-                    imgurlbase64=base64.urlsafe_b64encode(bio.getvalue()).decode('utf-8')
-                    cleaned_data["portrait"]=imgurlbase64
-
-        elif item == "Category1":
-            DrivingPrivileges = []
-            i = 1
-            for i in range(int(form_data["NumberCategories"])):
-                f = str(i + 1)
-                drivP = {
-                    "vehicle_category_code": form_data["Category" + f],
-                    "issue_date": form_data["IssueDate" + f],
-                    "expiry_date": form_data["ExpiryDate" + f],
-                }
-                DrivingPrivileges.append(drivP)
-
-            cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
-
-        else:
-            cleaned_data[item] = form_data[item]
-
-    cleaned_data.update(
-        {
-            "version": session["version"],
-            "issuing_country": session["country"],
-            "issuing_authority": cfgserv.mdl_issuing_authority,
-            "timestamp": timestamp,
-        }
-    )
-
-    app.config["dynamic"][user_id] = cleaned_data
-
-    
-    if "jws_token" not in session or "authorization_params" in session:
-        session["jws_token"] = session["authorization_params"]["token"]
-
-    session["returnURL"] = cfgserv.OpenID_first_endpoint
-
-    credentialsSupported = oidc_metadata["credential_configurations_supported"]
-
-    presentation_data=dict()
-
-    for credential_requested in session["credentials_requested"]:
-        
-        scope= credentialsSupported[credential_requested]["scope"]
-
-        if scope in cfgserv.common_name:
-            credential=cfgserv.common_name[scope]
-
-        else:
-            credential = scope
-
-        presentation_data.update({credential:{}})
-
-        test=list()
-        test.append(credential_requested)
-        attributesForm = getAttributesForm(test).keys()
-
-        for attribute in cleaned_data.keys():
-
-            if attribute in attributesForm:
-                presentation_data[credential][attribute]= cleaned_data[attribute]
-
-        doctype_config=cfgserv.config_doctype[scope]
-
-        today = date.today()
-        expiry = today + timedelta(days=doctype_config["validity"])
-    
-        presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-        presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-        presentation_data[credential].update({"issuing_country": session["country"]}),
-        presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
-        if "birth_date" in presentation_data[credential]:
-            presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
-
-        if "driving_privileges" in presentation_data[credential]:
-            json_priv = json.loads(presentation_data[credential]["driving_privileges"])
-            presentation_data[credential].update({"driving_privileges":json_priv})
-        
-        if "portrait" in presentation_data[credential]:
-            presentation_data[credential].update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data[credential]["portrait"])).decode("utf-8")})
-        
-        if "NumberCategories" in presentation_data[credential]:
-            for i in range(int(presentation_data[credential]["NumberCategories"])):
-                    f = str(i + 1)
-                    presentation_data[credential].pop("IssueDate" + f)
-                    presentation_data[credential].pop("ExpiryDate" + f)
-            presentation_data[credential].pop("NumberCategories")
-
-    return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
-
-
 @dynamic.route("/form", methods=["GET", "POST"])
 def Dynamic_form():
     """Form PID page.
@@ -1122,11 +895,10 @@ def Dynamic_form():
 
     print("\n-----Cleaned Data----\n", cleaned_data)
 
-    app.config["dynamic"][user_id] = cleaned_data
+    form_dynamic_data[user_id] = cleaned_data
 
     if "jws_token" not in session or "authorization_params" in session:
         session["jws_token"] = session["authorization_params"]["token"]
-
     session["returnURL"] = cfgserv.OpenID_first_endpoint
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -1189,51 +961,13 @@ def redirect_wallet():
     form_data = request.form.to_dict()
 
     user_id= form_data["user_id"]
-        
+    print("\n----Session redirect_wallet----\n", session)
     return redirect(
             url_get(
                 cfgserv.OpenID_first_endpoint,
                 {
-                    "jws_token": session["jws_token"],
+                    "jws_token": session["authorization_params"]["token"],
                     "username": user_id,
                 },
             )
         )
-
-def clear_data():
-    """Function to clear app.config['data']"""
-    now = datetime.now()
-    aux = []
-
-    for unique_id, dados in app.config["dynamic"].items():
-        timestamp = datetime.fromtimestamp(dados.get("timestamp", 0))
-        diff = now - timestamp
-        if diff.total_seconds() > (
-            cfgserv.max_time_data * 60
-        ):  # minutes * 60 seconds -> data is deleted after being saved for 1 minute
-            aux.append(unique_id)
-
-    for unique_id in aux:
-        del app.config["dynamic"][unique_id]
-
-    if aux:
-        print(f"Entradas {aux} eliminadas.")
-
-
-def job():
-    clear_data()
-
-
-schedule.every(cfgserv.schedule_check).minutes.do(
-    job
-)  # scheduled to run every 5 minutes
-
-
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-
-scheduler_thread = threading.Thread(target=run_scheduler)
-scheduler_thread.start()

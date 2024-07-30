@@ -16,15 +16,13 @@
 #
 ###############################################################################
 """
-The Dynamic Issuer Web service is a component of the Dynamic Provider backend. 
-Its main goal is to issue the credentials in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
+The oid4vp route implements the communication with an openid4vp backend service.
 
-
-This route_dynamic.py file is the blueprint for the route /dynamic of the PID Issuer Web service.
+It has support for both same device and cross device oid4vp
 """
 
 import base64
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import io
 import json
 from uuid import uuid4
@@ -42,10 +40,7 @@ oid4vp = Blueprint("oid4vp", __name__, url_prefix="/")
 CORS(oid4vp)  # enable CORS on the blue print
 
 # secrets
-from app_config.config_secrets import flask_secret_key
-from app.route_dynamic import app
-
-oid4vp_requests = {}
+from app.data_management import oid4vp_requests, form_dynamic_data
 
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
@@ -196,7 +191,7 @@ def openid4vp():
     response_same = requests.request("POST", url, headers=headers, data=payload_same_device).json()
 
     
-    oid4vp_requests.update({id:response_same})
+    oid4vp_requests.update({id:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
 
     deeplink_url = (
         "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
@@ -244,12 +239,10 @@ def openid4vp():
 
 @oid4vp.route("/getpidoid4vp", methods=["GET"])
 def getpidoid4vp():
-    print(request.args)
-    print(oid4vp_requests)
 
     if "response_code" in request.args and "session_id" in request.args:
         response_code = request.args.get("response_code")
-        presentation_id = oid4vp_requests[request.args.get("session_id")]["presentation_id"]
+        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
         url = (
             "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
             + presentation_id
@@ -271,14 +264,11 @@ def getpidoid4vp():
     }
 
     response = requests.request("GET", url, headers=headers)
-    print(response.status_code)
     if response.status_code != 200:
         error_msg = str(response.status_code)
         return jsonify({"error": error_msg}), 400
 
     error, error_msg = validate_vp_token(response.json())
-
-    print(error)
 
     if error == True:
         return authentication_error_redirect(
@@ -288,7 +278,6 @@ def getpidoid4vp():
         )
 
     mdoc_json = cbor2elems(response.json()["vp_token"] + "==")
-    print(mdoc_json)
     attributesForm = {}
 
     if (
@@ -334,7 +323,7 @@ def getpidoid4vp():
     attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
 
     user_id = generate_unique_id()
-    app.config["dynamic"][user_id] = attributesForm
+    form_dynamic_data[user_id] = attributesForm
     
     presentation_data = attributesForm.copy()
 
