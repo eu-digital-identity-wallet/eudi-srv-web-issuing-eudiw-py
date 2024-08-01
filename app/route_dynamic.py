@@ -325,28 +325,42 @@ def red():
             + " -  entered the route"
         )
 
-        user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
         data = dynamic_R2_data_collect(
-            country=session["country"], user_id=user_id
+            country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
         )
+        
+        i = 0
+        while "error" in data and data["error"] == "Pending" and i < 20:
+            time.sleep(2)
+            data = dynamic_R2_data_collect(
+            country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
+            )
+            i =+ 2
 
         portuguese_fields = dict()
         form_data={}
 
-        for doctype in cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"]:
+        credential_requested = session["credentials_requested"]
+        credentialsSupported = oidc_metadata["credential_configurations_supported"]
             
+        for id in credential_requested:
+            doctype= credentialsSupported[id]["doctype"]
             portuguese_fields.update({doctype:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
 
         for doctype in portuguese_fields:
             for fields in portuguese_fields[doctype]:
                 for item in data:
                     if item["name"] == portuguese_fields[doctype][fields]:
-                        form_data[doctype][fields] = item["value"]
+                        if doctype not in form_data:
+                            form_data.update({doctype:{fields:item["value"]}})
+                        else:
+                            form_data[doctype].update({fields:item["value"]})
+                        #form_data[doctype][fields] = item["value"]
                         break
         
         for doctype in portuguese_fields:
             if "birth_date" in form_data[doctype]:
-                form_data[doctype]["birth_date"] = datetime.datetime.strptime(
+                form_data[doctype]["birth_date"] = datetime.strptime(
                     form_data[doctype]["birth_date"], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
 
@@ -364,6 +378,8 @@ def red():
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
             form_data[doctype].update({"issuing_country": session["country"]})
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
+
+        user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
         return render_template("dynamic/form_authorize.html", presentation_data=form_data, user_id=user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
@@ -425,7 +441,7 @@ def red():
     )
 
     data = dynamic_R2_data_collect(
-        country=country, user_id=session["country"] + "." + session["access_token"]
+        country=country, user_id=session["access_token"]
     )
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
