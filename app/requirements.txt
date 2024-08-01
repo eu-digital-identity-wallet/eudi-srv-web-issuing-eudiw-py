@@ -22,9 +22,9 @@ pillow==10.2.0
 segno==1.6.1
 qrcode-artistic==3.0.2
 gunicorn
-git+https://github.com/niscy-eudiw/pyMDOC-CBOR.git@branch-development
-git+https://github.com/niscy-eudiw/idpy-oidc.git@branch-development
-git+https://github.com/niscy-eudiw/openid4v.git@branch-development
+git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
+git+https://github.com/eu-digital-identity-wallet/idpy-oidc.git
+git+https://github.com/eu-digital-identity-wallet/openid4v.git
 git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@9181a0a4514b7de2cc30a84d320b509e9fc5cb59
 git+https://github.com/rohe/fedservice.git
 git+https://github.com/rohe/idpy-sdjwt.git

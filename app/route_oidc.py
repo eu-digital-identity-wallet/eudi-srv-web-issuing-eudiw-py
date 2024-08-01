@@ -594,7 +594,6 @@ def token():
 
         response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
-            print("\n",str(response.json()),"\n")
             return make_response("invalid_request", 400)
 
         #response = response.json()
@@ -947,7 +946,7 @@ def credentialOffer():
     
 
 
-@oidc.route("/testgetauth", methods=["GET"])
+""" @oidc.route("/testgetauth", methods=["GET"])
 def testget():
     if "error" in request.args:
         response = (
@@ -955,7 +954,7 @@ def testget():
         )
         return response
     else:
-        return request.args.get("code")
+        return request.args.get("code") """
 
 
 IGNORE = ["cookie", "user-agent"]
@@ -1131,8 +1130,6 @@ def service_endpoint(endpoint):
             "expires": args["http_response"]["expires_in"]
             + int(datetime.timestamp(datetime.now())),
         }
-
-        print("\n--------parRequests-----\n", parRequests[args["http_response"]["request_uri"]])
 
     if "redirect_location" in args:
         return redirect(args["redirect_location"])
