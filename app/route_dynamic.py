@@ -293,7 +293,6 @@ def red():
     Return: Redirect answer to returnURL.
     """
     session["route"] = "/dynamic/redirect"
-    session["country"]="PT"
 
     if session["country"] == "PT":
 
@@ -329,13 +328,17 @@ def red():
             country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
         )
         
-        i = 0
+        if "error" in data and data["error"] == "Pending" and "response" in data:
+            data = data["response"]
+
+        print("\n-----Data-----\n", data)
+        """ i = 0
         while "error" in data and data["error"] == "Pending" and i < 20:
             time.sleep(2)
             data = dynamic_R2_data_collect(
             country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
             )
-            i =+ 2
+            i =+ 2 """
 
         portuguese_fields = dict()
         form_data={}
@@ -351,21 +354,30 @@ def red():
             for fields in portuguese_fields[doctype]:
                 for item in data:
                     if item["name"] == portuguese_fields[doctype][fields]:
-                        if doctype not in form_data:
-                            form_data.update({doctype:{fields:item["value"]}})
+                        if item["state"] == "Pending":
+                            value = "Pending"
                         else:
-                            form_data[doctype].update({fields:item["value"]})
+                            value = item["value"]
+
+                        if doctype not in form_data:
+                            form_data.update({doctype:{fields:value}})
+                        else:
+                            form_data[doctype].update({fields:value})
                         #form_data[doctype][fields] = item["value"]
                         break
         
         for doctype in portuguese_fields:
-            if "birth_date" in form_data[doctype]:
+            if "birth_date" in form_data[doctype] and form_data[doctype]["birth_date"] != "Pending":
                 form_data[doctype]["birth_date"] = datetime.strptime(
                     form_data[doctype]["birth_date"], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
 
-            if "driving_privileges" in form_data[doctype]:
+            if "driving_privileges" in form_data[doctype] and form_data[doctype]["driving_privileges"] != "Pending":
                 json_priv = json.loads(form_data[doctype]["driving_privileges"])
+                form_data[doctype].update({"driving_privileges":json_priv})
+
+            if "driving_privileges" in form_data[doctype] and form_data[doctype]["driving_privileges"] == "Pending":
+                json_priv = [{'Type': 'Pending', 'IssueDate': 'Pending', 'ExpiryDate': 'Pending', 'Restriction': []}]
                 form_data[doctype].update({"driving_privileges":json_priv})
 
             doctype_config=cfgserv.config_doctype[doctype]
@@ -373,7 +385,11 @@ def red():
             today = date.today()
             expiry = today + timedelta(days=doctype_config["validity"])
 
-            form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
+            if form_data[doctype]["birth_date"] != "Pending":
+                form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
+            else:
+                form_data[doctype].update({"age_over_18":"Pending"})
+
             form_data[doctype].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
             form_data[doctype].update({"issuing_country": session["country"]})
@@ -397,7 +413,7 @@ def red():
             error_description="Missing mandatory IdP fields",
         )
     
-
+    
     metadata_url = cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"] + "/.well-known/openid-configuration"
     metadata_json = requests.get(metadata_url).json()
 
@@ -441,7 +457,7 @@ def red():
     )
 
     data = dynamic_R2_data_collect(
-        country=country, user_id=session["access_token"]
+        country=session["country"], user_id=session["access_token"]
     )
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -449,36 +465,51 @@ def red():
     presentation_data=dict()
 
     for credential_requested in session["credentials_requested"]:
-            
-            scope= credentialsSupported[credential_requested]["scope"]
+        
+        scope= credentialsSupported[credential_requested]["scope"]
 
-            if scope in cfgserv.common_name:
-                credential=cfgserv.common_name[scope]
+        if scope in cfgserv.common_name:
+            credential=cfgserv.common_name[scope]
 
-            else:
-                credential = scope
+        else:
+            credential = scope
 
-            presentation_data.update({credential:{}})
+        presentation_data.update({credential:{}})
 
-            test=list()
-            test.append(credential_requested)
-            attributesForm = getAttributesForm(test).keys()
+        credential_atributes_form=list()
+        credential_atributes_form.append(credential_requested)
+        attributesForm = getAttributesForm(credential_atributes_form).keys()
 
-            for attribute in data.keys():
+        for attribute in data.keys():
+            if attribute in attributesForm:
+                presentation_data[credential][attribute]= data[attribute]
 
-                if attribute in attributesForm:
-                    presentation_data[credential][attribute]= data[attribute]
+        doctype_config=cfgserv.config_doctype[scope]
 
-            doctype_config=cfgserv.config_doctype[credential]
+        today = date.today()
+        expiry = today + timedelta(days=doctype_config["validity"])
+    
+        presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
+        presentation_data[credential].update({"issuing_country": session["country"]}),
+        presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "birth_date" in presentation_data[credential]:
+            presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
-            today = date.today()
-            expiry = today + timedelta(days=doctype_config["validity"])
 
-            presentation_data[credential].update({"age_over_18": True if calculate_age(data["birth_date"]) >= 18 else False})
-            presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-            presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-            presentation_data[credential].update({"issuing_country":session["country"]})
-            presentation_data[credential].update({"issuing_authority":doctype_config["issuing_authority"]})
+        if "driving_privileges" in presentation_data[credential]:
+            json_priv = json.loads(presentation_data[credential]["driving_privileges"])
+            presentation_data[credential].update({"driving_privileges":json_priv})
+        
+        if "portrait" in presentation_data[credential]:
+            presentation_data[credential].update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data[credential]["portrait"])).decode("utf-8")})
+        
+        if "NumberCategories" in presentation_data[credential]:
+            for i in range(int(presentation_data[credential]["NumberCategories"])):
+                    f = str(i + 1)
+                    presentation_data[credential].pop("IssueDate" + f)
+                    presentation_data[credential].pop("ExpiryDate" + f)
+            presentation_data[credential].pop("NumberCategories")
 
     user_id=session["country"] + "." + session["access_token"]
 
@@ -590,7 +621,8 @@ def dynamic_R2_data_collect(country, user_id):
             json_response = r2.json()
             for attribute in json_response:
                 if attribute["state"] == "Pending":
-                    return {"error": "Pending"}
+                    return {"error": "Pending",
+                            "response":json_response}
 
             data = json_response
 
