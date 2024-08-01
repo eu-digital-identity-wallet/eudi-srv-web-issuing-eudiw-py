@@ -28,7 +28,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, request, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -197,7 +197,9 @@ def create_app(test_config=None):
 
     @app.route("/", methods=["GET"])
     def initial_page():
-        return render_template("misc/initial_page.html", oidc=cfgserv.oidc)
+        
+        print(f"Client IP: {request.headers}")
+        return render_template("misc/initial_page.html", oidc=cfgserv.oidc, service_url = cfgserv.service_url)
 
     @app.route("/favicon.ico")
     def favicon():
@@ -229,12 +231,16 @@ def create_app(test_config=None):
         route_formatter,
         route_oidc,
         route_dynamic,
+        route_oid4vp,
+        preauthorization
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
+    app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
+    app.register_blueprint(preauthorization.preauth)
 
     # config session
     app.config["SESSION_FILE_THRESHOLD"] = 50

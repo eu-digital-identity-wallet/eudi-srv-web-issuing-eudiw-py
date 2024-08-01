@@ -3,8 +3,18 @@
     "format": "mso_mdoc",
     "doctype": "eu.europa.ec.eudi.pid.1",
     "scope": "eu.europa.ec.eudi.pid.1",
+    "policy": {
+        "batch_size": 50,
+        "one_time_use": true
+    },
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"
+    ],
+    "credential_alg_values_supported": [
+        -7
+      ],
+    "credential_crv_values_supported": [
+      1
     ],
     "credential_signing_alg_values_supported": [
       "ES256"

@@ -73,10 +73,6 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     if doctype == "org.iso.18013.5.1.mDL":
 
-        data["org.iso.18013.5.1"]["portrait"] = base64.urlsafe_b64decode(
-            data["org.iso.18013.5.1"]["portrait"]
-        )
-
         # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
         # data["org.iso.18013.5.1"]["signature_usual_mark"]
         # )
@@ -106,6 +102,16 @@ def mdocFormatter(data, doctype, country, device_publickey):
             "issuance_date": data[first_key]["issuance_date"],
             "expiry_date": data[first_key]["expiry_date"],
         }
+    
+    namespace = cfgservice.config_doctype[doctype]["namespace"]
+
+    if "portrait" in data[namespace]:
+        data[namespace]["portrait"] = base64.urlsafe_b64decode(
+            data[namespace]["portrait"]
+        )
+
+    if "user_pseudonym" in data[namespace]:
+        data[doctype]["user_pseudonym"] = data[doctype]["user_pseudonym"].encode('utf-8')
 
     # Construct the COSE private key
     cose_pkey = {

@@ -69,7 +69,7 @@
                     <p class="relying-party"><strong>etranslation</strong> requires you to authenticate</p>
                     -->
                     <h1>Authorize data from your EUDI Wallet</h1>
-                    <div id="content" class="content-wrap content-center col-md-6 col-sm-7">
+                    <div id="content" class="content-wrap content-center col-md-6 col-sm-7 col-xs-12">
 
                         <div class="genericErrors" id="genericErrorsDesc">
 
@@ -77,25 +77,56 @@
                         <!-- <status>EID_COUNTRY_SELECTION</status> -->
                         <h2>Please confirm your information</h2>
                         <!--bean-ext:form action="" styleClass="mt"-->
-                        <form id="selectCountryForm" method="post" action="{{redirect_url}}dynamic/form" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
+                        <form id="selectCountryForm" method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
                             <!-- <div class="nodisplay"><input type="hidden" name="TxId" value="ECAS_TX-7404446-Rej9lkLFeXORXm9rG7q4Xqo1xGRJ86gt3hoJcfMG3XyxQrAyn8mu9PbXRCZoKKUbCzLlIzG5jKgHy4vlfgkG5M-rS0vSrmBGYCAxyMeVAWeYi-PVgrhNnzagSfzJvUraGtvIPzqv8cbsV46ZMUiinVIlcDkNWEKzr5uBS6CMnabjUfRGxDHabrZictNyNLy0AsLWy" /></div><input type="hidden" name="loginRequestId" value="ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" id="loginRequestId" /> -->
                             <h3>Provider Form Authentication</h3>
                             <p>Please confirm if your data is right</p>
                             <div id="eidasCountries">
-                                {% for name, value in attributes.items() %}    
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                {{name}}
-                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
-                                             </div>
-                                        </div>
+                                {% for attributes in presentation_data.keys() %}
+                                    <h3 >{{attributes}}</h3>
+                                    <div >
+                                        {% for name, value in presentation_data[attributes].items() %}
+                                                {%if name == "portrait" %}
+                                                    <div class="form-group ">
+                                                        <div class="col-md-12 col-xs-12" style="padding-bottom:5% ;">
+                                                            <label class="control-label" for="inputError1">{{name}}</label>
+                                                            <img style="width: 50%;"  class="img-thumbnail" src="data:image/png;base64,{{value}} " >
+                                                        </div>
+                                                    </div>
+                                                {%elif name == "driving_privileges" %}
+                                                    <h5 >{{name}}</h5>
+                                                    <div class="form-group" >
+                                                        {% for i_value in value %}
+                                                            <div class="col-md-12 col-xs-12" style="display:inline; background-color: rgb(213, 213, 213); margin-bottom: 5%; outline: auto;">
+                                                                {% for name , value in i_value.items() %} 
+                                                                    <label class="control-label" for="inputError1">{{name}}</label>
+                                                                    <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div> 
+                                                {% else %}   
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            {{name}}
+                                                            <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                        {% endfor %}
+                                    </div>
                                 {% endfor %}
+                                <div class="col-md-12 col-xs-12" id="hidden_elems">
+                                    <div class="col" >
+                                        <input type="hidden" value="{{ user_id }}" name="user_id">
+                                    </div>
+                                </div>
                             </div>
                             <div class="clearfix"></div>
 
 
                             <span class="more-submit">
-                                <input type="submit" name="proceed" accesskey="S" value="Authorize" class="btn btn-primary" title="Submit" /><input type="submit" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" />
+                                <input type="submit" name="proceed" accesskey="S" value="Authorize" class="btn btn-primary" title="Submit"  style="margin-right: 5%;"/><a href="/auth_choice" class="btn btn-back">Cancel</a>
                             </span>
                         </form>
                         <!--<script type="text/javascript" src="{{ url_for('static', filename='scripts/dynamic-validator/selectCountryForm_9.7.1.20.1679559965505_en.js') }}" charset="UTF-8" defer="true"></script>-->
