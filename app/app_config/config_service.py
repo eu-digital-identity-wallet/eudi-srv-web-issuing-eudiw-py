@@ -34,9 +34,9 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    # service_url = "https://issuer.eudiw.dev/"
+    service_url = "https://issuer.eudiw.dev/"
     # service_url = "https://127.0.0.1:5000/"
-    service_url = "https://dev.issuer.eudiw.dev/"
+    # service_url = "https://dev.issuer.eudiw.dev/"
 
     wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
 
@@ -348,7 +348,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log_dev"
+    log_dir = "/tmp/log"
     # log_dir = "../../log"
     log_file_info = "logs.log"
 

@@ -34,7 +34,9 @@ import threading
 import urllib.parse
 import segno
 
+
 from flask import Blueprint, jsonify, Response, request, session, current_app, redirect, render_template, url_for
+
 from flask.helpers import make_response, send_from_directory
 import os
 
@@ -73,6 +75,7 @@ CORS(oidc)  # enable CORS on the blue print
 
 # variable for PAR requests
 from app.data_management import parRequests, transaction_codes, deferredRequests
+
 
 def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}
@@ -154,15 +157,19 @@ def verify(authn_method):
 
         auth_args = authn_method.unpack_token(request.args.get("jws_token"))
     except:
-        log.logger_error.error("Authorization verification: username or jws_token not found")
+        log.logger_error.error(
+            "Authorization verification: username or jws_token not found"
+        )
         if "jws_token" in request.args:
             return authentication_error_redirect(
-            jws_token=request.args.get("jws_token"),
-            error="invalid_request",
-            error_description="Authentication verification Error",
-        )
+                jws_token=request.args.get("jws_token"),
+                error="invalid_request",
+                error_description="Authentication verification Error",
+            )
         else:
-            return render_template("misc/500.html", error="Authentication verification Error")
+            return render_template(
+                "misc/500.html", error="Authentication verification Error"
+            )
 
     authz_request = AuthorizationRequest().from_urlencoded(auth_args["query"])
 
@@ -268,8 +275,16 @@ def authorization():
     return service_endpoint(current_app.server.get_endpoint("authorization"))
 
 
-#@oidc.route("/authorizationV2", methods=["GET"])
-def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_challenge_method=None, code_challenge=None, authorization_details=None):
+# @oidc.route("/authorizationV2", methods=["GET"])
+def authorizationv2(
+    client_id,
+    redirect_uri,
+    response_type,
+    scope=None,
+    code_challenge_method=None,
+    code_challenge=None,
+    authorization_details=None,
+):
 
     client_secret = str(uuid.uuid4())
 
@@ -277,9 +292,10 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
         client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri
     )
 
-    #return service_endpoint(current_app.server.get_endpoint("authorization"))
+    # return service_endpoint(current_app.server.get_endpoint("authorization"))
     url = (
-        cfgservice.service_url + "authorization?redirect_uri="
+        cfgservice.service_url
+        + "authorization?redirect_uri="
         + redirect_uri
         + "&response_type="
         + response_type
@@ -295,19 +311,17 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
 
     if code_challenge and code_challenge_method:
         url = url + "&code_challenge="
-        + code_challenge
-        + "&code_challenge_method="
-        + code_challenge_method
+        +code_challenge
+        +"&code_challenge_method="
+        +code_challenge_method
 
     payload = {}
     headers = {}
-    response = requests.request(
-        "GET", url, headers=headers, data=payload
-    )
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         log.logger_error.error("Authorization endpoint invalid request")
-        return auth_error_redirect(redirect_uri,"invalid_request")
+        return auth_error_redirect(redirect_uri, "invalid_request")
 
     response = response.json()
 
@@ -332,12 +346,17 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
 
     return redirect(response["url"])
 
+
 @oidc.route("/authorizationV3", methods=["GET"])
 def authorizationV3():
 
-    log.logger_info.info("Authorization request Data: " + str(request.args) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Authorization request Data: "
+        + str(request.args)
+        + " | Headers: "
+        + str(dict(request.headers))
     )
-    
+
     if "request_uri" not in request.args:
         try:
             client_id = request.args.get("client_id")
@@ -349,9 +368,15 @@ def authorizationV3():
             authorization_details = request.args.get("authorization_details")
         except:
             return make_response("Authorization v2 error", 400)
-        return authorizationv2(client_id,redirect_uri, response_type,scope, code_challenge_method, code_challenge, authorization_details)
-
-
+        return authorizationv2(
+            client_id,
+            redirect_uri,
+            response_type,
+            scope,
+            code_challenge_method,
+            code_challenge,
+            authorization_details,
+        )
 
     try:
         request_uri = request.args.get("request_uri")
@@ -369,9 +394,10 @@ def authorizationV3():
 
     if "scope" not in par_args:
         par_args["scope"] = "openid"
-    
+
     url = (
-        cfgservice.service_url + "authorization?redirect_uri="
+        cfgservice.service_url
+        + "authorization?redirect_uri="
         + par_args["redirect_uri"]
         + "&response_type="
         + par_args["response_type"]
@@ -385,13 +411,11 @@ def authorizationV3():
 
     payload = {}
     headers = {}
-    response = requests.request(
-        "GET", url, headers=headers, data=payload
-    )
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         log.logger_error.error("Authorization endpoint invalid request")
-        return auth_error_redirect(par_args["redirect_uri"],"invalid_request")
+        return auth_error_redirect(par_args["redirect_uri"], "invalid_request")
 
     response = response.json()
 
@@ -419,34 +443,43 @@ def authorizationV3():
 @oidc.route("/pid_authorization")
 def pid_authorization_get():
 
-    presentation_id= request.args.get("presentation_id")
+    presentation_id = request.args.get("presentation_id")
 
-    url = "https://dev.verifier-backend.eudiw.dev/ui/presentations/" + presentation_id + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    url = (
+        "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+        + presentation_id
+        + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    )
     headers = {
-    'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
 
     response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
-        error_msg= str(response.status_code)
-        return jsonify({"error": error_msg}),500
+        error_msg = str(response.status_code)
+        return jsonify({"error": error_msg}), 500
     else:
         data = {"message": "Sucess"}
-        return jsonify({"message": data}),200
-            
+        return jsonify({"message": data}), 200
+
 
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
     token = request.args.get("token")
 
-    supported_credencials=cfgservice.auth_method_supported_credencials
-    pid_auth=True
-    country_selection=True
+    supported_credencials = cfgservice.auth_method_supported_credencials
+    pid_auth = True
+    country_selection = True
 
     if "authorization_params" not in session:
-        log.logger_info.info("Authorization Params didn't exist in Authentication Choice")
-        return render_template("misc/500.html", error="Invalid Authentication. No authorization details or scope found.")
-    
+        log.logger_info.info(
+            "Authorization Params didn't exist in Authentication Choice"
+        )
+        return render_template(
+            "misc/500.html",
+            error="Invalid Authentication. No authorization details or scope found.",
+        )
+
     authorization_params = session["authorization_params"]
 
     authorization_details = []
@@ -456,7 +489,6 @@ def auth_choice():
         )
     if "scope" in authorization_params:
         authorization_details.extend(scope2details(authorization_params["scope"]))
-        
 
     credentials_requested = []
     for cred in authorization_details:
@@ -467,50 +499,68 @@ def auth_choice():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
 
-    
     for cred in credentials_requested:
-        if cred in supported_credencials["PID_login"] and cred not in supported_credencials["country_selection"]:
-             country_selection=False
-        elif cred not in supported_credencials["PID_login"] and cred in supported_credencials["country_selection"]:
-            pid_auth=False
+        if (
+            cred in supported_credencials["PID_login"]
+            and cred not in supported_credencials["country_selection"]
+        ):
+            country_selection = False
+        elif (
+            cred not in supported_credencials["PID_login"]
+            and cred in supported_credencials["country_selection"]
+        ):
+            pid_auth = False
 
     error = ""
     if pid_auth == False and country_selection == False:
-        error="Combination of requested credentials is not valid!"
-            
-    return render_template("misc/auth_method.html",pid_auth=pid_auth,country_selection=country_selection, error=error, redirect_url= log.service_url)
+        error = "Combination of requested credentials is not valid!"
 
+    return render_template(
+        "misc/auth_method.html",
+        pid_auth=pid_auth,
+        country_selection=country_selection,
+        error=error,
+        redirect_url=log.service_url,
+    )
 
-    #return render_template("misc/auth_method.html")
+    # return render_template("misc/auth_method.html")
+
 
 @oidc.route("/token_service", methods=["POST"])
 def token_service():
 
-    #session_id = request.cookies.get("session")
+    # session_id = request.cookies.get("session")
 
     response = service_endpoint(current_app.server.get_endpoint("token"))
 
     return response
 
+
 @oidc.route("/token", methods=["POST"])
 def token():
 
-    log.logger_info.info("Token request data: " + str(request.form.to_dict()) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Token request data: "
+        + str(request.form.to_dict())
+        + " | Headers: "
+        + str(dict(request.headers))
     )
-    
+
     req_args = dict([(k, v) for k, v in request.form.items()])
 
     response = None
 
     if req_args["grant_type"] == "authorization_code":
-    
+
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
-    elif req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code":
+    elif (
+        req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code"
+    ):
 
         if "pre-authorized_code" not in req_args or "tx_code" not in req_args:
             return make_response("invalid_request", 400)
-        
+
         code = req_args["pre-authorized_code"]
 
         if code not in transaction_codes:
@@ -533,16 +583,22 @@ def token():
         url = cfgservice.service_url + "token_service"
         redirect_url = urllib.parse.quote(cfgservice.service_url) + "preauth-code"
 
-        payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
-        headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        
+        payload = (
+            "grant_type=authorization_code&code="
+            + code
+            + "&redirect_uri="
+            + redirect_url
+            + "&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg"
+        )
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
         response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
             print("\n",str(response.json()),"\n")
             return make_response("invalid_request", 400)
+
         #response = response.json()
+
         log.logger_info.info("Token response: " + str(response.json()))
 
         transaction_codes.pop(code)
@@ -579,7 +635,11 @@ def par_endpoint():
 @oidc.route("/pushed_authorizationv2", methods=["POST"])
 def par_endpointv2():
 
-    log.logger_info.info("Recieved Pushed Authorization request. Data: " + str(request.form.to_dict()) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Recieved Pushed Authorization request. Data: "
+        + str(request.form.to_dict())
+        + " | Headers: "
+        + str(dict(request.headers))
     )
 
     redirect_uri = None
@@ -590,7 +650,9 @@ def par_endpointv2():
     except:
         log.logger_error.error("PAR: client_id or redirect_uri not found")
         if redirect_uri:
-            return auth_error_redirect(redirect_uri, "invalid_request", "invalid parameters")
+            return auth_error_redirect(
+                redirect_uri, "invalid_request", "invalid parameters"
+            )
         else:
             return make_response("PARv2 error", 400)
 
@@ -602,8 +664,13 @@ def par_endpointv2():
 
     response = service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
-    log.logger_info.info("PAR response for client_id " + client_id + " : " + str(json.loads(response.get_data())))
-                         
+    log.logger_info.info(
+        "PAR response for client_id "
+        + client_id
+        + " : "
+        + str(json.loads(response.get_data()))
+    )
+
     return response
 
 
@@ -611,24 +678,42 @@ def par_endpointv2():
 def credential():
 
     if request.data:
-        log.logger_info.info("Credential request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
+        log.logger_info.info(
+            "Credential request data: "
+            + str(json.loads(request.data))
+            + " | Headers: "
+            + str(dict(request.headers))
         )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
-    
-    if isinstance(_response,Response):
-        log.logger_info.info("Credential response " + str(json.loads(_response.get_data())))
+
+    if isinstance(_response, Response):
+        log.logger_info.info(
+            "Credential response " + str(json.loads(_response.get_data()))
+        )
         return _response
 
-    if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
+    if (
+        "transaction_id" in _response
+        and _response["transaction_id"] not in deferredRequests
+    ):
 
         request_data = request.data
         request_headers = dict(request.headers)
-        deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
-        
+        deferredRequests.update(
+            {
+                _response["transaction_id"]: {
+                    "data": request_data,
+                    "headers": request_headers,
+                    "expires": datetime.now()
+                    + timedelta(minutes=cfgservice.deffered_expiry),
+                }
+            }
+        )
+
         log.logger_info.info("Credential response " + str(_response))
 
-        return make_response(jsonify(_response),202)
+        return make_response(jsonify(_response), 202)
 
     log.logger_info.info("Credential response " + str(_response))
     return _response
@@ -636,59 +721,86 @@ def credential():
 
 @oidc.route("/batch_credential", methods=["POST"])
 def batchCredential():
-    log.logger_info.info("Batch credential request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Batch credential request data: "
+        + str(json.loads(request.data))
+        + " | Headers: "
+        + str(dict(request.headers))
     )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
-    if isinstance(_response,Response):
-        log.logger_info.info("Batch Credential response " + str(json.loads(_response.get_data())))
+    if isinstance(_response, Response):
+        log.logger_info.info(
+            "Batch Credential response " + str(json.loads(_response.get_data()))
+        )
         return _response
-    
-    if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
+
+    if (
+        "transaction_id" in _response
+        and _response["transaction_id"] not in deferredRequests
+    ):
 
         request_data = request.data
         request_headers = dict(request.headers)
-        deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
-        
+        deferredRequests.update(
+            {
+                _response["transaction_id"]: {
+                    "data": request_data,
+                    "headers": request_headers,
+                    "expires": datetime.now()
+                    + timedelta(minutes=cfgservice.deffered_expiry),
+                }
+            }
+        )
+
         log.logger_info.info("Batch credential response " + str(_response))
-        return make_response(jsonify(_response),202)
-    
+        return make_response(jsonify(_response), 202)
 
     log.logger_info.info("Batch credential response " + str(_response))
 
     return _response
 
+
 @oidc.route("/notification", methods=["POST"])
 def notification():
-    log.logger_info.info("Notification request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Notification request data: "
+        + str(json.loads(request.data))
+        + " | Headers: "
+        + str(dict(request.headers))
     )
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
-    if isinstance(_resp,Response):
+    if isinstance(_resp, Response):
         log.logger_info.info("Notification response " + str(_resp))
         return _resp
-    
 
     log.logger_info.info("Notification response " + str(_resp))
-    
+
     return _resp
+
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
 
-    log.logger_info.info("Deferred request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
+    log.logger_info.info(
+        "Deferred request data: "
+        + str(json.loads(request.data))
+        + " | Headers: "
+        + str(dict(request.headers))
     )
-    
+
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
-    if isinstance(_resp,Response):
+    if isinstance(_resp, Response):
         log.logger_info.info("Deferred response " + str(json.loads(_resp.get_data())))
         return _resp
 
     log.logger_info.info("Deferred response " + str(_resp))
 
     return _resp
+
 
 @oidc.route("credential_offer_choice", methods=["GET"])
 def credential_offer():
@@ -704,9 +816,9 @@ def credential_offer():
         credential = credentialsSupported[cred]
 
         if credential["format"] == "vc+sd-jwt":
-            #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
+            # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
             credentials["sd-jwt vc format"].update(
-                #{"Personal Identification Data": cred}
+                # {"Personal Identification Data": cred}
                 {cred: cred}
             )
 
@@ -716,16 +828,22 @@ def credential_offer():
                 ) """
 
         if credential["format"] == "mso_mdoc":
-            #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
+            # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
             credentials["mdoc format"].update(
                 {cred: cred}
-                #{"Personal Identification Data": cred}
+                # {"Personal Identification Data": cred}
             )
 
             """ elif credential["scope"] == "org.iso.18013.5.1.mDL":
                 credentials["mdoc format"].update({"Mobile Driver's Licence": cred}) """
 
-    return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
+    return render_template(
+        "openid/credential_offer.html",
+        cred=credentials,
+        redirect_url=cfgservice.service_url,
+        credential_offer_URI="openid-credential-offer://",
+    )
+
 
 @oidc.route("/test_dump", methods=["GET", "POST"])
 def dump_test():
@@ -757,7 +875,7 @@ def credentialOffer():
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     auth_choice=request.form.get("Authorization Code Grant")
     form_keys = request.form.keys()
-    credential_offer_URI=request.form.get("credential_offer_URI")
+    credential_offer_URI = request.form.get("credential_offer_URI")
 
 
     if "proceed" in form_keys:
@@ -788,6 +906,7 @@ def credentialOffer():
                 # create URI
                 json_string = json.dumps(credential_offer)
 
+
                 uri = f"{credential_offer_URI}credential_offer?credential_offer=" + urllib.parse.quote(
                     json_string, safe=":/"
                 )
@@ -799,6 +918,7 @@ def credentialOffer():
                 qrcode = segno.make(uri)
                 out = io.BytesIO()
                 qrcode.save(out, kind='png', scale=3)
+
 
                 """ qrcode.to_artistic(
                     background=cfgtest.qr_png,
@@ -886,7 +1006,7 @@ def service_endpoint(endpoint):
                 error="invalid_request", error_description=str(err)
             )
             return make_response(err_msg.to_json(), 400)
-    
+
     if endpoint.name == "notification":
         try:
             accessToken = http_info["headers"]["authorization"][7:]
@@ -896,8 +1016,8 @@ def service_endpoint(endpoint):
             _resp = endpoint.process_request(req_args)
 
             if isinstance(_resp, ResponseMessage) and "error" in _resp:
-                    _log.info("Error response: {}".format(_resp))
-                    _resp = make_response(_resp.to_json(), 400)
+                _log.info("Error response: {}".format(_resp))
+                _resp = make_response(_resp.to_json(), 400)
 
         except Exception as err:
             _log.error(err)
@@ -930,7 +1050,7 @@ def service_endpoint(endpoint):
                 else:
                     response = do_response(endpoint, args, **args)
             return response
-        
+
         except Exception as err:
             _log.error(err)
             return make_response(
@@ -997,7 +1117,7 @@ def service_endpoint(endpoint):
         err_msg = ResponseMessage(error="invalid_request", error_description=str(err))
         return make_response(err_msg.to_json(), 400)
 
-    #_log.info("Response args: {}".format(args))
+    # _log.info("Response args: {}".format(args))
 
     # "pushed_authorization"
     if (
