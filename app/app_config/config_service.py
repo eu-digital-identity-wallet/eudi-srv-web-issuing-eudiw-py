@@ -38,6 +38,8 @@ class ConfService:
     # service_url = "https://127.0.0.1:5000/"
     # service_url = "https://dev.issuer.eudiw.dev/"
 
+    wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
+
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
@@ -68,6 +70,9 @@ class ConfService:
 
     # Deferred endpoint expiry time (minutes)
     deffered_expiry = 60
+
+    # transaction code expiry time (minutes)
+    tx_code_expiry = 60
 
     # ------------------------------------------------------------------------------------------------
     # PID namespace
@@ -204,6 +209,12 @@ class ConfService:
         },
     }
 
+    common_name={
+        "eu.europa.ec.eudi.pid.1": "National ID",
+        "org.iso.18013.5.1.mDL": "Driving License",
+        "eu.europa.ec.eudi.pseudonym.age_over_18.1": "Age Verification "
+    }
+
     config_doctype = {
         "eu.europa.ec.eudi.pid.1": {
             "issuing_authority": pid_issuing_authority,
@@ -247,6 +258,21 @@ class ConfService:
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.loyalty.1",
         },
+        "teste": {
+            "issuing_authority": "Test EUDIW Issuer",
+            "organization_id":pid_organization_id,
+            "validity":pid_validity,
+            "organization_name":"Test QEAA issuer",
+            "namespace":"teste"
+        },
+        "org.iso.23220.2.photoid.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "org.iso.23220.2.photoid.1",
+        }
+        
     }
 
     auth_method_supported_credencials = {
@@ -262,6 +288,7 @@ class ConfService:
             "eu.europa.ec.eudi.pid_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+            "eu.europa.ec.eudi.photoid",
         ],
     }
 

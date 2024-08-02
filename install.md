@@ -193,4 +193,3 @@ server {
 2. Run `certbot` to get a free HTTPS certificate. The `certbot` will also configure the EUDIW Issuer Nginx configuration file with the HTTPS certificate.
 
 3. Restart the Nginx server and goto `https:\\FQDN\` (FQDN configured in the Nginx configuration file)
-
