@@ -37,19 +37,18 @@ form_dynamic_data = {}
 ################################################
 ## To be moved to a file with scheduled jobs
 
-scheduler_call = 3600  # scheduled periodic job will be called every scheduler_call seconds (should be 300; 30 for debug)
-
+scheduler_call = 10  
 
 def clear_par():
     """Function to clear parRequests"""
     now = int(datetime.timestamp(datetime.now()))
-    print("Job scheduled: clear_par() at " + str(now))
+    #print("Job scheduled: clear_par() at " + str(now))
 
     for uri in parRequests.copy():
         expire_time = parRequests[uri]["expires"]
         if now > expire_time:
             parRequests.pop(uri)
-            print(
+            """ print(
                 "Job scheduled: clear_par: "
                 + uri
                 + " eliminated. "
@@ -65,7 +64,7 @@ def clear_par():
                 + str(now)
                 + " < "
                 + str(expire_time)
-            )
+            ) """
 
     for req in deferredRequests.copy():
             
@@ -108,11 +107,13 @@ def clear_par():
         ):  # minutes * 60 seconds -> data is deleted after being saved for 1 minute
             aux.append(unique_id)
 
+    if aux:
+        print(f"Entries {aux} eliminated.")
+
     for unique_id in aux:
         del form_dynamic_data[unique_id]
 
-    if aux:
-        print(f"Entries {aux} eliminated.")
+    
 
 def run_scheduler():
     print("Run scheduler.")
