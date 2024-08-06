@@ -72,7 +72,7 @@ oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
 
 # variable for PAR requests
-from app.data_management import parRequests, transaction_codes, deferredRequests
+from app.data_management import parRequests, transaction_codes, deferredRequests, session_ids, getSessionId_requestUri, getSessionId_authCode
 
 def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}
@@ -180,6 +180,10 @@ def verify(authn_method):
 
     if isinstance(args, ResponseMessage) and "error" in args:
         return make_response(args.to_json(), 400)
+
+    session_ids[session["session_id"]]["auth_code"] = args["response_args"]["code"]
+
+    log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization Response, Code: " + args["response_args"]["code"] + ", State: " + args["response_args"]["state"])
 
     return do_response(endpoint, request, **args)
 
@@ -335,8 +339,6 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
 @oidc.route("/authorizationV3", methods=["GET"])
 def authorizationV3():
 
-    log.logger_info.info("Authorization request Data: " + str(request.args) + " | Headers: " + str(dict(request.headers))
-    )
     
     if "request_uri" not in request.args:
         try:
@@ -364,6 +366,17 @@ def authorizationV3():
         # return service_endpoint(current_app.server.get_endpoint("authorization"))
         log.logger_error.error("Authorization request_uri not found in parRequests")
         return make_response("Request_uri not found", 400)
+    
+    session_id = getSessionId_requestUri(request_uri)
+
+    if session_id == None:
+        log.logger_error.error("Authorization request_uri not found.")
+        return make_response("Request_uri not found", 400)
+    
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str(dict(request.args))
+    )
+
+    session["session_id"] = session_id
 
     par_args = parRequests[request_uri]["req_args"]
 
@@ -415,6 +428,7 @@ def authorizationV3():
     session["authorization_params"] = params
 
     return redirect(response["url"])
+
 
 @oidc.route("/pid_authorization")
 def pid_authorization_get():
@@ -495,14 +509,16 @@ def token_service():
 @oidc.route("/token", methods=["POST"])
 def token():
 
-    log.logger_info.info("Token request data: " + str(request.form.to_dict()) + " | Headers: " + str(dict(request.headers))
-    )
-    
     req_args = dict([(k, v) for k, v in request.form.items()])
+
 
     response = None
 
     if req_args["grant_type"] == "authorization_code":
+
+        session_id = getSessionId_authCode(req_args["code"])
+
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Token Request, Payload: " + str(request.form.to_dict()))
     
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
@@ -540,7 +556,6 @@ def token():
         
         response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
-            print("\n",str(response.json()),"\n")
             return make_response("invalid_request", 400)
         #response = response.json()
         log.logger_info.info("Token response: " + str(response.json()))
@@ -579,7 +594,9 @@ def par_endpoint():
 @oidc.route("/pushed_authorizationv2", methods=["POST"])
 def par_endpointv2():
 
-    log.logger_info.info("Recieved Pushed Authorization request. Data: " + str(request.form.to_dict()) + " | Headers: " + str(dict(request.headers))
+    session_id = str(uuid.uuid4())
+
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Pushed Authorization Request, Payload: " + str(request.form.to_dict())
     )
 
     redirect_uri = None
@@ -602,8 +619,10 @@ def par_endpointv2():
 
     response = service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
-    log.logger_info.info("PAR response for client_id " + client_id + " : " + str(json.loads(response.get_data())))
-                         
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Pushed Authorization Response, Payload: " + str(json.loads(response.get_data())))
+
+    session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60), "request_uri":json.loads(response.get_data())["request_uri"]}})
+
     return response
 
 
@@ -727,7 +746,7 @@ def credential_offer():
 
     return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
 
-@oidc.route("/test_dump", methods=["GET", "POST"])
+""" @oidc.route("/test_dump", methods=["GET", "POST"])
 def dump_test():
     _store = current_app.server.context.dump()
     
@@ -749,7 +768,7 @@ def load_test():
         print("\n-----Data-----\n",data)
         current_app.server.context.load(data)
 
-    return "load"
+    return "load" """
 
 @oidc.route("/credential_offer", methods=["GET", "POST"])
 def credentialOffer():
@@ -1011,8 +1030,6 @@ def service_endpoint(endpoint):
             "expires": args["http_response"]["expires_in"]
             + int(datetime.timestamp(datetime.now())),
         }
-
-        print("\n--------parRequests-----\n", parRequests[args["http_response"]["request_uri"]])
 
     if "redirect_location" in args:
         return redirect(args["redirect_location"])

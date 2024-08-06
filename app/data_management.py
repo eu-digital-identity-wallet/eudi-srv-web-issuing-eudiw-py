@@ -33,6 +33,26 @@ transaction_codes={}
 deferredRequests = {}
 oid4vp_requests = {}
 form_dynamic_data = {}
+session_ids = {}
+
+
+def getSessionId_requestUri(target_request_uri):
+    matching_session_id = None
+    for session_id, session_data in session_ids.items():
+        if session_data["request_uri"] == target_request_uri:
+            matching_session_id = session_id
+            break
+    
+    return matching_session_id
+
+def getSessionId_authCode(target_authCode):
+    matching_session_id = None
+    for session_id, session_data in session_ids.items():
+        if session_data["auth_code"] == target_authCode:
+            matching_session_id = session_id
+            break
+    
+    return matching_session_id
 
 ################################################
 ## To be moved to a file with scheduled jobs

@@ -142,6 +142,8 @@ def Supported_Countries():
         session["returnURL"] = cfgserv.OpenID_first_endpoint
         session["country"] = form_country
 
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + form_country)
+
         """ log.logger_info.info(
             " - INFO - "
             + session["route"]
@@ -179,13 +181,13 @@ def dynamic_R1(country):
     credentials_requested = session["credentials_requested"]
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    log.logger_info.info(
+    """ log.logger_info.info(
         " - INFO -  Version:"
         + cfgserv.current_version
         + " -  URL_R1 for Country: "
         + country
         + " has been created"
-    )
+    ) """
 
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
@@ -1009,7 +1011,6 @@ def redirect_wallet():
     form_data = request.form.to_dict()
 
     user_id= form_data["user_id"]
-    print("\n----Session redirect_wallet----\n", session)
     return redirect(
             url_get(
                 cfgserv.OpenID_first_endpoint,
