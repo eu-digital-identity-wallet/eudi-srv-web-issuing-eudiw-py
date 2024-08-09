@@ -33,9 +33,15 @@ from datetime import datetime, timedelta
 
 import segno
 
-from app.route_oidc import parRequests, service_endpoint, transaction_codes
+from app.route_oidc import service_endpoint
 from .app_config.config_service import ConfService as cfgservice
 from app.misc import authentication_error_redirect, getAttributesForm
+
+from app.data_management import parRequests, transaction_codes, getSessionId_requestUri
+
+from app_config.config_service import ConfService as log
+
+
 
 
 preauth = Blueprint("preauth", __name__, url_prefix="/")
@@ -65,12 +71,12 @@ def preauthRed():
     'Content-Type': 'application/x-www-form-urlencoded'
     }
 
-    print("\n------ PAR payload -----\n", payload)
+    #print("\n------ PAR payload -----\n", payload)
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
     if response.status_code != 200:
-        print("\n",str(response.json()),"\n")
+        #print("\n",str(response.json()),"\n")
         return make_response("invalid_request", 400)
     
     par_response = response.json()
@@ -89,6 +95,14 @@ def authorizationpre():
     if not request_uri in parRequests:  # unknow request_uri => return error
         # needs to be changed to an appropriate error message, and need to be logged
         return service_endpoint(current_app.server.get_endpoint("authorization"))
+    
+    session_id = getSessionId_requestUri(request_uri)
+
+    if session_id == None:
+        log.logger_error.error("Authorization request_uri not found.")
+        return make_response("Request_uri not found", 400)
+    
+    session["session_id"] = session_id
 
     par_args = parRequests[request_uri]["req_args"]
 

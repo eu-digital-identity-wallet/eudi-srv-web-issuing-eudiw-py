@@ -72,7 +72,7 @@ oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
 
 # variable for PAR requests
-from app.data_management import parRequests, transaction_codes, deferredRequests, session_ids, getSessionId_requestUri, getSessionId_authCode
+from app.data_management import getSessionId_accessToken, parRequests, transaction_codes, deferredRequests, session_ids, getSessionId_requestUri, getSessionId_authCode
 
 def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}
@@ -183,7 +183,14 @@ def verify(authn_method):
 
     session_ids[session["session_id"]]["auth_code"] = args["response_args"]["code"]
 
-    log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization Response, Code: " + args["response_args"]["code"] + ", State: " + args["response_args"]["state"])
+    logText = ", Session ID: " + session["session_id"] + ", " + "Authorization Response, Code: " + args["response_args"]["code"]
+
+    if "state" in args["response_args"]:
+
+        logText = logText + ", State: " + args["response_args"]["state"]
+
+
+    log.logger_info.info(logText)
 
     return do_response(endpoint, request, **args)
 
@@ -333,6 +340,11 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
     params.update(args)
 
     session["authorization_params"] = params
+
+    session_id = str(uuid.uuid4())
+    session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60)}})
+    session["session_id"] = session_id
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str({"client_id":client_id,"redirect_uri":redirect_uri, "response_type":response_type, "scope":scope, "code_challenge_method":code_challenge_method, "code_challenge":code_challenge, "authorization_details":authorization_details}))
 
     return redirect(response["url"])
 
@@ -518,9 +530,19 @@ def token():
 
         session_id = getSessionId_authCode(req_args["code"])
 
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Token Request, Payload: " + str(request.form.to_dict()))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Token Request, Payload: " + str(request.form.to_dict()))
     
         response = service_endpoint(current_app.server.get_endpoint("token"))
+
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Token Response, Payload: " + str(json.loads(response.get_data())))
+
+        response_json = json.loads(response.get_data())
+
+        if "access_token" in response_json:
+            session_ids[session_id]["access_token"] = response_json["access_token"]
+
+        if "refresh_token" in response_json:
+            session_ids[session_id]["refresh_token"] = response_json["refresh_token"]
 
     elif req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code":
 
@@ -528,6 +550,10 @@ def token():
             return make_response("invalid_request", 400)
         
         code = req_args["pre-authorized_code"]
+
+        session_id = getSessionId_authCode(code)
+
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Request, Payload: " + str(request.form.to_dict()))
 
         if code not in transaction_codes:
             error_message = {
@@ -561,12 +587,23 @@ def token():
         log.logger_info.info("Token response: " + str(response.json()))
 
         transaction_codes.pop(code)
-        return response.json()
-    
+
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Response, Payload: " + str(response.json()))
+
+        response_json = response.json()
+
+        if "access_token" in response_json:
+            session_ids[session_id]["access_token"] = response_json["access_token"]
+
+        if "refresh_token" in response_json:
+            session_ids[session_id]["refresh_token"] = response_json["refresh_token"]
+
+        return response_json
+
     else: 
-        return service_endpoint(current_app.server.get_endpoint("token"))
-    
-    log.logger_info.info("Token response: " + str(json.loads(response.get_data())))
+        response = service_endpoint(current_app.server.get_endpoint("token"))
+        log.logger_info.info("Token response: " + str(json.loads(response.get_data())))
+
 
     return response
 
@@ -629,14 +666,22 @@ def par_endpointv2():
 @oidc.route("/credential", methods=["POST"])
 def credential():
 
-    if request.data:
-        log.logger_info.info("Credential request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
-        )
+    headers = dict(request.headers)
+    payload = json.loads(request.data)
+
+    if "Authorization" not in headers:
+        return make_response("Authorization error", 400)
+
+    access_token = headers["Authorization"][7:]
+    print("\naccess_token: ", access_token)
+    session_id = getSessionId_accessToken(access_token)
+
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
     
     if isinstance(_response,Response):
-        log.logger_info.info("Credential response " + str(json.loads(_response.get_data())))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(json.loads(_response.get_data())))
         return _response
 
     if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
@@ -645,23 +690,32 @@ def credential():
         request_headers = dict(request.headers)
         deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
         
-        log.logger_info.info("Credential response " + str(_response))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
 
         return make_response(jsonify(_response),202)
 
-    log.logger_info.info("Credential response " + str(_response))
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
     return _response
 
 
 @oidc.route("/batch_credential", methods=["POST"])
 def batchCredential():
-    log.logger_info.info("Batch credential request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
-    )
+
+    headers = dict(request.headers)
+    payload = json.loads(request.data)
+
+    if "Authorization" not in headers:
+        return make_response("Authorization error", 400)
+
+    access_token = headers["Authorization"][6:]
+    session_id = getSessionId_accessToken(access_token)
+
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
     if isinstance(_response,Response):
-        log.logger_info.info("Batch Credential response " + str(json.loads(_response.get_data())))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential response, Payload: " + str(json.loads(_response.get_data())))
         return _response
     
     if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
@@ -670,42 +724,60 @@ def batchCredential():
         request_headers = dict(request.headers)
         deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
         
-        log.logger_info.info("Batch credential response " + str(_response))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
         return make_response(jsonify(_response),202)
     
 
-    log.logger_info.info("Batch credential response " + str(_response))
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
 
     return _response
 
 @oidc.route("/notification", methods=["POST"])
 def notification():
-    log.logger_info.info("Notification request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
-    )
+
+    headers = dict(request.headers)
+    payload = json.loads(request.data)
+
+    if "Authorization" not in headers:
+        return make_response("Authorization error", 400)
+
+    access_token = headers["Authorization"][6:]
+    session_id = getSessionId_accessToken(access_token)
+
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
+
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
     if isinstance(_resp,Response):
-        log.logger_info.info("Notification response " + str(_resp))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
         return _resp
     
 
-    log.logger_info.info("Notification response " + str(_resp))
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
     
     return _resp
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
 
-    log.logger_info.info("Deferred request data: " + str(json.loads(request.data)) + " | Headers: " + str(dict(request.headers))
-    )
+    headers = dict(request.headers)
+    payload = json.loads(request.data)
+
+    if "Authorization" not in headers:
+        return make_response("Authorization error", 400)
+
+    access_token = headers["Authorization"][6:]
+    session_id = getSessionId_accessToken(access_token)
+
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
     
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
     if isinstance(_resp,Response):
-        log.logger_info.info("Deferred response " + str(json.loads(_resp.get_data())))
+        log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
         return _resp
 
-    log.logger_info.info("Deferred response " + str(_resp))
+    log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
 
     return _resp
 

@@ -42,8 +42,14 @@ CORS(oid4vp)  # enable CORS on the blue print
 # secrets
 from app.data_management import oid4vp_requests, form_dynamic_data
 
+from app_config.config_service import ConfService as log
+
+
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
+
+    if "session_id" in session:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
     payload_cross_device = json.dumps(
@@ -113,7 +119,6 @@ def openid4vp():
         }
     )
 
-    id = generate_unique_id()
     payload_same_device = json.dumps(
         {
             "type": "vp_token",
@@ -178,7 +183,7 @@ def openid4vp():
                 }
                 ]
             },
-            "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + id
+            "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + session["session_id"]
         }
     )
 
@@ -191,7 +196,7 @@ def openid4vp():
     response_same = requests.request("POST", url, headers=headers, data=payload_same_device).json()
 
     
-    oid4vp_requests.update({id:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
+    oid4vp_requests.update({session["session_id"]:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
 
     deeplink_url = (
         "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
@@ -241,6 +246,7 @@ def openid4vp():
 def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
         response_code = request.args.get("response_code")
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
         url = (
@@ -251,6 +257,7 @@ def getpidoid4vp():
         )
 
     elif "presentation_id" in request.args:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
         presentation_id = request.args.get("presentation_id")
 
         url = (
