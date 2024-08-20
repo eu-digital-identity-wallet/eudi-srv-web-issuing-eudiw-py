@@ -271,6 +271,41 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "org.iso.23220.2.photoid.1",
+        },
+        "eu.europa.ec.eudi.por.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.por.1",
+        },
+        "eu.europa.ec.eudi.iban.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.por.1",
+        },
+        "eu.europa.ec.eudi.hiid.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.hiid.1",
+        },
+        "eu.europa.ec.eudi.tax.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.tax.1",
+        },
+        "eu.europa.ec.eudi.msisdn.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.msisdn.1",
         }
         
     }
@@ -289,6 +324,11 @@ class ConfService:
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
             "eu.europa.ec.eudi.photoid",
+            "eu.europa.ec.eudi.por_mdoc",
+            "eu.europa.ec.eudi.iban_mdoc",
+            "eu.europa.ec.eudi.hiid_mdoc",
+            "eu.europa.ec.eudi.tax_mdoc",
+            "eu.europa.ec.eudi.msisdn_mdoc",
         ],
     }
 
