@@ -921,12 +921,12 @@ def Dynamic_form():
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
+        
+        elif form_data[item] == "true":
+            cleaned_data[item] = True
 
-        elif item == "age_over_18":
-            if form_data[item] == "on":
-                cleaned_data["age_over_18"] = True
-            else:
-                cleaned_data["age_over_18"] = False
+        elif form_data[item] == "false":
+            cleaned_data[item] = False
 
         else:
             cleaned_data[item] = form_data[item]

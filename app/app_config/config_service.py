@@ -284,7 +284,7 @@ class ConfService:
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.por.1",
+            "namespace": "eu.europa.ec.eudi.iban.1",
         },
         "eu.europa.ec.eudi.hiid.1": {
             "issuing_authority": "Test QEAA issuer",
@@ -314,6 +314,11 @@ class ConfService:
         "PID_login": [
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+            "eu.europa.ec.eudi.por_mdoc",
+            "eu.europa.ec.eudi.iban_mdoc",
+            "eu.europa.ec.eudi.hiid_mdoc",
+            "eu.europa.ec.eudi.tax_mdoc",
+            "eu.europa.ec.eudi.msisdn_mdoc",
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",

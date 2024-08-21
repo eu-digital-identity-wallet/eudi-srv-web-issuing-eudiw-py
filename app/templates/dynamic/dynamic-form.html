@@ -131,9 +131,32 @@
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 <label for="{{ name }}">{{ name }}</label>
-                                                <input type="checkbox" id="{{ name }}" name="{{ name }}">
+                                                <!-- Hidden input to represent the unchecked state -->
+                                                <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
+                                                <!-- Checkbox input -->
+                                                <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
                                             </div>
-                                        </div>                    
+                                        </div>
+                                        <script>
+                                            function setupCheckbox(name) {
+                                                const checkbox = document.getElementById(name);
+                                                const hiddenInput = document.getElementById(name + "_hidden");
+                                                
+                                                // Function to update hidden input based on checkbox state
+                                                function updateHiddenInput() {
+                                                    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                                }
+                                                
+                                                // Attach the change event listener
+                                                checkbox.addEventListener('change', updateHiddenInput);
+                                                
+                                                // Call the function to set the initial state correctly
+                                                updateHiddenInput();
+                                            }
+                                            
+                                            // Setup each checkbox with a unique name
+                                            setupCheckbox("{{ name }}");
+                                        </script>                   
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
