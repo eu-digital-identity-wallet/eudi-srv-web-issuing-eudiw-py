@@ -918,7 +918,7 @@ def credentialOffer():
     
 
 
-@oidc.route("/testgetauth", methods=["GET"])
+""" @oidc.route("/testgetauth", methods=["GET"])
 def testget():
     if "error" in request.args:
         response = (
@@ -926,7 +926,7 @@ def testget():
         )
         return response
     else:
-        return request.args.get("code")
+        return request.args.get("code") """
 
 
 IGNORE = ["cookie", "user-agent"]
