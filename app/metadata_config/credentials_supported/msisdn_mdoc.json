@@ -39,11 +39,11 @@
     },
     "display": [
       {
-        "name": "PoR",
+        "name": "msisdn",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/por.png",
-          "alt_text": "A square figure of a PoR"
+          "url": "https://examplestate.com/public/msisdn.png",
+          "alt_text": "A square figure of a msisdn"
         }
       }
     ],
@@ -54,7 +54,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current Legal person identifier",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -63,7 +63,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current Legal person identifier",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -72,7 +72,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current legal Name",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -81,7 +81,7 @@
           "value_type":"bool",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -90,7 +90,7 @@
           "value_type":"bool",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -99,7 +99,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current legal Name",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -107,7 +107,7 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
               "locale": "en"
             }
           ]
@@ -116,7 +116,35 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "credential_type": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuing_organization": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "verification_date": {
+          "mandatory": true,
+          "value_type":"full-date",
+          "display": [
+            {
+              "name": "",
               "locale": "en"
             }
           ]

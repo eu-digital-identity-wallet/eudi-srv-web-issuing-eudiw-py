@@ -299,6 +299,7 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.tax.1",
+            "credential_type": "Tax Number"
         },
         "eu.europa.ec.eudi.msisdn.1": {
             "issuing_authority": "Test QEAA issuer",
@@ -306,6 +307,7 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.msisdn.1",
+            "credential_type": "MSISDN",
         }
         
     }

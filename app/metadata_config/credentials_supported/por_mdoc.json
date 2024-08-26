@@ -54,7 +54,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current Legal person identifier",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -63,7 +63,7 @@
           "value_type":"string",
           "display": [
             {
-              "name": "Current legal Name",
+              "name": "",
               "locale": "en"            }
           ]
         },
@@ -72,16 +72,16 @@
           "value_type":"bool",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "",
               "locale": "en"            }
           ]
         },
         "effective_from_date": {
           "mandatory": true,
-          "value_type":"full-date",
+          "value_type":"",
           "display": [
             {
-              "name": "Adult or minor",
+              "name": "",
               "locale": "en"
             }
           ]
@@ -90,7 +90,7 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
               "locale": "en"
             }
           ]
@@ -99,7 +99,7 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
               "locale": "en"
             }
           ]

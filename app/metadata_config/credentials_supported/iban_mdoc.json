@@ -39,11 +39,11 @@
     },
     "display": [
       {
-        "name": "PoR",
+        "name": "iban",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/por.png",
-          "alt_text": "A square figure of a PoR"
+          "url": "https://examplestate.com/public/iban.png",
+          "alt_text": "A square figure of a iban"
         }
       }
     ],
@@ -108,7 +108,7 @@
           "value_type":"full-date",
           "display": [
             {
-              "name": "Adult or minor",
+              "name": "",
               "locale": "en"
             }
           ]
@@ -153,7 +153,7 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
               "locale": "en"
             }
           ]
@@ -162,7 +162,7 @@
           "mandatory": true,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "",
               "locale": "en"
             }
           ]

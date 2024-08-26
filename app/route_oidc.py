@@ -744,16 +744,16 @@ def notification():
     access_token = headers["Authorization"][6:]
     session_id = getSessionId_accessToken(access_token)
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
 
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
     if isinstance(_resp,Response):
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+        #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
         return _resp
     
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
     
     return _resp
 

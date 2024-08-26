@@ -134,6 +134,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             data.update({"issue_date": today.strftime("%Y-%m-%d")})
             data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
             data.update({"issuing_authority": doctype_config["issuing_authority"]})
+            if "credential_type" in doctype_config:
+                data.update({"credential_type":doctype_config["credential_type"] })
+            
 
             if "driving_privileges" in attributes_req:
                 json_priv = json.loads(data["driving_privileges"])

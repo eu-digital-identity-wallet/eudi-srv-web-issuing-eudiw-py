@@ -396,6 +396,8 @@ def red():
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
             form_data[doctype].update({"issuing_country": session["country"]})
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
+            if "credential_type" in doctype_config:
+                form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -495,6 +497,9 @@ def red():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "credential_type" in doctype_config:
+                presentation_data[doctype].update({"credential_type":doctype_config["credential_type"] })
+
         if "birth_date" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
@@ -940,9 +945,6 @@ def Dynamic_form():
         }
     )
 
-    if "age_over_18" not in cleaned_data:
-        cleaned_data["age_over_18"] = False
-
     print("\n-----Cleaned Data----\n", cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data
@@ -985,7 +987,10 @@ def Dynamic_form():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
-        if "birth_date" in presentation_data[credential]:
+        if "credential_type" in doctype_config:
+                presentation_data[credential].update({"credential_type":doctype_config["credential_type"] })
+        
+        if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
 

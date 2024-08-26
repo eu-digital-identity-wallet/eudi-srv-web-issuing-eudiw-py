@@ -332,6 +332,8 @@ def getpidoid4vp():
 
         attributesForm.update({"issuing_country": "FC"})
         attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "credential_type" in doctype_config:
+            attributesForm.update({"credential_type":doctype_config["credential_type"] })
 
         user_id = generate_unique_id()
         form_dynamic_data[user_id] = attributesForm
