@@ -34,9 +34,9 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = "https://issuer.eudiw.dev/"
+    # service_url = "https://issuer.eudiw.dev/"
     # service_url = "https://127.0.0.1:5000/"
-    # service_url = "https://dev.issuer.eudiw.dev/"
+    service_url = "https://dev.issuer.eudiw.dev/"
 
     wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
 
@@ -271,6 +271,43 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "org.iso.23220.2.photoid.1",
+        },
+        "eu.europa.ec.eudi.por.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.por.1",
+        },
+        "eu.europa.ec.eudi.iban.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.iban.1",
+        },
+        "eu.europa.ec.eudi.hiid.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.hiid.1",
+        },
+        "eu.europa.ec.eudi.tax.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.tax.1",
+            "credential_type": "Tax Number"
+        },
+        "eu.europa.ec.eudi.msisdn.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.msisdn.1",
+            "credential_type": "MSISDN",
         }
         
     }
@@ -279,6 +316,11 @@ class ConfService:
         "PID_login": [
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
+            "eu.europa.ec.eudi.por_mdoc",
+            "eu.europa.ec.eudi.iban_mdoc",
+            "eu.europa.ec.eudi.hiid_mdoc",
+            "eu.europa.ec.eudi.tax_mdoc",
+            "eu.europa.ec.eudi.msisdn_mdoc",
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
@@ -289,6 +331,11 @@ class ConfService:
             "eu.europa.ec.eudi.pseudonym_over18_mdoc",
             "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
             "eu.europa.ec.eudi.photoid",
+            "eu.europa.ec.eudi.por_mdoc",
+            "eu.europa.ec.eudi.iban_mdoc",
+            "eu.europa.ec.eudi.hiid_mdoc",
+            "eu.europa.ec.eudi.tax_mdoc",
+            "eu.europa.ec.eudi.msisdn_mdoc",
         ],
     }
 
@@ -348,7 +395,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log"
+    log_dir = "/tmp/log_dev"
     # log_dir = "../../log"
     log_file_info = "logs.log"
 

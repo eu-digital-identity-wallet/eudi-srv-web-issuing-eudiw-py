@@ -30,7 +30,7 @@ from flask import Blueprint, Flask, jsonify, render_template, request, session
 from flask_cors import CORS
 import requests
 import segno
-from misc import generate_unique_id, authentication_error_redirect
+from misc import generate_unique_id, authentication_error_redirect, getAttributesForm, scope2details
 from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
@@ -42,8 +42,14 @@ CORS(oid4vp)  # enable CORS on the blue print
 # secrets
 from app.data_management import oid4vp_requests, form_dynamic_data
 
+from app_config.config_service import ConfService as log
+
+
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
+
+    if "session_id" in session:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
     payload_cross_device = json.dumps(
@@ -113,7 +119,6 @@ def openid4vp():
         }
     )
 
-    id = generate_unique_id()
     payload_same_device = json.dumps(
         {
             "type": "vp_token",
@@ -178,7 +183,7 @@ def openid4vp():
                 }
                 ]
             },
-            "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + id
+            "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + session["session_id"]
         }
     )
 
@@ -191,7 +196,7 @@ def openid4vp():
     response_same = requests.request("POST", url, headers=headers, data=payload_same_device).json()
 
     
-    oid4vp_requests.update({id:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
+    oid4vp_requests.update({session["session_id"]:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
 
     deeplink_url = (
         "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
@@ -241,6 +246,7 @@ def openid4vp():
 def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
         response_code = request.args.get("response_code")
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
         url = (
@@ -251,6 +257,7 @@ def getpidoid4vp():
         )
 
     elif "presentation_id" in request.args:
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
         presentation_id = request.args.get("presentation_id")
 
         url = (
@@ -278,6 +285,7 @@ def getpidoid4vp():
         )
 
     mdoc_json = cbor2elems(response.json()["vp_token"] + "==")
+    is_ageOver18 = False
     attributesForm = {}
 
     if (
@@ -296,6 +304,7 @@ def getpidoid4vp():
                     or cred_request["credential_configuration_id"]
                     == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
                 ):
+                    is_ageOver18 = True
                     attributesForm.update({"user_pseudonym": str(uuid4())})
             elif "vct" in cred_request:
                 if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
@@ -310,38 +319,80 @@ def getpidoid4vp():
             or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
             in cred_scopes
         ):
+            is_ageOver18 = True
             attributesForm.update({"user_pseudonym": str(uuid4())})
 
-    for doctype in mdoc_json:
-        for attribute, value in mdoc_json[doctype]:
-            if attribute == "age_over_18":
-                attributesForm.update({attribute: value})
-    
-    doctype_config = cfgservice.config_doctype["eu.europa.ec.eudi.pseudonym.age_over_18.1"]
+    if is_ageOver18 == True:
+        for doctype in mdoc_json:
+            for attribute, value in mdoc_json[doctype]:
+                if attribute == "age_over_18":
+                    attributesForm.update({attribute: value})
+        
+        doctype_config = cfgservice.config_doctype["eu.europa.ec.eudi.pseudonym.age_over_18.1"]
 
-    attributesForm.update({"issuing_country": "FC"})
-    attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
+        attributesForm.update({"issuing_country": "FC"})
+        attributesForm.update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "credential_type" in doctype_config:
+            attributesForm.update({"credential_type":doctype_config["credential_type"] })
 
-    user_id = generate_unique_id()
-    form_dynamic_data[user_id] = attributesForm
-    
-    presentation_data = attributesForm.copy()
+        user_id = generate_unique_id()
+        form_dynamic_data[user_id] = attributesForm
+        
+        presentation_data = attributesForm.copy()
 
-    today = date.today()
-    expiry = today + timedelta(days=doctype_config["validity"])
-    
+        today = date.today()
+        expiry = today + timedelta(days=doctype_config["validity"])
+        
 
-    presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
-    presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-    presentation_data.update({})
-    presentation_data.update({})
+        presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
+        presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+        presentation_data.update({})
+        presentation_data.update({})
 
-    if "jws_token" not in session and "authorization_params" in session:
-            session["jws_token"] = session["authorization_params"]["token"]
+        if "jws_token" not in session and "authorization_params" in session:
+                session["jws_token"] = session["authorization_params"]["token"]
 
-    return render_template(
-        "dynamic/form_authorize_oid4vp.html",
-        attributes=presentation_data,
-        user_id="FC." + user_id,
-        redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
-    )
+
+        return render_template(
+            "dynamic/form_authorize_oid4vp.html",
+            attributes=presentation_data,
+            user_id="FC." + user_id,
+            redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
+        )
+    else:
+
+        authorization_params = session["authorization_params"]
+        authorization_details = []
+        if "authorization_details" in authorization_params:
+            authorization_details.extend(
+                json.loads(authorization_params["authorization_details"])
+            )
+        if "scope" in authorization_params:
+            authorization_details.extend(scope2details(authorization_params["scope"]))
+
+        if not authorization_details:
+            return authentication_error_redirect(
+                jws_token=authorization_params["token"],
+                error="invalid authentication",
+                error_description="No authorization details or scope found in dynamic route.",
+            )
+
+        credentials_requested = []
+        for cred in authorization_details:
+            if "credential_configuration_id" in cred:
+                if cred["credential_configuration_id"] not in credentials_requested:
+                    credentials_requested.append(cred["credential_configuration_id"])
+            elif "vct" in cred:
+                if cred["vct"] not in credentials_requested:
+                    credentials_requested.append(cred["vct"])
+
+        session["credentials_requested"] = credentials_requested
+
+        attributesForm = getAttributesForm(credentials_requested)
+        if "user_pseudonym" in attributesForm:
+            attributesForm.update({"user_pseudonym": str(uuid4())})
+        return render_template(
+            "dynamic/dynamic-form.html",
+            attributes=attributesForm,
+            redirect_url=cfgservice.service_url + "dynamic/form",
+        )

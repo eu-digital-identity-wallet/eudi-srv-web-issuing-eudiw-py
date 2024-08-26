@@ -1,0 +1,118 @@
+{
+"eu.europa.ec.eudi.hiid_mdoc": {
+    "format": "mso_mdoc",
+    "doctype": "eu.europa.ec.eudi.hiid.1",
+    "scope": "eu.europa.ec.eudi.hiid.1",
+    "policy": {
+        "batch_size": 50,
+        "one_time_use": true
+    },
+    "cryptographic_binding_methods_supported": [
+      "jwk", "cose_key"
+    ],
+    "credential_alg_values_supported": [
+        -7
+      ],
+    "credential_crv_values_supported": [
+      1
+    ],
+    "credential_signing_alg_values_supported": [
+      "ES256"
+    ],
+    "proof_types_supported": {
+      "jwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ]
+      },
+      "cwt": {
+        "proof_signing_alg_values_supported": [
+          "ES256"
+        ],
+        "proof_alg_values_supported": [
+          -7
+        ],
+        "proof_crv_values_supported": [
+          1
+        ]
+      }
+    },
+    "display": [
+      {
+        "name": "hiid",
+        "locale": "en",
+        "logo": {
+          "url": "https://examplestate.com/public/hiid.png",
+          "alt_text": "A square figure of a hiid"
+        }
+      }
+    ],
+    "claims": {
+      "eu.europa.ec.eudi.hiid.1": {
+        "health_insurance_id": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "patient_id": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "tax_number": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "one_time_token": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "affiliation_country": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "issuance_date": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "expiry_date": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -142,6 +142,8 @@ def Supported_Countries():
         session["returnURL"] = cfgserv.OpenID_first_endpoint
         session["country"] = form_country
 
+        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + form_country)
+
         """ log.logger_info.info(
             " - INFO - "
             + session["route"]
@@ -179,13 +181,13 @@ def dynamic_R1(country):
     credentials_requested = session["credentials_requested"]
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    log.logger_info.info(
+    """ log.logger_info.info(
         " - INFO -  Version:"
         + cfgserv.current_version
         + " -  URL_R1 for Country: "
         + country
         + " has been created"
-    )
+    ) """
 
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
@@ -394,6 +396,8 @@ def red():
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
             form_data[doctype].update({"issuing_country": session["country"]})
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
+            if "credential_type" in doctype_config:
+                form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -493,6 +497,9 @@ def red():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "credential_type" in doctype_config:
+                presentation_data[doctype].update({"credential_type":doctype_config["credential_type"] })
+
         if "birth_date" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
@@ -919,12 +926,12 @@ def Dynamic_form():
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
+        
+        elif form_data[item] == "true":
+            cleaned_data[item] = True
 
-        elif item == "age_over_18":
-            if form_data[item] == "on":
-                cleaned_data["age_over_18"] = True
-            else:
-                cleaned_data["age_over_18"] = False
+        elif form_data[item] == "false":
+            cleaned_data[item] = False
 
         else:
             cleaned_data[item] = form_data[item]
@@ -937,9 +944,6 @@ def Dynamic_form():
             "timestamp": timestamp,
         }
     )
-
-    if "age_over_18" not in cleaned_data:
-        cleaned_data["age_over_18"] = False
 
     print("\n-----Cleaned Data----\n", cleaned_data)
 
@@ -983,7 +987,10 @@ def Dynamic_form():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
-        if "birth_date" in presentation_data[credential]:
+        if "credential_type" in doctype_config:
+                presentation_data[credential].update({"credential_type":doctype_config["credential_type"] })
+        
+        if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
 
@@ -1009,7 +1016,6 @@ def redirect_wallet():
     form_data = request.form.to_dict()
 
     user_id= form_data["user_id"]
-    print("\n----Session redirect_wallet----\n", session)
     return redirect(
             url_get(
                 cfgserv.OpenID_first_endpoint,

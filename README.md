@@ -1,3 +1,18 @@
+
+----
+
+# NOTICE
+
+:heavy_exclamation_mark: This is a development version provided for the POTENTIAL LSP hackathon in Dresden.
+
+Changes in the configuration process:
+
++ You must copy your IACA trusted certificate(s) (in PEM format) to the trusted_CAs_path folder - you can use the [example test IACA certificate for country Utopia (UT)](api_docs/test_tokens/IACA-token/PIDIssuerCAUThackathon.cacert.pem) -.
+
++ You can use the [example test private DS keys and certificates, for country Utopia (UT)](api_docs/test_tokens/DS-token/PID-DS-hackathon.zip) - the password of the example test private DS keys is b"123456".
+
+----
+
 # EUDIW Issuer
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)

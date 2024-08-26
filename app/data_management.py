@@ -33,6 +33,36 @@ transaction_codes={}
 deferredRequests = {}
 oid4vp_requests = {}
 form_dynamic_data = {}
+session_ids = {}
+
+
+def getSessionId_requestUri(target_request_uri):
+    matching_session_id = None
+    for session_id, session_data in session_ids.items():
+        
+        if "request_uri" in session_data and session_data["request_uri"] == target_request_uri:
+            matching_session_id = session_id
+            break
+    
+    return matching_session_id
+
+def getSessionId_authCode(target_authCode):
+    matching_session_id = None
+    for session_id, session_data in session_ids.items():
+        if "auth_code" in session_data and session_data["auth_code"] == target_authCode:
+            matching_session_id = session_id
+            break
+    
+    return matching_session_id
+
+def getSessionId_accessToken(target_accessToken):
+    matching_session_id = None
+    for session_id, session_data in session_ids.items():
+        if "access_token" in session_data and session_data["access_token"] == target_accessToken:
+            matching_session_id = session_id
+            break
+    
+    return matching_session_id
 
 ################################################
 ## To be moved to a file with scheduled jobs
@@ -85,16 +115,20 @@ def clear_par():
     
     for code in transaction_codes.copy():
         if datetime.now() > transaction_codes[code]["expires"]:
-            cfgservice.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
+            #cfgservice.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
             cfgservice.logger_info.info("Removing tx_code for code: " + str(code))
             transaction_codes.pop(code)
     
     for id in oid4vp_requests.copy():
         if datetime.now() > oid4vp_requests[id]["expires"]:
-            cfgservice.logger_info.info("Current oid4vp_requests:\n" + str(oid4vp_requests))
+            #cfgservice.logger_info.info("Current oid4vp_requests:\n" + str(oid4vp_requests))
             cfgservice.logger_info.info("Removing oid4vp_requests with id: " + str(id))
             oid4vp_requests.pop(id)
-
+    
+    for id in session_ids.copy():
+        if datetime.now() > session_ids[id]["expires"]:
+            cfgservice.logger_info.info("Removing session id: " + str(id))
+            session_ids.pop(id)
 
     """Function to clear app.config['data']"""
     aux = []
