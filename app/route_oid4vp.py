@@ -30,7 +30,7 @@ from flask import Blueprint, Flask, jsonify, render_template, request, session
 from flask_cors import CORS
 import requests
 import segno
-from misc import generate_unique_id, authentication_error_redirect, getAttributesForm, scope2details
+from misc import generate_unique_id, authentication_error_redirect, getAttributesForm, getAttributesForm2, scope2details
 from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
@@ -247,6 +247,7 @@ def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
         log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
+
         response_code = request.args.get("response_code")
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
         url = (
@@ -275,8 +276,11 @@ def getpidoid4vp():
         error_msg = str(response.status_code)
         return jsonify({"error": error_msg}), 400
 
-    error, error_msg = validate_vp_token(response.json())
+    print(response.json())
 
+    error, error_msg = validate_vp_token(response.json())
+    print(error)
+    print(error_msg)
     if error == True:
         return authentication_error_redirect(
             jws_token=session["authorization_params"]["token"],
@@ -360,7 +364,7 @@ def getpidoid4vp():
             redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
         )
     else:
-
+        print("\n--OID4VP 1---\n")
         authorization_params = session["authorization_params"]
         authorization_details = []
         if "authorization_details" in authorization_params:
@@ -376,7 +380,7 @@ def getpidoid4vp():
                 error="invalid authentication",
                 error_description="No authorization details or scope found in dynamic route.",
             )
-
+        print("\n--OID4VP 2---\n")
         credentials_requested = []
         for cred in authorization_details:
             if "credential_configuration_id" in cred:
@@ -391,8 +395,12 @@ def getpidoid4vp():
         attributesForm = getAttributesForm(credentials_requested)
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": str(uuid4())})
+
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+        print("\n--OID4VP 3---\n")
         return render_template(
             "dynamic/dynamic-form.html",
-            attributes=attributesForm,
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
             redirect_url=cfgservice.service_url + "dynamic/form",
         )

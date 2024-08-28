@@ -120,7 +120,7 @@
                             <h3>Test Provider Form</h3>
                             <p>This data is only used for issuing credentials for testing purposes.</p>
                             <div id="eidasCountries">
-                                {% for name, value in attributes.items() %}    
+                                {% for name, value in mandatory_attributes.items() %}    
                                         {% if value == 'string' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
@@ -234,6 +234,140 @@
                                                             <div class="col">
                                                                 Expiry Date:
                                                                 <input type="date" class="form-control" placeholder="Expiry Date" aria-label="Expiry Date" name="ExpiryDate1" required>
+                                                            </div>
+                                                            
+                                                            <div id="AddCategory">
+                
+                                                            </div>
+                                                            <button type="button" class="btn btn-primary btn-sm" onclick="AddCategories();">Add</button>                   
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12" id="hidden_elems">
+                                                    {% for elem, value in hidden_elems %}
+                                                    <div class="col" >
+                                                        <input type="hidden" value="{{ value }}" name="{{ elem }}">
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %} 
+                                    {% endfor %}
+                                </div>
+                                <h3>Optional Elements</h3>
+                                {% for name, value in optional_attributes.items() %}    
+                                        {% if value == 'string' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
+                                                </div>
+                                            </div>
+                                        {% elif value == 'bool' %}
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label for="{{ name }}">{{ name }}</label>
+                                                <!-- Hidden input to represent the unchecked state -->
+                                                <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
+                                                <!-- Checkbox input -->
+                                                <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                            </div>
+                                        </div>
+                                        <script>
+                                            function setupCheckbox(name) {
+                                                const checkbox = document.getElementById(name);
+                                                const hiddenInput = document.getElementById(name + "_hidden");
+                                                
+                                                // Function to update hidden input based on checkbox state
+                                                function updateHiddenInput() {
+                                                    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                                }
+                                                
+                                                // Attach the change event listener
+                                                checkbox.addEventListener('change', updateHiddenInput);
+                                                
+                                                // Call the function to set the initial state correctly
+                                                updateHiddenInput();
+                                            }
+                                            
+                                            // Setup each checkbox with a unique name
+                                            setupCheckbox("{{ name }}");
+                                        </script>                   
+                                        {% elif name == 'user_pseudonym' %}
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                {{name}}
+                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                             </div>
+                                        </div>
+                                        {% elif value == 'full-date' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    {{name}}
+                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
+                                                </div>
+                                            </div>
+                                        {% elif value == 'jpeg'%}
+                                            <label>Portrait:</label>
+                                            <p>Please select one option or upload a file.</p>
+                                             
+                                            <div class="row g-3">
+                                                
+                                                <div class="col-md-6">
+                                                    <label>
+                                                        <input type="radio" name="{{ name }}"value="Port1" checked >
+                                                        <img src="{{url_for('static', filename='image.jpeg')}}" width=50% alt="Option 1">
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label>
+                                                        <input type="radio" name="{{ name }}" value="Port2">
+                                                        <img src="{{url_for('static', filename='image2.jpeg')}}" width=50% alt="Option 2">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3" style="margin-top: 10% ;">
+                                                <div class="col-md-6">
+                                                    <input type="radio" name="{{ name }}" id="Option3" value="Port3">
+                                                    <label >
+                                                        <input type="file" name="Image" id="fileInput" accept="image.jpeg" capture>
+                                                        <div id="preview">
+                                                        </div>            
+                                                        <p>Type: image/jpeg , Size(pixels): 360x433 </p>
+                                                    </label>
+                                                    
+                                                </div>
+
+                                            </div>
+                                        {% elif value == 'driving_privileges' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <div class="form-group" id="DrivingP">
+                                                        <label for="Driving">Driving Privileges</label>
+                                                        <label>Category </label>
+                                                            <select class="form-control" name="Category1">
+                                                                <option>AM</option>
+                                                                <option>A1</option>
+                                                                <option>A2</option>
+                                                                <option>A</option>
+                                                                <option>B1</option>
+                                                                <option>B</option>
+                                                                <option>C1</option>
+                                                                <option>C</option>
+                                                                <option>D1</option>
+                                                                <option>D</option>
+                                                                <option>BE</option>
+                                                                <option>C1E</option>
+                                                                <option>CE</option>
+                                                                <option>D1E</option>
+                                                                <option>DE</option>
+                                                            </select>
+                
+                                                            <div class="col">
+                                                                Issue Date:
+                                                                <input type="date" class="form-control" placeholder="Issue Date" aria-label="Issue Date" name="IssueDate1">
+                                                            </div>
+                                                            <div class="col">
+                                                                Expiry Date:
+                                                                <input type="date" class="form-control" placeholder="Expiry Date" aria-label="Expiry Date" name="ExpiryDate1">
                                                             </div>
                                                             
                                                             <div id="AddCategory">

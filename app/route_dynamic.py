@@ -55,6 +55,7 @@ from misc import (
     credential_error_resp,
     generate_unique_id,
     getAttributesForm,
+    getAttributesForm2,
     scope2details,
     calculate_age,
     validate_image,
@@ -193,9 +194,15 @@ def dynamic_R1(country):
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": str(uuid4())})
+
+        print("\n-----Mandatory-----\n", attributesForm)
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+        print("\n-----Mandatory-----\n", attributesForm2)
+
         return render_template(
             "dynamic/dynamic-form.html",
-            attributes=attributesForm,
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
             redirect_url=cfgserv.service_url + "dynamic/form",
         )
 
@@ -934,7 +941,8 @@ def Dynamic_form():
             cleaned_data[item] = False
 
         else:
-            cleaned_data[item] = form_data[item]
+            if form_data[item] != "":
+             cleaned_data[item] = form_data[item]
 
     cleaned_data.update(
         {
@@ -972,10 +980,14 @@ def Dynamic_form():
         credential_atributes_form=list()
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
+        attributesForm2 = getAttributesForm2(credential_atributes_form).keys()
 
         for attribute in cleaned_data.keys():
 
             if attribute in attributesForm:
+                presentation_data[credential][attribute]= cleaned_data[attribute]
+            
+            if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
         doctype_config=cfgserv.config_doctype[scope]
@@ -987,12 +999,16 @@ def Dynamic_form():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        
         if "credential_type" in doctype_config:
                 presentation_data[credential].update({"credential_type":doctype_config["credential_type"] })
         
         if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
+        if scope == "eu.europa.ec.eudi.pid.1" or scope == "org.iso.18013.5.1.mDL":
+            if "birth_date" in presentation_data[credential]:
+                presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
         if "driving_privileges" in presentation_data[credential]:
             json_priv = json.loads(presentation_data[credential]["driving_privileges"])
