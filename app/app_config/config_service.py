@@ -285,6 +285,7 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.iban.1",
+            "credential_type": "IBAN",
         },
         "eu.europa.ec.eudi.hiid.1": {
             "issuing_authority": "Test QEAA issuer",

@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "PoR",
+        "name": "Power Of Representation",
         "locale": "en",
         "logo": {
           "url": "https://examplestate.com/public/por.png",
@@ -78,7 +78,7 @@
         },
         "effective_from_date": {
           "mandatory": true,
-          "value_type":"",
+          "value_type":"full-date",
           "display": [
             {
               "name": "",
@@ -102,6 +102,24 @@
               "name": "",
               "locale": "en"
             }
+          ]
+        },
+        "eService": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "effective_until_date": {
+          "mandatory": false,
+          "value_type":"full-date",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
           ]
         }
       }

@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "msisdn",
+        "name": "MSISDN",
         "locale": "en",
         "logo": {
           "url": "https://examplestate.com/public/msisdn.png",
@@ -147,6 +147,34 @@
               "name": "",
               "locale": "en"
             }
+          ]
+        },
+        "phone_number_in_use": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "verification_method_Information": {
+          "mandatory": true,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "document_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
           ]
         }
       }

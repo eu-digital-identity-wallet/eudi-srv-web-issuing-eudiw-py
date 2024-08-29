@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "tax",
+        "name": "Tax Number",
         "locale": "en",
         "logo": {
           "url": "https://examplestate.com/public/tax.png",
@@ -127,6 +127,65 @@
           "display": [
             {
               "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "church_tax_ID": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "iban": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "document_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "administrative_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuing_jurisdiction": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuing_country": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
               "locale": "en"
             }
           ]

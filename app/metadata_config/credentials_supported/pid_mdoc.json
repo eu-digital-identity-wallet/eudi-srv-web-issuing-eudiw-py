@@ -117,6 +117,7 @@
         },
         "birth_country": {
           "mandatory": false,
+          "value_type":"string",
           "display": [
             {
               "name": "The country where the PID User was born, as an Alpha-2 country code.",

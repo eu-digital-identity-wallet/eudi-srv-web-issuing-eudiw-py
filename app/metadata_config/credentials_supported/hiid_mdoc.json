@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "hiid",
+        "name": "Health ID",
         "locale": "en",
         "logo": {
           "url": "https://examplestate.com/public/hiid.png",
@@ -105,6 +105,106 @@
         },
         "expiry_date": {
           "mandatory": true,
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "matching_institution-id": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "matching_registered_family_name": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "matching_registered_given_name": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "matching_resident_address": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "matching_birth_place": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "matching_birth_date": {
+          "mandatory": false,
+          "value_type":"full-date",
+          "display": [
+            {
+              "name": "Date of Birth",
+              "locale": "en"            }
+          ]
+        },
+        "issuing_authority": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+              "locale": "en"
+            }
+          ]
+        },
+        "document_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "administrative_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "issuing_country": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuing_jurisdiction": {
+          "mandatory": false,
+          "value_type":"string",
           "display": [
             {
               "name": "",

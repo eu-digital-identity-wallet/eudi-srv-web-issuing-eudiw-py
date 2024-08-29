@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "iban",
+        "name": "IBAN",
         "locale": "en",
         "logo": {
           "url": "https://examplestate.com/public/iban.png",
@@ -165,6 +165,69 @@
               "name": "",
               "locale": "en"
             }
+          ]
+        },
+        "national_account_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "account_product": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "account_name": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "account_type": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "national_bank_code": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
+        },
+        "credential_type": {
+          "mandatory": true,
+          "display": [
+            {
+              "name": "",
+              "locale": "en"
+            }
+          ]
+        },
+        "verification_method_Information": {
+          "mandatory": false,
+          "value_type":"string",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
           ]
         }
       }

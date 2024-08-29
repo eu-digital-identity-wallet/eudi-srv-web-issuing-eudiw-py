@@ -35,7 +35,7 @@ import segno
 
 from app.route_oidc import service_endpoint
 from .app_config.config_service import ConfService as cfgservice
-from app.misc import authentication_error_redirect, getAttributesForm
+from app.misc import authentication_error_redirect, getAttributesForm, getAttributesForm2
 
 from app.data_management import parRequests, transaction_codes, getSessionId_requestUri
 
@@ -188,11 +188,23 @@ def preauthForm():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
 
+
+
     session["credentials_requested"] = credentials_requested
 
     attributesForm=getAttributesForm(session["credentials_requested"])
 
-    return render_template("dynamic/dynamic-form.html", attributes=attributesForm, redirect_url= cfgservice.service_url + "dynamic/form")
+    print("\n-----Mandatory-----\n", attributesForm)
+    attributesForm2 = getAttributesForm2(session["credentials_requested"])
+    print("\n-----Optional-----\n", attributesForm2)
+    
+
+    return render_template(
+            "dynamic/dynamic-form.html",
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
+            redirect_url=cfgservice.service_url + "dynamic/form",
+        )
 
 
 @preauth.route("/preauth-code", methods=["GET"])

@@ -710,9 +710,10 @@ def batchCredential():
     access_token = headers["Authorization"][6:]
     session_id = getSessionId_accessToken(access_token)
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
+    print(_response)
 
     if isinstance(_response,Response):
         log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential response, Payload: " + str(json.loads(_response.get_data())))
@@ -724,11 +725,11 @@ def batchCredential():
         request_headers = dict(request.headers)
         deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
         
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
+        #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
         return make_response(jsonify(_response),202)
     
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
 
     return _response
 
