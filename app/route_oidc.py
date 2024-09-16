@@ -546,8 +546,17 @@ def token():
 
     elif req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code":
 
-        if "pre-authorized_code" not in req_args or "tx_code" not in req_args:
+        if "pre-authorized_code" not in req_args:
             return make_response("invalid_request", 400)
+        
+        if "tx_code" not in req_args:
+            if "0" != transaction_codes[code]["tx_code"]:
+                error_message = {
+                "error": "invalid_request",
+                "description": "invalid tx_code"
+            }
+            response = make_response(jsonify(error_message), 400)
+            return response
         
         code = req_args["pre-authorized_code"]
 
@@ -582,7 +591,20 @@ def token():
         
         response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
-            return make_response("invalid_request", 400)
+
+            redirect_url = urllib.parse.quote(cfgservice.service_url) + "preauth-codeReq"
+
+            payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
+            headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+
+            if response.status_code != 200:
+                return make_response("invalid_request", 400)
+        
+
         #response = response.json()
         log.logger_info.info("Token response: " + str(response.json()))
 

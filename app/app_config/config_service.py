@@ -309,6 +309,13 @@ class ConfService:
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.msisdn.1",
             "credential_type": "MSISDN",
+        },
+        "org.iso.18013.5.1.reservation": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "org.iso.18013.5.reservation.1",
         }
         
     }
