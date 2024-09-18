@@ -197,7 +197,7 @@ def dynamic_R1(country):
 
         print("\n-----Mandatory-----\n", attributesForm)
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
-        print("\n-----Mandatory-----\n", attributesForm2)
+        print("\n-----Optional-----\n", attributesForm2)
 
         return render_template(
             "dynamic/dynamic-form.html",
@@ -209,7 +209,8 @@ def dynamic_R1(country):
     elif country == "sample":
         user_id = generate_unique_id()
 
-        form_dynamic_data[user_id] = cfgserv.sample_data
+        form_dynamic_data[user_id] = cfgserv.sample_data.copy()
+        form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
 
         if "jws_token" not in session or "authorization_params" in session:
             session["jws_token"] = session["authorization_params"]["token"]
@@ -888,7 +889,6 @@ def Dynamic_form():
     form_data = request.form.to_dict()
 
     user_id = generate_unique_id()
-    timestamp = int(datetime.timestamp(datetime.now()))
 
     form_data.pop("proceed")
     cleaned_data = {}
@@ -949,13 +949,13 @@ def Dynamic_form():
             "version": session["version"],
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
-            "timestamp": timestamp,
         }
     )
 
     print("\n-----Cleaned Data----\n", cleaned_data)
 
-    form_dynamic_data[user_id] = cleaned_data
+    form_dynamic_data[user_id] = cleaned_data.copy()
+    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
 
     if "jws_token" not in session or "authorization_params" in session:
         session["jws_token"] = session["authorization_params"]["token"]

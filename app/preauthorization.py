@@ -315,7 +315,9 @@ def credentialOfferReq():
 
     data.update({"issuing_country": "FC"})
 
-    form_dynamic_data[user_id] = data
+    form_dynamic_data[user_id] = data.copy()
+
+    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)})
 
     user_id="FC." + user_id
 
@@ -498,7 +500,9 @@ def credentialOfferReq2():
 
     data.update({"issuing_country": "FC"})
 
-    form_dynamic_data[user_id] = data
+    form_dynamic_data[user_id] = data.copy()
+
+    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)})
 
     user_id="FC." + user_id
 

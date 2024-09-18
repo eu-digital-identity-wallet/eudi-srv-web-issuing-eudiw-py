@@ -246,6 +246,7 @@ def openid4vp():
 def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
+        print("\n-----getpidoid4vp----\n", session)
         log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
 
         response_code = request.args.get("response_code")
@@ -288,7 +289,7 @@ def getpidoid4vp():
             error_description=error_msg,
         )
 
-    mdoc_json = cbor2elems(response.json()["vp_token"] + "==")
+    mdoc_json = cbor2elems(response.json()["vp_token"][0] + "==")
     is_ageOver18 = False
     attributesForm = {}
 
@@ -340,7 +341,9 @@ def getpidoid4vp():
             attributesForm.update({"credential_type":doctype_config["credential_type"] })
 
         user_id = generate_unique_id()
-        form_dynamic_data[user_id] = attributesForm
+        form_dynamic_data[user_id] = attributesForm.copy()
+
+        form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)})
         
         presentation_data = attributesForm.copy()
 
@@ -350,8 +353,6 @@ def getpidoid4vp():
 
         presentation_data.update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
         presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
-        presentation_data.update({})
-        presentation_data.update({})
 
         if "jws_token" not in session and "authorization_params" in session:
                 session["jws_token"] = session["authorization_params"]["token"]

@@ -74,6 +74,9 @@ class ConfService:
     # transaction code expiry time (minutes)
     tx_code_expiry = 60
 
+    # Form data expiry time (minutes)
+    form_expiry = 60
+
     # ------------------------------------------------------------------------------------------------
     # PID namespace
     pid_namespace = "eu.europa.ec.eudi.pid.1"

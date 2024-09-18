@@ -92,7 +92,7 @@ def validate_vp_token(response_json):
 
     else:
 
-        mdoc = response_json["vp_token"]
+        mdoc = response_json["vp_token"][0]
         mdoc_ver = None
 
         try:
@@ -163,6 +163,7 @@ def validate_certificate(mdoc):
     )
 
     # Validate Certificate (MSO Header)
+    print("\n----Certificate Issuer:\n", certificate.issuer)
     if certificate.issuer not in trusted_CAs:
 
         return False, "Certificate wasn't emitted by a Trusted CA "

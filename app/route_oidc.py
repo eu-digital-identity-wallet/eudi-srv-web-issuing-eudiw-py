@@ -792,15 +792,17 @@ def deferred_credential():
     access_token = headers["Authorization"][6:]
     session_id = getSessionId_accessToken(access_token)
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
     
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
-    if isinstance(_resp,Response):
+    #print(type(_resp[0].get_data()))
+    #print(json.loads(_resp[0].get_data()))
+    """  if isinstance(_resp,Response):
         log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
-        return _resp
+        return _resp """
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
+    #log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
 
     return _resp
 

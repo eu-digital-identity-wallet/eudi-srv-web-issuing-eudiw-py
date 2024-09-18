@@ -67,7 +67,7 @@ def getSessionId_accessToken(target_accessToken):
 ################################################
 ## To be moved to a file with scheduled jobs
 
-scheduler_call = 3600  # scheduled periodic job will be called every scheduler_call seconds (should be 300; 30 for debug)
+scheduler_call = 30  # scheduled periodic job will be called every scheduler_call seconds (should be 300; 30 for debug)
 
 
 def clear_par():
@@ -131,8 +131,13 @@ def clear_par():
             cfgservice.logger_info.info("Removing session id: " + str(id))
             session_ids.pop(id)
 
+    for id in form_dynamic_data.copy():
+        if datetime.now() > form_dynamic_data[id]["expires"]:
+            cfgservice.logger_info.info("Removing form id: " + str(id))
+            form_dynamic_data.pop(id)
+
     """Function to clear app.config['data']"""
-    aux = []
+    """ aux = []
 
     for unique_id, dados in form_dynamic_data.items():
         timestamp = datetime.fromtimestamp(dados.get("timestamp", 0))
@@ -146,7 +151,7 @@ def clear_par():
         del form_dynamic_data[unique_id]
 
     if aux:
-        print(f"Entries {aux} eliminated.")
+        print(f"Entries {aux} eliminated.") """
 
 def run_scheduler():
     print("Run scheduler.")
