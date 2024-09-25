@@ -73,12 +73,12 @@ scheduler_call = 30  # scheduled periodic job will be called every scheduler_cal
 def clear_par():
     """Function to clear parRequests"""
     now = int(datetime.timestamp(datetime.now()))
-    print("Job scheduled: clear_par() at " + str(now))
+    #print("Job scheduled: clear_par() at " + str(now))
 
     for uri in parRequests.copy():
         expire_time = parRequests[uri]["expires"]
         if now > expire_time:
-            parRequests.pop(uri)
+            """ parRequests.pop(uri)
             print(
                 "Job scheduled: clear_par: "
                 + uri
@@ -95,7 +95,7 @@ def clear_par():
                 + str(now)
                 + " < "
                 + str(expire_time)
-            )
+            ) """
 
     for req in deferredRequests.copy():
             
@@ -117,44 +117,27 @@ def clear_par():
     for code in transaction_codes.copy():
         if datetime.now() > transaction_codes[code]["expires"]:
             #cfgservice.logger_info.info("Current transaction_codes:\n" + str(transaction_codes))
-            cfgservice.logger_info.info("Removing tx_code for code: " + str(code))
+            cfgservice.app_logger.info("Removing tx_code for code: " + str(code))
             transaction_codes.pop(code)
     
     for id in oid4vp_requests.copy():
         if datetime.now() > oid4vp_requests[id]["expires"]:
             #cfgservice.logger_info.info("Current oid4vp_requests:\n" + str(oid4vp_requests))
-            cfgservice.logger_info.info("Removing oid4vp_requests with id: " + str(id))
+            cfgservice.app_logger.info("Removing oid4vp_requests with id: " + str(id))
             oid4vp_requests.pop(id)
     
     for id in session_ids.copy():
         if datetime.now() > session_ids[id]["expires"]:
-            cfgservice.logger_info.info("Removing session id: " + str(id))
+            cfgservice.app_logger.info("Removing session id: " + str(id))
             session_ids.pop(id)
 
     for id in form_dynamic_data.copy():
         if datetime.now() > form_dynamic_data[id]["expires"]:
-            cfgservice.logger_info.info("Removing form id: " + str(id))
+            cfgservice.app_logger.info("Removing form id: " + str(id))
             form_dynamic_data.pop(id)
 
-    """Function to clear app.config['data']"""
-    """ aux = []
-
-    for unique_id, dados in form_dynamic_data.items():
-        timestamp = datetime.fromtimestamp(dados.get("timestamp", 0))
-        diff = datetime.now() - timestamp
-        if diff.total_seconds() > (
-            cfgservice.max_time_data * 60
-        ):  # minutes * 60 seconds -> data is deleted after being saved for 1 minute
-            aux.append(unique_id)
-
-    for unique_id in aux:
-        del form_dynamic_data[unique_id]
-
-    if aux:
-        print(f"Entries {aux} eliminated.") """
-
 def run_scheduler():
-    print("Run scheduler.")
+    #print("Run scheduler.")
     threading.Timer(scheduler_call, run_scheduler).start()
     clear_par()
 

@@ -67,9 +67,6 @@ from . import oidc_metadata
 dynamic = Blueprint("dynamic", __name__, url_prefix="/dynamic")
 CORS(dynamic)  # enable CORS on the blue print
 
-# Log
-from app_config.config_service import ConfService as log
-
 # secrets
 from app_config.config_secrets import flask_secret_key
 
@@ -143,7 +140,7 @@ def Supported_Countries():
         session["returnURL"] = cfgserv.OpenID_first_endpoint
         session["country"] = form_country
 
-        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + form_country)
+        cfgserv.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + form_country)
 
         """ log.logger_info.info(
             " - INFO - "
@@ -195,9 +192,7 @@ def dynamic_R1(country):
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": str(uuid4())})
 
-        print("\n-----Mandatory-----\n", attributesForm)
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
-        print("\n-----Optional-----\n", attributesForm2)
 
         return render_template(
             "dynamic/dynamic-form.html",
@@ -324,7 +319,7 @@ def red():
         )
 
 
-        log.logger_info.info(
+        cfgserv.app_logger.info(
             " - INFO - "
             + session["route"]
             + " - Version:"
@@ -341,7 +336,6 @@ def red():
         if "error" in data and data["error"] == "Pending" and "response" in data:
             data = data["response"]
 
-        print("\n-----Data-----\n", data)
         """ i = 0
         while "error" in data and data["error"] == "Pending" and i < 20:
             time.sleep(2)
@@ -456,7 +450,7 @@ def red():
     json_response = json.loads(r.text)
     session["access_token"] = json_response["access_token"]
 
-    log.logger_info.info(
+    cfgserv.app_logger.info(
         " - INFO - "
         + session["route"]
         + " - Version:"
@@ -941,7 +935,7 @@ def Dynamic_form():
             cleaned_data[item] = False
 
         else:
-            if form_data[item] != "":
+            if form_data[item] != "" and form_data[item] != "unset":
              cleaned_data[item] = form_data[item]
 
     cleaned_data.update(
@@ -951,8 +945,6 @@ def Dynamic_form():
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
-
-    print("\n-----Cleaned Data----\n", cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})

@@ -42,41 +42,46 @@
         "family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Family name",
               "locale": "en"            }
           ]
         },
         "given_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current First Names",
+              "name": "Given names",
               "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "Date of birth",
               "locale": "en"            }
           ]
         },
         "issue_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Date when mDL was issued.",
+              "name": "Date of issue",
               "locale": "en"
             }
           ]
         },
         "expiry_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Date when mDL expires",
@@ -86,18 +91,20 @@
         },
         "issuing_country": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
+              "name": "Issuing country",
               "locale": "en"
             }
           ]
         },
         "issuing_authority": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+              "name": "Issuing authority",
               "locale": "en"
             }
           ]
@@ -105,197 +112,233 @@
         "document_number": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The number assigned or calculated by the issuing authority. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+              "name": "Licence number",
               "locale": "en"            }
           ]
         },
         "portrait": {
           "mandatory": true,
           "value_type":"jpeg",
+          "source":"user",
           "display": [
             {
-              "name": "A reproduction of the mDL holder’s portrait",
+              "name": "Portrait of mDL holder",
               "locale": "en"            }
           ]
         },
         "driving_privileges": {
           "mandatory": true,
           "value_type":"driving_privileges",
+          "source":"user",
           "display": [
             {
-              "name": "Driving privileges of the mDL holder.",
+              "name": "Categories of vehicles",
               "locale": "en"            }
           ]
         },
         "un_distinguishing_sign": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Distinguishing sign of the issuing country according to ISO/IEC 18013-1:2018, Annex F.",
+              "name": "UN distinguishing sign",
               "locale": "en"
             }
           ]
         },
         "administrative_number": {
           "mandatory": false,
+          "source":"issuer",
           "display": [
             {
-              "name": "An audit control number assigned by the issuing authority",
+              "name": "Administrative number",
               "locale": "en"
             }
           ]
         },
         "sex": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"uint",
           "display": [
             {
-              "name": "mDL holder’s sex using values as defined in ISO/IEC 5218.",
+              "name": "Sex",
               "locale": "en"
             }
           ]
         },
         "height": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"uint",
           "display": [
             {
-              "name": "mDL holder’s height in centimetres",
+              "name": "Height (cm)",
               "locale": "en"
             }
           ]
         },
         "weight": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"uint",
           "display": [
             {
-              "name": "mDL holder’s weight in kilograms",
+              "name": "Weight (kg)",
               "locale": "en"
             }
           ]
         },
         "eye_colour": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"string",
           "display": [
             {
-              "name": "mDL holder’s eye colour. The value shall be one of the following: “black”, “blue”, “brown”, “dichromatic”, “grey”, “green”, “hazel”, “maroon”, “pink”, “unknown”",
+              "name": "Eye colour",
               "locale": "en"
             }
           ]
         },
         "hair_colour": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"string",
           "display": [
             {
-              "name": "mDL holder’s hair colour. The value shall be one of the following: “bald”, “black”, “blond”, “brown”, “grey”, “red”, “auburn”, “sandy”, “white”, “unknown”.",
+              "name": "Hair colour",
               "locale": "en"
             }
           ]
         },
         "birth_place": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Country and municipality or state/province where the mDL holder was born.",
+              "name": "Place of birth",
               "locale": "en"
             }
           ]
         },
         "resident_address": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The place where the mDL holder resides and/or may be contacted (street/house number, municipality etc.).",
+              "name": "Permanent place of residence",
               "locale": "en"
             }
           ]
         },
         "portrait_capture_date": {
           "mandatory": false,
+          "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Date when portrait was taken",
+              "name": "Portrait image timestamp",
               "locale": "en"
             }
           ]
         },
         "age_in_years": {
           "mandatory": false,
+          "value_type":"uint",
+          "source":"user",
           "display": [
             {
-              "name": "The age of the mDL holder",
+              "name": "Age attestation: How old are you (in years)?",
               "locale": "en"
             }
           ]
         },
         "age_birth_year": {
           "mandatory": false,
+          "value_type":"uint",
+          "source":"user",
           "display": [
             {
-              "name": "The year when the mDL holder was born ",
+              "name": "Age attestation: In what year were you born?",
               "locale": "en"
             }
           ]
         },
-        "age_over_NN": {
+        "age_over_18": {
           "mandatory": false,
+          "source":"issuer",
           "display": [
             {
-              "name": "mDL holder is as old or older than a specified age",
+              "name": "Age attestation: Nearest “true” attestation above request",
               "locale": "en"
             }
           ]
         },
-        "issuing_jurisdiction": {
+        "Issuing jurisdiction": {
           "mandatory": false,
           "display": [
             {
-              "name": "Country subdivision code of the jurisdiction that issued the mDL as defined in ISO 3166-2:2020, Clause 8. T",
+              "name": "Issuing jurisdiction",
               "locale": "en"
             }
           ]
         },
         "nationality": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Nationality of the mDL holder as a two letter country code (alpha-2 code) defined in ISO 3166-1",
+              "name": "Nationality",
               "locale": "en"
             }
           ]
         },
         "resident_city": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The city where the mDL holder lives.",
+              "name": "Resident city",
               "locale": "en"
             }
           ]
         },
         "resident_state": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The state/province/district where the mDL holder lives",
+              "name": "Resident state/province/district",
               "locale": "en"
             }
           ]
         },
         "resident_postal_code": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The postal code of the mDL holder.",
+              "name": "Resident postal code",
               "locale": "en"
             }
           ]
         },
         "resident_country": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The country where the mDL holder lives",
+              "name": "Resident country",
               "locale": "en"
             }
           ]
@@ -311,18 +354,22 @@
         },
         "family_name_national_character": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The family name of the mDL holder using full UTF-8 character set.",
+              "name": "Family name in national characters",
               "locale": "en"
             }
           ]
         },
         "given_name_national_character": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The given name of the mDL holder using full UTF-8 character set.",
+              "name": "Given name in national characters",
               "locale": "en"
             }
           ]
@@ -331,7 +378,7 @@
           "mandatory": false,
           "display": [
             {
-              "name": "Image of the signature or usual mark of the mDL holder",
+              "name": "ISignature / usual mark",
               "locale": "en"
             }
           ]

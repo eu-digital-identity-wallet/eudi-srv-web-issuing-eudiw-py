@@ -49,47 +49,70 @@
     ],
     "claims": {
       "eu.europa.ec.eudi.pid.1": {
-        "given_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "Current First Names",
-              "locale": "en"            }
-          ]
-        },
         "family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Current last name(s) or surname(s) of the PID User.",
+              "locale": "en"            }
+          ]
+        },
+        "given_name": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Current first name(s), including middle name(s), of the PID User.",
               "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "Day, month, and year on which the PID User was born. If unknown, approximate date of birth.",
               "locale": "en"            }
           ]
         },
         "age_over_18": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Adult or minor",
+              "name": "Attesting whether the PID User is currently an adult (true) or a minor (false).",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_in_years": {
+          "mandatory": false,
+          "value_type":"uint",
+          "display": [
+            {
+              "name": "The current age of the PID User in years.",
               "locale": "en"
             }
           ]
         },
         "age_birth_year": {
-          "mandatory": false
+          "mandatory": false,
+          "value_type":"uint",
+          "display": [
+            {
+              "name": "The year when the PID User was born. If unknown, approximate year.",
+              "locale": "en"
+            }
+          ]
         },
         "family_name_birth": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
@@ -99,6 +122,8 @@
         },
         "given_name_birth": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
@@ -108,6 +133,8 @@
         },
         "birth_place": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The country, state, and city where the PID User was born.",
@@ -118,6 +145,7 @@
         "birth_country": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The country where the PID User was born, as an Alpha-2 country code.",
@@ -127,6 +155,8 @@
         },
         "birth_state": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The state, province, district, or local area where the PID User was born. ",
@@ -136,6 +166,8 @@
         },
         "birth_city": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The municipality, city, town, or village where the PID User was born. ",
@@ -143,17 +175,32 @@
             }
           ]
         },
-        "resident_country": {
+        "resident_address": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "he country where the PID User currently resides, as an Alpha-2 country code as specified in ISO 3166-1.",
+              "name": "The full address of the place where the PID User currently resides and/or can be contacted (street name, house number, city etc.).",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_country": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "The country where the PID User currently resides, as an Alpha-2 country code as specified in ISO 3166-1.",
               "locale": "en"
             }
           ]
         },
         "resident_state": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The state, province, district, or local area where the PID User currently resides",
@@ -163,6 +210,8 @@
         },
         "resident_city": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The municipality, city, town, or village where the PID User currently resides.",
@@ -172,6 +221,8 @@
         },
         "resident_postal_code": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "Postal code of the place where the PID User currently resides.",
@@ -181,6 +232,8 @@
         },
         "resident_street": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The name of the street where the PID User currently resides",
@@ -190,6 +243,8 @@
         },
         "resident_house_number": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
               "name": "The house number where the PID User currently resides, including any affix or suffix.",
@@ -199,6 +254,7 @@
         },
         "gender": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
               "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
@@ -208,6 +264,8 @@
         },
         "nationality": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"string",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -217,6 +275,7 @@
         },
         "issuance_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -226,6 +285,7 @@
         },
         "expiry_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -244,6 +304,7 @@
         },
         "issuing_authority": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -253,6 +314,7 @@
         },
         "document_number": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -262,6 +324,7 @@
         },
         "administrative_number": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -271,6 +334,7 @@
         },
         "issuing_country": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -280,6 +344,7 @@
         },
         "portrait_capture_date": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -289,6 +354,7 @@
         },
         "portrait": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
               "name": "Alpha-2 country code, representing the nationality of the PID User.",

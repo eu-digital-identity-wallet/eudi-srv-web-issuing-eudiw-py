@@ -49,8 +49,6 @@ from pid_func import format_pid_data, format_sd_jwt_pid_data
 eidasnode = Blueprint("eidasnode", __name__, url_prefix="/eidasnode")
 CORS(eidasnode)  # enable CORS on the eidasnode blue print
 
-# Log
-from app_config.config_service import ConfService as log
 
 
 # --------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +120,7 @@ def getlightresponse():
     """
 
     session["route"] = "/eidasnode/lightresponse"
-    log.logger_info.info(
+    cfgservice.app_logger.info(
         " - INFO - " + session["route"] + " - " + " -  entered the route"
     )
 
@@ -184,7 +182,7 @@ def eidasnodeR2():
     session["returnURL"] = cfgservice.service_url + "V04/getpid"
 
     session["route"] = "/eidasnode/eidasR2"
-    log.logger_info.info(
+    cfgservice.app_logger.info(
         " - INFO - "
         + session["route"]
         + " - "
@@ -264,7 +262,7 @@ def dynamic_eidasnodeR2():
     session["returnURL"] = cfgservice.service_url + "V04/getpid"
 
     session["route"] = "/eidasnode/eidasR2"
-    log.logger_info.info(
+    cfgservice.app_logger.info(
         " - INFO - "
         + session["route"]
         + " - "

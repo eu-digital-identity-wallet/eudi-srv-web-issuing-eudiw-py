@@ -229,6 +229,15 @@
               "name": "",
               "locale": "en"            }
           ]
+        },
+        "disponent": {
+          "mandatory": false,
+          "value_type":"bool",
+          "display": [
+            {
+              "name": "",
+              "locale": "en"            }
+          ]
         }
       }
     }

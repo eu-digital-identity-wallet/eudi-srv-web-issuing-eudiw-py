@@ -217,6 +217,22 @@ def getOptionalAttributes(attributes):
 
     return attributes_form
 
+def getIssuerFilledAttributes(attributes):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = {}
+
+    for x, value in enumerate(list(attributes.keys())):
+        attribute_name = list(attributes.keys())[x]
+        attribute_data = attributes.get(attribute_name, {})
+
+        if "source" in attribute_data and attribute_data["source"] == "issuer":
+            attributes_form.update({attribute_name: ""})
+
+    return attributes_form
+
 
 def generate_unique_id():
     """Function to generate a random uuid"""

@@ -65,9 +65,6 @@ from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
 from . import oidc_metadata, openid_metadata
 
-# Log
-from app_config.config_service import ConfService as log
-
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
 
@@ -103,31 +100,31 @@ def keys():
 
 def do_response(endpoint, req_args, error="", **args) -> Response:
     info = endpoint.do_response(request=req_args, error=error, **args)
-    _log = current_app.logger
-    _log.info("do_response: {}".format(info))
+    #_log = current_app.logger
+    cfgservice.app_logger.info("do_response: {}".format(info))
 
     try:
         _response_placement = info["response_placement"]
     except KeyError:
         _response_placement = endpoint.response_placement
 
-    _log.debug("response_placement: {}".format(_response_placement))
+    cfgservice.app_logger.debug("response_placement: {}".format(_response_placement))
 
     if error:
         if _response_placement == "body":
-            _log.info("Error Response: {}".format(info["response"]))
+            cfgservice.app_logger.info("Error Response: {}".format(info["response"]))
             _http_response_code = info.get("response_code", 400)
             resp = make_response(info["response"], _http_response_code)
         else:  # _response_placement == 'url':
-            _log.info("Redirect to: {}".format(info["response"]))
+            cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
             resp = redirect(info["response"])
     else:
         if _response_placement == "body":
-            _log.info("Response: {}".format(info["response"]))
+            cfgservice.app_logger.info("Response: {}".format(info["response"]))
             _http_response_code = info.get("response_code", 200)
             resp = make_response(info["response"], _http_response_code)
         else:  # _response_placement == 'url':
-            _log.info("Redirect to: {}".format(info["response"]))
+            cfgservice.app_logger.info("Redirect to: {}".format(info["response"]))
             resp = redirect(info["response"])
 
     for key, value in info["http_headers"]:
@@ -154,7 +151,7 @@ def verify(authn_method):
 
         auth_args = authn_method.unpack_token(request.args.get("jws_token"))
     except:
-        log.logger_error.error("Authorization verification: username or jws_token not found")
+        cfgservice.app_logger.error("Authorization verification: username or jws_token not found")
         if "jws_token" in request.args:
             return authentication_error_redirect(
             jws_token=request.args.get("jws_token"),
@@ -190,7 +187,7 @@ def verify(authn_method):
         logText = logText + ", State: " + args["response_args"]["state"]
 
 
-    log.logger_info.info(logText)
+    cfgservice.app_logger.info(logText)
 
     return do_response(endpoint, request, **args)
 
@@ -203,7 +200,7 @@ def verify_user():
     try:
         return verify(authn_method)
     except FailedAuthentication as exc:
-        log.logger_error.error("Authorization verification failed")
+        cfgservice.app_logger.error("Authorization verification failed")
         return render_template("misc/500.html", error=str(exc))
 
 
@@ -317,7 +314,7 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
     )
 
     if response.status_code != 200:
-        log.logger_error.error("Authorization endpoint invalid request")
+        cfgservice.app_logger.error("Authorization endpoint invalid request")
         return auth_error_redirect(redirect_uri,"invalid_request")
 
     response = response.json()
@@ -328,7 +325,7 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
     if "scope" in response:
         args.update({"scope": response["scope"]})
     if not args:
-        log.logger_error.error("Authorization args not found")
+        cfgservice.app_logger.error("Authorization args not found")
         return authentication_error_redirect(
             jws_token=response["token"],
             error=response["error"],
@@ -344,7 +341,7 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
     session_id = str(uuid.uuid4())
     session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60)}})
     session["session_id"] = session_id
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str({"client_id":client_id,"redirect_uri":redirect_uri, "response_type":response_type, "scope":scope, "code_challenge_method":code_challenge_method, "code_challenge":code_challenge, "authorization_details":authorization_details}))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str({"client_id":client_id,"redirect_uri":redirect_uri, "response_type":response_type, "scope":scope, "code_challenge_method":code_challenge_method, "code_challenge":code_challenge, "authorization_details":authorization_details}))
 
     return redirect(response["url"])
 
@@ -370,22 +367,22 @@ def authorizationV3():
     try:
         request_uri = request.args.get("request_uri")
     except:
-        log.logger_error.error("Authorization request_uri not found")
+        cfgservice.app_logger.error("Authorization request_uri not found")
         return make_response("Authorization error", 400)
 
     if not request_uri in parRequests:  # unknow request_uri => return error
         # needs to be changed to an appropriate error message, and need to be logged
         # return service_endpoint(current_app.server.get_endpoint("authorization"))
-        log.logger_error.error("Authorization request_uri not found in parRequests")
+        cfgservice.app_logger.error("Authorization request_uri not found in parRequests")
         return make_response("Request_uri not found", 400)
     
     session_id = getSessionId_requestUri(request_uri)
 
     if session_id == None:
-        log.logger_error.error("Authorization request_uri not found.")
+        cfgservice.app_logger.error("Authorization request_uri not found.")
         return make_response("Request_uri not found", 400)
     
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str(dict(request.args))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str(dict(request.args))
     )
 
     session["session_id"] = session_id
@@ -415,7 +412,7 @@ def authorizationV3():
     )
 
     if response.status_code != 200:
-        log.logger_error.error("Authorization endpoint invalid request")
+        cfgservice.app_logger.error("Authorization endpoint invalid request")
         return auth_error_redirect(par_args["redirect_uri"],"invalid_request")
 
     response = response.json()
@@ -426,7 +423,7 @@ def authorizationV3():
     if "scope" in response:
         args.update({"scope": response["scope"]})
     if not args:
-        log.logger_error.error("Authorization args not found")
+        cfgservice.app_logger.error("Authorization args not found")
         return authentication_error_redirect(
             jws_token=response["token"],
             error=response["error"],
@@ -470,7 +467,7 @@ def auth_choice():
     country_selection=True
 
     if "authorization_params" not in session:
-        log.logger_info.info("Authorization Params didn't exist in Authentication Choice")
+        cfgservice.app_logger.info("Authorization Params didn't exist in Authentication Choice")
         return render_template("misc/500.html", error="Invalid Authentication. No authorization details or scope found.")
     
     authorization_params = session["authorization_params"]
@@ -504,7 +501,7 @@ def auth_choice():
     if pid_auth == False and country_selection == False:
         error="Combination of requested credentials is not valid!"
             
-    return render_template("misc/auth_method.html",pid_auth=pid_auth,country_selection=country_selection, error=error, redirect_url= log.service_url)
+    return render_template("misc/auth_method.html",pid_auth=pid_auth,country_selection=country_selection, error=error, redirect_url= cfgservice.service_url)
 
 
     #return render_template("misc/auth_method.html")
@@ -530,11 +527,11 @@ def token():
 
         session_id = getSessionId_authCode(req_args["code"])
 
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Token Request, Payload: " + str(request.form.to_dict()))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Token Request, Payload: " + str(request.form.to_dict()))
     
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Authorization Token Response, Payload: " + str(json.loads(response.get_data())))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Token Response, Payload: " + str(json.loads(response.get_data())))
 
         response_json = json.loads(response.get_data())
 
@@ -560,10 +557,6 @@ def token():
         
         code = req_args["pre-authorized_code"]
 
-        session_id = getSessionId_authCode(code)
-
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Request, Payload: " + str(request.form.to_dict()))
-
         if code not in transaction_codes:
             error_message = {
                     "error": "invalid_request",
@@ -572,6 +565,14 @@ def token():
             response = make_response(jsonify(error_message), 400)
             return response
         
+        preauth_code = transaction_codes[code]["pre_auth_code"]
+
+        session_id = getSessionId_authCode(preauth_code)
+        print(preauth_code)
+        print(session_id)
+        print(str(request.form.to_dict()))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Request, Payload: " + str(request.form.to_dict()))
+
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
             error_message = {
                 "error": "invalid_request",
@@ -580,37 +581,23 @@ def token():
             response = make_response(jsonify(error_message), 400)
             return response
         
-        
         url = cfgservice.service_url + "token_service"
-        redirect_url = urllib.parse.quote(cfgservice.service_url) + "preauth-code"
+        redirect_url = "preauth"
 
-        payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
+        payload = 'grant_type=authorization_code&code=' + preauth_code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
         headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
         }
         
         response = requests.request("POST", url, headers=headers, data=payload)
-        if response.status_code != 200:
-
-            redirect_url = urllib.parse.quote(cfgservice.service_url) + "preauth-codeReq"
-
-            payload = 'grant_type=authorization_code&code=' + code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
-            headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-            }
-
-            response = requests.request("POST", url, headers=headers, data=payload)
-
-            if response.status_code != 200:
-                return make_response("invalid_request", 400)
         
 
         #response = response.json()
-        log.logger_info.info("Token response: " + str(response.json()))
+        cfgservice.app_logger.info("Token response: " + str(response.json()))
 
         transaction_codes.pop(code)
 
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Response, Payload: " + str(response.json()))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Response, Payload: " + str(response.json()))
 
         response_json = response.json()
 
@@ -624,7 +611,7 @@ def token():
 
     else: 
         response = service_endpoint(current_app.server.get_endpoint("token"))
-        log.logger_info.info("Token response: " + str(json.loads(response.get_data())))
+        cfgservice.app_logger.info("Token response: " + str(json.loads(response.get_data())))
 
 
     return response
@@ -655,7 +642,7 @@ def par_endpointv2():
 
     session_id = str(uuid.uuid4())
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Pushed Authorization Request, Payload: " + str(request.form.to_dict())
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pushed Authorization Request, Payload: " + str(request.form.to_dict())
     )
 
     redirect_uri = None
@@ -664,7 +651,7 @@ def par_endpointv2():
 
         client_id = request.form["client_id"]
     except:
-        log.logger_error.error("PAR: client_id or redirect_uri not found")
+        cfgservice.app_logger.error("PAR: client_id or redirect_uri not found")
         if redirect_uri:
             return auth_error_redirect(redirect_uri, "invalid_request", "invalid parameters")
         else:
@@ -678,7 +665,7 @@ def par_endpointv2():
 
     response = service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Pushed Authorization Response, Payload: " + str(json.loads(response.get_data())))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pushed Authorization Response, Payload: " + str(json.loads(response.get_data())))
 
     session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60), "request_uri":json.loads(response.get_data())["request_uri"]}})
 
@@ -695,15 +682,14 @@ def credential():
         return make_response("Authorization error", 400)
 
     access_token = headers["Authorization"][7:]
-    print("\naccess_token: ", access_token)
     session_id = getSessionId_accessToken(access_token)
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Credential Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
     
     if isinstance(_response,Response):
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(json.loads(_response.get_data())))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(json.loads(_response.get_data())))
         return _response
 
     if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
@@ -712,11 +698,11 @@ def credential():
         request_headers = dict(request.headers)
         deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
         
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
 
         return make_response(jsonify(_response),202)
 
-    log.logger_info.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
     return _response
 
 
@@ -735,10 +721,9 @@ def batchCredential():
     #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
-    print(_response)
 
     if isinstance(_response,Response):
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential response, Payload: " + str(json.loads(_response.get_data())))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch Credential response, Payload: " + str(json.loads(_response.get_data())))
         return _response
     
     if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
@@ -958,8 +943,8 @@ IGNORE = ["cookie", "user-agent"]
 
 
 def service_endpoint(endpoint):
-    _log = current_app.logger
-    _log.info('At the "{}" endpoint'.format(endpoint.name))
+    #_log = current_app.logger
+    cfgservice.app_logger.info('At the "{}" endpoint'.format(endpoint.name))
 
     http_info = {
         "headers": {
@@ -970,7 +955,7 @@ def service_endpoint(endpoint):
         # name is not unique
         "cookie": [{"name": k, "value": v} for k, v in request.cookies.items()],
     }
-    _log.info(f"http_info: {http_info}")
+    cfgservice.app_logger.info(f"http_info: {http_info}")
 
     if endpoint.name == "credential":
         try:
@@ -990,14 +975,14 @@ def service_endpoint(endpoint):
                 response = args["response_args"]
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
-                    _log.info("Error response: {}".format(args))
+                    cfgservice.app_logger.error("Error response: {}".format(args))
                     response = make_response(args.to_json(), 400)
                 else:
                     response = do_response(endpoint, args, **args)
             return response
         except Exception as err:
             message = traceback.format_exception(*sys.exc_info())
-            _log.error(message)
+            cfgservice.app_logger.error(message)
             err_msg = ResponseMessage(
                 error="invalid_request", error_description=str(err)
             )
@@ -1012,11 +997,11 @@ def service_endpoint(endpoint):
             _resp = endpoint.process_request(req_args)
 
             if isinstance(_resp, ResponseMessage) and "error" in _resp:
-                    _log.info("Error response: {}".format(_resp))
+                    cfgservice.app_logger.error("Error response: {}".format(_resp))
                     _resp = make_response(_resp.to_json(), 400)
 
         except Exception as err:
-            _log.error(err)
+            cfgservice.app_logger.error(err)
             return make_response(
                 json.dumps({"error": "invalid_request", "error_description": str(err)}),
                 400,
@@ -1041,14 +1026,14 @@ def service_endpoint(endpoint):
                 response = args["response_args"]
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
-                    _log.info("Error response: {}".format(args))
+                    cfgservice.app_logger.error("Error response: {}".format(args))
                     response = make_response(args.to_json(), 400)
                 else:
                     response = do_response(endpoint, args, **args)
             return response
         
         except Exception as err:
-            _log.error(err)
+            cfgservice.app_logger.error(err)
             return make_response(
                 json.dumps({"error": "invalid_request", "error_description": str(err)}),
                 400,
@@ -1061,7 +1046,7 @@ def service_endpoint(endpoint):
                 args["client_id"] = args["client_id"].split(".")[0]
             req_args = endpoint.parse_request(args, http_info=http_info)
         except ClientAuthenticationError as err:
-            _log.error(err)
+            cfgservice.app_logger.error(err)
             return make_response(
                 json.dumps(
                     {"error": "unauthorized_client", "error_description": str(err)}
@@ -1069,7 +1054,7 @@ def service_endpoint(endpoint):
                 401,
             )
         except Exception as err:
-            _log.error(err)
+            cfgservice.app_logger.error(err)
             return make_response(
                 json.dumps({"error": "invalid_request", "error_description": str(err)}),
                 400,
@@ -1085,20 +1070,20 @@ def service_endpoint(endpoint):
         try:
             req_args = endpoint.parse_request(req_args, http_info=http_info)
         except Exception as err:
-            _log.error(err)
+            cfgservice.app_logger.error(err)
             err_msg = ResponseMessage(
                 error="invalid_request", error_description=str(err)
             )
             return make_response(err_msg.to_json(), 400)
 
     if isinstance(req_args, ResponseMessage) and "error" in req_args:
-        _log.info("Error response: {}".format(req_args))
+        cfgservice.app_logger.error("Error response: {}".format(req_args))
         _resp = make_response(req_args.to_json(), 400)
         if request.method == "POST":
             _resp.headers["Content-type"] = "application/json"
         return _resp
     try:
-        _log.info("request: {}".format(req_args))
+        cfgservice.app_logger.error("request: {}".format(req_args))
         if isinstance(endpoint, Token):
             args = endpoint.process_request(
                 AccessTokenRequest(**req_args), http_info=http_info
@@ -1109,7 +1094,7 @@ def service_endpoint(endpoint):
             )
     except Exception as err:
         message = traceback.format_exception(*sys.exc_info())
-        _log.error(message)
+        cfgservice.app_logger.error(message)
         err_msg = ResponseMessage(error="invalid_request", error_description=str(err))
         return make_response(err_msg.to_json(), 400)
 

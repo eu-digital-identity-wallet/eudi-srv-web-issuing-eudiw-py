@@ -42,14 +42,13 @@ CORS(oid4vp)  # enable CORS on the blue print
 # secrets
 from app.data_management import oid4vp_requests, form_dynamic_data
 
-from app_config.config_service import ConfService as log
 
 
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
 
     if "session_id" in session:
-        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
+        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
     payload_cross_device = json.dumps(
@@ -246,8 +245,7 @@ def openid4vp():
 def getpidoid4vp():
 
     if "response_code" in request.args and "session_id" in request.args:
-        print("\n-----getpidoid4vp----\n", session)
-        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
+        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
 
         response_code = request.args.get("response_code")
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
@@ -259,7 +257,7 @@ def getpidoid4vp():
         )
 
     elif "presentation_id" in request.args:
-        log.logger_info.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
+        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
         presentation_id = request.args.get("presentation_id")
 
         url = (
@@ -277,11 +275,9 @@ def getpidoid4vp():
         error_msg = str(response.status_code)
         return jsonify({"error": error_msg}), 400
 
-    print(response.json())
 
     error, error_msg = validate_vp_token(response.json())
-    print(error)
-    print(error_msg)
+
     if error == True:
         return authentication_error_redirect(
             jws_token=session["authorization_params"]["token"],
@@ -365,7 +361,6 @@ def getpidoid4vp():
             redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
         )
     else:
-        print("\n--OID4VP 1---\n")
         authorization_params = session["authorization_params"]
         authorization_details = []
         if "authorization_details" in authorization_params:
@@ -381,7 +376,6 @@ def getpidoid4vp():
                 error="invalid authentication",
                 error_description="No authorization details or scope found in dynamic route.",
             )
-        print("\n--OID4VP 2---\n")
         credentials_requested = []
         for cred in authorization_details:
             if "credential_configuration_id" in cred:
@@ -398,7 +392,6 @@ def getpidoid4vp():
             attributesForm.update({"user_pseudonym": str(uuid4())})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
-        print("\n--OID4VP 3---\n")
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,

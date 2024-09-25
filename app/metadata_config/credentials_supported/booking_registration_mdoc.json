@@ -52,154 +52,131 @@
         "booking_service_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current First Names",
+              "name": "The booking service providing the booking reservation.",
               "locale": "en"            }
           ]
         },
         "reservation_id": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current First Names",
+              "name": "The identifier of the booking reservation from the booking service.",
               "locale": "en"            }
           ]
         },
         "reservation_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Current First Names",
+              "name": "Date of the reservation.",
               "locale": "en"            }
           ]
         },
         "service_provider_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current First Names",
+              "name": "The name of the service provider (e.g. Hotel) the reservation refers to ",
               "locale": "en"            }
           ]
         },
         "location": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "The location or place the reservation refers to (e.g. city, service provider place, etc.)",
               "locale": "en"            }
           ]
         },
         "check_in_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "The check-in date for the reservation.",
               "locale": "en"            }
           ]
         },
         "check_out_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "The check-out date for the reservation.",
               "locale": "en"            }
           ]
         },
         "guests": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "The guest of the reservation (num of adults, num of children, etc).",
               "locale": "en"            }
           ]
         },
         "car_rental": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Indicates inclusion of car rental in the reservation.",
               "locale": "en"            }
           ]
         },
-        "mum_of_rooms": {
+        "num_of_rooms": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "The number of rooms the reservation refers to.",
               "locale": "en"            }
           ]
         },
         "family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Current last name(s) or surname(s) of the holder. ",
               "locale": "en"            }
           ]
         },
         "given_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Current first name(s), including middle name(s), of the holder. ",
               "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Day, month, and year on which the holder was born.",
               "locale": "en"            }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_authority": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_country": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
-              "locale": "en"
-            }
           ]
         }
       }

@@ -70,8 +70,16 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     # Extract the key parameters
     priv_d = private_key.private_numbers().private_value
+    
+    issuance_date = datetime.datetime.today()
+    expiry_date = issuance_date + datetime.timedelta(days=cfgservice.config_doctype[doctype]["validity"])
 
-    if doctype == "org.iso.18013.5.1.mDL":
+    validity = {
+        "issuance_date": issuance_date.strftime('%Y-%m-%d'),
+        "expiry_date": expiry_date.strftime('%Y-%m-%d')
+    }
+    
+    """ if doctype == "org.iso.18013.5.1.mDL":
 
         # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
         # data["org.iso.18013.5.1"]["signature_usual_mark"]
@@ -101,7 +109,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         validity = {
             "issuance_date": data[first_key]["issuance_date"],
             "expiry_date": data[first_key]["expiry_date"],
-        }
+        } """
     
     namespace = cfgservice.config_doctype[doctype]["namespace"]
 
@@ -122,8 +130,11 @@ def mdocFormatter(data, doctype, country, device_publickey):
         "KID": b"mdocIssuer",
     }
 
+    print("\n------1------\n")
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
+
+    print("\n------2------\n")
 
     mdoci.new(
         doctype=doctype,
@@ -133,6 +144,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         cert_path=cfgcountries.supported_countries[country]["pid_mdoc_cert"],
     )
 
+    print("\n------3------\n")
     return base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
 
 
@@ -239,8 +251,6 @@ def sdjwtFormatter(PID, country):
         JWT_PID_DATA.update(namespacedata)
 
     datafinal["verified_claims"]["claims"].update(JWT_PID_DATA)
-
-    # print(datafinal)
 
     claims.update(datafinal)
 

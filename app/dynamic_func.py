@@ -20,7 +20,7 @@ import json
 from flask import session
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from misc import calculate_age, getMandatoryAttributes, getOptionalAttributes
+from misc import calculate_age, getIssuerFilledAttributes, getMandatoryAttributes, getOptionalAttributes
 from redirect_func import json_post
 import base64
 from flask import session
@@ -40,8 +40,6 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
         un_distinguishing_sign = ""
 
     data = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
-
-    print("\n----Formatter data----\n", data)
 
     if format == "mso_mdoc":
         url = cfgserv.service_url + "formatter/cbor"
@@ -95,7 +93,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
                     attributes_req2 = getOptionalAttributes(
                         credentialsSupported[request]["claims"][namescape]
-                    )                    
+                    )
+
+                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])                    
 
                     pdata = {namescape: {}}
 
@@ -125,13 +125,15 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                         credentialsSupported[request]["claims"][namescape]
                     )
 
+                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])
+
                     pdata["claims"] = {namescape: {}}
 
             # add optional age_over_18 to mdl
-            if doctype == "org.iso.18013.5.1.mDL" or doctype == "eu.europa.ec.eudi.pid.1":
-                attributes_req.update({"age_over_18":"bool"})
+            """ if doctype == "org.iso.18013.5.1.mDL" or doctype == "eu.europa.ec.eudi.pid.1":
+                attributes_req.update({"age_over_18":"bool"}) """
 
-            if "age_over_18" in attributes_req and "birth_date" in data:
+            if ("age_over_18" in issuer_claims) and "birth_date" in data:
                 data.update(
                     {
                         "age_over_18": (
@@ -139,18 +141,25 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                         )
                     }
                 )
+            
+            if "un_distinguishing_sign" in issuer_claims:
+                data.update({"un_distinguishing_sign": un_distinguishing_sign})
 
-            data.update({"un_distinguishing_sign": un_distinguishing_sign})
+            if "issuance_date" in issuer_claims:
+                data.update({"issuance_date": today.strftime("%Y-%m-%d")})
 
-            data.update({"issuance_date": today.strftime("%Y-%m-%d")})
-            data.update({"issue_date": today.strftime("%Y-%m-%d")})
-            data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
-            data.update({"issuing_authority": doctype_config["issuing_authority"]})
-            if "credential_type" in doctype_config:
+            if "issue_date" in issuer_claims: 
+                data.update({"issue_date": today.strftime("%Y-%m-%d")})
+            if "expiry_date" in issuer_claims:
+                data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
+            if "issuing_authority" in issuer_claims:
+                data.update({"issuing_authority": doctype_config["issuing_authority"]})
+
+            if "credential_type" in issuer_claims:
                 data.update({"credential_type":doctype_config["credential_type"] })
                 attributes_req.update({"credential_type":""})
             
-            attributes_req.update({
+            """ attributes_req.update({
                 "expiry_date":"",
                 "issuing_authority":"",
                 "issuing_country":"",
@@ -164,7 +173,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             else:
                 attributes_req.update({
                 "issuance_date":"",
-                })
+                }) """
 
             
             if "driving_privileges" in attributes_req:
@@ -179,6 +188,11 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                     if attribute in data:
                         pdata[namescape].update({attribute: data[attribute]})
 
+                for attribute in issuer_claims:
+                    if attribute in data:
+                        pdata[namescape].update({attribute: data[attribute]})
+                
+
             elif format == "vc+sd-jwt":
                 for attribute in attributes_req:
                     pdata["claims"][namescape].update({attribute: data[attribute]})
@@ -187,8 +201,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                     if attribute in data:
                         pdata["claims"][namescape].update({attribute: data[attribute]})
 
-                for attribute in attributes_req:
-                    pdata["claims"][namescape].update({attribute: data[attribute]})
+                for attribute in issuer_claims:
+                    if attribute in data:
+                        pdata["claims"][namescape].update({attribute: data[attribute]})
 
 
             return pdata

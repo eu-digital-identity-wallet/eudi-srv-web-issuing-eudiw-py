@@ -261,36 +261,32 @@
                                                     <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
                                                 </div>
                                             </div>
+                                        {% elif value == 'uint' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <input type="number" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" min="0">
+                                                </div>
+                                            </div>
                                         {% elif value == 'bool' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 <label for="{{ name }}">{{ name }}</label>
-                                                <!-- Hidden input to represent the unchecked state -->
-                                                <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
-                                                <!-- Checkbox input -->
-                                                <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                                <div class="inline-checkbox-group">
+                                                    <label class="radio-inline">
+                                                        <input type="radio" id="{{ name }}_unset" name="{{ name }}" value="unset" checked>
+                                                        Unset
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" id="{{ name }}_true" name="{{ name }}" value="true">
+                                                        True
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" id="{{ name }}_false" name="{{ name }}" value="false">
+                                                        False
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <script>
-                                            function setupCheckbox(name) {
-                                                const checkbox = document.getElementById(name);
-                                                const hiddenInput = document.getElementById(name + "_hidden");
-                                                
-                                                // Function to update hidden input based on checkbox state
-                                                function updateHiddenInput() {
-                                                    hiddenInput.value = checkbox.checked ? 'true' : 'false';
-                                                }
-                                                
-                                                // Attach the change event listener
-                                                checkbox.addEventListener('change', updateHiddenInput);
-                                                
-                                                // Call the function to set the initial state correctly
-                                                updateHiddenInput();
-                                            }
-                                            
-                                            // Setup each checkbox with a unique name
-                                            setupCheckbox("{{ name }}");
-                                        </script>                   
+                                        </div>           
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
@@ -392,8 +388,8 @@
 
 
                             <span class="more-submit">
-                                <input type="submit" onclick="AddNumberCategories();" name="proceed" accesskey="S" value="Submit" class="btn btn-primary" title="Submit" /><input type="submit" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" />
-                            </span>
+                                <input type="submit" onclick="AddNumberCategories();" name="proceed" accesskey="S" value="Submit" class="btn btn-primary" title="Submit" />
+                                <input type="button" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" onclick="window.history.back();" />                            </span>
                         </form>
                         <!--<script type="text/javascript" src="{{ url_for('static', filename='scripts/dynamic-validator/selectCountryForm_9.7.1.20.1679559965505_en.js') }}" charset="UTF-8" defer="true"></script>-->
                     </div>
