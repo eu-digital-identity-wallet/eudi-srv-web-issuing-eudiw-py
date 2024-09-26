@@ -273,7 +273,7 @@ class ConfService:
             "organization_id": pid_organization_id,
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
-            "namespace": "org.iso.23220.2.photoid.1",
+            "namespace": "org.iso.23220.photoid.1",
         },
         "eu.europa.ec.eudi.por.1": {
             "issuing_authority": "Test QEAA issuer",

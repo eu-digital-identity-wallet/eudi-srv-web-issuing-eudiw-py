@@ -38,7 +38,7 @@
       }
     ],
     "claims": {
-      "org.iso.23220.2.photoid.1": {
+      "org.iso.23220.photoid.1": {
         "portrait": {
           "mandatory": true,
           "value_type":"jpeg",

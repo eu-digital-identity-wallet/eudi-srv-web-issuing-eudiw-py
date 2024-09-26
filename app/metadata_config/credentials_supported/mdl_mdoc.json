@@ -378,7 +378,7 @@
           "mandatory": false,
           "display": [
             {
-              "name": "ISignature / usual mark",
+              "name": "Signature / usual mark",
               "locale": "en"
             }
           ]

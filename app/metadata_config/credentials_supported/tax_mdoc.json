@@ -52,81 +52,60 @@
         "tax_number": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Tax Number",
               "locale": "en"            }
           ]
         },
         "affiliation_country": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Affiliation Country",
               "locale": "en"            }
           ]
         },
         "registered_given_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Given Name",
               "locale": "en"            }
           ]
         },
         "registered_family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Family Name",
               "locale": "en"            }
           ]
         },
         "resident_address": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Resident Address",
               "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "credential_type": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
+              "name": "Birth Date",
               "locale": "en"
             }
           ]
@@ -134,9 +113,10 @@
         "church_tax_ID": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Church Tax ID",
               "locale": "en"
             }
           ]
@@ -144,36 +124,57 @@
         "iban": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "IBAN",
               "locale": "en"
             }
           ]
         },
-        "document_number": {
-          "mandatory": false,
-          "value_type":"string",
+        "credential_type": {
+          "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Credential Type",
               "locale": "en"
             }
           ]
         },
-        "administrative_number": {
-          "mandatory": false,
-          "value_type":"string",
+        "issuance_date": {
+          "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Issuance Date",
+              "locale": "en"
+            }
+          ]
+        },
+        "expiry_date": {
+          "mandatory": true,
+          "source":"issuer",
+          "display": [
+            {
+              "name": "Expiry Date",
+              "locale": "en"
+            }
+          ]
+        },
+        "issuing_authority": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"issuer",
+          "display": [
+            {
+              "name": "Issuing Authority",
               "locale": "en"
             }
           ]
         },
         "issuing_jurisdiction": {
           "mandatory": false,
-          "value_type":"string",
           "display": [
             {
               "name": "",
@@ -183,6 +184,7 @@
         },
         "issuing_country": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
               "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",

@@ -474,11 +474,13 @@ def red():
         
         scope= credentialsSupported[credential_requested]["scope"]
 
-        if scope in cfgserv.common_name:
+        """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
         else:
-            credential = scope
+            credential = scope  """
+
+        credential = credentialsSupported[credential_requested]["display"][0]["name"]
 
         presentation_data.update({credential:{}})
 
@@ -961,11 +963,13 @@ def Dynamic_form():
         
         scope= credentialsSupported[credential_requested]["scope"]
 
-        if scope in cfgserv.common_name:
+        """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
         else:
-            credential = scope
+            credential = scope """ 
+        
+        credential = credentialsSupported[credential_requested]["display"][0]["name"]
 
         presentation_data.update({credential:{}})
 

@@ -52,73 +52,61 @@
         "legal_person_identifier": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Legal Person Identifier",
               "locale": "en"            }
           ]
         },
         "legal_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Legal Name",
               "locale": "en"            }
           ]
         },
         "full_powers": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Full Powers",
+              "locale": "en"            }
+          ]
+        },
+        "eService": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "eService",
               "locale": "en"            }
           ]
         },
         "effective_from_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Effective From Date",
               "locale": "en"
             }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "eService": {
-          "mandatory": false,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
           ]
         },
         "effective_until_date": {
           "mandatory": false,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Effective Until Date",
               "locale": "en"            }
           ]
         }

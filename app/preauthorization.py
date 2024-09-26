@@ -164,11 +164,13 @@ def preauth_form():
         
         scope= credentialsSupported[credential_requested]["scope"]
 
-        if scope in cfgservice.common_name:
+        """ if scope in cfgservice.common_name:
             credential=cfgservice.common_name[scope]
 
         else:
-            credential = scope
+            credential = scope """
+        
+        credential = credentialsSupported[credential_requested]["display"][0]["name"]
 
         presentation_data.update({credential:{}})
 

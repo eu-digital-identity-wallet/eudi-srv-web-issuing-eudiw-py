@@ -806,10 +806,11 @@ def credential_offer():
 
         if credential["format"] == "vc+sd-jwt":
             #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
-            credentials["sd-jwt vc format"].update(
-                #{"Personal Identification Data": cred}
-                {cred: cred}
-            )
+            if cred in cfgservice.auth_method_supported_credencials["PID_login"] or cred in cfgservice.auth_method_supported_credencials["country_selection"]:
+                credentials["sd-jwt vc format"].update(
+                    #{"Personal Identification Data": cred}
+                    {cred: credential["display"][0]["name"]}
+                )
 
             """ elif credential["scope"] == "org.iso.18013.5.1.mDL":
                 credentials["sd-jwt vc format"].update(
@@ -818,14 +819,16 @@ def credential_offer():
 
         if credential["format"] == "mso_mdoc":
             #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
-            credentials["mdoc format"].update(
-                {cred: cred}
-                #{"Personal Identification Data": cred}
-            )
+            if cred in cfgservice.auth_method_supported_credencials["PID_login"] or cred in cfgservice.auth_method_supported_credencials["country_selection"]:
+                credentials["mdoc format"].update(
+                    {cred: credential["display"][0]["name"]}
+                    #{"Personal Identification Data": cred}
+                )
 
             """ elif credential["scope"] == "org.iso.18013.5.1.mDL":
                 credentials["mdoc format"].update({"Mobile Driver's Licence": cred}) """
 
+    print(credentials)
     return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
 
 """ @oidc.route("/test_dump", methods=["GET", "POST"])

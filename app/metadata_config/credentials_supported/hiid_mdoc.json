@@ -52,42 +52,47 @@
         "health_insurance_id": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Health Insurance ID",
               "locale": "en"            }
           ]
         },
         "patient_id": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Patient ID",
               "locale": "en"            }
           ]
         },
         "tax_number": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Tax Number",
               "locale": "en"            }
           ]
         },
         "one_time_token": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "One Time Token",
               "locale": "en"            }
           ]
         },
         "affiliation_country": {
           "mandatory": true,
           "value_type":"string",
+          "source":"Affiliation Country",
           "display": [
             {
               "name": "",
@@ -96,18 +101,20 @@
         },
         "issuance_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Issuance Date",
               "locale": "en"
             }
           ]
         },
         "expiry_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Expiry Date",
               "locale": "en"
             }
           ]
@@ -115,99 +122,104 @@
         "matching_institution-id": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Matching Institution ID",
               "locale": "en"            }
           ]
         },
         "matching_registered_family_name": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Matching Registered Family Name",
               "locale": "en"            }
           ]
         },
         "matching_registered_given_name": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Matching Registered Given Name",
               "locale": "en"            }
           ]
         },
         "matching_resident_address": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Matching Resident Address",
               "locale": "en"            }
           ]
         },
         "matching_birth_place": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Mathing Birth Place",
               "locale": "en"            }
           ]
         },
         "matching_birth_date": {
           "mandatory": false,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "Matching Birth Date",
               "locale": "en"            }
           ]
         },
         "issuing_authority": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+              "name": "Issuing Authority",
               "locale": "en"
             }
           ]
         },
         "document_number": {
           "mandatory": false,
-          "value_type":"string",
           "display": [
             {
-              "name": "",
+              "name": "Document Number",
               "locale": "en"            }
           ]
         },
         "administrative_number": {
           "mandatory": false,
-          "value_type":"string",
           "display": [
             {
-              "name": "",
+              "name": "Administrative_Number",
               "locale": "en"            }
           ]
         },
         "issuing_country": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
+              "name": "Issuing_Country",
               "locale": "en"
             }
           ]
         },
         "issuing_jurisdiction": {
           "mandatory": false,
-          "value_type":"string",
           "display": [
             {
-              "name": "",
+              "name": "Issuing Jurisdiction",
               "locale": "en"
             }
           ]

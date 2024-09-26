@@ -52,63 +52,110 @@
         "iban": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "IBAN",
+              "locale": "en"            }
+          ]
+        },
+        "national_account_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "National Account Number",
+              "locale": "en"            }
+          ]
+        },
+        "account_product": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Account Product",
+              "locale": "en"            }
+          ]
+        },
+        "account_name": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Account Name",
+              "locale": "en"            }
+          ]
+        },
+        "account_type": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Account Type",
               "locale": "en"            }
           ]
         },
         "currency": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Currency",
               "locale": "en"            }
           ]
         },
         "bank_account_status": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Bank Account Status",
               "locale": "en"            }
           ]
         },
         "payment_possibility": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Payment Possibility",
               "locale": "en"            }
           ]
         },
         "registered_family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Family Name",
               "locale": "en"            }
           ]
         },
         "registered_given_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Given Name",
               "locale": "en"            }
           ]
         },
         "date_of_birth": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Date of Birth",
               "locale": "en"
             }
           ]
@@ -116,14 +163,25 @@
         "account_holder_owner": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Account Holder Owner",
               "locale": "en"            }
           ]
         },
         "coowner": {
           "mandatory": true,
+          "value_type":"bool",
+          "source":"user",
+          "display": [
+            {
+              "name": "Coowner",
+              "locale": "en"            }
+          ]
+        },
+        "disponent": {
+          "mandatory": false,
           "value_type":"bool",
           "display": [
             {
@@ -134,108 +192,60 @@
         "issuing_organization": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "business_identifier_code": {
-          "mandatory": true,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
-          ]
-        },
-        "national_account_number": {
-          "mandatory": false,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "account_product": {
-          "mandatory": false,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "account_name": {
-          "mandatory": false,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "account_type": {
-          "mandatory": false,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
+              "name": "Issuing Organization",
               "locale": "en"            }
           ]
         },
         "national_bank_code": {
           "mandatory": false,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "National Bank Code",
               "locale": "en"            }
           ]
         },
-        "credential_type": {
+        "issuance_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Issuance Date",
               "locale": "en"
             }
           ]
         },
-        "verification_method_Information": {
-          "mandatory": false,
-          "value_type":"string",
+        "expiry_date": {
+          "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
-              "locale": "en"            }
+              "name": "Expiry Date",
+              "locale": "en"
+            }
           ]
         },
-        "disponent": {
-          "mandatory": false,
-          "value_type":"bool",
+        "credential_type": {
+          "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Credential Type",
+              "locale": "en"
+            }
+          ]
+        },
+        "business_identifier_code": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Bussiness Identifier Code",
               "locale": "en"            }
           ]
         }

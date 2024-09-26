@@ -42,6 +42,7 @@
           "user_pseudonym": {
             "mandatory": true,
             "value_type":"string",
+            "source":"issuer",
             "display": [
               {
                 "name": "User pseudonym",
@@ -51,6 +52,7 @@
           "age_over_18": {
             "mandatory": true,
             "value_type":"bool",
+            "source":"user",
             "display": [
               {
                 "name": "Adult or minor",
@@ -59,6 +61,7 @@
           },
           "issuance_date": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
                 "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -68,6 +71,7 @@
           },
           "expiry_date": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
                 "name": "Alpha-2 country code, representing the nationality of the PID User.",
@@ -77,6 +81,7 @@
           },
           "issuing_country": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
                 "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
@@ -86,6 +91,7 @@
           },
           "issuing_authority": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
                 "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",

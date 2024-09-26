@@ -42,9 +42,10 @@
           "given_name": {
             "mandatory": true,
             "value_type":"string",
+            "source":"user",
             "display": [
               {
-                "name": "Current First Names",
+                "name": "Given Name",
                 "locale": "en"
               }
             ]
@@ -52,44 +53,49 @@
           "family_name": {
             "mandatory": true,
             "value_type":"string",
+            "source":"user",
             "display": [
               {
-                "name": "Current Family Name",
+                "name": "Family Name",
                 "locale": "en"              }
             ]
           },
           "company": {
             "mandatory": true,
             "value_type":"string",
+            "source":"user",
             "display": [
               {
-                "name": "Loyalty card company",
+                "name": "Loyalty Card Company",
                 "locale": "en"              }
             ]
           },
           "client_id": {
             "mandatory": true,
             "value_type":"string",
+            "source":"user",
             "display": [
               {
-                "name": "Comapny internal client id",
+                "name": "Client ID",
                 "locale": "en"              }
             ]
           },
           "issuance_date": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
-                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "name": "Issuance Date",
                 "locale": "en"
               }
             ]
           },
           "expiry_date": {
             "mandatory": true,
+            "source":"issuer",
             "display": [
               {
-                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "name": "Expiry Date",
                 "locale": "en"
               }
             ]

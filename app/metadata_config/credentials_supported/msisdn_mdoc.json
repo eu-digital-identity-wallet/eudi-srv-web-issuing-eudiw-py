@@ -52,51 +52,57 @@
         "phone_number": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Phone Number",
               "locale": "en"            }
           ]
         },
         "registered_family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Family Name",
               "locale": "en"            }
           ]
         },
         "registered_given_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Registered Given Name",
               "locale": "en"            }
           ]
         },
         "contract_owner": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Contract Owner",
               "locale": "en"            }
           ]
         },
         "end_user": {
           "mandatory": true,
           "value_type":"bool",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "End User",
               "locale": "en"            }
           ]
         },
         "mobile_operator": {
           "mandatory": true,
           "value_type":"string",
+          "source":"Mobile Operator",
           "display": [
             {
               "name": "",
@@ -105,27 +111,30 @@
         },
         "issuance_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Issuance Date",
               "locale": "en"
             }
           ]
         },
         "expiry_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Expiry Date",
               "locale": "en"
             }
           ]
         },
         "credential_type": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Credential Type",
               "locale": "en"
             }
           ]
@@ -133,47 +142,28 @@
         "issuing_organization": {
           "mandatory": true,
           "value_type":"string",
+          "source":"issuer",
           "display": [
             {
-              "name": "",
+              "name": "Issuing Organization",
               "locale": "en"            }
-          ]
-        },
-        "verification_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
           ]
         },
         "phone_number_in_use": {
           "mandatory": false,
-          "value_type":"string",
+          "value_type":"uint",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Phone Number in Use",
               "locale": "en"            }
-          ]
-        },
-        "verification_method_Information": {
-          "mandatory": true,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"
-            }
           ]
         },
         "document_number": {
           "mandatory": false,
-          "value_type":"string",
           "display": [
             {
-              "name": "",
+              "name": "Document Number",
               "locale": "en"            }
           ]
         }
