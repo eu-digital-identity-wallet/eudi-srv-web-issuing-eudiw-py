@@ -350,6 +350,32 @@ class ConfService:
         ],
     }
 
+    eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
+    dynamic_presentation_url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
+    dynamic_issuing = {
+        "eu.europa.ec.eudi.pseudonym_over18_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}
+        },
+        "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}
+        },
+        "eu.europa.ec.eudi.por_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        },
+        "eu.europa.ec.eudi.iban_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        },
+        "eu.europa.ec.eudi.hiid_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        },
+        "eu.europa.ec.eudi.tax_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        },
+        "eu.europa.ec.eudi.msisdn_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        }
+    }
+
     # Supported certificate algorithms and curves
     cert_algo_list = {"ecdsa-with-SHA256": ["secp256r1"]}
 

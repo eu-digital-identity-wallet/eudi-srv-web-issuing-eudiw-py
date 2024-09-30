@@ -49,6 +49,36 @@ def openid4vp():
 
     if "session_id" in session:
         cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
+    
+
+    credential_ids= scope2details(session["authorization_params"]["scope"])
+
+    credentials_requested = []
+    for cred in credential_ids:
+        if "credential_configuration_id" in cred:
+            if cred["credential_configuration_id"] not in credentials_requested:
+                credentials_requested.append(cred["credential_configuration_id"])
+
+    print(credentials_requested)
+
+    session["oid4vp_cred_requested"] = credentials_requested
+
+    fields = [] 
+
+    for id in credentials_requested:
+        for doctype in cfgservice.dynamic_issuing[id]:
+            for namespace in cfgservice.dynamic_issuing[id][doctype]:
+                for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
+                    fields.append(
+                        {
+                        "path": [
+                            "$['" + namespace + "']['"+ attribute +"']"
+                        ],
+                        "intent_to_retain": False
+                        }
+                    )
+
+    print("\n fields: ", fields)
 
     url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
     payload_cross_device = json.dumps(
@@ -73,44 +103,7 @@ def openid4vp():
                     "name": "EUDI PID",
                     "purpose": "We need to verify your identity",
                     "constraints": {
-                    "fields": [
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['family_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['given_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['birth_date']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['age_over_18']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_authority']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_country']"
-                        ],
-                        "intent_to_retain": False
-                        }
-                    ]
+                    "fields": fields
                     }
                 }
                 ]
@@ -140,44 +133,7 @@ def openid4vp():
                     "name": "EUDI PID",
                     "purpose": "We need to verify your identity",
                     "constraints": {
-                    "fields": [
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['family_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['given_name']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['birth_date']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['age_over_18']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_authority']"
-                        ],
-                        "intent_to_retain": False
-                        },
-                        {
-                        "path": [
-                            "$['eu.europa.ec.eudi.pid.1']['issuing_country']"
-                        ],
-                        "intent_to_retain": False
-                        }
-                    ]
+                    "fields": fields
                     }
                 }
                 ]
@@ -276,9 +232,10 @@ def getpidoid4vp():
         return jsonify({"error": error_msg}), 400
 
 
-    error, error_msg = validate_vp_token(response.json())
+    error, error_msg = validate_vp_token(response.json(), session["oid4vp_cred_requested"])
 
     if error == True:
+        cfgservice.app_logger.error(", Session ID: " + session["session_id"] + ", " + "OID4VP error: " + error_msg)
         return authentication_error_redirect(
             jws_token=session["authorization_params"]["token"],
             error="invalid_request",
