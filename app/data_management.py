@@ -97,7 +97,6 @@ def clear_par():
                 + " < "
                 + str(expire_time)
             ) """
-            ) """
 
     for req in deferredRequests.copy():
             
