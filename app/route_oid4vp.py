@@ -67,7 +67,6 @@ def openid4vp():
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
 
-    print(credentials_requested)
 
     session["oid4vp_cred_requested"] = credentials_requested 
 
@@ -107,8 +106,6 @@ def openid4vp():
                         }
                     )
 
-    print(input_descriptors)
-
     url = cfgservice.dynamic_presentation_url
     payload_cross_device = json.dumps(
         {
@@ -140,8 +137,6 @@ def openid4vp():
     response_cross = requests.request("POST", url[:-1], headers=headers, data=payload_cross_device).json()
 
     response_same = requests.request("POST", url[:-1], headers=headers, data=payload_same_device).json()
-
-    print(response_same)
     
     oid4vp_requests.update({session["session_id"]:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
 

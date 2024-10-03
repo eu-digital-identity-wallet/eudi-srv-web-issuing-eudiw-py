@@ -563,8 +563,6 @@ def dynamic_R2():
         country=country, user_id=user_id
     )
 
-    print("\n-----dynamic R2 data-----", data)
-
     if "error" in data:
         return data
 

@@ -568,9 +568,7 @@ def token():
         preauth_code = transaction_codes[code]["pre_auth_code"]
 
         session_id = getSessionId_authCode(preauth_code)
-        print(preauth_code)
-        print(session_id)
-        print(str(request.form.to_dict()))
+
         cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Request, Payload: " + str(request.form.to_dict()))
 
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
@@ -715,7 +713,7 @@ def batchCredential():
     if "Authorization" not in headers:
         return make_response("Authorization error", 400)
 
-    access_token = headers["Authorization"][6:]
+    access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
     cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
@@ -749,10 +747,10 @@ def notification():
     if "Authorization" not in headers:
         return make_response("Authorization error", 400)
 
-    access_token = headers["Authorization"][6:]
+    access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
 
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
@@ -761,7 +759,7 @@ def notification():
         return _resp
     
 
-    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
     
     return _resp
 
@@ -770,16 +768,13 @@ def deferred_credential():
 
     headers = dict(request.headers)
     payload = json.loads(request.data)
-    print("\nPayload: ",payload)
     if "Authorization" not in headers:
         return make_response("Authorization error", 400)
-    print("\Auth: ", headers["Authorization"])
-    access_token = headers["Authorization"][6:]
-    print("\nAccess_token: ",access_token)
+    
+    access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
-    print("\nSession_id: ",session_id)
 
-    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
     
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
@@ -787,7 +782,7 @@ def deferred_credential():
         cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
         return _resp
 
-    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
 
     return _resp
 
@@ -819,7 +814,6 @@ def credential_offer():
                 )
 
 
-    print(credentials)
     return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
 
 """ @oidc.route("/test_dump", methods=["GET", "POST"])

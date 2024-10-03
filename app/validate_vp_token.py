@@ -137,8 +137,6 @@ def validate_vp_token(response_json, credentials_requested):
                 id = val["elementIdentifier"]
                 attributes_received.append(id)
 
-        print("\n Attributes requested: ", attributes_requested )
-        print("\n Attributes recieved: ", attributes_received )
         if len(attributes_received) != len(attributes_requested):
 
             if set(attributes_received).issubset(set(attributes_requested)):

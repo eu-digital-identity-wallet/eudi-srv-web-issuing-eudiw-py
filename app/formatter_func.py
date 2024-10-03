@@ -130,11 +130,8 @@ def mdocFormatter(data, doctype, country, device_publickey):
         "KID": b"mdocIssuer",
     }
 
-    print("\n------1------\n")
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
-
-    print("\n------2------\n")
 
     mdoci.new(
         doctype=doctype,
@@ -144,7 +141,6 @@ def mdocFormatter(data, doctype, country, device_publickey):
         cert_path=cfgcountries.supported_countries[country]["pid_mdoc_cert"],
     )
 
-    print("\n------3------\n")
     return base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
 
 

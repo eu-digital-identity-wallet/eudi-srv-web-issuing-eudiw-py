@@ -230,9 +230,7 @@ def form_authorize_generate():
     form_data = request.form.to_dict()
 
     user_id= form_data["user_id"]
-    print(user_id)
     data = form_dynamic_data[user_id]
-    print(data)
 
     return generate_offer(data)
 
@@ -297,8 +295,6 @@ def generate_offer(data):
 def credentialOfferReq2():
 
     json_token = request.form.get('request')
-
-    print("\n-----JWT in credential offer---\n", json_token)
 
     header, payload, signature = json_token.split('.')
 
@@ -427,7 +423,6 @@ def generate_preauth_token(data, authorization_details):
     )
 
     if response.status_code != 200:
-        print("\n",str(response.json()),"\n")
         return make_response("invalid_request", 400)
 
     response = response.json()

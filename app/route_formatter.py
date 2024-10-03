@@ -87,6 +87,7 @@ def cborformatter():
     + error_code - error number. 0 if no error. Additional errors defined below. If error != 0, mdoc field may have an empty value.
     + error_message - Error information.
     """
+
     (b, l) = validate_mandatory_args(
         request.json, ["version", "country", "doctype", "device_publickey", "data"]
     )
@@ -98,12 +99,12 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-
+    
     if request.json["version"] not in cfgservice.getpid_or_mdl_response_field:
         return jsonify(
             {"error_code": 13, "error_message": cfgservice.error_list["13"], "mdoc": ""}
         )
-
+    
     if request.json["country"] not in cfcountries.supported_countries:
         return jsonify(
             {
@@ -112,7 +113,7 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-
+    
     if request.json["doctype"] == "org.iso.18013.5.1.mDL":
         (b, l) = validate_mandatory_args(
             request.json["data"]["org.iso.18013.5.1"],
@@ -130,6 +131,7 @@ def cborformatter():
                 "un_distinguishing_sign",
             ],
         )
+
     if request.json["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
             request.json["data"]["eu.europa.ec.eudi.pid.1"],
@@ -167,13 +169,14 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-
+    
     base64_mdoc = mdocFormatter(
         request.json["data"],
         request.json["doctype"],
         request.json["country"],
         request.json["device_publickey"],
     )
+
     return jsonify(
         {
             "error_code": 0,
