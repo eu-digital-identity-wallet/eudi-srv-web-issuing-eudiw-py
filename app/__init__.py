@@ -259,7 +259,7 @@ def create_app(test_config=None):
         entity_conf=[
             {"class": OPConfiguration, "attr": "op", "path": ["op", "server_info"]}
         ],
-        filename=dir_path + "/app_config/oid_config.json",
+        filename=dir_path + "/app_config/oid_config.py",
         base_path=dir_path,
     )
 

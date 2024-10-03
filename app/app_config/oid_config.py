@@ -1,7 +1,13 @@
-{
+from urllib.parse import urlparse
+from config_service import ConfService as cfgservice
+
+parsed_url = urlparse(cfgservice.service_url)
+subdomain = parsed_url.netloc
+
+CONFIG = {
   "logging": {
     "version": 1,
-    "disable_existing_loggers": false,
+    "disable_existing_loggers": False,
     "root": {
       "handlers": [
         "console",
@@ -33,7 +39,7 @@
     }
   },
   "port": 6000,
-  "domain": "dev.issuer.eudiw.dev",
+  "domain": subdomain,
   "server_name": "{domain}",
   "base_url": "https://{domain}",
   "op": {
@@ -42,7 +48,7 @@
         "pkce": {
           "function": "idpyoidc.server.oauth2.add_on.pkce.add_support",
           "kwargs": {
-            "essential": false,
+            "essential": False,
             "code_challenge_method": "S256 S384 S512"
           }
         }
@@ -132,7 +138,7 @@
                 "kid": "sig"
               }
             ],
-            "read_only": false
+            "read_only": False
           },
           "name": {
             "session": "oidc_op",
@@ -146,21 +152,21 @@
           "path": ".well-known/webfinger",
           "class": "idpyoidc.server.oidc.discovery.Discovery",
           "kwargs": {
-            "client_authn_method": null
+            "client_authn_method": None
           }
         },
         "provider_info": {
           "path": ".well-known/openid-configuration",
           "class": "idpyoidc.server.oidc.provider_config.ProviderConfiguration",
           "kwargs": {
-            "client_authn_method": null
+            "client_authn_method": None
           }
         },
         "registration": {
           "path": "registration",
           "class": "idpyoidc.server.oidc.registration.Registration",
           "kwargs": {
-            "client_authn_method": null,
+            "client_authn_method": None,
             "client_secret_expiration_time": 432000
           }
         },
@@ -192,10 +198,10 @@
           "path": "authorization",
           "class": "idpyoidc.server.oidc.authorization.Authorization",
           "kwargs": {
-            "client_authn_method": null,
-            "claims_parameter_supported": true,
-            "request_parameter_supported": true,
-            "request_uri_parameter_supported": true,
+            "client_authn_method": None,
+            "claims_parameter_supported": True,
+            "request_parameter_supported": True,
+            "request_uri_parameter_supported": None,
             "response_types_supported": [
               "code",
               "token",
@@ -244,10 +250,10 @@
             "logout_verify_url": "verify_logout",
             "post_logout_uri_path": "post_logout",
             "signing_alg": "ES256",
-            "frontchannel_logout_supported": true,
-            "frontchannel_logout_session_supported": true,
-            "backchannel_logout_supported": true,
-            "backchannel_logout_session_supported": true,
+            "frontchannel_logout_supported": True,
+            "frontchannel_logout_session_supported": True,
+            "backchannel_logout_supported": True,
+            "backchannel_logout_session_supported": True,
             "check_session_iframe": "check_session_iframe"
           }
         },
@@ -286,7 +292,7 @@
         }
       },
       "httpc_params": {
-        "verify": false
+        "verify": False
       },
       "issuer": "https://{domain}",
       "keys": {
@@ -307,7 +313,7 @@
           }
         ],
         "public_path": "static/jwks.json",
-        "read_only": false,
+        "read_only": False,
         "uri_path": "static/jwks.json"
       },
       "template_dir": "templates",
@@ -328,7 +334,7 @@
               "phone_number",
               "phone_number_verified"
             ],
-            "add_claims_by_scope": true,
+            "add_claims_by_scope": True,
             "aud": [
               "https://example.org/appl"
             ]
@@ -344,10 +350,10 @@
           "kwargs": {
             "base_claims": {
               "email": {
-                "essential": true
+                "essential": True
               },
               "email_verified": {
-                "essential": true
+                "essential": True
               }
             }
           }
@@ -361,10 +367,10 @@
   "webserver": {
     "server_cert": "certs/client.crt",
     "server_key": "certs/client.key",
-    "ca_bundle": null,
-    "verify_user": false,
+    "ca_bundle": None,
+    "verify_user": False,
     "port": 6000,
-    "domain": "issuer.eudiw.dev",
-    "debug": true
+    "domain": subdomain,
+    "debug": True
   }
 }

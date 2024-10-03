@@ -41,11 +41,11 @@ class ConfService:
     wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
 
     # ---------------------------------------------------------------------------
-    trusted_CAs_path = os.getenv("TRUSTED_CAs","/etc/eudiw/pid-issuer/cert/")
+    trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
     # ------------------------------------------------------------------------------------------------
     # eIDAS Node base href (used in lightrequest)
-    eidasnode_url = "https://preprod.issuer.eudiw.dev/EidasNode/"
+    eidasnode_url = os.getenv("EIDAS_NODE_URL","https://preprod.issuer.eudiw.dev/EidasNode/")
 
     # Number of Tries for login in eidas node
     eidasnode_retry = 3
@@ -55,7 +55,7 @@ class ConfService:
 
     # eIDAS node connector endpoint (for lightrequest)
     eidasnode_lightToken_connectorEndpoint = (
-        "https://issuer.eudiw.dev/EidasNode/SpecificConnectorRequest"
+        service_url + "EidasNode/SpecificConnectorRequest"
     )
 
     # eIDAS node PID attributes
