@@ -34,7 +34,17 @@ import threading
 import urllib.parse
 import segno
 
-from flask import Blueprint, jsonify, Response, request, session, current_app, redirect, render_template, url_for
+from flask import (
+    Blueprint,
+    jsonify,
+    Response,
+    request,
+    session,
+    current_app,
+    redirect,
+    render_template,
+    url_for,
+)
 from flask.helpers import make_response, send_from_directory
 import os
 
@@ -69,7 +79,16 @@ oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
 
 # variable for PAR requests
-from app.data_management import getSessionId_accessToken, parRequests, transaction_codes, deferredRequests, session_ids, getSessionId_requestUri, getSessionId_authCode
+from app.data_management import (
+    getSessionId_accessToken,
+    parRequests,
+    transaction_codes,
+    deferredRequests,
+    session_ids,
+    getSessionId_requestUri,
+    getSessionId_authCode,
+)
+
 
 def _add_cookie(resp: Response, cookie_spec: Union[dict, list]):
     kwargs = {k: v for k, v in cookie_spec.items() if k not in ("name",)}
@@ -100,7 +119,7 @@ def keys():
 
 def do_response(endpoint, req_args, error="", **args) -> Response:
     info = endpoint.do_response(request=req_args, error=error, **args)
-    #_log = current_app.logger
+    # _log = current_app.logger
     cfgservice.app_logger.info("do_response: {}".format(info))
 
     try:
@@ -151,15 +170,19 @@ def verify(authn_method):
 
         auth_args = authn_method.unpack_token(request.args.get("jws_token"))
     except:
-        cfgservice.app_logger.error("Authorization verification: username or jws_token not found")
+        cfgservice.app_logger.error(
+            "Authorization verification: username or jws_token not found"
+        )
         if "jws_token" in request.args:
             return authentication_error_redirect(
-            jws_token=request.args.get("jws_token"),
-            error="invalid_request",
-            error_description="Authentication verification Error",
-        )
+                jws_token=request.args.get("jws_token"),
+                error="invalid_request",
+                error_description="Authentication verification Error",
+            )
         else:
-            return render_template("misc/500.html", error="Authentication verification Error")
+            return render_template(
+                "misc/500.html", error="Authentication verification Error"
+            )
 
     authz_request = AuthorizationRequest().from_urlencoded(auth_args["query"])
 
@@ -180,12 +203,17 @@ def verify(authn_method):
 
     session_ids[session["session_id"]]["auth_code"] = args["response_args"]["code"]
 
-    logText = ", Session ID: " + session["session_id"] + ", " + "Authorization Response, Code: " + args["response_args"]["code"]
+    logText = (
+        ", Session ID: "
+        + session["session_id"]
+        + ", "
+        + "Authorization Response, Code: "
+        + args["response_args"]["code"]
+    )
 
     if "state" in args["response_args"]:
 
         logText = logText + ", State: " + args["response_args"]["state"]
-
 
     cfgservice.app_logger.info(logText)
 
@@ -276,8 +304,16 @@ def authorization():
     return service_endpoint(current_app.server.get_endpoint("authorization"))
 
 
-#@oidc.route("/authorizationV2", methods=["GET"])
-def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_challenge_method=None, code_challenge=None, authorization_details=None):
+# @oidc.route("/authorizationV2", methods=["GET"])
+def authorizationv2(
+    client_id,
+    redirect_uri,
+    response_type,
+    scope=None,
+    code_challenge_method=None,
+    code_challenge=None,
+    authorization_details=None,
+):
 
     client_secret = str(uuid.uuid4())
 
@@ -285,9 +321,10 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
         client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri
     )
 
-    #return service_endpoint(current_app.server.get_endpoint("authorization"))
+    # return service_endpoint(current_app.server.get_endpoint("authorization"))
     url = (
-        cfgservice.service_url + "authorization?redirect_uri="
+        cfgservice.service_url
+        + "authorization?redirect_uri="
         + redirect_uri
         + "&response_type="
         + response_type
@@ -303,19 +340,17 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
 
     if code_challenge and code_challenge_method:
         url = url + "&code_challenge="
-        + code_challenge
-        + "&code_challenge_method="
-        + code_challenge_method
+        +code_challenge
+        +"&code_challenge_method="
+        +code_challenge_method
 
     payload = {}
     headers = {}
-    response = requests.request(
-        "GET", url, headers=headers, data=payload
-    )
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         cfgservice.app_logger.error("Authorization endpoint invalid request")
-        return auth_error_redirect(redirect_uri,"invalid_request")
+        return auth_error_redirect(redirect_uri, "invalid_request")
 
     response = response.json()
 
@@ -339,16 +374,34 @@ def authorizationv2(client_id,redirect_uri, response_type,scope=None, code_chall
     session["authorization_params"] = params
 
     session_id = str(uuid.uuid4())
-    session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60)}})
+    session_ids.update(
+        {session_id: {"expires": datetime.now() + timedelta(minutes=60)}}
+    )
     session["session_id"] = session_id
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str({"client_id":client_id,"redirect_uri":redirect_uri, "response_type":response_type, "scope":scope, "code_challenge_method":code_challenge_method, "code_challenge":code_challenge, "authorization_details":authorization_details}))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Authorization Request, Payload: "
+        + str(
+            {
+                "client_id": client_id,
+                "redirect_uri": redirect_uri,
+                "response_type": response_type,
+                "scope": scope,
+                "code_challenge_method": code_challenge_method,
+                "code_challenge": code_challenge,
+                "authorization_details": authorization_details,
+            }
+        )
+    )
 
     return redirect(response["url"])
+
 
 @oidc.route("/authorizationV3", methods=["GET"])
 def authorizationV3():
 
-    
     if "request_uri" not in request.args:
         try:
             client_id = request.args.get("client_id")
@@ -360,9 +413,15 @@ def authorizationV3():
             authorization_details = request.args.get("authorization_details")
         except:
             return make_response("Authorization v2 error", 400)
-        return authorizationv2(client_id,redirect_uri, response_type,scope, code_challenge_method, code_challenge, authorization_details)
-
-
+        return authorizationv2(
+            client_id,
+            redirect_uri,
+            response_type,
+            scope,
+            code_challenge_method,
+            code_challenge,
+            authorization_details,
+        )
 
     try:
         request_uri = request.args.get("request_uri")
@@ -373,16 +432,23 @@ def authorizationV3():
     if not request_uri in parRequests:  # unknow request_uri => return error
         # needs to be changed to an appropriate error message, and need to be logged
         # return service_endpoint(current_app.server.get_endpoint("authorization"))
-        cfgservice.app_logger.error("Authorization request_uri not found in parRequests")
+        cfgservice.app_logger.error(
+            "Authorization request_uri not found in parRequests"
+        )
         return make_response("Request_uri not found", 400)
-    
+
     session_id = getSessionId_requestUri(request_uri)
 
     if session_id == None:
         cfgservice.app_logger.error("Authorization request_uri not found.")
         return make_response("Request_uri not found", 400)
-    
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Request, Payload: " + str(dict(request.args))
+
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Authorization Request, Payload: "
+        + str(dict(request.args))
     )
 
     session["session_id"] = session_id
@@ -391,9 +457,10 @@ def authorizationV3():
 
     if "scope" not in par_args:
         par_args["scope"] = "openid"
-    
+
     url = (
-        cfgservice.service_url + "authorization?redirect_uri="
+        cfgservice.service_url
+        + "authorization?redirect_uri="
         + par_args["redirect_uri"]
         + "&response_type="
         + par_args["response_type"]
@@ -407,13 +474,11 @@ def authorizationV3():
 
     payload = {}
     headers = {}
-    response = requests.request(
-        "GET", url, headers=headers, data=payload
-    )
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         cfgservice.app_logger.error("Authorization endpoint invalid request")
-        return auth_error_redirect(par_args["redirect_uri"],"invalid_request")
+        return auth_error_redirect(par_args["redirect_uri"], "invalid_request")
 
     response = response.json()
 
@@ -442,34 +507,43 @@ def authorizationV3():
 @oidc.route("/pid_authorization")
 def pid_authorization_get():
 
-    presentation_id= request.args.get("presentation_id")
+    presentation_id = request.args.get("presentation_id")
 
-    url = cfgservice.dynamic_presentation_url + presentation_id + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    url = (
+        cfgservice.dynamic_presentation_url
+        + presentation_id
+        + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    )
     headers = {
-    'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
 
     response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
-        error_msg= str(response.status_code)
-        return jsonify({"error": error_msg}),500
+        error_msg = str(response.status_code)
+        return jsonify({"error": error_msg}), 500
     else:
         data = {"message": "Sucess"}
-        return jsonify({"message": data}),200
-            
+        return jsonify({"message": data}), 200
+
 
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
     token = request.args.get("token")
 
-    supported_credencials=cfgservice.auth_method_supported_credencials
-    pid_auth=True
-    country_selection=True
+    supported_credencials = cfgservice.auth_method_supported_credencials
+    pid_auth = True
+    country_selection = True
 
     if "authorization_params" not in session:
-        cfgservice.app_logger.info("Authorization Params didn't exist in Authentication Choice")
-        return render_template("misc/500.html", error="Invalid Authentication. No authorization details or scope found.")
-    
+        cfgservice.app_logger.info(
+            "Authorization Params didn't exist in Authentication Choice"
+        )
+        return render_template(
+            "misc/500.html",
+            error="Invalid Authentication. No authorization details or scope found.",
+        )
+
     authorization_params = session["authorization_params"]
 
     authorization_details = []
@@ -479,7 +553,6 @@ def auth_choice():
         )
     if "scope" in authorization_params:
         authorization_details.extend(scope2details(authorization_params["scope"]))
-        
 
     credentials_requested = []
     for cred in authorization_details:
@@ -490,36 +563,47 @@ def auth_choice():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
 
-    
     for cred in credentials_requested:
-        if cred in supported_credencials["PID_login"] and cred not in supported_credencials["country_selection"]:
-             country_selection=False
-        elif cred not in supported_credencials["PID_login"] and cred in supported_credencials["country_selection"]:
-            pid_auth=False
+        if (
+            cred in supported_credencials["PID_login"]
+            and cred not in supported_credencials["country_selection"]
+        ):
+            country_selection = False
+        elif (
+            cred not in supported_credencials["PID_login"]
+            and cred in supported_credencials["country_selection"]
+        ):
+            pid_auth = False
 
     error = ""
     if pid_auth == False and country_selection == False:
-        error="Combination of requested credentials is not valid!"
-            
-    return render_template("misc/auth_method.html",pid_auth=pid_auth,country_selection=country_selection, error=error, redirect_url= cfgservice.service_url)
+        error = "Combination of requested credentials is not valid!"
 
+    return render_template(
+        "misc/auth_method.html",
+        pid_auth=pid_auth,
+        country_selection=country_selection,
+        error=error,
+        redirect_url=cfgservice.service_url,
+    )
 
-    #return render_template("misc/auth_method.html")
+    # return render_template("misc/auth_method.html")
+
 
 @oidc.route("/token_service", methods=["POST"])
 def token_service():
 
-    #session_id = request.cookies.get("session")
+    # session_id = request.cookies.get("session")
 
     response = service_endpoint(current_app.server.get_endpoint("token"))
 
     return response
 
+
 @oidc.route("/token", methods=["POST"])
 def token():
 
     req_args = dict([(k, v) for k, v in request.form.items()])
-
 
     response = None
 
@@ -527,11 +611,23 @@ def token():
 
         session_id = getSessionId_authCode(req_args["code"])
 
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Token Request, Payload: " + str(request.form.to_dict()))
-    
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Authorization Token Request, Payload: "
+            + str(request.form.to_dict())
+        )
+
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Authorization Token Response, Payload: " + str(json.loads(response.get_data())))
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Authorization Token Response, Payload: "
+            + str(json.loads(response.get_data()))
+        )
 
         response_json = json.loads(response.get_data())
 
@@ -541,61 +637,80 @@ def token():
         if "refresh_token" in response_json:
             session_ids[session_id]["refresh_token"] = response_json["refresh_token"]
 
-    elif req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code":
+    elif (
+        req_args["grant_type"] == "urn:ietf:params:oauth:grant-type:pre-authorized_code"
+    ):
 
         if "pre-authorized_code" not in req_args:
             return make_response("invalid_request", 400)
-        
+
         if "tx_code" not in req_args:
             if "0" != transaction_codes[code]["tx_code"]:
                 error_message = {
-                "error": "invalid_request",
-                "description": "invalid tx_code"
-            }
+                    "error": "invalid_request",
+                    "description": "invalid tx_code",
+                }
             response = make_response(jsonify(error_message), 400)
             return response
-        
+
         code = req_args["pre-authorized_code"]
 
         if code not in transaction_codes:
             error_message = {
-                    "error": "invalid_request",
-                    "description": "invalid or expired tx_code"
-                }
+                "error": "invalid_request",
+                "description": "invalid or expired tx_code",
+            }
             response = make_response(jsonify(error_message), 400)
             return response
-        
+
         preauth_code = transaction_codes[code]["pre_auth_code"]
 
         session_id = getSessionId_authCode(preauth_code)
 
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Request, Payload: " + str(request.form.to_dict()))
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Pre-Authorized Token Request, Payload: "
+            + str(request.form.to_dict())
+        )
 
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
             error_message = {
                 "error": "invalid_request",
-                "description": "invalid tx_code"
+                "description": "invalid tx_code",
             }
             response = make_response(jsonify(error_message), 400)
             return response
-        
+
         url = cfgservice.service_url + "token_service"
         redirect_url = "preauth"
 
-        payload = 'grant_type=authorization_code&code=' + preauth_code + '&redirect_uri=' + redirect_url + '&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg'
-        headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        
-        response = requests.request("POST", url, headers=headers, data=payload)
-        
+        payload = (
+            "grant_type=authorization_code&code="
+            + preauth_code
+            + "&redirect_uri="
+            + redirect_url
+            + "&client_id=ID&state=vFs5DfvJqoyHj7_dZs2JbdklePg6pMLsUHHmVIfobRw&code_verifier=FnWCRIhpJtl6IYwVVYB8gZkQsmvBVLfU4HQiABPopYQ6gvIZBwMrXg"
+        )
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        #response = response.json()
+        response = requests.request("POST", url, headers=headers, data=payload)
+        if response.status_code != 200:
+            return make_response("invalid_request", 400)
+
+        # response = response.json()
         cfgservice.app_logger.info("Token response: " + str(response.json()))
 
         transaction_codes.pop(code)
 
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pre-Authorized Token Response, Payload: " + str(response.json()))
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Pre-Authorized Token Response, Payload: "
+            + str(response.json())
+        )
 
         response_json = response.json()
 
@@ -607,10 +722,11 @@ def token():
 
         return response_json
 
-    else: 
+    else:
         response = service_endpoint(current_app.server.get_endpoint("token"))
-        cfgservice.app_logger.info("Token response: " + str(json.loads(response.get_data())))
-
+        cfgservice.app_logger.info(
+            "Token response: " + str(json.loads(response.get_data()))
+        )
 
     return response
 
@@ -640,7 +756,12 @@ def par_endpointv2():
 
     session_id = str(uuid.uuid4())
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pushed Authorization Request, Payload: " + str(request.form.to_dict())
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Pushed Authorization Request, Payload: "
+        + str(request.form.to_dict())
     )
 
     redirect_uri = None
@@ -651,7 +772,9 @@ def par_endpointv2():
     except:
         cfgservice.app_logger.error("PAR: client_id or redirect_uri not found")
         if redirect_uri:
-            return auth_error_redirect(redirect_uri, "invalid_request", "invalid parameters")
+            return auth_error_redirect(
+                redirect_uri, "invalid_request", "invalid parameters"
+            )
         else:
             return make_response("PARv2 error", 400)
 
@@ -663,9 +786,22 @@ def par_endpointv2():
 
     response = service_endpoint(current_app.server.get_endpoint("pushed_authorization"))
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Pushed Authorization Response, Payload: " + str(json.loads(response.get_data())))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Pushed Authorization Response, Payload: "
+        + str(json.loads(response.get_data()))
+    )
 
-    session_ids.update({session_id:{"expires":datetime.now() + timedelta(minutes=60), "request_uri":json.loads(response.get_data())["request_uri"]}})
+    session_ids.update(
+        {
+            session_id: {
+                "expires": datetime.now() + timedelta(minutes=60),
+                "request_uri": json.loads(response.get_data())["request_uri"],
+            }
+        }
+    )
 
     return response
 
@@ -682,25 +818,61 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Credential Request, Payload: "
+        + str(payload)
+    )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
-    
-    if isinstance(_response,Response):
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(json.loads(_response.get_data())))
+
+    if isinstance(_response, Response):
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Credential response, Payload: "
+            + str(json.loads(_response.get_data()))
+        )
         return _response
 
-    if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
+    if (
+        "transaction_id" in _response
+        and _response["transaction_id"] not in deferredRequests
+    ):
 
         request_data = request.data
         request_headers = dict(request.headers)
-        deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
-        
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
+        deferredRequests.update(
+            {
+                _response["transaction_id"]: {
+                    "data": request_data,
+                    "headers": request_headers,
+                    "expires": datetime.now()
+                    + timedelta(minutes=cfgservice.deffered_expiry),
+                }
+            }
+        )
 
-        return make_response(jsonify(_response),202)
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Credential response, Payload: "
+            + str(_response)
+        )
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Credential response, Payload: " + str(_response))
+        return make_response(jsonify(_response), 202)
+
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Credential response, Payload: "
+        + str(_response)
+    )
     return _response
 
 
@@ -716,27 +888,63 @@ def batchCredential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Batch Credential Request, Payload: "
+        + str(payload)
+    )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
-    if isinstance(_response,Response):
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch Credential response, Payload: " + str(json.loads(_response.get_data())))
+    if isinstance(_response, Response):
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Batch Credential response, Payload: "
+            + str(json.loads(_response.get_data()))
+        )
         return _response
-    
-    if "transaction_id" in _response and _response["transaction_id"] not in deferredRequests:
+
+    if (
+        "transaction_id" in _response
+        and _response["transaction_id"] not in deferredRequests
+    ):
 
         request_data = request.data
         request_headers = dict(request.headers)
-        deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
-        
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
-        return make_response(jsonify(_response),202)
-    
+        deferredRequests.update(
+            {
+                _response["transaction_id"]: {
+                    "data": request_data,
+                    "headers": request_headers,
+                    "expires": datetime.now()
+                    + timedelta(minutes=cfgservice.deffered_expiry),
+                }
+            }
+        )
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Batch credential response, Payload: "
+            + str(_response)
+        )
+        return make_response(jsonify(_response), 202)
+
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Batch credential response, Payload: "
+        + str(_response)
+    )
 
     return _response
+
 
 @oidc.route("/notification", methods=["POST"])
 def notification():
@@ -750,18 +958,36 @@ def notification():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Notification Request, Payload: "
+        + str(payload)
+    )
 
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
-    if isinstance(_resp,Response):
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+    if isinstance(_resp, Response):
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Notification response, Payload: "
+            + str(_resp)
+        )
         return _resp
-    
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
-    
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Notification response, Payload: "
+        + str(_resp)
+    )
+
     return _resp
+
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
@@ -770,21 +996,40 @@ def deferred_credential():
     payload = json.loads(request.data)
     if "Authorization" not in headers:
         return make_response("Authorization error", 400)
-    
+
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
-    
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Deferred Credential Request, Payload:, Payload: "
+        + str(payload)
+    )
+
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
-    if isinstance(_resp,Response):
-        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
+    if isinstance(_resp, Response):
+        cfgservice.app_logger.info(
+            ", Session ID: "
+            + session_id
+            + ", "
+            + "Deferred response, Payload: "
+            + str(json.loads(_resp.get_data()))
+        )
         return _resp
 
-    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Deferred response, Payload: "
+        + str(_resp)
+    )
 
     return _resp
+
 
 @oidc.route("credential_offer_choice", methods=["GET"])
 def credential_offer():
@@ -800,21 +1045,34 @@ def credential_offer():
         credential = credentialsSupported[cred]
 
         if credential["format"] == "vc+sd-jwt":
-            #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
-            if cred in cfgservice.auth_method_supported_credencials["PID_login"] or cred in cfgservice.auth_method_supported_credencials["country_selection"]:
+            # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
+            if (
+                cred in cfgservice.auth_method_supported_credencials["PID_login"]
+                or cred
+                in cfgservice.auth_method_supported_credencials["country_selection"]
+            ):
                 credentials["sd-jwt vc format"].update(
-                    #{"Personal Identification Data": cred}
+                    # {"Personal Identification Data": cred}
                     {cred: credential["display"][0]["name"]}
                 )
 
         if credential["format"] == "mso_mdoc":
-            if cred in cfgservice.auth_method_supported_credencials["PID_login"] or cred in cfgservice.auth_method_supported_credencials["country_selection"]:
+            if (
+                cred in cfgservice.auth_method_supported_credencials["PID_login"]
+                or cred
+                in cfgservice.auth_method_supported_credencials["country_selection"]
+            ):
                 credentials["mdoc format"].update(
                     {cred: credential["display"][0]["name"]}
                 )
 
+    return render_template(
+        "openid/credential_offer.html",
+        cred=credentials,
+        redirect_url=cfgservice.service_url,
+        credential_offer_URI="openid-credential-offer://",
+    )
 
-    return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")
 
 """ @oidc.route("/test_dump", methods=["GET", "POST"])
 def dump_test():
@@ -840,14 +1098,14 @@ def load_test():
 
     return "load" """
 
+
 @oidc.route("/credential_offer", methods=["GET", "POST"])
 def credentialOffer():
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
-    auth_choice=request.form.get("Authorization Code Grant")
+    auth_choice = request.form.get("Authorization Code Grant")
     form_keys = request.form.keys()
-    credential_offer_URI=request.form.get("credential_offer_URI")
-
+    credential_offer_URI = request.form.get("credential_offer_URI")
 
     if "proceed" in form_keys:
         form = list(form_keys)
@@ -857,28 +1115,29 @@ def credentialOffer():
         all_exist = all(credential in credentialsSupported for credential in form)
 
         if all_exist:
-            credentials_id=form
-            session["credentials_id"]=credentials_id
+            credentials_id = form
+            session["credentials_id"] = credentials_id
             credentials_id_list = json.dumps(form)
-            if auth_choice =="pre_auth_code":
+            if auth_choice == "pre_auth_code":
                 session["credential_offer_URI"] = credential_offer_URI
-                return redirect(url_for('preauth.preauthRed', credentials_id=credentials_id_list))
-            
+                return redirect(
+                    url_for("preauth.preauthRed", credentials_id=credentials_id_list)
+                )
+
             else:
-                
+
                 credential_offer = {
                     "credential_issuer": cfgservice.service_url[:-1],
                     "credential_configuration_ids": credentials_id,
-                    "grants" : {
-                        "authorization_code" : {}
-                    }
+                    "grants": {"authorization_code": {}},
                 }
 
                 # create URI
                 json_string = json.dumps(credential_offer)
 
-                uri = f"{credential_offer_URI}credential_offer?credential_offer=" + urllib.parse.quote(
-                    json_string, safe=":/"
+                uri = (
+                    f"{credential_offer_URI}credential_offer?credential_offer="
+                    + urllib.parse.quote(json_string, safe=":/")
                 )
 
                 # Generate QR code
@@ -887,7 +1146,7 @@ def credentialOffer():
 
                 qrcode = segno.make(uri)
                 out = io.BytesIO()
-                qrcode.save(out, kind='png', scale=3)
+                qrcode.save(out, kind="png", scale=3)
 
                 """ qrcode.to_artistic(
                     background=cfgtest.qr_png,
@@ -903,20 +1162,21 @@ def credentialOffer():
                 ).decode("utf-8")
 
                 wallet_url = cfgservice.wallet_test_url + "credential_offer"
-            
+
                 return render_template(
                     "openid/credential_offer_qr_code.html",
-                    wallet_dev= wallet_url + "?credential_offer=" + json.dumps(credential_offer),
+                    wallet_dev=wallet_url
+                    + "?credential_offer="
+                    + json.dumps(credential_offer),
                     url_data=uri,
                     qrcode=qr_img_base64,
                 )
 
     else:
         return redirect(cfgservice.service_url + "credential_offer_choice")
-    
 
 
-@oidc.route("/testgetauth", methods=["GET"])
+""" @oidc.route("/testgetauth", methods=["GET"])
 def testget():
     if "error" in request.args:
         response = (
@@ -924,14 +1184,14 @@ def testget():
         )
         return response
     else:
-        return request.args.get("code")
+        return request.args.get("code") """
 
 
 IGNORE = ["cookie", "user-agent"]
 
 
 def service_endpoint(endpoint):
-    #_log = current_app.logger
+    # _log = current_app.logger
     cfgservice.app_logger.info('At the "{}" endpoint'.format(endpoint.name))
 
     http_info = {
@@ -975,7 +1235,7 @@ def service_endpoint(endpoint):
                 error="invalid_request", error_description=str(err)
             )
             return make_response(err_msg.to_json(), 400)
-    
+
     if endpoint.name == "notification":
         try:
             accessToken = http_info["headers"]["authorization"][7:]
@@ -985,8 +1245,8 @@ def service_endpoint(endpoint):
             _resp = endpoint.process_request(req_args)
 
             if isinstance(_resp, ResponseMessage) and "error" in _resp:
-                    cfgservice.app_logger.error("Error response: {}".format(_resp))
-                    _resp = make_response(_resp.to_json(), 400)
+                cfgservice.app_logger.error("Error response: {}".format(_resp))
+                _resp = make_response(_resp.to_json(), 400)
 
         except Exception as err:
             cfgservice.app_logger.error(err)
@@ -1019,7 +1279,7 @@ def service_endpoint(endpoint):
                 else:
                     response = do_response(endpoint, args, **args)
             return response
-        
+
         except Exception as err:
             cfgservice.app_logger.error(err)
             return make_response(
@@ -1086,7 +1346,7 @@ def service_endpoint(endpoint):
         err_msg = ResponseMessage(error="invalid_request", error_description=str(err))
         return make_response(err_msg.to_json(), 400)
 
-    #_log.info("Response args: {}".format(args))
+    # _log.info("Response args: {}".format(args))
 
     # "pushed_authorization"
     if (
