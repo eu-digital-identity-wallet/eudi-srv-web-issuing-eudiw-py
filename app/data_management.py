@@ -78,7 +78,8 @@ def clear_par():
     for uri in parRequests.copy():
         expire_time = parRequests[uri]["expires"]
         if now > expire_time:
-            """ parRequests.pop(uri)
+            parRequests.pop(uri)
+            """
             print(
                 "Job scheduled: clear_par: "
                 + uri
