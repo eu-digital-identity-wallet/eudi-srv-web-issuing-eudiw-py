@@ -74,12 +74,13 @@ def clear_par():
     """Function to clear parRequests"""
     now = int(datetime.timestamp(datetime.now()))
     #print("Job scheduled: clear_par() at " + str(now))
+    #print("Job scheduled: clear_par() at " + str(now))
 
     for uri in parRequests.copy():
         expire_time = parRequests[uri]["expires"]
         if now > expire_time:
-            """ parRequests.pop(uri)
-            print(
+            parRequests.pop(uri)
+            """ print(
                 "Job scheduled: clear_par: "
                 + uri
                 + " eliminated. "
@@ -95,6 +96,7 @@ def clear_par():
                 + str(now)
                 + " < "
                 + str(expire_time)
+            ) """
             ) """
 
     for req in deferredRequests.copy():

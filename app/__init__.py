@@ -82,9 +82,13 @@ def setup_metadata():
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"Metadata Error: file not found. \n{e}")
     except json.JSONDecodeError as e:
-        cfgserv.app_logger.exception(f"Metadata Error: Metadata Unable to decode JSON. \n{e}")
+        cfgserv.app_logger.exception(
+            f"Metadata Error: Metadata Unable to decode JSON. \n{e}"
+        )
     except Exception as e:
-        cfgserv.app_logger.exception(f"Metadata Error: An unexpected error occurred. \n{e}")
+        cfgserv.app_logger.exception(
+            f"Metadata Error: An unexpected error occurred. \n{e}"
+        )
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
@@ -150,9 +154,13 @@ def setup_trusted_CAs():
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
     except json.JSONDecodeError as e:
-        cfgserv.app_logger.exception(f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}")
+        cfgserv.app_logger.exception(
+            f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
+        )
     except Exception as e:
-        cfgserv.app_logger.exception(f"TrustedCA Error: An unexpected error occurred.\n {e}")
+        cfgserv.app_logger.exception(
+            f"TrustedCA Error: An unexpected error occurred.\n {e}"
+        )
 
     trusted_CAs = ec_keys
 
@@ -196,8 +204,10 @@ def create_app(test_config=None):
     app.register_error_handler(404, page_not_found)
 
     @app.route("/", methods=["GET"])
-    def initial_page():        
-        return render_template("misc/initial_page.html", oidc=cfgserv.oidc, service_url = cfgserv.service_url)
+    def initial_page():
+        return render_template(
+            "misc/initial_page.html", oidc=cfgserv.oidc, service_url=cfgserv.service_url
+        )
 
     @app.route("/favicon.ico")
     def favicon():
@@ -230,7 +240,7 @@ def create_app(test_config=None):
         route_oidc,
         route_dynamic,
         route_oid4vp,
-        preauthorization
+        preauthorization,
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
