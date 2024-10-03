@@ -70,8 +70,16 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     # Extract the key parameters
     priv_d = private_key.private_numbers().private_value
+    
+    issuance_date = datetime.datetime.today()
+    expiry_date = issuance_date + datetime.timedelta(days=cfgservice.config_doctype[doctype]["validity"])
 
-    if doctype == "org.iso.18013.5.1.mDL":
+    validity = {
+        "issuance_date": issuance_date.strftime('%Y-%m-%d'),
+        "expiry_date": expiry_date.strftime('%Y-%m-%d')
+    }
+    
+    """ if doctype == "org.iso.18013.5.1.mDL":
 
         # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
         # data["org.iso.18013.5.1"]["signature_usual_mark"]
@@ -101,7 +109,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         validity = {
             "issuance_date": data[first_key]["issuance_date"],
             "expiry_date": data[first_key]["expiry_date"],
-        }
+        } """
     
     namespace = cfgservice.config_doctype[doctype]["namespace"]
 
@@ -239,8 +247,6 @@ def sdjwtFormatter(PID, country):
         JWT_PID_DATA.update(namespacedata)
 
     datafinal["verified_claims"]["claims"].update(JWT_PID_DATA)
-
-    # print(datafinal)
 
     claims.update(datafinal)
 

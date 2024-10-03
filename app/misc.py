@@ -127,13 +127,13 @@ def getAttributesForm(credentials_requested):
         if format == "mso_mdoc":
 
             for namescape in namescapes:
-                attributes_req = getAttributes(
+                attributes_req = getMandatoryAttributes(
                     credentialsSupported[request]["claims"][namescape]
                 )
 
         elif format == "vc+sd-jwt":
             attributes_req.update(
-                getAttributes(credentialsSupported[request]["claims"])
+                getMandatoryAttributes(credentialsSupported[request]["claims"])
             )
 
         for attribute in attributes_req:
@@ -146,7 +146,7 @@ def getAttributesForm(credentials_requested):
     return attributes
 
 
-def getAttributes(attributes):
+def getMandatoryAttributes(attributes):
     """
     Function to get mandatory attributes from credential
     """
@@ -160,6 +160,76 @@ def getAttributes(attributes):
         if attribute_data["mandatory"] == True:
             if "value_type" in attribute_data:
                 attributes_form.update({attribute_name: attribute_data["value_type"]})
+
+    return attributes_form
+
+def getAttributesForm2(credentials_requested):
+    """
+    Function to get attributes needed to populate form depending credentials requested by user
+
+    Keyword arguments:"
+    credentials_requested --credentials requested by the user
+
+    """
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+
+    attributes = {}
+    for request in credentials_requested:
+        format = credentialsSupported[request]["format"]
+        namescapes = credentialsSupported[request]["claims"]
+        attributes_req = {}
+        if format == "mso_mdoc":
+
+            for namescape in namescapes:
+                attributes_req = getOptionalAttributes(
+                    credentialsSupported[request]["claims"][namescape]
+                )
+
+        elif format == "vc+sd-jwt":
+            attributes_req.update(
+                getOptionalAttributes(credentialsSupported[request]["claims"])
+            )
+
+        for attribute in attributes_req:
+            if attribute not in attributes:
+                attributes.update({attribute: attributes_req[attribute]})
+
+        if "birth_date" in attributes and "birthdate" in attributes:
+            attributes.pop("birthdate")
+
+    return attributes
+
+
+def getOptionalAttributes(attributes):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = {}
+
+    for x, value in enumerate(list(attributes.keys())):
+        attribute_name = list(attributes.keys())[x]
+        attribute_data = attributes.get(attribute_name, {})
+
+        if attribute_data["mandatory"] == False:
+            if "value_type" in attribute_data:
+                attributes_form.update({attribute_name: attribute_data["value_type"]})
+
+    return attributes_form
+
+def getIssuerFilledAttributes(attributes):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = {}
+
+    for x, value in enumerate(list(attributes.keys())):
+        attribute_name = list(attributes.keys())[x]
+        attribute_data = attributes.get(attribute_name, {})
+
+        if "source" in attribute_data and attribute_data["source"] == "issuer":
+            attributes_form.update({attribute_name: ""})
 
     return attributes_form
 

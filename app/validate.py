@@ -43,7 +43,7 @@ from app_config.config_countries import ConfCountries as cfgcountries
 
 
 # Log
-from app_config.config_service import ConfService as log
+#from app_config.config_service import ConfService as log
 
 
 def validate_mandatory_args(
@@ -112,7 +112,7 @@ def validate_params_getpid_or_mdl(args, list):
 
     # if no device_publickey
     if "device_publickey" in l:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - " + session["route"] + " - " + cfgserv.error_list["15"]
         )
         return (
@@ -121,7 +121,7 @@ def validate_params_getpid_or_mdl(args, list):
         )
     # if no returnURL
     if "returnURL" in l:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -137,7 +137,7 @@ def validate_params_getpid_or_mdl(args, list):
     if not validators.url(args.get("returnURL")):
         urlval = urlparse(args.get("returnURL"))
         if not urlval.scheme:
-            log.logger_info.warn(
+            cfgserv.app_logger.warning(
                 " - WARN - "
                 + session["route"]
                 + " - "
@@ -151,7 +151,7 @@ def validate_params_getpid_or_mdl(args, list):
             )
     # if no version
     if "version" in l:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -165,7 +165,7 @@ def validate_params_getpid_or_mdl(args, list):
         )
     # if version not supported
     if args.get("version") not in cfgserv.getpid_or_mdl_response_field.keys():
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -182,7 +182,7 @@ def validate_params_getpid_or_mdl(args, list):
         not "country" in l
         and args.get("country") not in cfgcountries.supported_countries.keys()
     ):
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -195,7 +195,7 @@ def validate_params_getpid_or_mdl(args, list):
         )
     # if some mandatory parameters are missing
     if not b:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -210,7 +210,7 @@ def validate_params_getpid_or_mdl(args, list):
     try:
         certificate = base64.urlsafe_b64decode(args.get("certificate"))
     except Exception as e:  # catch *all* exceptions
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -227,7 +227,7 @@ def validate_params_getpid_or_mdl(args, list):
     # if certificate curve or algorithms not supported
     (v, algo, curve) = validate_cert_algo(certificate, cfgserv.cert_algo_list)
     if not v:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
@@ -255,7 +255,7 @@ def validate_params_getpid_or_mdl(args, list):
             args.get("device_publickey").encode("utf-8")
         )
         if is_valid_pem_public_key(device_pub) == False:
-            log.logger_info.warn(
+            cfgserv.app_logger.warning(
                 " - WARN - " + session["route"] + " - " + cfgserv.error_list["16"]
             )
             return (
@@ -280,7 +280,7 @@ def validate_params_showpid_or_mdl(args, list):
     (b, l) = validate_mandatory_args(args, list)
     # if missing mandatory fields or no error field
     if not b or "error" in l:
-        log.logger_info.warn(
+        cfgserv.app_logger.warning(
             " - WARN - "
             + session["route"]
             + " - "
