@@ -13,28 +13,23 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+RUN mkdir -p /tmp/log_dev
+RUN chmod -R 755 /tmp/log_dev
 
-COPY app/requirements.txt /app/
+RUN git clone git@github.com:eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git
 
-RUN mkdir -p /etc/eudiw/pid-issuer/cert/
+WORKDIR /root/eudi-srv-web-issuing-eudiw-py
 
-RUN mkdir -p /etc/eudiw/pid-issuer/privkey/
+RUN python3 -m venv venv
 
-COPY app/private/certs/ /etc/eudiw/pid-issuer/cert/
-
-COPY app/private/privkeys/ /etc/eudiw/pid-issuer/privkey/
-
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-COPY . /app
-
-ENV REQUESTS_CA_BUNDLE=app/cert.pem
+RUN /root/eudi-srv-web-issuing-eudiw-py/venv/bin/pip install --no-cache-dir -r app/requirements.txt
 
 EXPOSE 5000
 
-ENV FLASK_APP=app
-ENV FLASK_RUN_PORT=5000
-ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_APP=app\
+    FLASK_RUN_PORT=5000\
+    FLASK_RUN_HOST=0.0.0.0\
+    SERVICE_URL="https://127.0.0.1:5000/" \
+    EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"
 
-CMD ["flask", "run", "--cert=app/cert.pem", "--key=app/key.pem"]
+CMD ["sh", "-c", "cp /root/secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && export REQUESTS_CA_BUNDLE=/root/secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run --cert=/root/secrets/cert.pem --key=/root/secrets/key.pem"]
