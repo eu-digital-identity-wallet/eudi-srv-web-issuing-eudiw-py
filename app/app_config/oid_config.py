@@ -28,7 +28,7 @@ CONFIG = {
       },
       "file": {
         "class": "logging.FileHandler",
-        "filename": "/tmp/log/logs.log",
+        "filename": cfgservice.log_dir + "/" + cfgservice.log_file_info,
         "formatter": "default"
       }
     },
