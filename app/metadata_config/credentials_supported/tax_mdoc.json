@@ -164,7 +164,6 @@
         },
         "issuing_authority": {
           "mandatory": true,
-          "value_type":"string",
           "source":"issuer",
           "display": [
             {
