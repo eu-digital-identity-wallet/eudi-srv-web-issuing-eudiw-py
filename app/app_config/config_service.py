@@ -36,7 +36,7 @@ class ConfService:
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
     # service_url = "https://issuer.eudiw.dev/"
     # service_url = "https://127.0.0.1:5000/"
-    service_url = service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
     wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
 
@@ -164,6 +164,15 @@ class ConfService:
             "error_str",
         ],
         "0.5": [
+            "mdoc",
+            "nonce",
+            "authTag",
+            "ciphertextPubKey",
+            "sd_jwt",
+            "error",
+            "error_str",
+        ],
+        "0.6": [
             "mdoc",
             "nonce",
             "authTag",
@@ -351,7 +360,7 @@ class ConfService:
     }
 
     #eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
-    dynamic_presentation_url = "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+    dynamic_presentation_url = os.getenv("DYNAMIC_PRESENTATION_URL","https://dev.verifier-backend.eudiw.dev/ui/presentations/")
     dynamic_issuing = {
         "eu.europa.ec.eudi.pseudonym_over18_mdoc":{
             "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}

@@ -113,7 +113,7 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-    
+
     if request.json["doctype"] == "org.iso.18013.5.1.mDL":
         (b, l) = validate_mandatory_args(
             request.json["data"]["org.iso.18013.5.1"],
