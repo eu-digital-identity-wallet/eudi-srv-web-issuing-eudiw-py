@@ -123,7 +123,7 @@ class ConfService:
 
     # ------------------------------------------------------------------------------------------------
     # current version
-    current_version = "0.5"
+    current_version = "0.6"
 
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
