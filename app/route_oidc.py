@@ -444,7 +444,7 @@ def pid_authorization_get():
 
     presentation_id= request.args.get("presentation_id")
 
-    url = "https://dev.verifier-backend.eudiw.dev/ui/presentations/" + presentation_id + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+    url = cfgservice.dynamic_presentation_url + presentation_id + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
     headers = {
     'Content-Type': 'application/json',
     }
@@ -718,7 +718,7 @@ def batchCredential():
     access_token = headers["Authorization"][6:]
     session_id = getSessionId_accessToken(access_token)
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch Credential Request, Payload: " + str(payload))
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
@@ -732,11 +732,11 @@ def batchCredential():
         request_headers = dict(request.headers)
         deferredRequests.update({_response["transaction_id"]: {"data":request_data, "headers":request_headers, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
         
-        #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
         return make_response(jsonify(_response),202)
     
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
+    cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Batch credential response, Payload: " + str(_response))
 
     return _response
 
@@ -752,16 +752,16 @@ def notification():
     access_token = headers["Authorization"][6:]
     session_id = getSessionId_accessToken(access_token)
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
+    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification Request, Payload: " + str(payload))
 
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
     if isinstance(_resp,Response):
-        #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
         return _resp
     
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
+    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Notification response, Payload: " + str(_resp))
     
     return _resp
 
@@ -770,24 +770,24 @@ def deferred_credential():
 
     headers = dict(request.headers)
     payload = json.loads(request.data)
-
+    print("\nPayload: ",payload)
     if "Authorization" not in headers:
         return make_response("Authorization error", 400)
-
+    print("\Auth: ", headers["Authorization"])
     access_token = headers["Authorization"][6:]
+    print("\nAccess_token: ",access_token)
     session_id = getSessionId_accessToken(access_token)
+    print("\nSession_id: ",session_id)
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
+    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred Credential Request, Payload:, Payload: " + str(payload))
     
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
-    #print(type(_resp[0].get_data()))
-    #print(json.loads(_resp[0].get_data()))
-    """  if isinstance(_resp,Response):
-        log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
-        return _resp """
+    if isinstance(_resp,Response):
+        cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(json.loads(_resp.get_data())))
+        return _resp
 
-    #log.logger_info.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
+    #cfgservice.app_logger.info(", Session ID: " + session_id + ", " + "Deferred response, Payload: " + str(_resp))
 
     return _resp
 
@@ -812,21 +812,12 @@ def credential_offer():
                     {cred: credential["display"][0]["name"]}
                 )
 
-            """ elif credential["scope"] == "org.iso.18013.5.1.mDL":
-                credentials["sd-jwt vc format"].update(
-                    {"Mobile Driver's Licence": cred}
-                ) """
-
         if credential["format"] == "mso_mdoc":
-            #if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
             if cred in cfgservice.auth_method_supported_credencials["PID_login"] or cred in cfgservice.auth_method_supported_credencials["country_selection"]:
                 credentials["mdoc format"].update(
                     {cred: credential["display"][0]["name"]}
-                    #{"Personal Identification Data": cred}
                 )
 
-            """ elif credential["scope"] == "org.iso.18013.5.1.mDL":
-                credentials["mdoc format"].update({"Mobile Driver's Licence": cred}) """
 
     print(credentials)
     return render_template("openid/credential_offer.html", cred=credentials, redirect_url= cfgservice.service_url, credential_offer_URI="openid-credential-offer://")

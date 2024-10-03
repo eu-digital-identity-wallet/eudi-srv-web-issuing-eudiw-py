@@ -25,6 +25,7 @@ import base64
 from datetime import date, timedelta, datetime
 import io
 import json
+from urllib.parse import urlparse
 from uuid import uuid4
 from flask import Blueprint, Flask, jsonify, render_template, request, session
 from flask_cors import CORS
@@ -50,23 +51,51 @@ def openid4vp():
     if "session_id" in session:
         cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + "oid4vp")
     
+    authorization_params = session["authorization_params"]
+    authorization_details = []
 
-    credential_ids= scope2details(session["authorization_params"]["scope"])
+    if "authorization_details" in authorization_params:
+        authorization_details.extend(
+            json.loads(authorization_params["authorization_details"])
+        )
+    if "scope" in authorization_params:
+        authorization_details.extend(scope2details(authorization_params["scope"]))
 
     credentials_requested = []
-    for cred in credential_ids:
+    for cred in authorization_details:
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
 
     print(credentials_requested)
 
-    session["oid4vp_cred_requested"] = credentials_requested
+    session["oid4vp_cred_requested"] = credentials_requested 
 
-    fields = [] 
+    input_descriptors = []
 
     for id in credentials_requested:
         for doctype in cfgservice.dynamic_issuing[id]:
+            fields = []
+            input_descriptors.append(
+                {
+                    "id": doctype,
+                    "format": {
+                    "mso_mdoc": {
+                        "alg": [
+                        "ES256",
+                        "ES384",
+                        "ES512",
+                        "EdDSA"
+                        ]
+                    }
+                    },
+                    "name": "EUDI PID",
+                    "purpose": "We need to verify your identity",
+                    "constraints": {
+                    "fields": fields
+                    }
+                }
+            )
             for namespace in cfgservice.dynamic_issuing[id][doctype]:
                 for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
                     fields.append(
@@ -78,35 +107,16 @@ def openid4vp():
                         }
                     )
 
-    print("\n fields: ", fields)
+    print(input_descriptors)
 
-    url = "https://dev.verifier-backend.eudiw.dev/ui/presentations"
+    url = cfgservice.dynamic_presentation_url
     payload_cross_device = json.dumps(
         {
             "type": "vp_token",
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "presentation_definition": {
                 "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": [
-                {
-                    "id": "eu.europa.ec.eudi.pid.1",
-                    "format": {
-                    "mso_mdoc": {
-                        "alg": [
-                        "ES256",
-                        "ES384",
-                        "ES512",
-                        "EdDSA"
-                        ]
-                    }
-                    },
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {
-                    "fields": fields
-                    }
-                }
-                ]
+                "input_descriptors": input_descriptors
             }
         }
     )
@@ -117,26 +127,7 @@ def openid4vp():
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "presentation_definition": {
                 "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": [
-                {
-                    "id": "eu.europa.ec.eudi.pid.1",
-                    "format": {
-                    "mso_mdoc": {
-                        "alg": [
-                        "ES256",
-                        "ES384",
-                        "ES512",
-                        "EdDSA"
-                        ]
-                    }
-                    },
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {
-                    "fields": fields
-                    }
-                }
-                ]
+                "input_descriptors": input_descriptors
             },
             "wallet_response_redirect_uri_template":cfgservice.service_url + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id=" + session["session_id"]
         }
@@ -146,22 +137,25 @@ def openid4vp():
         "Content-Type": "application/json",
     }
 
-    response_cross = requests.request("POST", url, headers=headers, data=payload_cross_device).json()
+    response_cross = requests.request("POST", url[:-1], headers=headers, data=payload_cross_device).json()
 
-    response_same = requests.request("POST", url, headers=headers, data=payload_same_device).json()
+    response_same = requests.request("POST", url[:-1], headers=headers, data=payload_same_device).json()
 
+    print(response_same)
     
     oid4vp_requests.update({session["session_id"]:{"response": response_same, "expires":datetime.now() + timedelta(minutes=cfgservice.deffered_expiry)}})
 
+    domain = urlparse(url).netloc
+
     deeplink_url = (
-        "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
+        "eudi-openid4vp://" + domain + "?client_id="
         + response_same["client_id"]
         + "&request_uri="
         + response_same["request_uri"]
     )
 
     qr_code_url = (
-        "eudi-openid4vp://dev.verifier-backend.eudiw.dev?client_id="
+        "eudi-openid4vp://" + domain + "?client_id="
         + response_cross["client_id"]
         + "&request_uri="
         + response_cross["request_uri"]
@@ -206,7 +200,7 @@ def getpidoid4vp():
         response_code = request.args.get("response_code")
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
         url = (
-            "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+            cfgservice.dynamic_presentation_url
             + presentation_id
             + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
             + "&response_code=" + response_code
@@ -217,7 +211,7 @@ def getpidoid4vp():
         presentation_id = request.args.get("presentation_id")
 
         url = (
-            "https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+            cfgservice.dynamic_presentation_url
             + presentation_id
             + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
         )

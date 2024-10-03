@@ -21,6 +21,7 @@ Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT for
 
 """
 
+"""
 import os
 
 from flask import Flask, render_template, session
@@ -149,3 +150,4 @@ app = create_app()
 # gunicorn app:app -b 127.0.0.1:5000
 # flask run
 #
+ """
