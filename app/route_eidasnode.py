@@ -134,6 +134,9 @@ def getlightresponse():
     (b, e) = handle_response(user_id)
     if not b:  # if error in getting the attributes
 
+        if "tries" not in session:
+            session["tries"] = 3
+
         session["tries"] -= 1
 
         if session["tries"] == 0:
