@@ -49,203 +49,256 @@
     ],
     "claims": {
       "eu.europa.ec.eudi.pid.1": {
-        "given_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "display": [
-            {
-              "name": "Current First Names",
-              "locale": "en"            }
-          ]
-        },
         "family_name": {
           "mandatory": true,
           "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Current Family Name",
+              "name": "Family Name(s)",
+              "locale": "en"            }
+          ]
+        },
+        "given_name": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Given Name(s)",
               "locale": "en"            }
           ]
         },
         "birth_date": {
           "mandatory": true,
           "value_type":"full-date",
+          "source":"user",
           "display": [
             {
-              "name": "Date of Birth",
+              "name": "Birth Date",
               "locale": "en"            }
           ]
         },
         "age_over_18": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Adult or minor",
+              "name": "Age Over 18",
+              "locale": "en"
+            }
+          ]
+        },
+        "age_in_years": {
+          "mandatory": false,
+          "value_type":"uint",
+          "display": [
+            {
+              "name": "Age in Years",
               "locale": "en"
             }
           ]
         },
         "age_birth_year": {
-          "mandatory": false
+          "mandatory": false,
+          "value_type":"uint",
+          "display": [
+            {
+              "name": "Age Year of Birth",
+              "locale": "en"
+            }
+          ]
         },
         "family_name_birth": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Last name(s) or surname(s) of the PID User at the time of birth.",
+              "name": "Birth Family Name(s)",
               "locale": "en"
             }
           ]
         },
         "given_name_birth": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "First name(s), including middle name(s), of the PID User at the time of birth.",
+              "name": "Birth Given Name(s)",
               "locale": "en"
             }
           ]
         },
         "birth_place": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The country, state, and city where the PID User was born.",
+              "name": "Birth Place",
               "locale": "en"
             }
           ]
         },
         "birth_country": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The country where the PID User was born, as an Alpha-2 country code.",
+              "name": "Birth Country",
               "locale": "en"
             }
           ]
         },
         "birth_state": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The state, province, district, or local area where the PID User was born. ",
+              "name": "Birth State/Province",
               "locale": "en"
             }
           ]
         },
         "birth_city": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The municipality, city, town, or village where the PID User was born. ",
+              "name": "Birth City",
+              "locale": "en"
+            }
+          ]
+        },
+        "resident_address": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Resident Address",
               "locale": "en"
             }
           ]
         },
         "resident_country": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "he country where the PID User currently resides, as an Alpha-2 country code as specified in ISO 3166-1.",
+              "name": "Resident Country",
               "locale": "en"
             }
           ]
         },
         "resident_state": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The state, province, district, or local area where the PID User currently resides",
+              "name": "Resident State",
               "locale": "en"
             }
           ]
         },
         "resident_city": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The municipality, city, town, or village where the PID User currently resides.",
+              "name": "Resident City",
               "locale": "en"
             }
           ]
         },
         "resident_postal_code": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "Postal code of the place where the PID User currently resides.",
+              "name": "Resident Postal Code",
               "locale": "en"
             }
           ]
         },
         "resident_street": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The name of the street where the PID User currently resides",
+              "name": "Resident Street",
               "locale": "en"
             }
           ]
         },
         "resident_house_number": {
           "mandatory": false,
+          "value_type":"string",
+          "source":"user",
           "display": [
             {
-              "name": "The house number where the PID User currently resides, including any affix or suffix.",
+              "name": "Resident House Number",
               "locale": "en"
             }
           ]
         },
         "gender": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
-              "name": "PID User’s gender, using a value as defined in ISO/IEC 5218.",
+              "name": "Gender",
               "locale": "en"
             }
           ]
         },
         "nationality": {
           "mandatory": false,
+          "source":"user",
+          "value_type":"string",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Nationality",
               "locale": "en"
             }
           ]
         },
         "issuance_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Issuance Date",
               "locale": "en"
             }
           ]
         },
         "expiry_date": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_jurisdiction": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Expiry Date",
               "locale": "en"
             }
           ]
         },
         "issuing_authority": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Issuance Authority",
               "locale": "en"
             }
           ]
@@ -254,7 +307,7 @@
           "mandatory": false,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Document Number",
               "locale": "en"
             }
           ]
@@ -263,34 +316,36 @@
           "mandatory": false,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Administrative Number",
               "locale": "en"
             }
           ]
         },
         "issuing_country": {
           "mandatory": true,
+          "source":"issuer",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Issuing Country",
               "locale": "en"
             }
           ]
         },
         "portrait_capture_date": {
           "mandatory": false,
+          "source":"user",
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Portrait Capture Date",
               "locale": "en"
             }
           ]
         },
-        "portrait": {
+        "issuing_jurisdiction": {
           "mandatory": false,
           "display": [
             {
-              "name": "Alpha-2 country code, representing the nationality of the PID User.",
+              "name": "Issuing Jurisdiction",
               "locale": "en"
             }
           ]

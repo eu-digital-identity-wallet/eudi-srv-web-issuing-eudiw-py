@@ -55,6 +55,7 @@ from misc import (
     credential_error_resp,
     generate_unique_id,
     getAttributesForm,
+    getAttributesForm2,
     scope2details,
     calculate_age,
     validate_image,
@@ -65,9 +66,6 @@ from . import oidc_metadata
 # /pid blueprint
 dynamic = Blueprint("dynamic", __name__, url_prefix="/dynamic")
 CORS(dynamic)  # enable CORS on the blue print
-
-# Log
-from app_config.config_service import ConfService as log
 
 # secrets
 from app_config.config_secrets import flask_secret_key
@@ -142,6 +140,8 @@ def Supported_Countries():
         session["returnURL"] = cfgserv.OpenID_first_endpoint
         session["country"] = form_country
 
+        cfgserv.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + form_country)
+
         """ log.logger_info.info(
             " - INFO - "
             + session["route"]
@@ -179,28 +179,33 @@ def dynamic_R1(country):
     credentials_requested = session["credentials_requested"]
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    log.logger_info.info(
+    """ log.logger_info.info(
         " - INFO -  Version:"
         + cfgserv.current_version
         + " -  URL_R1 for Country: "
         + country
         + " has been created"
-    )
+    ) """
 
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": str(uuid4())})
+
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
         return render_template(
             "dynamic/dynamic-form.html",
-            attributes=attributesForm,
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
             redirect_url=cfgserv.service_url + "dynamic/form",
         )
 
     elif country == "sample":
         user_id = generate_unique_id()
 
-        form_dynamic_data[user_id] = cfgserv.sample_data
+        form_dynamic_data[user_id] = cfgserv.sample_data.copy()
+        form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
 
         if "jws_token" not in session or "authorization_params" in session:
             session["jws_token"] = session["authorization_params"]["token"]
@@ -314,7 +319,7 @@ def red():
         )
 
 
-        log.logger_info.info(
+        cfgserv.app_logger.info(
             " - INFO - "
             + session["route"]
             + " - Version:"
@@ -331,7 +336,6 @@ def red():
         if "error" in data and data["error"] == "Pending" and "response" in data:
             data = data["response"]
 
-        print("\n-----Data-----\n", data)
         """ i = 0
         while "error" in data and data["error"] == "Pending" and i < 20:
             time.sleep(2)
@@ -394,6 +398,8 @@ def red():
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
             form_data[doctype].update({"issuing_country": session["country"]})
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
+            if "credential_type" in doctype_config:
+                form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -444,7 +450,7 @@ def red():
     json_response = json.loads(r.text)
     session["access_token"] = json_response["access_token"]
 
-    log.logger_info.info(
+    cfgserv.app_logger.info(
         " - INFO - "
         + session["route"]
         + " - Version:"
@@ -468,11 +474,13 @@ def red():
         
         scope= credentialsSupported[credential_requested]["scope"]
 
-        if scope in cfgserv.common_name:
+        """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
         else:
-            credential = scope
+            credential = scope  """
+
+        credential = credentialsSupported[credential_requested]["display"][0]["name"]
 
         presentation_data.update({credential:{}})
 
@@ -493,6 +501,9 @@ def red():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+        if "credential_type" in doctype_config:
+                presentation_data[doctype].update({"credential_type":doctype_config["credential_type"] })
+
         if "birth_date" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
@@ -551,8 +562,6 @@ def dynamic_R2():
     data = dynamic_R2_data_collect(
         country=country, user_id=user_id
     )
-
-    print("\n-----dynamic R2 data-----", data)
 
     if "error" in data:
         return data
@@ -874,7 +883,6 @@ def Dynamic_form():
     form_data = request.form.to_dict()
 
     user_id = generate_unique_id()
-    timestamp = int(datetime.timestamp(datetime.now()))
 
     form_data.pop("proceed")
     cleaned_data = {}
@@ -919,31 +927,27 @@ def Dynamic_form():
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
+        
+        elif form_data[item] == "true":
+            cleaned_data[item] = True
 
-        elif item == "age_over_18":
-            if form_data[item] == "on":
-                cleaned_data["age_over_18"] = True
-            else:
-                cleaned_data["age_over_18"] = False
+        elif form_data[item] == "false":
+            cleaned_data[item] = False
 
         else:
-            cleaned_data[item] = form_data[item]
+            if form_data[item] != "" and form_data[item] != "unset":
+             cleaned_data[item] = form_data[item]
 
     cleaned_data.update(
         {
             "version": session["version"],
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
-            "timestamp": timestamp,
         }
     )
 
-    if "age_over_18" not in cleaned_data:
-        cleaned_data["age_over_18"] = False
-
-    print("\n-----Cleaned Data----\n", cleaned_data)
-
-    form_dynamic_data[user_id] = cleaned_data
+    form_dynamic_data[user_id] = cleaned_data.copy()
+    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
 
     if "jws_token" not in session or "authorization_params" in session:
         session["jws_token"] = session["authorization_params"]["token"]
@@ -957,21 +961,27 @@ def Dynamic_form():
         
         scope= credentialsSupported[credential_requested]["scope"]
 
-        if scope in cfgserv.common_name:
+        """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
         else:
-            credential = scope
+            credential = scope """ 
+        
+        credential = credentialsSupported[credential_requested]["display"][0]["name"]
 
         presentation_data.update({credential:{}})
 
         credential_atributes_form=list()
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
+        attributesForm2 = getAttributesForm2(credential_atributes_form).keys()
 
         for attribute in cleaned_data.keys():
 
             if attribute in attributesForm:
+                presentation_data[credential][attribute]= cleaned_data[attribute]
+            
+            if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
         doctype_config=cfgserv.config_doctype[scope]
@@ -983,9 +993,16 @@ def Dynamic_form():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
-        if "birth_date" in presentation_data[credential]:
+        
+        if "credential_type" in doctype_config:
+                presentation_data[credential].update({"credential_type":doctype_config["credential_type"] })
+        
+        if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
+        if scope == "eu.europa.ec.eudi.pid.1" or scope == "org.iso.18013.5.1.mDL":
+            if "birth_date" in presentation_data[credential]:
+                presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
         if "driving_privileges" in presentation_data[credential]:
             json_priv = json.loads(presentation_data[credential]["driving_privileges"])
@@ -1009,7 +1026,6 @@ def redirect_wallet():
     form_data = request.form.to_dict()
 
     user_id= form_data["user_id"]
-    print("\n----Session redirect_wallet----\n", session)
     return redirect(
             url_get(
                 cfgserv.OpenID_first_endpoint,

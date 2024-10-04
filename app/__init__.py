@@ -80,11 +80,15 @@ def setup_metadata():
                     credentials_supported.update(credential)
 
     except FileNotFoundError as e:
-        print(f"Metadata Error: file not found. \n{e}")
+        cfgserv.app_logger.exception(f"Metadata Error: file not found. \n{e}")
     except json.JSONDecodeError as e:
-        print(f"Metadata Error: Metadata Unable to decode JSON. \n{e}")
+        cfgserv.app_logger.exception(
+            f"Metadata Error: Metadata Unable to decode JSON. \n{e}"
+        )
     except Exception as e:
-        print(f"Metadata Error: An unexpected error occurred. \n{e}")
+        cfgserv.app_logger.exception(
+            f"Metadata Error: An unexpected error occurred. \n{e}"
+        )
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
@@ -148,11 +152,15 @@ def setup_trusted_CAs():
                     )
 
     except FileNotFoundError as e:
-        print(f"TrustedCA Error: file not found.\n {e}")
+        cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
     except json.JSONDecodeError as e:
-        print(f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}")
+        cfgserv.app_logger.exception(
+            f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
+        )
     except Exception as e:
-        print(f"TrustedCA Error: An unexpected error occurred.\n {e}")
+        cfgserv.app_logger.exception(
+            f"TrustedCA Error: An unexpected error occurred.\n {e}"
+        )
 
     trusted_CAs = ec_keys
 
@@ -164,7 +172,7 @@ def handle_exception(e):
     # pass through HTTP errors
     if isinstance(e, HTTPException):
         return e
-    log.logger_info.exception("- WARN - Error 500")
+    cfgserv.app_logger.exception("- WARN - Error 500")
     # now you're handling non-HTTP exceptions only
     return (
         render_template(
@@ -177,7 +185,7 @@ def handle_exception(e):
 
 
 def page_not_found(e):
-    log.logger_info.exception("- WARN - Error 404")
+    cfgserv.app_logger.exception("- WARN - Error 404")
     return (
         render_template(
             "misc/500.html",
@@ -197,9 +205,9 @@ def create_app(test_config=None):
 
     @app.route("/", methods=["GET"])
     def initial_page():
-        
-        #print(f"Client IP: {request.headers}")
-        return render_template("misc/initial_page.html", oidc=cfgserv.oidc, service_url = cfgserv.service_url)
+        return render_template(
+            "misc/initial_page.html", oidc=cfgserv.oidc, service_url=cfgserv.service_url
+        )
 
     @app.route("/favicon.ico")
     def favicon():
@@ -232,7 +240,7 @@ def create_app(test_config=None):
         route_oidc,
         route_dynamic,
         route_oid4vp,
-        preauthorization
+        preauthorization,
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
@@ -252,7 +260,7 @@ def create_app(test_config=None):
     # CORS is a mechanism implemented by browsers to block requests from domains other than the server's one.
     CORS(app, supports_credentials=True)
 
-    log.logger_info.info(" - DEBUG - FLASK started")
+    cfgserv.app_logger.info(" - DEBUG - FLASK started")
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -261,7 +269,7 @@ def create_app(test_config=None):
         entity_conf=[
             {"class": OPConfiguration, "attr": "op", "path": ["op", "server_info"]}
         ],
-        filename=dir_path + "/app_config/oid_config.json",
+        filename=dir_path + "/app_config/oid_config.py",
         base_path=dir_path,
     )
 

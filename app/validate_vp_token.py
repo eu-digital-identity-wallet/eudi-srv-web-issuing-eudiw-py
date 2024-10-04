@@ -35,9 +35,10 @@ from cryptography import x509
 import datetime
 import hashlib
 from . import trusted_CAs
+from .app_config.config_service import ConfService as cfgservice
 
 
-def validate_vp_token(response_json):
+def validate_vp_token(response_json, credentials_requested):
     """
     Validate VP token, checking document and presentation_submission attributes
     """
@@ -54,6 +55,8 @@ def validate_vp_token(response_json):
             "issuing_country",
         ],
     }
+
+    
 
     if (
         response_json["presentation_submission"]["definition_id"]
@@ -92,7 +95,7 @@ def validate_vp_token(response_json):
 
     else:
 
-        mdoc = response_json["vp_token"]
+        mdoc = response_json["vp_token"][0]
         mdoc_ver = None
 
         try:
@@ -115,7 +118,16 @@ def validate_vp_token(response_json):
 
         # Validate values received are the same values requested
         namespaces = mdoc_cbor["documents"][pos]["issuerSigned"]["nameSpaces"]
-        attributes_requested = auth_request_values["input_descriptor"]
+
+        attributes_requested = []
+
+        for id in credentials_requested:
+            for doctype in cfgservice.dynamic_issuing[id]:
+                for namespace in cfgservice.dynamic_issuing[id][doctype]:
+                    for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
+                        attributes_requested.append(attribute)
+        
+        #attributes_requested = auth_request_values["input_descriptor"]
         attributes_received = []
 
         for n in namespaces.keys():

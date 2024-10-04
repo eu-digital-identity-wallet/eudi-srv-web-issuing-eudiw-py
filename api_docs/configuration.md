@@ -37,7 +37,6 @@ You can find example test private DS keys and certificates, for country Utopia (
 
 For configuring the installed [idpy-oidc](https://github.com/IdentityPython/idpy-oidc) and [openid4v](https://github.com/rohe/openid4v) libraries, you need to change the following parameters in the ```app/app_config/oid_config.json``` configuration file:
 
-- domain
 - port
 
 ## 4. Metadata configuration

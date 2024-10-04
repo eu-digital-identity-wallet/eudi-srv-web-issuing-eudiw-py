@@ -116,6 +116,10 @@ Please see detailed instructions in [api_docs/credential_offer.md](api_docs/cred
 
 Yes. Please see how in [api_docs/pre-authorized.md](api_docs/pre-authorized.md).
 
+### H. Can I run the issuer in a Docker container?
+
+Yes. Please see how in [Install Docker](install.md#6-docker).
+
 ## How to contribute
 
 We welcome contributions to this project. To ensure that the process is smooth for everyone
