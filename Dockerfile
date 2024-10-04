@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /tmp/log_dev
 RUN chmod -R 755 /tmp/log_dev
 
-RUN git clone git@github.com:eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git
+RUN git clone https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git /root/eudi-srv-web-issuing-eudiw-py
 
 WORKDIR /root/eudi-srv-web-issuing-eudiw-py
 
