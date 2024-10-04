@@ -186,10 +186,81 @@ server {
 3. Restart the Nginx server
 
 
-### 4.2 Install and run certbot to gef a free HTTPS certificate
+### 5.2 Install and run certbot to gef a free HTTPS certificate
 
 1. Follow the installation guide in https://certbot.eff.org
 
 2. Run `certbot` to get a free HTTPS certificate. The `certbot` will also configure the EUDIW Issuer Nginx configuration file with the HTTPS certificate.
 
 3. Restart the Nginx server and goto `https:\\FQDN\` (FQDN configured in the Nginx configuration file)
+
+
+## 6. Docker
+
+To run the EUDIW issuer in Docker please follow these steps:
+
+1. Install Docker following the official instructions for your operating system : <https://docs.docker.com/engine/install/>
+
+2. Download the Dockerfile at <https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/Dockerfile> 
+
+3. Build the Docker: `sudo docker build -t eudiw-issuer .`
+
+4. Create 2 directories to be mounted:
+
+   1. First directory named `config_secrets`
+      
+      This directory will have the cert.pem and key.pem generated in [Section 4](#4-running-your-local-eudiw-issuer-over-https)
+   
+      As well as the config_secrets.py based on this [example](app/app_config/__config_secrets.py)
+
+
+   2. Second directory named `pid-issuer`, inside will be a directory `cert` and `privKey`
+      
+      The `cert` directory has the certificates of the trusted CAs in PEM format as well as the Document/Credential signer (DS) certificates in DER format
+
+      The `privKey` directory has the Document/Credential signer (DS) private keys
+
+
+    Example:
+   
+
+    ```bash
+    docker-issuer
+    ├── Dockerfile
+    ├── config_secrets
+    │   ├── config_secrets.py
+    │   ├── cert.pem
+    │   └── key.pem
+    └── pid-issuer
+        ├── cert
+        │   ├── PID-DS-0001_UT_cert.der
+        │   └── PIDIssuerCAUT01.pem
+        └── privKeys
+            └── PID-DS-0001_UT.pem
+    ```
+
+5. Run Docker
+
+    If running a basic configuration without EIDAS node or Dynamic presentation, their respective variables can be removed from the run command below.
+    
+    ```bash
+    sudo docker run -d \
+    --name eudiw-issuer \
+    -e SERVICE_URL="https://your.service.url/" \
+    -e EIDAS_NODE_URL="https://your.eidas.node.url/" \
+    -e DYNAMIC_PRESENTATION_URL="https://your.dynamic.presentation.url/" \
+    -v ./config_secrets:/root/secrets \
+    -v ./pid-issuer:/etc/eudiw/pid-issuer \
+    -p 5000:5000 \
+    eudiw-issuer
+    ```
+
+5. Docker logs
+
+    Issuer logs in real time: `sudo docker logs -f eudiw-issuer`
+    All logs: `sudo docker logs eudiw-issuer`
+
+6. Stopping Docker Issuer
+   `sudo docker stop eudiw-issuer`
+
+
