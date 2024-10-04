@@ -55,3 +55,28 @@ _20 Jun 2024_
 -  UI scalling for mobile devices
 -  Pull [#11](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/11) Fix date validation for issue_date and expiry_date for doc_type org.iso.18013.5.1.mDL
 -  Pull [#7](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/7) Fix Directory /tmp/log does not exist
+
+## [0.5.0]
+
+_04 Oct 2024_
+### Added:
+- Docker
+- config with environment variables
+- Issue Photo ID attestation
+- Issue attestations needed for the LSP POTENTIAL
+- Endpoint to create a credential offer, from an external request
+- Credential offer guides to the front page
+- Issuing PID/EAA with optional attributes
+- Added information to the metadata on how the attribute will be sourced
+
+### Changed
+- UI changes in the credential offer and authorisation pages
+- change the way optional attributes are managed
+- dynamic generation of Issuer managed attributes (issuance date, expiration date, issuing authority, issuing country, ...)
+- Improve responsiveness to the issuer profile and service (including UI) to improve usability and accessibility
+
+### Fixed
+- Fixed form data being prematurely removed
+- Conflicting dependencies
+- Dynamic Issuing always requests full PID attestation instead of the required attributes.
+  
