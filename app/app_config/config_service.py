@@ -40,6 +40,8 @@ class ConfService:
 
     wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
 
+    revocation_service_url = "https://issuer.eudiw.dev/token_status_list/take"
+
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
@@ -125,6 +127,25 @@ class ConfService:
     # current version
     current_version = "0.6"
 
+    #IANA registered claims
+    Registered_claims={
+        "birth_date":"birthdate",
+        "age_over_18":"age_equal_or_over.18",
+        "family_name_birth":"birth_family_name",
+        "given_name_birth":"birth_given_name",
+        "nationality":"nationalities",
+        "birth_place": "place_of_birth.locality",
+        "birth_country": "place_of_birth.country",
+        "birth_state": "place_of_birth.region",
+        "birth_city": "place_of_birth.locality",
+        "resident_address": "address.formatted",
+        "resident_country": "address.country",
+        "resident_state": "address.region",
+        "resident_city": "address.locality",
+        "resident_postal_code": "address.postal_code",	
+        "resident_street": "address.street_address",
+        "resident_house_number": "address.house_number",
+    }
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
         "0.1": [
