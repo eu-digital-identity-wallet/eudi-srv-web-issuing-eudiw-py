@@ -21,7 +21,9 @@ RUN flaskuser:flaskuser /tmp/log_dev
 
 USER flaskuser
 
-RUN git clone https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git /root/eudi-srv-web-issuing-eudiw-py
+# install cargo into user land
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/home/flaskuser/.cargo/bin:${PATH}"
 
 # copy application contents into container
 WORKDIR /home/flaskuser/eudi-srv-web-issuing-eudiw-py
