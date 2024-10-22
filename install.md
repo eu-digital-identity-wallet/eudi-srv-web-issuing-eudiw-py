@@ -205,7 +205,7 @@ To run the EUDIW issuer in Docker please follow these steps:
 
 3. Build the Docker: `sudo docker build -t eudiw-issuer .`
 
-4. Create 2 directories to be mounted:
+4. Create 3 directories to be mounted:
 
    1. First directory named `config_secrets`
       
@@ -220,17 +220,22 @@ To run the EUDIW issuer in Docker please follow these steps:
 
       The `privKey` directory has the Document/Credential signer (DS) private keys
 
+   3. Third directory named `metadata_config` containing the files `metadata_config.json` and `openid-configuration.json`
+
+      Configure them as per [documentation](api_docs/configuration.md) starting with the templates that are already present in the application code
 
     Example:
    
 
     ```bash
     docker-issuer
-    ├── Dockerfile
     ├── config_secrets
     │   ├── config_secrets.py
     │   ├── cert.pem
     │   └── key.pem
+    ├── metadata_config
+    │   ├── metadata_config.json
+    │   └── openid-configuration.json
     └── pid-issuer
         ├── cert
         │   ├── PID-DS-0001_UT_cert.der
@@ -249,7 +254,8 @@ To run the EUDIW issuer in Docker please follow these steps:
     -e SERVICE_URL="https://your.service.url/" \
     -e EIDAS_NODE_URL="https://your.eidas.node.url/" \
     -e DYNAMIC_PRESENTATION_URL="https://your.dynamic.presentation.url/" \
-    -v ./config_secrets:/root/secrets \
+    -v ./config_secrets://home/flaskuser/secrets \
+    -v ./metadata_config://home/flaskuser/metadata_config \
     -v ./pid-issuer:/etc/eudiw/pid-issuer \
     -p 5000:5000 \
     eudiw-issuer
