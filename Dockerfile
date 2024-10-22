@@ -34,10 +34,13 @@ RUN ./venv/bin/pip install --no-cache-dir -r app/requirements.txt
 
 EXPOSE 5000
 
-ENV FLASK_APP=app\
-    FLASK_RUN_PORT=5000\
-    FLASK_RUN_HOST=0.0.0.0\
+ENV FLASK_APP=app \
+    FLASK_RUN_PORT=5000 \
+    FLASK_RUN_HOST=0.0.0.0 \
     SERVICE_URL="https://127.0.0.1:5000/" \
+    EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/" \
+    DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/" \
+    SECRETS_CONFIG_DIR="/home/flaskuser/secrets"
 # copy entrypoint script to conntainer
 COPY --chown=flaskuser:flaskuser docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
