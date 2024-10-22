@@ -9,16 +9,26 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Add a non root user for the application to run on
+RUN groupadd -r flaskuser && useradd -r -g flaskuser flaskuser
+
+RUN mkdir -p /home/flaskuser/eudi-srv-web-issuing-eudiw-py \
+    && chown -R flaskuser:flaskuser /home/flaskuser
+
 RUN mkdir -p /tmp/log_dev
 RUN chmod -R 755 /tmp/log_dev
+RUN flaskuser:flaskuser /tmp/log_dev
+
+USER flaskuser
 
 RUN git clone https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py.git /root/eudi-srv-web-issuing-eudiw-py
 
-WORKDIR /root/eudi-srv-web-issuing-eudiw-py
+# copy application contents into container
+WORKDIR /home/flaskuser/eudi-srv-web-issuing-eudiw-py
+COPY --chown=flaskuser:flaskuser ./app /home/flaskuser/eudi-srv-web-issuing-eudiw-py/app
 
 RUN python3 -m venv venv
-
-RUN /root/eudi-srv-web-issuing-eudiw-py/venv/bin/pip install --no-cache-dir -r app/requirements.txt
+RUN ./venv/bin/pip install --no-cache-dir -r app/requirements.txt
 
 EXPOSE 5000
 
