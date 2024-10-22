@@ -7,6 +7,11 @@ fi
 
 cp "$SECRETS_CONFIG_DIR/config_secrets.py" /home/flaskuser/eudi-srv-web-issuing-eudiw-py/app/app_config/
 
+if [ -d "$METADATA_CONFIG_DIR" ]; then
+    cp "$METADATA_CONFIG_DIR/metadata_config.json" /home/flaskuser/eudi-srv-web-issuing-eudiw-py/app/metadata_config/
+    cp "$METADATA_CONFIG_DIR/openid-configuration.json" /home/flaskuser/eudi-srv-web-issuing-eudiw-py/app/metadata_config/
+fi
+
 FLASK_RUN_CMD="./venv/bin/flask run"
 
 if [ -f "$SECRETS_CONFIG_DIR/cert.pem" ] && [ -f "$SECRETS_CONFIG_DIR/key.pem" ]; then
