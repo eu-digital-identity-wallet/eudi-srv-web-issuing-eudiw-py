@@ -38,7 +38,8 @@ ENV FLASK_APP=app\
     FLASK_RUN_PORT=5000\
     FLASK_RUN_HOST=0.0.0.0\
     SERVICE_URL="https://127.0.0.1:5000/" \
-    EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
-    DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
+# copy entrypoint script to conntainer
+COPY --chown=flaskuser:flaskuser docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-CMD ["sh", "-c", "cp /root/secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && export REQUESTS_CA_BUNDLE=/root/secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run --cert=/root/secrets/cert.pem --key=/root/secrets/key.pem"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
