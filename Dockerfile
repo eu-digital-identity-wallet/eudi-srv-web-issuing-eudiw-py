@@ -17,7 +17,7 @@ RUN mkdir -p /home/flaskuser/eudi-srv-web-issuing-eudiw-py \
 
 RUN mkdir -p /tmp/log_dev
 RUN chmod -R 755 /tmp/log_dev
-RUN flaskuser:flaskuser /tmp/log_dev
+RUN chown flaskuser:flaskuser /tmp/log_dev
 
 USER flaskuser
 
