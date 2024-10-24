@@ -214,14 +214,15 @@ def sdjwtFormatter(PID, country):
     if doctype == "org.iso.18013.5.1.mDL":
         PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
         iat = DatestringFormatter(PID_Claims_data["issue_date"])
-    if doctype == "eu.europa.ec.eudi.pid.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"]
+        PID_Claims_data.pop("issue_date")
+    else :
+        PID_Claims_data = PID["data"]["claims"][doctype]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-    if doctype == "eu.europa.ec.eudiw.qeaa.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.qeaa.1"]
-        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
+        PID_Claims_data.pop("issuance_date")
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
+
+    PID_Claims_data.pop("expiry_date")
 
     jti = str(uuid4())
 
@@ -238,34 +239,16 @@ def sdjwtFormatter(PID, country):
         "vct":"urn:"+ doctype,
     }
 
-    evidence = pid_data["evidence"][0]
-
-    datafinal = {
-        "verified_claims": {
-            "verification": {
-                "trust_framework": "eidas",
-                "assurance_level": "high",
-            },
-            "claims": {},
-        }
-    }
-
-    disclosure_pid_data = {SDObj(value="evidence"): evidence}
-
-    datafinal["verified_claims"]["verification"].update(disclosure_pid_data)
+    datafinal = {}
 
     JWT_PID_DATA = {}
 
     for x, value in enumerate(list(pid_data["claims"].keys())):
         namespace = list(pid_data["claims"].keys())[x]
         PID_DATA = pid_data["claims"].get(namespace, {})
+        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
 
-        namespacedata = {namespace: {}}
-
-        namespacedata[namespace].update(DATA_sd_jwt(PID_DATA))
-        JWT_PID_DATA.update(namespacedata)
-
-    datafinal["verified_claims"]["claims"].update(JWT_PID_DATA)
+    datafinal.update(JWT_PID_DATA)
 
     claims.update(datafinal)
 
