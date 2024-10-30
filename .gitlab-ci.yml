@@ -1,0 +1,58 @@
+stages:
+    - dockerize
+    - deploy
+
+variables:
+    CI_DEBUG_TRACE: "true"
+    GROUP_NAME: "mdl"
+    PROJECT_NAME: "mdl-issuer-python"
+
+    EXPOSED_IMAGE_PORT: "5000"
+    
+    GITOPS_COMMIT_GROUP_NAME: "itivs-devops"
+    GITOPS_COMMIT_DIR_NAME: "business/mdl-issuer" #naujas kintamasis
+    GITOPS_DIR_NAME: "argocd-apps"
+
+    JAVA_CONTAINER_MEM_START: "256M"
+    JAVA_CONTAINER_MEM_LIMIT: "512M"
+
+    GITLAB_URL: "gitlab-new.regitra.lt"
+    DOCKER_REPOSITORY: "gitlab-new.regitra.lt:5050"
+    IMAGE_NAME: "$GROUP_NAME/$PROJECT_NAME:$CI_COMMIT_SHORT_SHA"
+
+    DOCKER_HOST: "tcp://docker:2375"
+
+dockerize:
+    stage: dockerize
+    services:
+        - docker:18.09.7-dind
+    dependencies:
+        - build
+    tags: [ shell ]
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REPOSITORY
+        - docker build -t $DOCKER_REPOSITORY/$IMAGE_NAME .
+        - docker push $DOCKER_REPOSITORY/$IMAGE_NAME
+    only:
+        - regitra
+
+.update-image-tag-script: &update-image-tag-script
+    - git config --global http.sslCAinfo /etc/docker/certs.d/gitlab-new.regitra.lt:5050/gitlab-new.regitra.lt.crt
+    - git config --global user.email "gitlab-ci@regitra.lt"
+    - git config --global user.name "GitLab CI"
+    - git clone --single-branch --branch $CI_COMMIT_BRANCH https://$CI_DEPLOY_USER:$CI_DEPLOY_PASSWORD@$GITLAB_URL/$GITOPS_COMMIT_GROUP_NAME/$GITOPS_DIR_NAME.git
+    - cd $GITOPS_DIR_NAME
+    - yq e .image.name=\"$IMAGE_NAME\" -i $GITOPS_COMMIT_DIR_NAME/values.yaml
+    - cat $GITOPS_COMMIT_DIR_NAME/values.yaml
+    - git commit -am $PROJECT_NAME" update image tag"
+    - git push https://$CI_DEPLOY_USER:$CI_DEPLOY_PASSWORD@$GITLAB_URL/$GITOPS_COMMIT_GROUP_NAME/$GITOPS_DIR_NAME.git HEAD:$CI_COMMIT_BRANCH
+
+deploy:
+    stage: deploy
+    tags: [ shell ]
+    script:
+        - *update-image-tag-script
+    rules:
+        - if: $CI_COMMIT_BRANCH == 'regitra'
+          when: manual
+        - when: never
