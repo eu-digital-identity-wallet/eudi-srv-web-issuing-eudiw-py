@@ -293,5 +293,5 @@ def create_app(test_config=None):
 #
 # Usage examples:
 # flask --app app run --debug
-# flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/key.pem --host=127.0.0.1 --port=4430
+# flask --app app run --debug --cert=app/certs/certHttps.pem --key=app/certs/PID-DS-0001_UT.pem --host=127.0.0.1 --port=4430
 #

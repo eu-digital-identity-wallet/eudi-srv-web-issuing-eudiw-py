@@ -34,7 +34,8 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL","https://192.168.25.67:5000/")
+    # service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
     #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
