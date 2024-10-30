@@ -1,9 +1,9 @@
 {
-  "credential_issuer": "https://192.168.25.67:5000",
-  "credential_endpoint": "https://192.168.25.67:5000/credential",
-  "batch_credential_endpoint": "https://192.168.25.67:5000/batch_credential",
-  "notification_endpoint": "https://192.168.25.67:5000/notification",
-  "deferred_credential_endpoint": "https://192.168.25.67:5000/deferred_credential",
+  "credential_issuer": "https://172.23.1.160:5000",
+  "credential_endpoint": "https://172.23.1.160:5000/credential",
+  "batch_credential_endpoint": "https://172.23.1.160:5000/batch_credential",
+  "notification_endpoint": "https://172.23.1.160:5000/notification",
+  "deferred_credential_endpoint": "https://172.23.1.160:5000/deferred_credential",
   "credential_configurations_supported": {
     
 
