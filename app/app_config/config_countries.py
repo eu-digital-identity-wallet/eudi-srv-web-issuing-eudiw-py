@@ -36,7 +36,7 @@ class ConfCountries:
         "EU": {
             "name": "nodeEU",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=EU",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_EU.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_EU.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EU.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EU_cert.der",
@@ -56,8 +56,8 @@ class ConfCountries:
         formCountry: {
             "name": "FormEU",
             "pid_url": cfgserv.service_url + "pid/form",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_UT.pem",
-            # "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/hackathon-DS-0001_UT.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_UT.pem",
+            # "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/hackathon-DS-0001_UT.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_UT_cert.der",
@@ -83,7 +83,7 @@ class ConfCountries:
         },
         "PT": {
             "name": "Portugal",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_PT.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_PT.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_PT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_PT_cert.der",
@@ -128,7 +128,7 @@ class ConfCountries:
         },
         "EE": {
             "name": "Estonia",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_EE.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_EE.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
@@ -164,7 +164,7 @@ class ConfCountries:
         "CZ": {
             "name": "Czechia",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_CZ.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_CZ.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_CZ_cert.der",
@@ -179,7 +179,7 @@ class ConfCountries:
         "NL": {
             "name": "Netherland",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=NL",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_NL.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_NL.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_NL_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
@@ -193,7 +193,7 @@ class ConfCountries:
         "LU": {
             "name": "Luxembourg",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=LU",
-            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/PID-DS-0001_LU.pem",
+            "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privKey/PID-DS-0001_LU.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_LU_cert.der",
             "loa": "http://eidas.europa.eu/LoA/high",
