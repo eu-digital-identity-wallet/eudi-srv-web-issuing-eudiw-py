@@ -1,13 +1,6 @@
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-RUN gpg2 --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
-RUN gpg2 --export --armor 871920D1991BC93C | apt-key add - && apt-get update
-
-RUN apt-get update && apt-get install curl
-
-RUN curl -s https://download.docker.com/linux/debian/gpg | apt-key add -
 
 RUN apt-get update && apt-get install -y \
     python3.10 \
