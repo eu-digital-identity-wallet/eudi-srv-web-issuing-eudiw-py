@@ -2,7 +2,9 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN curl -s https://download.docker.com/linux/debian/gpg | gpg --dearmor > /usr/share/keyrings/docker.gpg
+RUN apt install curl
+
+RUN curl -s https://download.docker.com/linux/debian/gpg | apt-key add -
 
 RUN apt-get update && apt-get install -y \
     python3.10 \
