@@ -2,6 +2,9 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN gpg --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
+RUN gpg --export --armor 871920D1991BC93C | apt-key add - && apt-get update
+
 RUN apt-get update && apt-get install curl
 
 RUN curl -s https://download.docker.com/linux/debian/gpg | apt-key add -
