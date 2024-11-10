@@ -2,8 +2,8 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN gpg --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
-RUN gpg --export --armor 871920D1991BC93C | apt-key add - && apt-get update
+RUN gpg2 --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
+RUN gpg2 --export --armor 871920D1991BC93C | apt-key add - && apt-get update
 
 RUN apt-get update && apt-get install curl
 
