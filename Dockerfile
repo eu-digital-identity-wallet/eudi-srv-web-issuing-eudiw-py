@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt install curl
+RUN apt-get update && apt-get install curl
 
 RUN curl -s https://download.docker.com/linux/debian/gpg | apt-key add -
 
