@@ -26,8 +26,6 @@ dockerize:
     stage: dockerize
     services:
         - docker:18.09.7-dind
-    dependencies:
-        - build
     tags: [ shell ]
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REPOSITORY
