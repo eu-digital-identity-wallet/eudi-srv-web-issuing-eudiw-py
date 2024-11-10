@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+RUN apt update && apt install -y \
     python3.10 \
     python3.10-venv \
     python3.10-dev \
