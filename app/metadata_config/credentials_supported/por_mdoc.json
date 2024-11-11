@@ -42,7 +42,7 @@
         "name": "Power Of Representation",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/por.png",
+          "uri": "https://examplestate.com/public/por.png",
           "alt_text": "A square figure of a PoR"
         }
       }
