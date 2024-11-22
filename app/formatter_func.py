@@ -135,8 +135,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
-
-    payload = "doctype=" + doctype
+    payload = "doctype=" + doctype + "&country=" + country
     headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'X-Api-Key': revocation_api_key
