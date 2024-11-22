@@ -365,7 +365,6 @@ class ConfService:
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
-            "eu.europa.ec.eudi.mdl_jwt_vc_json",
             "eu.europa.ec.eudi.mdl_mdoc",
             "eu.europa.ec.eudi.pid_jwt_vc_json",
             "eu.europa.ec.eudi.pid_mdoc",

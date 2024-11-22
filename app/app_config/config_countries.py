@@ -66,7 +66,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
@@ -93,7 +92,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
@@ -108,7 +106,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
             ],
