@@ -25,7 +25,7 @@ variables:
 dockerize:
     stage: dockerize
     services:
-        - docker:18.09.7-dind
+        - docker:27.3.1-dind
     tags: [ shell ]
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REPOSITORY
