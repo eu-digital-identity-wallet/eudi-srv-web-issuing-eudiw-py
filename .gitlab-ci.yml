@@ -20,7 +20,7 @@ variables:
     DOCKER_REPOSITORY: "gitlab-new.regitra.lt:5050"
     IMAGE_NAME: "$GROUP_NAME/$PROJECT_NAME:$CI_COMMIT_SHORT_SHA"
 
-    DOCKER_HOST: "tcp://docker:2376"
+    DOCKER_HOST: "tcp://docker:2375"
 
 dockerize:
     stage: dockerize
