@@ -135,7 +135,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
-    payload = "doctype=" + doctype + "&country=" + country
+    payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
     headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'X-Api-Key': revocation_api_key
@@ -223,19 +223,21 @@ def sdjwtFormatter(PID, country):
 
     PID_Claims_data.pop("expiry_date")
 
-    jti = str(uuid4())
+    #jti = str(uuid4())
 
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
 
     claims = {
-        "iss": cfgservice.service_url[:-1],
-        "jti": jti,
+        #"iss": cfgservice.service_url[:-1],
+        "iss": "https://credential-issuer.example.com",
+        #"jti": jti,
         "iat": iat,
         # "nbf": iat,
         "exp": exp,
-        "status": "validation status URL",
-        "vct":"urn:"+ doctype,
+        #"status": "validation status URL",
+        #"vct":"urn:"+ doctype,
+        "vct":"urn:"+ doctype.replace(".",":"),
     }
 
     datafinal = {}
@@ -250,6 +252,17 @@ def sdjwtFormatter(PID, country):
     datafinal.update(JWT_PID_DATA)
 
     claims.update(datafinal)
+
+    with open(
+        cfgcountries.supported_countries[country]["pid_mdoc_cert"], "rb"
+    ) as certificate:
+         certificate_data=certificate.read()
+    
+    certificate_base64=base64.b64encode(certificate_data).decode("utf-8")
+    x5c={
+        "x5c":[]
+    }
+    x5c["x5c"].append(certificate_base64)
 
     with open(
         cfgcountries.supported_countries[country]["pid_mdoc_privkey"], "rb"
@@ -304,6 +317,7 @@ def sdjwtFormatter(PID, country):
         keys["issuer_key"],
         keys["holder_key"],
         add_decoy_claims=False,
+        extra_header_parameters=x5c
     )
 
     # sdjwt_at_holder = SDJWTHolder(sdjwt_at_issuer.sd_jwt_issuance)
@@ -348,22 +362,29 @@ def DATA_sd_jwt(PID):
             Data.update(data)
 
     if age_equal_or_over:
-            data = {SDObj(value="age_equal_or_over"): age_equal_or_over}
+            data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
             Data.update(data)
     if place_of_birth:
-            data = {SDObj(value="place_of_birth"): place_of_birth}
+            data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
             Data.update(data)
     if address_dict:
-            data = {SDObj(value="address"): address_dict}
+            data = {SDObj(value="address"): recursive(address_dict)}
             Data.update(data)        
             
     return Data
 
 
+def recursive(dict):
+    temp_dic={}
+    for f in dict:
+        recursive = {SDObj(value=f): dict[f]}
+        temp_dic.update(recursive)
+    return temp_dic 
+
 def DatestringFormatter(date):
     date_objectiat = datetime.datetime.strptime(date, "%Y-%m-%d")
 
-    datefinal = int(date_objectiat.timestamp() / (24 * 60 * 60))
+    datefinal = int(date_objectiat.timestamp())
 
     return datefinal
 
