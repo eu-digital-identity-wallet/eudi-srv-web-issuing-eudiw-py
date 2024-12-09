@@ -20,16 +20,12 @@ variables:
     DOCKER_REPOSITORY: "gitlab-new.regitra.lt:5050"
     IMAGE_NAME: "$GROUP_NAME/$PROJECT_NAME:$CI_COMMIT_SHORT_SHA"
 
-    
+    DOCKER_HOST: "tcp://docker:2376"
 
 dockerize:
     stage: dockerize
     services:
-        - name: docker:27.3.1-dind
-          alias: docker
-          command: ["--host=tcp://0.0.0.0:2375"]  # Uždavimas Docker demonui klausyti visų adresų
-    variables:
-        DOCKER_HOST: "tcp://docker:2375"
+        - docker:27.3.1-dind
     tags: [ shell ]
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REPOSITORY
