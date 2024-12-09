@@ -25,7 +25,9 @@ variables:
 dockerize:
     stage: dockerize
     services:
-        - docker:27.3.1-dind
+        - name: docker:27.3.1-dind
+          alias: docker
+          command: ["--host=tcp://0.0.0.0:2375"]  # Uždavimas Docker demonui klausyti visų adresų
     tags: [ shell ]
     script:
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REPOSITORY
