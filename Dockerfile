@@ -4,7 +4,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y
 
-RUN apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip git gcc build-essential libssl-dev nano
+#RUN apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip git gcc build-essential libssl-dev nano
+
+RUN apt-get install -y python3
+
+RUN python3 -V
 
 RUN rm -rf /var/lib/apt/lists/*
 
