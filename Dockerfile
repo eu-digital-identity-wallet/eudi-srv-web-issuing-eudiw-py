@@ -10,6 +10,10 @@ RUN apt-get install -y python3 python3-venv git
 
 RUN python3 -V
 
+RUN pip install --upgrade pip
+
+RUN pip install --upgrade setuptools
+
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /tmp/log_dev
