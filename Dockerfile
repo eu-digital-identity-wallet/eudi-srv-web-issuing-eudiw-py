@@ -8,10 +8,6 @@ RUN apt-get update -y
 
 RUN apt-get install -y python3 python3-venv python3-dev python3-pip git
 
-RUN pip install --upgrade pip
-
-RUN pip install --upgrade setuptools
-
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /tmp/log_dev
