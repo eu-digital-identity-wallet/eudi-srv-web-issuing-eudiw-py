@@ -2,16 +2,11 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y \
-    python3.10 \
-    python3.10-venv \
-    python3.10-dev \
-    python3-pip \
-    git \
-    gcc \
-    build-essential \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y
+
+RUN apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip git gcc build-essential libssl-dev nano
+
+RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /tmp/log_dev
 RUN chmod -R 755 /tmp/log_dev
