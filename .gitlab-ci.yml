@@ -54,6 +54,6 @@ deploy:
     script:
         - *update-image-tag-script
     rules:
-        - if: $CI_COMMIT_BRANCH == 'regitra'
+        - if: $CI_COMMIT_BRANCH == 'test'
           when: manual
         - when: never
