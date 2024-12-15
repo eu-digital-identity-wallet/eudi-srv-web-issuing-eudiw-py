@@ -49,11 +49,17 @@ dockerize:
     - git push https://$CI_DEPLOY_USER:$CI_DEPLOY_PASSWORD@$GITLAB_URL/$GITOPS_COMMIT_GROUP_NAME/$GITOPS_DIR_NAME.git HEAD:$CI_COMMIT_BRANCH
 
 deploy:
-    stage: deploy
-    tags: [ shell ]
-    script:
-        - *update-image-tag-script
-    rules:
-        - if: $CI_COMMIT_BRANCH == 'test'
-          when: manual
-        - when: never
+  stage: deploy
+  tags: [ shell ]
+  script:
+    - *update-image-tag-script
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+      when: manual
+    - if: $CI_COMMIT_BRANCH == 'dev'
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == 'test'
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == 'staging'
+      when: on_success
+    - when: never
