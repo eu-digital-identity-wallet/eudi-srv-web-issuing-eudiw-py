@@ -22,7 +22,7 @@ pillow==10.2.0
 segno==1.6.1
 qrcode-artistic==3.0.2
 gunicorn
-oscrypto
+oscrypto=1.3.0
 git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
 git+https://github.com/eu-digital-identity-wallet/idpy-oidc.git
 git+https://github.com/eu-digital-identity-wallet/openid4v.git
