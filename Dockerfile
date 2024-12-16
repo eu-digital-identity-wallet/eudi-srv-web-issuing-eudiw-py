@@ -26,7 +26,6 @@ EXPOSE 5000
 ENV FLASK_APP=app\
     FLASK_RUN_PORT=5000\
     FLASK_RUN_HOST=0.0.0.0\
-    SERVICE_URL="https://172.23.1.160:5000/" \
     EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
     DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
 
