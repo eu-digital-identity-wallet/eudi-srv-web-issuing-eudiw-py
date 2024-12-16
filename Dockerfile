@@ -26,8 +26,8 @@ EXPOSE 5000
 ENV FLASK_APP=app\
     FLASK_RUN_PORT=5000\
     FLASK_RUN_HOST=0.0.0.0\
-    SERVICE_URL="https://mdl-test.regitra.lt/" \
+    SERVICE_URL="http://mdl-issuer-service.test.svc.cluster.local/" \
     EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
     DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
 
-CMD ["sh", "-c", "cp ./config_secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && export REQUESTS_CA_BUNDLE=./config_secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run"]
+CMD ["sh", "-c", "cp ./config_secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && cp -r ./pid-issuer /etc/eudiw/pid-issuer && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run"]
