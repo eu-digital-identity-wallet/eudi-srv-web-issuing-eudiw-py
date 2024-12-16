@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+    <title>Form for EUDI Wallet</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Enter the data for your EUDI Wallet</h1>
+        <form method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
+            <h3>Please select a number (1-8) for the case:</h3>
+
+            <!-- Dropdown for numbers 1-8 -->
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label for="caseSelect">Case Number:</label>
+                    <select class="form-control" name="case" id="caseSelect" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Ensure form submission sends the selected value of the dropdown
+        document.getElementById('eudiForm').addEventListener('submit', function(event) {
+            var caseValue = document.getElementById('caseSelect').value;
+            console.log('Selected case number:', caseValue);
+            // Optionally, you can handle the form submission here if you want to use AJAX.
+        });
+    </script>
+</body>
+</html>
