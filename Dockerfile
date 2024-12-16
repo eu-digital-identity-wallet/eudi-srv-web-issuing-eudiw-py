@@ -26,6 +26,7 @@ EXPOSE 5000
 ENV FLASK_APP=app\
     FLASK_RUN_PORT=5000\
     FLASK_RUN_HOST=0.0.0.0\
+    SERVICE_URL="https://mdl-test.regitra.lt/" \
     EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
     DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
 
