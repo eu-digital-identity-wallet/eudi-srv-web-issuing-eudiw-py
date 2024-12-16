@@ -30,4 +30,4 @@ ENV FLASK_APP=app\
     EIDAS_NODE_URL="https://preprod.issuer.eudiw.dev/EidasNode/"\
     DYNAMIC_PRESENTATION_URL="https://dev.verifier-backend.eudiw.dev/ui/presentations/"
 
-CMD ["sh", "-c", "cp ./config_secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && mkdir /etc/eudiw/pid-issuer && cp -r ./pid-issuer /etc/eudiw/pid-issuer && export REQUESTS_CA_BUNDLE=./config_secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run"]
+CMD ["sh", "-c", "cp ./config_secrets/config_secrets.py /root/eudi-srv-web-issuing-eudiw-py/app/app_config/ && export REQUESTS_CA_BUNDLE=./config_secrets/cert.pem && /root/eudi-srv-web-issuing-eudiw-py/venv/bin/flask run"]
