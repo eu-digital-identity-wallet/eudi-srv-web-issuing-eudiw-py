@@ -13,7 +13,7 @@
         "urn:ietf:params:oauth:grant-type:jwt-bearer",
         "refresh_token"
     ],
-    "jwks_uri": "https://mdl-test.regitra.lt/static/jwks.json",
+    "jwks_uri": "https://mdl-test.eregitra.lt/static/jwks.json",
     "scopes_supported": [
         "openid"
     ],
@@ -78,13 +78,13 @@
     "code_challenge_methods_supported": [
         "S256"
     ],
-    "issuer": "https://mdl-test.regitra.lt",
-    "registration_endpoint": "https://mdl-test.regitra.lt/registration",
-    "introspection_endpoint": "https://mdl-test.regitra.lt/introspection",
-    "authorization_endpoint": "https://mdl-test.regitra.lt/authorizationV3",
-    "token_endpoint": "https://mdl-test.regitra.lt/token",
-    "userinfo_endpoint": "https://mdl-test.regitra.lt/userinfo",
-    "end_session_endpoint": "https://mdl-test.regitra.lt/session",
-    "pushed_authorization_request_endpoint": "https://mdl-test.regitra.lt/pushed_authorizationv2",
-    "credential_endpoint": "https://mdl-test.regitra.lt/credential"
+    "issuer": "https://mdl-test.eregitra.lt",
+    "registration_endpoint": "https://mdl-test.eregitra.lt/registration",
+    "introspection_endpoint": "https://mdl-test.eregitra.lt/introspection",
+    "authorization_endpoint": "https://mdl-test.eregitra.lt/authorizationV3",
+    "token_endpoint": "https://mdl-test.eregitra.lt/token",
+    "userinfo_endpoint": "https://mdl-test.eregitra.lt/userinfo",
+    "end_session_endpoint": "https://mdl-test.eregitra.lt/session",
+    "pushed_authorization_request_endpoint": "https://mdl-test.eregitra.lt/pushed_authorizationv2",
+    "credential_endpoint": "https://mdl-test.eregitra.lt/credential"
 }
