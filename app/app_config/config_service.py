@@ -104,7 +104,7 @@ class ConfService:
     mdl_validity = 30
 
     # MDL issuing Authority
-    mdl_issuing_authority = "Test Regitra mDL issuer"
+    mdl_issuing_authority = "Regitra"
 
     # QEAA namespace
     qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"
