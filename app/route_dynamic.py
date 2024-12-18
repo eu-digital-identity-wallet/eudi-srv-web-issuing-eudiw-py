@@ -201,6 +201,20 @@ def dynamic_R1(country):
             redirect_url=cfgserv.service_url + "dynamic/form",
         )
 
+    if country == "LT":
+        attributesForm = getAttributesForm(session["credentials_requested"])
+        if "user_pseudonym" in attributesForm:
+            attributesForm.update({"user_pseudonym": str(uuid4())})
+
+        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
+        return render_template(
+            "dynamic/test-case-form.html",
+            mandatory_attributes=attributesForm,
+            optional_attributes=attributesForm2,
+            redirect_url=cfgserv.service_url + "dynamic/test_case_form",
+        )
+
     elif country == "sample":
         user_id = generate_unique_id()
 
@@ -594,6 +608,17 @@ def dynamic_R2_data_collect(country, user_id):
 
         return data
 
+    if country == "LT":
+        data = form_dynamic_data.get(user_id, "Data not found")
+
+        if data == "Data not found":
+            return {"error": "error", "error_description": "Data not found"}
+
+        session["version"] = cfgserv.current_version
+        session["country"] = data["issuing_country"]
+
+        return data
+
     if country == "sample":
         data = form_dynamic_data.get(user_id, "Data not found")
 
@@ -735,6 +760,9 @@ def credentialCreation(credential_request, data, country):
 
         form_data = {}
         if country == "FC":
+            form_data = data
+
+        elif country == "LT":
             form_data = data
 
         elif country == "sample":
@@ -1019,6 +1047,450 @@ def Dynamic_form():
             presentation_data[credential].pop("NumberCategories")
 
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
+
+
+@dynamic.route("/test_case_form", methods=["GET", "POST"])
+def test_case_form():
+    """Form page for test cases.
+    Form page where the user can select mDL test case.
+    """
+    session["route"] = "/dynamic/test_case_form"
+    session["version"] = "0.5"
+    session["country"] = "LT"
+    # if GET
+    if request.method == "GET":
+        # print("/pid/form GET: " + str(request.args))
+        if (
+                session.get("country") is None or session.get("returnURL") is None
+        ):  # someone is trying to connect directly to this endpoint
+            return (
+                "Error 101: " + cfgserv.error_list["101"] + "\n",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+    if "Cancelled" in request.form.keys():  # Form request Cancelled
+        return render_template('misc/auth_method.html')
+
+    form_data = request.form.to_dict()
+
+    test_case = form_data.get("case", "1")
+
+    match test_case:
+        case "1":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Pavarde",
+                "given_name": "Vardas",
+                "birth_date": "2008-07-10",
+                "document_number": "002447688",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "2023-10-19"
+                  }
+                ]
+              }
+            }
+            """
+        case "2":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Simpsoniene",
+                "given_name": "Marge",
+                "birth_date": "1966-03-18",
+                "document_number": "00111111",
+                "portrait": "F",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1990-04-20"
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1990-04-20"
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1990-04-20"
+                  }
+                ]
+              }
+            }
+            """
+        case "3":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Simpsonaite",
+                "given_name": "Lisa",
+                "birth_date": "1966-03-18",
+                "document_number": "00222222",
+                "portrait": "F",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.06"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.06"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.06"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+            """
+        case "4":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Homeris",
+                "given_name": "Simpson",
+                "birth_date": "1954-05-19",
+                "document_number": "00333333",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.01"
+                      },
+                      {
+                        "code": "02"
+                      },
+                      {
+                        "code": "64",
+                        "sign": "=",
+                        "value": "100"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.01"
+                      },
+                      {
+                        "code": "02"
+                      },
+                      {
+                        "code": "64",
+                        "sign": "=",
+                        "value": "100"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1990-04-20",
+                    "codes": [
+                      {
+                        "code": "1.01"
+                      },
+                      {
+                        "code": "02"
+                      },
+                      {
+                        "code": "64",
+                        "sign": "=",
+                        "value": "100"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+            """
+        case "5":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Sunus Simpsonas",
+                "given_name": "Bartas",
+                "birth_date": "1960-01-06",
+                "document_number": "00444444",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "A",
+                    "issue_date": "1992-02-11",
+                    "codes": [
+                      {
+                        "code": "79.03"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1992-02-11"
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1992-02-11"
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1992-02-11"
+                  }
+                ]
+              }
+            }
+            """
+        case "6":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "SHACHAR",
+                "given_name": "MATTHEW MICHAEL CHARLES",
+                "birth_date": "1960-01-06",
+                "document_number": "00555555",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "2020-11-07",
+                    "codes": [
+                      {
+                        "code": "78"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "2020-11-07",
+                    "codes": [
+                      {
+                        "code": "78"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "2020-11-07"
+                  }
+                ]
+              }
+            }
+            """
+        case "7":
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "KORS",
+                "given_name": "MICHAEL",
+                "birth_date": "1968-02-01",
+                "document_number": "00666666",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "A1",
+                    "issue_date": "1990-07-03"
+                  },
+                  {
+                    "vehicle_category_code": "A2",
+                    "issue_date": "1990-07-03"
+                  },
+                  {
+                    "vehicle_category_code": "A",
+                    "issue_date": "1990-07-03"
+                  },
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "1987-01-09"
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "1987-01-09"
+                  },
+                  {
+                    "vehicle_category_code": "C1",
+                    "issue_date": "1987-01-09",
+                    "expiry_date": "2027-11-27",
+                    "codes": [
+                      {
+                        "code": "95"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "C",
+                    "issue_date": "1987-01-09",
+                    "expiry_date": "2027-11-27",
+                    "codes": [
+                      {
+                        "code": "95"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "D1",
+                    "issue_date": "1990-07-03",
+                    "expiry_date": "2024-11-27"
+                  },
+                  {
+                    "vehicle_category_code": "D",
+                    "issue_date": "1990-07-03",
+                    "expiry_date": "2024-11-27"
+                  },
+                  {
+                    "vehicle_category_code": "BE",
+                    "issue_date": "1990-07-03"
+                  },
+                  {
+                    "vehicle_category_code": "C1E",
+                    "issue_date": "1990-07-03",
+                    "expiry_date": "2027-11-27",
+                    "codes": [
+                      {
+                        "code": "95"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "CE",
+                    "issue_date": "1990-07-03",
+                    "expiry_date": "2027-11-27",
+                    "codes": [
+                      {
+                        "code": "95"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "D1E",
+                    "issue_date": "1991-07-03",
+                    "expiry_date": "2024-11-27"
+                  },
+                  {
+                    "vehicle_category_code": "DE",
+                    "issue_date": "1991-07-03",
+                    "expiry_date": "2024-11-27"
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "1987-01-09
+                  }
+                ]
+              }
+            }
+            """
+        case _:
+            test_json = """
+            {
+              "mDL": {
+                "family_name": "Jonas",
+                "given_name": "Jonaitis",
+                "birth_date": "1960-01-06",
+                "document_number": "00777777",
+                "portrait": "M",
+                "driving_privileges": [
+                  {
+                    "vehicle_category_code": "B1",
+                    "issue_date": "2019-12-24",
+                    "codes": [
+                      {
+                        "code": "78"
+                      },
+                      {
+                        "code": "70.CND"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "B",
+                    "issue_date": "2019-12-24",
+                    "codes": [
+                      {
+                        "code": "78"
+                      },
+                      {
+                        "code": "70.CND"
+                      }
+                    ]
+                  },
+                  {
+                    "vehicle_category_code": "AM",
+                    "issue_date": "2019-12-24",
+                    "codes": [
+                      {
+                        "code": "70.CND"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+            """
+
+    user_id = generate_unique_id()
+
+    mdl_data = json.loads(test_json)
+
+    if mdl_data["mDL"]["portrait"] == "M":
+        mdl_data["mDL"]["portrait"] = cfgserv.portrait1
+    else:
+        mdl_data["mDL"]["portrait"] = cfgserv.portrait2
+
+    mdl_data["mDL"].update(
+        {
+            "version": session["version"],
+            "issuing_country": session["country"],
+            "issuing_authority": cfgserv.mdl_issuing_authority,
+        }
+    )
+
+    form_dynamic_data[user_id] = mdl_data["mDL"].copy()
+    form_dynamic_data[user_id].update({"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
+
+    if "jws_token" not in session or "authorization_params" in session:
+        session["jws_token"] = session["authorization_params"]["token"]
+    session["returnURL"] = cfgserv.OpenID_first_endpoint
+
+    doctype_config = cfgserv.config_doctype["org.iso.18013.5.1.mDL"]
+
+    today = date.today()
+    expiry = today + timedelta(days=doctype_config["validity"])
+
+    for privilege in mdl_data["mDL"]["driving_privileges"]:
+        if "expiry_date" not in privilege:
+            privilege["expiry_date"] = expiry
+
+    mdl_data["mDL"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
+    mdl_data["mDL"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+    mdl_data["mDL"].update({"issuing_country": session["country"]}),
+    mdl_data["mDL"].update({"issuing_authority": doctype_config["issuing_authority"]})
+    mdl_data["mDL"].update({"age_over_18": True if calculate_age(mdl_data["mDL"]["birth_date"]) >= 18 else False})
+    mdl_data["mDL"].update({"un_distinguishing_sign": "LT"}),
+
+    # TODO check if needed
+    mdl_data["mDL"].update({"portrait": base64.b64encode(base64.urlsafe_b64decode(mdl_data["mDL"]["portrait"])).decode("utf-8")})
+
+    return render_template("dynamic/form_authorize.html", presentation_data=mdl_data, user_id="LT." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet")
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
 def redirect_wallet():

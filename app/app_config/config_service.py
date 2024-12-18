@@ -101,10 +101,10 @@ class ConfService:
     mdl_doctype = "org.iso.18013.5.1.mDL"
 
     # mDL validity in days
-    mdl_validity = 7
+    mdl_validity = 30
 
     # MDL issuing Authority
-    mdl_issuing_authority = "Test MDL issuer"
+    mdl_issuing_authority = "Regitra"
 
     # QEAA namespace
     qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"

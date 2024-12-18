@@ -20,35 +20,17 @@
     <script type="text/javascript" id="jqueryId" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.min.js') }}" charset="UTF-8"></script>
 
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/promiz/promiz-1.0.6.js') }}" charset="UTF-8"></script>
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/sha3/sha3_en_9.7.1.20.1679559965505.js" integrity="sha256-CtgtQUShEl8dHOb+FeLo3tfArvxek4PGiS6UGczk5OY= sha384-DUt2v30t+xTbxAyvcy9BpswNEUrWJT8Fl1P1Fc+ScGgcUzrwtm2idVOj35m6NisW sha512-HrljBBDmVHa8MfWcgNifCVutUrKi/3eutVkadMdDUAP3dcraj6n1u2mx5J+UkkRFwYnEoCpFabG46Jxp8EdDnQ==" charset="UTF-8"></script>
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/static-validator/static-validator_en_9.7.1.20.1679559965505.js" integrity="sha256-hBVKKp1NO+Jxso6WVWYJzYcEyGudrlIJwUpEDp1Zf5E= sha384-my8RgF2Pk8SwCkcpI3HRVX8PX5QyMv+tlmLwVhekljHUBgLVcNe8PxqjYnn9lhUw sha512-VvLFAJWMDPOVXf6HAWnhROxaXLFB0LZWzeglGtlliYHLLEQzrV3N9ixrCfPg3LOrfxtyifR4xdI9+QL2QxRoKw==" charset="UTF-8"></script>
--->
 
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-3.4.1-dist/js/bootstrap.min.js') }}" charset="UTF-8" defer="true"></script>
-
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/screen/screen_en_9.7.1.20.1679559965505.js" integrity="sha256-Bt/KIz2P8ILyeohGr85rPLuC6V7lURI5hYwMKIDc2zw= sha384-Mm+L2nENQ0OpPq7RNoEtQVUpvJPZF+lp01OK3yDSCZBHNQFEMT+buBppzOCO2FVk sha512-OdapdrhB9SEwj64seVqqRD2sJWGAC02OvoKuc8nev/DYqy10gviD21XH+wsZcwKI5yVUpcUa215v7PBkJUJ40g==" charset="UTF-8" defer="true"></script>
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/contrast/contrast_en_9.7.1.20.1679559965505.js" integrity="sha256-s379ROUOzGyyK1H8neCEIRKo3wQnabmtXqp1Moh0Vo8= sha384-O7XOTZyM/toKPrGBJBI379zpo4nUxnJT3eUq1dgPwDkuzeJ3N8alAprhuAD3UKhT sha512-nsaRCL+FvdZ0S0dy8btbepr17GnX//XjBpJfr/UYDKpwS2tRUaYs4u8vh8RikLSgKudgRt39EeBuKvkWaCoGPA==" charset="UTF-8" defer="true"></script>
-    -->
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/html5shiv/html5shiv-3.7.3.js') }}" charset="UTF-8"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/respond/respond-1.4.2.js') }}" charset="UTF-8"></script>
     <meta name="referrer" content="no-referrer">
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/framekiller/framekiller_en_9.7.1.20.1679559965505.js" integrity="sha256-4eAcfcjcYggBc15lar0Ti3diGjQ2qnhfNeAQo2n7f+g= sha384-OOLLE3ikdVyR66gGCHsB/hGYstmmpUtONQOe/U8tP/PRXocqpI43ariFDGzKFcIG sha512-/7sPyYaEFDxkPyGQzkLKHSi/RSXBAbR5BjZLgUtkaRx8Qk4SROLIH96d+7bbkpU61osJDdB9gyjtilpPIFnF6w==" charset="UTF-8"></script>
-    -->
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/loc/loc_en_9.7.1.20.1679559965505.js') }}" charset="UTF-8"></script>
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/locval/locval_en_9.7.1.20.1679559965505.js" integrity="sha256-fGdBvjTPjOPZBmgDo8xMKgZUwmXXCzYZ+BbHErfhc/Q= sha384-Y9eAdYjT/TZ0VPUxw3Ex/TVSZZzPsV1mRoKD0BTkrQn0L615z24j26O2CZdT1Xl+ sha512-T9HoOOy1OkJ0l1GWqvT2RAR9frKd4zImDm1uyHxjmB/nxNBhmdjEhR9MckiWiNv2/UrFrMZJwSMB4Po/ExbFOw==" charset="UTF-8"></script>
--->
 
     <title>Form for your EUDI Wallet</title>
 </head>
 
-<body id="responsive-main-nav">
-    <!--
-    <div id="skip"><a href="#content" accesskey="M">Skip to Main Content</a></div>
-    -->
+<body id="responsive-main-nav">>
 
     <div class="main container-fluid">
 
@@ -56,45 +38,6 @@
         <header role="banner" class="main-header">
             <div class="container">
                 <div class="row">
-
-                    <!-- no env stamp for PRODUCTION_GENESIS -->
-                    <!--
-                    <div class="branding col-sm-8 col-md-9"><span class="eu-login"><a href="https://webgate.ec.europa.eu/cas/login?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD">EU Login</a></span><span class="baseline">One account, many EU services</span>
-                        <a href="#" id="btn-contrast" title="Contrast"></a>
-                    </div>
-                    <div class="language-selection col-sm-4 col-md-3"><a name="languageFormLink" class="service"></a>
-                        <form id="languageForm" method="post" action="https://webgate.ec.europa.eu/cas/changeLanguage.cgi" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
-                            <div class="nodisplay"><input type="hidden" name="TxId" value="ECAS_TX-7404445-muGesS1yA6xk1cNZThduStJfzYAf2E6lNlKgSbgRUkk8b11njySedgSG7TfBHYIywQ8pLO15f2LEyDH2zvJysd-rS0vSrmBGYCAxyMeVAWeYi-yMakrDvZB24PZQb4NZAdNpKMYC8lnirbqt3dMSWuzGhQzzqAmSEkcCcO0m8XAFTjPx2A4kr5Ex5MJDRrtnAAtQm" /></div><input type="hidden" name="here" value="/cas/login?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" id="here" /><select name="lang" id="lang" class="form-control">
-                                <option value="bg">български (bg)</option>
-                                <option value="cs">čeština (cs)</option>
-                                <option value="da">dansk (da)</option>
-                                <option value="de">Deutsch (de)</option>
-                                <option value="et">eesti (et)</option>
-                                <option value="el">ελληνικά (el)</option>
-                                <option value="en" selected="selected" class="selected">English (en)</option>
-                                <option value="es">español (es)</option>
-                                <option value="fr">français (fr)</option>
-                                <option value="ga">Gaeilge (ga)</option>
-                                <option value="hr">hrvatski (hr)</option>
-                                <option value="it">italiano (it)</option>
-                                <option value="lv">latviešu (lv)</option>
-                                <option value="lt">lietuvių (lt)</option>
-                                <option value="hu">magyar (hu)</option>
-                                <option value="mt">Malti (mt)</option>
-                                <option value="nl">Nederlands (nl)</option>
-                                <option value="pl">polski (pl)</option>
-                                <option value="pt">português (pt)</option>
-                                <option value="ro">română (ro)</option>
-                                <option value="sk">slovenčina (sk)</option>
-                                <option value="sl">slovenščina (sl)</option>
-                                <option value="fi">suomi (fi)</option>
-                                <option value="sv">svenska (sv)</option>
-                            </select>
-                            <noscript><input type="submit" name="_submit" value="Select" id="languageButtonId" /></noscript>
-                        </form>
-                        <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/dynamic-validator/languageForm_nv_9.7.1.20.1679559965505_en.js?nv=0&nf=0" charset="UTF-8" defer="true"></script>
-                    </div>
-                -->
                 </div>
             </div>
         </header>
@@ -103,20 +46,14 @@
             <div class="row">
                 <div class="col-md-12">
 
-                    <!--
-                    <p class="relying-party"><strong>etranslation</strong> requires you to authenticate</p>
-                    -->
                     <h1>Enter the data for your EUDI Wallet</h1>
                     <div id="content" class="content-wrap content-center col-md-6 col-sm-7">
 
                         <div class="genericErrors" id="genericErrorsDesc">
 
                         </div>
-                        <!-- <status>EID_COUNTRY_SELECTION</status> -->
                         <h2>Please enter your basic information</h2>
-                        <!--bean-ext:form action="" styleClass="mt"-->
                         <form id="selectCountryForm" method="post" action="{{redirect_url}}" onsubmit="return validateImage()" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
-                            <!-- <div class="nodisplay"><input type="hidden" name="TxId" value="ECAS_TX-7404446-Rej9lkLFeXORXm9rG7q4Xqo1xGRJ86gt3hoJcfMG3XyxQrAyn8mu9PbXRCZoKKUbCzLlIzG5jKgHy4vlfgkG5M-rS0vSrmBGYCAxyMeVAWeYi-PVgrhNnzagSfzJvUraGtvIPzqv8cbsV46ZMUiinVIlcDkNWEKzr5uBS6CMnabjUfRGxDHabrZictNyNLy0AsLWy" /></div><input type="hidden" name="loginRequestId" value="ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" id="loginRequestId" /> -->
                             <h3>Test Provider Form</h3>
                             <p>This data is only used for issuing credentials for testing purposes.</p>
                             <div id="eidasCountries">
@@ -253,136 +190,6 @@
                                         {% endif %} 
                                     {% endfor %}
                                 </div>
-                                <h3>Optional Elements</h3>
-                                {% for name, value in optional_attributes.items() %}    
-                                        {% if value == 'string' %}
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
-                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
-                                                </div>
-                                            </div>
-                                        {% elif value == 'uint' %}
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
-                                                    <input type="number" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" min="0">
-                                                </div>
-                                            </div>
-                                        {% elif value == 'bool' %}
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                <label for="{{ name }}">{{ name }}</label>
-                                                <div class="inline-checkbox-group">
-                                                    <label class="radio-inline">
-                                                        <input type="radio" id="{{ name }}_unset" name="{{ name }}" value="unset" checked>
-                                                        Unset
-                                                    </label>
-                                                    <label class="radio-inline">
-                                                        <input type="radio" id="{{ name }}_true" name="{{ name }}" value="true">
-                                                        True
-                                                    </label>
-                                                    <label class="radio-inline">
-                                                        <input type="radio" id="{{ name }}_false" name="{{ name }}" value="false">
-                                                        False
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>           
-                                        {% elif name == 'user_pseudonym' %}
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                {{name}}
-                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
-                                             </div>
-                                        </div>
-                                        {% elif value == 'full-date' %}
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
-                                                    {{name}}
-                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
-                                                </div>
-                                            </div>
-                                        {% elif value == 'jpeg'%}
-                                            <label>Portrait:</label>
-                                            <p>Please select one option or upload a file.</p>
-                                             
-                                            <div class="row g-3">
-                                                
-                                                <div class="col-md-6">
-                                                    <label>
-                                                        <input type="radio" name="{{ name }}"value="Port1" checked >
-                                                        <img src="{{url_for('static', filename='image.jpeg')}}" width=50% alt="Option 1">
-                                                    </label>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label>
-                                                        <input type="radio" name="{{ name }}" value="Port2">
-                                                        <img src="{{url_for('static', filename='image2.jpeg')}}" width=50% alt="Option 2">
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="row g-3" style="margin-top: 10% ;">
-                                                <div class="col-md-6">
-                                                    <input type="radio" name="{{ name }}" id="Option3" value="Port3">
-                                                    <label >
-                                                        <input type="file" name="Image" id="fileInput" accept="image.jpeg" capture>
-                                                        <div id="preview">
-                                                        </div>            
-                                                        <p>Type: image/jpeg , Size(pixels): 360x433 </p>
-                                                    </label>
-                                                    
-                                                </div>
-
-                                            </div>
-                                        {% elif value == 'driving_privileges' %}
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
-                                                    <div class="form-group" id="DrivingP">
-                                                        <label for="Driving">Driving Privileges</label>
-                                                        <label>Category </label>
-                                                            <select class="form-control" name="Category1">
-                                                                <option>AM</option>
-                                                                <option>A1</option>
-                                                                <option>A2</option>
-                                                                <option>A</option>
-                                                                <option>B1</option>
-                                                                <option>B</option>
-                                                                <option>C1</option>
-                                                                <option>C</option>
-                                                                <option>D1</option>
-                                                                <option>D</option>
-                                                                <option>BE</option>
-                                                                <option>C1E</option>
-                                                                <option>CE</option>
-                                                                <option>D1E</option>
-                                                                <option>DE</option>
-                                                            </select>
-                
-                                                            <div class="col">
-                                                                Issue Date:
-                                                                <input type="date" class="form-control" placeholder="Issue Date" aria-label="Issue Date" name="IssueDate1">
-                                                            </div>
-                                                            <div class="col">
-                                                                Expiry Date:
-                                                                <input type="date" class="form-control" placeholder="Expiry Date" aria-label="Expiry Date" name="ExpiryDate1">
-                                                            </div>
-                                                            
-                                                            <div id="AddCategory">
-                
-                                                            </div>
-                                                            <button type="button" class="btn btn-primary btn-sm" onclick="AddCategories();">Add</button>                   
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12" id="hidden_elems">
-                                                    {% for elem, value in hidden_elems %}
-                                                    <div class="col" >
-                                                        <input type="hidden" value="{{ value }}" name="{{ elem }}">
-                                                    </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        {% endif %} 
-                                    {% endfor %}
-                                </div>
                             </div>
                             <div class="clearfix"></div>
 
@@ -391,7 +198,6 @@
                                 <input type="submit" onclick="AddNumberCategories();" name="proceed" accesskey="S" value="Submit" class="btn btn-primary" title="Submit" />
                                 <input type="button" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" onclick="window.history.back();" />                            </span>
                         </form>
-                        <!--<script type="text/javascript" src="{{ url_for('static', filename='scripts/dynamic-validator/selectCountryForm_9.7.1.20.1679559965505_en.js') }}" charset="UTF-8" defer="true"></script>-->
                     </div>
 
                 </div>
@@ -402,29 +208,9 @@
     <footer class="main-footer container-fluid" role="contentinfo">
         <div class="container">
             <div class="row">
-                <!-- <div class="clearfix col-sm-8">
-
-                    <ul class="eu-login-link">
-                        <li><a href="https://webgate.ec.europa.eu/cas/about.html?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" class="service" title="About EU Login">About EU Login</a></li>
-                        <li><a href="https://webgate.ec.europa.eu/cas/cookies.html?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" class="service" title="Cookies">Cookies</a></li>
-                        <li><a href="https://webgate.ec.europa.eu/cas/privacyStatement.html?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" accesskey="5" class="service" title="Privacy Statement">Privacy Statement</a></li>
-                        <li><a href="https://webgate.ec.europa.eu/cas/contact.html?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" accesskey="2" class="service" title="Contact">Contact</a></li>
-                        <li><a href="https://webgate.ec.europa.eu/cas/help.html?loginRequestId=ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" class="service" title="Help">Help</a></li>
-                    </ul>
-
-                    <ul class="external-link">
-
-                        <li><a href="http://europa.eu" target="_blank" class="link-external" title="European Union" rel="noopener noreferrer">European Union</a><span class="sr-only">(opens in a new tab)</span></li>
-                        <li><a href="http://europa.eu/about-eu/institutions-bodies/index_en.htm" target="_blank" class="link-external" title="EU institutions" rel="noopener noreferrer">EU institutions</a><span class="sr-only">(opens in a new tab)</span></li>
-                    </ul><span class="server-information" aria-label="EU Login server version"><span class="text-danger">9.7.1-dn1p</span><span aria-hidden="true"> | </span>8<span> </span>ms</span>
-                </div> -->
-                <!--
-                <div class="ec-logo col-sm-4" aria-label="Powered by European Commission"><span class="powered-by" aria-hidden="true">Powered by</span><a href="http://ec.europa.eu" target="_blank" rel="noopener noreferrer"><img src="https://webgate.ec.europa.eu/cas/images/ec-logo-en.png" alt="Go to European Commission website" /></a></div>
-                -->
             </div>
         </div>
     </footer>
-    <!-- Version 9.7.1.20 - 23/03/2023 - 09:26 -->
 </body>
 <script>
     var room = 1;

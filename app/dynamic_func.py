@@ -176,7 +176,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 }) """
 
             
-            if "driving_privileges" in attributes_req:
+            if ("driving_privileges" in attributes_req) and data["issuing_country"] != "LT":
+                print("dynamic_func_data: " + str(data))
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
 
