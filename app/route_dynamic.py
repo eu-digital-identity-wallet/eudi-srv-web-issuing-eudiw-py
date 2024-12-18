@@ -1393,7 +1393,7 @@ def test_case_form():
                   },
                   {
                     "vehicle_category_code": "AM",
-                    "issue_date": "1987-01-09
+                    "issue_date": "1987-01-09"
                   }
                 ]
               }
