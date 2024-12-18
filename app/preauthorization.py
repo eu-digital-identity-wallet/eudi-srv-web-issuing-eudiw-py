@@ -377,7 +377,7 @@ def generate_preauth_token(data, authorization_details):
     'Content-Type': 'application/x-www-form-urlencoded'
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", url, headers=headers, data=payload, verify=False)
 
     if response.status_code != 200:
         return make_response("invalid_request", 400)
@@ -419,7 +419,7 @@ def generate_preauth_token(data, authorization_details):
     payload = {}
     headers = {}
     response = requests.request(
-        "GET", url, headers=headers, data=payload
+        "GET", url, headers=headers, data=payload, verify=False
     )
 
     if response.status_code != 200:
