@@ -315,7 +315,7 @@ def red():
         token = request.args.get("access_token")
         r1 = requests.post(
             "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
-            json={"token": token},
+            json={"token": token}, verify="/root/eudi-srv-web-issuing-eudiw-py/config_secrets/cert.pem"
         )
 
 
