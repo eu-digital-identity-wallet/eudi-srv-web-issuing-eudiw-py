@@ -1458,7 +1458,6 @@ def test_case_form():
 
     mdl_data["mDL"].update(
         {
-            "version": session["version"],
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
@@ -1478,7 +1477,7 @@ def test_case_form():
 
     for privilege in mdl_data["mDL"]["driving_privileges"]:
         if "expiry_date" not in privilege:
-            privilege["expiry_date"] = expiry
+            privilege["expiry_date"] = expiry.strftime("%Y-%m-%d")
 
     mdl_data["mDL"].update({"estimated_issuance_date": today.strftime("%Y-%m-%d")})
     mdl_data["mDL"].update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
