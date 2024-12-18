@@ -77,5 +77,5 @@ def json_post(url_path: str, json: dict):
     Return: Returns the answer to the HTTP POST
     """
     return requests.post(
-        url_path, json=json, headers={"Content-Type": "application/json"}, verify=False
+        url_path, json=json, headers={"Content-Type": "application/json"}
     )

@@ -265,7 +265,7 @@ def dynamic_R1(country):
         country_data = cfgcountries.supported_countries[country]["oidc_auth"]
 
         metadata_url = country_data["base_url"] + "/.well-known/openid-configuration"
-        metadata_json = requests.get(metadata_url, verify=False).json()
+        metadata_json = requests.get(metadata_url).json()
 
         authorization_endpoint = metadata_json["authorization_endpoint"]
 
@@ -421,7 +421,7 @@ def red():
     
     
     metadata_url = cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"] + "/.well-known/openid-configuration"
-    metadata_json = requests.get(metadata_url, verify=False).json()
+    metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
 
@@ -446,7 +446,7 @@ def red():
         + redirect_data["redirect_uri"]
     ) """
 
-    r = requests.post(token_endpoint, headers=headers, data=data, verify=False)
+    r = requests.post(token_endpoint, headers=headers, data=data)
     json_response = json.loads(r.text)
     session["access_token"] = json_response["access_token"]
 
@@ -625,7 +625,7 @@ def dynamic_R2_data_collect(country, user_id):
         url = attribute_request["url"] + user_id
         # headers = attribute_request["header"]
         try:
-            r2 = requests.get(url, verify=False)
+            r2 = requests.get(url)
 
             json_response = r2.json()
             for attribute in json_response:
@@ -652,7 +652,7 @@ def dynamic_R2_data_collect(country, user_id):
             ]
             + "/.well-known/openid-configuration"
         )
-        metadata_json = requests.get(metadata_url, verify=False).json()
+        metadata_json = requests.get(metadata_url).json()
 
         userinfo_endpoint = metadata_json["userinfo_endpoint"]
 
@@ -666,7 +666,7 @@ def dynamic_R2_data_collect(country, user_id):
             headers["Authorization"] = f"Bearer {user_id}"
 
         try:
-            r2 = requests.get(url, headers=headers, verify=False)
+            r2 = requests.get(url, headers=headers)
             json_response = json.loads(r2.text)
             data = json_response
             if (

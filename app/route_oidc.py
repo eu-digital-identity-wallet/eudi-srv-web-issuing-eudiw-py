@@ -346,7 +346,7 @@ def authorizationv2(
 
     payload = {}
     headers = {}
-    response = requests.request("GET", url, headers=headers, data=payload, verify=False)
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         cfgservice.app_logger.error("Authorization endpoint invalid request")
@@ -474,7 +474,7 @@ def authorizationV3():
 
     payload = {}
     headers = {}
-    response = requests.request("GET", url, headers=headers, data=payload, verify=False)
+    response = requests.request("GET", url, headers=headers, data=payload)
 
     if response.status_code != 200:
         cfgservice.app_logger.error("Authorization endpoint invalid request")
@@ -695,7 +695,7 @@ def token():
         )
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
             return make_response("invalid_request", 400)
 

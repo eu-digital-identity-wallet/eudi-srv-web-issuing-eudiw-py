@@ -108,7 +108,7 @@ def clear_par():
                 request_data = json.dumps(request_data)
                 request_headers = deferredRequests[req]["headers"]
 
-                response = requests.post(cfgservice.service_url+"credential", data=request_data, headers=request_headers, verify=False)
+                response = requests.post(cfgservice.service_url+"credential", data=request_data, headers=request_headers)
                 response_data = response.json()
 
                 if response.status_code == 200:

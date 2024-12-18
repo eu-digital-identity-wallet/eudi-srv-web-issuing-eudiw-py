@@ -1,9 +1,9 @@
 {
-  "credential_issuer": "https://mdl-test.eregitra.lt",
-  "credential_endpoint": "https://mdl-test.eregitra.lt/credential",
-  "batch_credential_endpoint": "https://mdl-test.eregitra.lt/batch_credential",
-  "notification_endpoint": "https://mdl-test.eregitra.lt/notification",
-  "deferred_credential_endpoint": "https://mdl-test.eregitra.lt/deferred_credential",
+  "credential_issuer": "https://mdl-test.regitra.lt",
+  "credential_endpoint": "https://mdl-test.regitra.lt/credential",
+  "batch_credential_endpoint": "https://mdl-test.regitra.lt/batch_credential",
+  "notification_endpoint": "https://mdl-test.regitra.lt/notification",
+  "deferred_credential_endpoint": "https://mdl-test.regitra.lt/deferred_credential",
   "credential_configurations_supported": {
     
 
