@@ -6,7 +6,7 @@ RUN apt-get update -y
 
 #RUN apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip git gcc build-essential libssl-dev nano
 
-RUN apt-get install -y python3 python3-venv python3-dev python3-pip git gcc build-essential libssl-dev nano curl telnet iputils-ping
+RUN apt-get install -y python3 python3-venv python3-dev python3-pip git gcc build-essential libssl-dev certifi nano curl telnet iputils-ping
 
 RUN rm -rf /var/lib/apt/lists/*
 
