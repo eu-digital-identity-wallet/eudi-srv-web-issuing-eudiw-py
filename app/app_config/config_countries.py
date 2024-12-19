@@ -82,14 +82,11 @@ class ConfCountries:
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
         "LT": {
-            "name": "FormLT",
+            "name": "Test Case LT",
             "pid_url": cfgserv.service_url + "pid/form",
-            "pid_mdoc_privkey": "/root/eudi-srv-web-issuing-eudiw-py/pid-issuer/privkey/PID-DS-0001_UT.pem",
-            # "pid_mdoc_privkey": "/etc/eudiw/pid-issuer/privkey/hackathon-DS-0001_UT.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
-            "pid_mdoc_privkey_passwd": b"pid-ds-0002",  # None or bytes
-            "pid_mdoc_cert": "/root/eudi-srv-web-issuing-eudiw-py/pid-issuer/cert/PID-DS-0001_UT_cert.der",
-            # "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/hackathon-DS-0001_UT_cert.der",
+            "pid_mdoc_privkey": "/root/eudi-srv-web-issuing-eudiw-py/pid-issuer/privkey/MDL-DS-0001_LT_DEV.cert.pem",
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/root/eudi-srv-web-issuing-eudiw-py/pid-issuer/cert/MDL-DS-0001_LT_DEV.cert.der",
             "un_distinguishing_sign": "LT",
             "supported_credentials": [
                 "eu.europa.ec.eudi.mdl_jwt_vc_json",
