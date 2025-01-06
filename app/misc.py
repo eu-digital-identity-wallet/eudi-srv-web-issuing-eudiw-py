@@ -258,6 +258,11 @@ def validate_image(file):
 
     return True, None
 
+def vct2scope(vct: str):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential in credentialsSupported:
+        if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["vct"] == vct:
+            return credentialsSupported[credential]["scope"]
 
 # Generates authorization details from a scope
 # First supported credential found of that doctype
