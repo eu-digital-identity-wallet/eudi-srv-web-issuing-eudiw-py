@@ -264,6 +264,12 @@ def vct2scope(vct: str):
         if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["vct"] == vct:
             return credentialsSupported[credential]["scope"]
 
+def doctype2vct(doctype: str):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential in credentialsSupported:
+        if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["scope"] == doctype:
+            return credentialsSupported[credential]["vct"]
+
 # Generates authorization details from a scope
 # First supported credential found of that doctype
 def scope2details(scope):

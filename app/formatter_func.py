@@ -43,6 +43,7 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
+from misc import doctype2vct
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
@@ -228,6 +229,8 @@ def sdjwtFormatter(PID, country):
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
 
+    vct = doctype2vct(doctype)
+
     claims = {
         #"iss": cfgservice.service_url[:-1],
         "iss": "https://credential-issuer.example.com",
@@ -237,7 +240,7 @@ def sdjwtFormatter(PID, country):
         "exp": exp,
         #"status": "validation status URL",
         #"vct":"urn:"+ doctype,
-        "vct":"urn:"+ doctype.replace(".",":"),
+        "vct":vct,
     }
 
     datafinal = {}
