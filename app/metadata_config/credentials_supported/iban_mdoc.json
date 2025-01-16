@@ -42,7 +42,7 @@
         "name": "IBAN",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/iban.png",
+          "uri": "https://examplestate.com/public/iban.png",
           "alt_text": "A square figure of a iban"
         }
       }

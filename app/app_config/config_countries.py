@@ -77,6 +77,7 @@ class ConfCountries:
                 "eu.europa.ec.eudi.hiid_mdoc",
                 "eu.europa.ec.eudi.tax_mdoc",
                 "eu.europa.ec.eudi.msisdn_mdoc",
+                "eu.europa.ec.eudi.ehic_mdoc"
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },

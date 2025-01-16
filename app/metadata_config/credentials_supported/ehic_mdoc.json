@@ -1,8 +1,8 @@
 {
-"eu.europa.ec.eudi.msisdn_mdoc": {
+"eu.europa.ec.eudi.ehic_mdoc": {
     "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.msisdn.1",
-    "scope": "eu.europa.ec.eudi.msisdn.1",
+    "doctype": "eu.europa.ec.eudi.ehic.1",
+    "scope": "eu.europa.ec.eudi.ehic.1",
     "policy": {
         "batch_size": 50,
         "one_time_use": true
@@ -39,73 +39,103 @@
     },
     "display": [
       {
-        "name": "MSISDN",
+        "name": "EHIC",
         "locale": "en",
         "logo": {
-          "uri": "https://examplestate.com/public/msisdn.png",
-          "alt_text": "A square figure of a msisdn"
+          "uri": "https://examplestate.com/public/pid.png",
+          "alt_text": "A square figure of a PID"
         }
       }
     ],
     "claims": {
-      "eu.europa.ec.eudi.msisdn.1": {
-        "phone_number": {
+      "eu.europa.ec.eudi.ehic.1": {
+        "family_name": {
           "mandatory": true,
           "value_type":"string",
           "source":"user",
           "display": [
             {
-              "name": "Phone Number",
+              "name": "Family Name(s)",
               "locale": "en"            }
           ]
         },
-        "registered_family_name": {
+        "forename": {
           "mandatory": true,
           "value_type":"string",
           "source":"user",
           "display": [
             {
-              "name": "Registered Family Name",
+              "name": "Given Name(s)",
               "locale": "en"            }
           ]
         },
-        "registered_given_name": {
+        "birth_date": {
+          "mandatory": true,
+          "value_type":"full-date",
+          "source":"user",
+          "display": [
+            {
+              "name": "Birth Date",
+              "locale": "en"            }
+          ]
+        },
+        "social_security_pin": {
           "mandatory": true,
           "value_type":"string",
           "source":"user",
           "display": [
             {
-              "name": "Registered Given Name",
+              "name": "Given Name(s)",
               "locale": "en"            }
           ]
         },
-        "contract_owner": {
+        "starting_date": {
           "mandatory": true,
-          "value_type":"bool",
+          "value_type":"full-date",
           "source":"user",
           "display": [
             {
-              "name": "Contract Owner",
+              "name": "Birth Date",
               "locale": "en"            }
           ]
         },
-        "end_user": {
+        "ending_date": {
           "mandatory": true,
-          "value_type":"bool",
+          "value_type":"full-date",
           "source":"user",
           "display": [
             {
-              "name": "End User",
+              "name": "Birth Date",
               "locale": "en"            }
           ]
         },
-        "mobile_operator": {
+        "document_id": {
           "mandatory": true,
           "value_type":"string",
-          "source":"Mobile Operator",
+          "source":"user",
           "display": [
             {
-              "name": "",
+              "name": "Given Name(s)",
+              "locale": "en"            }
+          ]
+        },
+        "institution_id": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Given Name(s)",
+              "locale": "en"            }
+          ]
+        },
+        "country_code": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Given Name(s)",
               "locale": "en"            }
           ]
         },
@@ -129,42 +159,24 @@
             }
           ]
         },
-        "credential_type": {
+        "issuing_authority": {
           "mandatory": true,
           "source":"issuer",
           "display": [
             {
-              "name": "Credential Type",
+              "name": "Issuance Authority",
               "locale": "en"
             }
           ]
         },
-        "issuing_organization": {
+        "issuing_country": {
           "mandatory": true,
-          "value_type":"string",
           "source":"issuer",
           "display": [
             {
-              "name": "Issuing Organization",
-              "locale": "en"            }
-          ]
-        },
-        "phone_number_in_use": {
-          "mandatory": false,
-          "value_type":"uint",
-          "source":"user",
-          "display": [
-            {
-              "name": "Phone Number in Use",
-              "locale": "en"            }
-          ]
-        },
-        "document_number": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Document Number",
-              "locale": "en"            }
+              "name": "Issuing Country",
+              "locale": "en"
+            }
           ]
         }
       }

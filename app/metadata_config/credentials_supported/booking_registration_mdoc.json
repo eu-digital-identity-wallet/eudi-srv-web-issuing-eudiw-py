@@ -42,7 +42,7 @@
         "name": "Reservation",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/pid.png",
+          "uri": "https://examplestate.com/public/pid.png",
           "alt_text": "A square figure of a PID"
         }
       }

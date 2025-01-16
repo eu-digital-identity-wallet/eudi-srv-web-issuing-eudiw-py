@@ -42,7 +42,7 @@
         "name": "Health ID",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/hiid.png",
+          "uri": "https://examplestate.com/public/hiid.png",
           "alt_text": "A square figure of a hiid"
         }
       }

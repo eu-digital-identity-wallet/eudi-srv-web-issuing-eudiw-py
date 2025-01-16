@@ -42,7 +42,7 @@
         "name": "Tax Number",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/tax.png",
+          "uri": "https://examplestate.com/public/tax.png",
           "alt_text": "A square figure of a tax"
         }
       }

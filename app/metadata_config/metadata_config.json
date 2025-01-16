@@ -4,6 +4,16 @@
   "batch_credential_endpoint": "https://dev.issuer.eudiw.dev/batch_credential",
   "notification_endpoint": "https://dev.issuer.eudiw.dev/notification",
   "deferred_credential_endpoint": "https://dev.issuer.eudiw.dev/deferred_credential",
+  "display": [
+    {
+    "name": "Digital Credentials Issuer",
+    "locale": "en",
+    "logo": {
+        "uri": "https://eudiw.dev/ic-logo.svg",
+        "alt_text": "EU Digital Identity Wallet Logo"
+    }
+    }
+  ],
   "credential_configurations_supported": {
     
 

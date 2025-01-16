@@ -222,6 +222,8 @@ def sdjwtFormatter(PID, country):
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 
+    validity = PID_Claims_data["expiry_date"]
+
     PID_Claims_data.pop("expiry_date")
 
     #jti = str(uuid4())
@@ -231,9 +233,23 @@ def sdjwtFormatter(PID, country):
 
     vct = doctype2vct(doctype)
 
+    payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'X-Api-Key': revocation_api_key
+    }
+
+    response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+
+    if response.status_code == 200:
+    # Parse the response as JSON
+        revocation_json = response.json()
+    else:
+        revocation_json = None
+
     claims = {
         #"iss": cfgservice.service_url[:-1],
-        "iss": "https://credential-issuer.example.com",
+        "iss": "https://issuer.eudiw.dev",
         #"jti": jti,
         "iat": iat,
         # "nbf": iat,
@@ -242,6 +258,9 @@ def sdjwtFormatter(PID, country):
         #"vct":"urn:"+ doctype,
         "vct":vct,
     }
+
+    if revocation_json:
+        claims.update({"status":revocation_json})
 
     datafinal = {}
 
