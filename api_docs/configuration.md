@@ -36,7 +36,7 @@ To decrypt the private key you can run the following command `openssl ec -in PID
 
 ## 3. OID4VCI configuration 
 
-For configuring the installed [idpy-oidc](https://github.com/IdentityPython/idpy-oidc) and [openid4v](https://github.com/rohe/openid4v) libraries, you need to change the following parameters in the ```app/app_config/oid_config.json``` configuration file:
+For configuring the installed [idpy-oidc](https://github.com/IdentityPython/idpy-oidc) and [openid4v](https://github.com/rohe/openid4v) libraries, you need to change the following parameters in the ```app/app_config/oid_config.py``` configuration file:
 
 - port
 
