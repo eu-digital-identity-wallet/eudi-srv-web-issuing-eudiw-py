@@ -388,7 +388,7 @@ class ConfService:
     }
 
     #eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
-    dynamic_presentation_url = os.getenv("DYNAMIC_PRESENTATION_URL","https://dev.verifier-backend.eudiw.dev/ui/presentations/")
+    dynamic_presentation_url = os.getenv("DYNAMIC_PRESENTATION_URL","https://verifier-backend.eudiw.dev/ui/presentations/")
     dynamic_issuing = {
         "eu.europa.ec.eudi.pseudonym_over18_mdoc":{
             "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}
