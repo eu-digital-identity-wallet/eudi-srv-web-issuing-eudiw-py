@@ -42,7 +42,7 @@
         "name": "MSISDN",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/msisdn.png",
+          "uri": "https://examplestate.com/public/msisdn.png",
           "alt_text": "A square figure of a msisdn"
         }
       }

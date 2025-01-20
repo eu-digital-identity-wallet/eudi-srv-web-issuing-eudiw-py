@@ -32,7 +32,7 @@
         "name": "Photo",
         "locale": "en",
         "logo": {
-          "url": "https://examplestate.com/public/mdl.png",
+          "uri": "https://examplestate.com/public/mdl.png",
           "alt_text": "A square figure of a mDL"
         }
       }
