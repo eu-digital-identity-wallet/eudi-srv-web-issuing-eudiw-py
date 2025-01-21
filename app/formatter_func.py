@@ -136,19 +136,18 @@ def mdocFormatter(data, doctype, country, device_publickey):
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
-    payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'X-Api-Key': revocation_api_key
-    }
+    revocation_json = None
+    if revocation_api_key:
+        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
+        headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Api-Key': revocation_api_key
+        }
 
-    response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
 
-    if response.status_code == 200:
-    # Parse the response as JSON
-        revocation_json = response.json()
-    else:
-        revocation_json = None
+        if response.status_code == 200:
+            revocation_json = response.json()
 
     mdoci.new(
         doctype=doctype,
@@ -233,23 +232,24 @@ def sdjwtFormatter(PID, country):
 
     vct = doctype2vct(doctype)
 
-    payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'X-Api-Key': revocation_api_key
-    }
+    revocation_json = None
 
-    response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+    if revocation_api_key:
+        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
+        headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Api-Key': revocation_api_key
+        }
 
-    if response.status_code == 200:
-    # Parse the response as JSON
-        revocation_json = response.json()
-    else:
-        revocation_json = None
+        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+
+        if response.status_code == 200:
+            revocation_json = response.json()
+            
 
     claims = {
-        #"iss": cfgservice.service_url[:-1],
-        "iss": "https://issuer.eudiw.dev",
+        "iss": cfgservice.service_url[:-1],
+        #"iss": "https://issuer.eudiw.dev",
         #"jti": jti,
         "iat": iat,
         # "nbf": iat,
