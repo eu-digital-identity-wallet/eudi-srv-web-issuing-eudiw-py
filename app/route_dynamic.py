@@ -191,9 +191,12 @@ def dynamic_R1(country):
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": str(uuid4())})
+            attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
+        print("\nAttributes form1: ", attributesForm)
+        print("\nAttributes form2: ", attributesForm2)
 
         return render_template(
             "dynamic/dynamic-form.html",

@@ -34,7 +34,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
     #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
@@ -369,6 +369,7 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_mdoc",
             "eu.europa.ec.eudi.tax_mdoc",
             "eu.europa.ec.eudi.msisdn_mdoc",
+            "eu.europa.ec.eudi.ehic_mdoc"
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
@@ -409,6 +410,9 @@ class ConfService:
             "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
         },
         "eu.europa.ec.eudi.msisdn_mdoc":{
+            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        },
+        "eu.europa.ec.eudi.ehic_mdoc":{
             "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
         }
     }

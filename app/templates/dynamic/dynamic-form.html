@@ -120,14 +120,15 @@
                             <h3>Test Provider Form</h3>
                             <p>This data is only used for issuing credentials for testing purposes.</p>
                             <div id="eidasCountries">
-                                {% for name, value in mandatory_attributes.items() %}    
-                                        {% if value == 'string' %}
+                                {% for name, attr in mandatory_attributes.items() %}    
+                                        {% if attr.type == 'string' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" required >
+                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" 
+                                                    {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
                                             </div>
-                                        {% elif value == 'bool' %}
+                                        {% elif attr.type == 'bool' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 <label for="{{ name }}">{{ name }}</label>
@@ -161,17 +162,18 @@
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 {{name}}
-                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{attr.filled_value}}" readonly  >
                                              </div>
                                         </div>
-                                        {% elif value == 'full-date' %}
+                                        {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     {{name}}
-                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" required >
+                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" 
+                                                    {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
                                             </div>
-                                        {% elif value == 'jpeg'%}
+                                        {% elif attr.type == 'jpeg'%}
                                             <label>Portrait:</label>
                                             <p>Please select one option or upload a file.</p>
                                              
@@ -203,7 +205,7 @@
                                                 </div>
 
                                             </div>
-                                        {% elif value == 'driving_privileges' %}
+                                        {% elif attr.type == 'driving_privileges' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <div class="form-group" id="DrivingP">
@@ -254,20 +256,20 @@
                                     {% endfor %}
                                 </div>
                                 <h3>Optional Elements</h3>
-                                {% for name, value in optional_attributes.items() %}    
-                                        {% if value == 'string' %}
+                                {% for name, attr in optional_attributes.items() %}    
+                                        {% if attr.type == 'string' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
                                                 </div>
                                             </div>
-                                        {% elif value == 'uint' %}
+                                        {% elif attr.type == 'uint' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <input type="number" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" min="0">
                                                 </div>
                                             </div>
-                                        {% elif value == 'bool' %}
+                                        {% elif attr.type == 'bool' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 <label for="{{ name }}">{{ name }}</label>
@@ -294,14 +296,14 @@
                                                 <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
                                              </div>
                                         </div>
-                                        {% elif value == 'full-date' %}
+                                        {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     {{name}}
                                                     <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
                                                 </div>
                                             </div>
-                                        {% elif value == 'jpeg'%}
+                                        {% elif attr.type == 'jpeg'%}
                                             <label>Portrait:</label>
                                             <p>Please select one option or upload a file.</p>
                                              
@@ -333,7 +335,7 @@
                                                 </div>
 
                                             </div>
-                                        {% elif value == 'driving_privileges' %}
+                                        {% elif attr.type == 'driving_privileges' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <div class="form-group" id="DrivingP">

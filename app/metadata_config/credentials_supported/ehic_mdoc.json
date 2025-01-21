@@ -59,7 +59,7 @@
               "locale": "en"            }
           ]
         },
-        "forename": {
+        "given_name": {
           "mandatory": true,
           "value_type":"string",
           "source":"user",

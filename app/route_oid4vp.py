@@ -338,6 +338,17 @@ def getpidoid4vp():
             attributesForm.update({"user_pseudonym": str(uuid4())})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
+        for doctype in mdoc_json:
+            for attribute, value in mdoc_json[doctype]:
+                if attribute in attributesForm:
+                    attributesForm[attribute]["filled_value"] = value
+                elif attribute in attributesForm2:
+                    attributesForm2[attribute]["filled_value"] = value
+
+        print("\nAttributes form1: ", attributesForm)
+        print("\nAttributes form2: ", attributesForm2)
+        
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,

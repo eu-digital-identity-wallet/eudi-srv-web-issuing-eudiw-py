@@ -124,6 +124,7 @@ def getAttributesForm(credentials_requested):
         format = credentialsSupported[request]["format"]
         namescapes = credentialsSupported[request]["claims"]
         attributes_req = {}
+
         if format == "mso_mdoc":
 
             for namescape in namescapes:
@@ -135,6 +136,8 @@ def getAttributesForm(credentials_requested):
             attributes_req.update(
                 getMandatoryAttributes(credentialsSupported[request]["claims"])
             )
+
+        print("\n attributes_req: ", attributes_req)
 
         for attribute in attributes_req:
             if attribute not in attributes:
@@ -159,7 +162,7 @@ def getMandatoryAttributes(attributes):
 
         if attribute_data["mandatory"] == True:
             if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: attribute_data["value_type"]})
+                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
 
     return attributes_form
 
@@ -213,7 +216,7 @@ def getOptionalAttributes(attributes):
 
         if attribute_data["mandatory"] == False:
             if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: attribute_data["value_type"]})
+                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
 
     return attributes_form
 
