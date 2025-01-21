@@ -235,7 +235,7 @@ To run the EUDIW issuer in Docker please follow these steps:
         ├── cert
         │   ├── PID-DS-0001_UT_cert.der
         │   └── PIDIssuerCAUT01.pem
-        └── privKeys
+        └── privKey
             └── PID-DS-0001_UT.pem
     ```
 

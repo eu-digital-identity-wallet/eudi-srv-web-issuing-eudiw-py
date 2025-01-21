@@ -31,11 +31,12 @@ Parameters that should be changed for each country:
 You must copy your DS private key (in PEM format) to `pid_mdoc_privkey` file (the password must be defined in `pid_mdoc_privkey_passwd`), and the certificate (in DER format) to `pid_mdoc_cert` file.
 
 You can find example test private DS keys and certificates, for country Utopia (UT) [here](test_tokens/DS-token/) - the password of the example test private DS keys is b"pid-ds-0002".
+To decrypt the private key you can run the following command `openssl ec -in PID-DS-0002.pid-ds-0002.key.pem -out PID-DS-0002-decrypted.key.pem`.
 
 
 ## 3. OID4VCI configuration 
 
-For configuring the installed [idpy-oidc](https://github.com/IdentityPython/idpy-oidc) and [openid4v](https://github.com/rohe/openid4v) libraries, you need to change the following parameters in the ```app/app_config/oid_config.json``` configuration file:
+For configuring the installed [idpy-oidc](https://github.com/IdentityPython/idpy-oidc) and [openid4v](https://github.com/rohe/openid4v) libraries, you need to change the following parameters in the ```app/app_config/oid_config.py``` configuration file:
 
 - port
 
