@@ -66,7 +66,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
@@ -91,7 +90,6 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
-                "eu.europa.ec.eudi.mdl_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
             ],
@@ -118,7 +116,7 @@ class ConfCountries:
                     },
                 },
                 "response_type": "token",
-                "client_id": "6285415231191573957",
+                "client_id": "4819147113201437011",
             },
             "attribute_request": {
                 "url": "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=",

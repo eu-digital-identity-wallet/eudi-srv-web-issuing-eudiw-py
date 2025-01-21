@@ -36,7 +36,7 @@
         }
       }
     ],
-    "vct": "eu.europa.ec.eudi.pid_jwt_vc_json",
+    "vct": "urn:eu.europa.ec.eudi:pid:1",
     "claims": {
       "family_name": {
         "mandatory": true,
