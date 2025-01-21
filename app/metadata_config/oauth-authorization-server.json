@@ -1,10 +1,10 @@
 {
     "issuer":
-        "https://dev.issuer.eudiw.dev",
+        "https://issuer.eudiw.dev",
     "authorization_endpoint":
-        "https://dev.issuer.eudiw.dev/authorizationV3",
+        "https://issuer.eudiw.dev/authorizationV3",
     "token_endpoint":
-        "https://dev.issuer.eudiw.dev/token",
+        "https://issuer.eudiw.dev/token",
     "token_endpoint_auth_methods_supported": 
         ["public"],
     "token_endpoint_auth_signing_alg_values_supported":
@@ -12,11 +12,11 @@
     "code_challenge_methods_supported": 
         ["S256"],
     "userinfo_endpoint": 
-        "https://dev.issuer.eudiw.dev/userinfo",
+        "https://issuer.eudiw.dev/userinfo",
     "jwks_uri":
-        "https://dev.issuer.eudiw.dev/static/jwks.json",
+        "https://issuer.eudiw.dev/static/jwks.json",
     "registration_endpoint":
-        "https://dev.issuer.eudiw.dev/registration",
+        "https://issuer.eudiw.dev/registration",
     "scopes_supported": [
         "openid"],
     "response_types_supported":
