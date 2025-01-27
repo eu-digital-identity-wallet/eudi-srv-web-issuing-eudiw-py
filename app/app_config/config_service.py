@@ -513,7 +513,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log_dev"
+    log_dir = "/tmp/log"
     # log_dir = "../../log"
     log_file_info = "logs.log"
 

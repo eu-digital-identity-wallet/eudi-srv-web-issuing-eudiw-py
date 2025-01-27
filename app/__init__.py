@@ -220,6 +220,10 @@ def create_app(test_config=None):
     def favicon():
         return send_from_directory("static/images", "favicon.ico")
 
+    @app.route("/ic-logo.png")
+    def logo():
+        return send_from_directory("static/images", "ic-logo.png")
+    
     app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:
