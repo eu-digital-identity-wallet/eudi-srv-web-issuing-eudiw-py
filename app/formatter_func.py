@@ -28,6 +28,7 @@ from cryptography.hazmat.primitives import serialization
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 import datetime
 import hashlib
+import requests
 from sd_jwt.common import SDObj
 from jsonschema import ValidationError, validate
 from sd_jwt import __version__
@@ -42,8 +43,10 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
+from misc import doctype2vct
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
+from app_config.config_secrets import revocation_api_key
 
 
 def mdocFormatter(data, doctype, country, device_publickey):
@@ -133,13 +136,28 @@ def mdocFormatter(data, doctype, country, device_publickey):
     # Construct and sign the mdoc
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
+    revocation_json = None
+    if revocation_api_key:
+        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
+        headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Api-Key': revocation_api_key
+        }
+
+        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+
+        if response.status_code == 200:
+            revocation_json = response.json()
+
     mdoci.new(
         doctype=doctype,
         data=data,
         validity=validity,
         devicekeyinfo=device_publickey,
         cert_path=cfgcountries.supported_countries[country]["pid_mdoc_cert"],
-    )
+        revocation = revocation_json
+                    
+          )
 
     return base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
 
@@ -195,60 +213,78 @@ def sdjwtFormatter(PID, country):
     if doctype == "org.iso.18013.5.1.mDL":
         PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
         iat = DatestringFormatter(PID_Claims_data["issue_date"])
-    if doctype == "eu.europa.ec.eudi.pid.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"]
+        PID_Claims_data.pop("issue_date")
+    else :
+        PID_Claims_data = PID["data"]["claims"][doctype]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-    if doctype == "eu.europa.ec.eudiw.qeaa.1":
-        PID_Claims_data = PID["data"]["claims"]["eu.europa.ec.eudiw.qeaa.1"]
-        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
+        PID_Claims_data.pop("issuance_date")
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 
-    jti = str(uuid4())
+    validity = PID_Claims_data["expiry_date"]
+
+    PID_Claims_data.pop("expiry_date")
+
+    #jti = str(uuid4())
 
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
 
+    vct = doctype2vct(doctype)
+
+    revocation_json = None
+
+    if revocation_api_key:
+        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
+        headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Api-Key': revocation_api_key
+        }
+
+        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+
+        if response.status_code == 200:
+            revocation_json = response.json()
+            
+
     claims = {
         "iss": cfgservice.service_url[:-1],
-        "jti": jti,
+        #"iss": "https://issuer.eudiw.dev",
+        #"jti": jti,
         "iat": iat,
         # "nbf": iat,
         "exp": exp,
-        "status": "validation status URL",
-        "type": doctype,
+        #"status": "validation status URL",
+        #"vct":"urn:"+ doctype,
+        "vct":vct,
     }
 
-    evidence = pid_data["evidence"][0]
+    if revocation_json:
+        claims.update({"status":revocation_json})
 
-    datafinal = {
-        "verified_claims": {
-            "verification": {
-                "trust_framework": "eidas",
-                "assurance_level": "high",
-            },
-            "claims": {},
-        }
-    }
-
-    disclosure_pid_data = {SDObj(value="evidence"): evidence}
-
-    datafinal["verified_claims"]["verification"].update(disclosure_pid_data)
+    datafinal = {}
 
     JWT_PID_DATA = {}
 
     for x, value in enumerate(list(pid_data["claims"].keys())):
         namespace = list(pid_data["claims"].keys())[x]
         PID_DATA = pid_data["claims"].get(namespace, {})
+        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
 
-        namespacedata = {namespace: {}}
-
-        namespacedata[namespace].update(DATA_sd_jwt(PID_DATA))
-        JWT_PID_DATA.update(namespacedata)
-
-    datafinal["verified_claims"]["claims"].update(JWT_PID_DATA)
+    datafinal.update(JWT_PID_DATA)
 
     claims.update(datafinal)
+
+    with open(
+        cfgcountries.supported_countries[country]["pid_mdoc_cert"], "rb"
+    ) as certificate:
+         certificate_data=certificate.read()
+    
+    certificate_base64=base64.b64encode(certificate_data).decode("utf-8")
+    x5c={
+        "x5c":[]
+    }
+    x5c["x5c"].append(certificate_base64)
 
     with open(
         cfgcountries.supported_countries[country]["pid_mdoc_privkey"], "rb"
@@ -297,11 +333,13 @@ def sdjwtFormatter(PID, country):
 
     ### Produce SD-JWT and SVC for selected example
     SDJWTIssuer.unsafe_randomness = False
+    SDJWTIssuer.SD_JWT_HEADER="vc+sd-jwt"
     sdjwt_at_issuer = SDJWTIssuer(
         claims,
         keys["issuer_key"],
         keys["holder_key"],
         add_decoy_claims=False,
+        extra_header_parameters=x5c
     )
 
     # sdjwt_at_holder = SDJWTHolder(sdjwt_at_issuer.sd_jwt_issuance)
@@ -317,19 +355,58 @@ def sdjwtFormatter(PID, country):
 
 def DATA_sd_jwt(PID):
     Data = {}
-
+    age_equal_or_over={}
+    place_of_birth={}
+    address_dict={}
     for i in PID:
-        data = {SDObj(value=i): PID[i]}
+        if i in cfgservice.Registered_claims:
 
-        Data.update(data)
+            r = cfgservice.Registered_claims.get(i)
 
+            if "age_equal_or_over" in r:
+                subAge=r.split(".")
+                age_equal_or_over.update({subAge[1]:PID[i]})
+
+            elif "place_of_birth" in r:
+                place_Birth=r.split(".")
+                place_of_birth.update({place_Birth[1]:PID[i]})
+
+            elif "address" in r:
+                address=r.split(".")
+                address_dict.update({address[1]:PID[i]})
+
+            else:
+                data = {SDObj(value=r): PID[i]}
+                Data.update(data)
+        else:
+
+            data = {SDObj(value=i): PID[i]}
+            Data.update(data)
+
+    if age_equal_or_over:
+            data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
+            Data.update(data)
+    if place_of_birth:
+            data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
+            Data.update(data)
+    if address_dict:
+            data = {SDObj(value="address"): recursive(address_dict)}
+            Data.update(data)        
+            
     return Data
 
+
+def recursive(dict):
+    temp_dic={}
+    for f in dict:
+        recursive = {SDObj(value=f): dict[f]}
+        temp_dic.update(recursive)
+    return temp_dic 
 
 def DatestringFormatter(date):
     date_objectiat = datetime.datetime.strptime(date, "%Y-%m-%d")
 
-    datefinal = int(date_objectiat.timestamp() / (24 * 60 * 60))
+    datefinal = int(date_objectiat.timestamp())
 
     return datefinal
 

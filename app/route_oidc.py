@@ -73,7 +73,7 @@ import requests
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
-from . import oidc_metadata, openid_metadata
+from . import oidc_metadata, openid_metadata, oauth_metadata
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -251,6 +251,24 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
+    elif service == 'oauth-authorization-server':
+        info = {
+            "response": oauth_metadata,
+            "http_headers": [
+                ("Content-type", "application/json; charset=utf-8"),
+                ("Pragma", "no-cache"),
+                ("Cache-Control", "no-store"),
+            ],
+        }
+
+        _http_response_code = info.get("response_code", 200)
+        resp = make_response(info["response"], _http_response_code)
+
+        for key, value in info["http_headers"]:
+            resp.headers[key] = value
+
+        return resp
+    
     elif service == "openid-configuration":
         # _endpoint = current_app.server.get_endpoint("provider_config")
         info = {

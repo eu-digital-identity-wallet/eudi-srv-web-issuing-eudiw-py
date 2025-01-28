@@ -34,18 +34,22 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
     # service_url = "https://preprod.issuer.eudiw.dev:4443/"
-    service_url = os.getenv("SERVICE_URL","https://issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL", "https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
-    #service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
+    # service_url = os.getenv("SERVICE_URL","https://dev.issuer.eudiw.dev/")
 
-    wallet_test_url = "https://dev.tester.issuer.eudiw.dev/"
+    wallet_test_url = "https://tester.issuer.eudiw.dev/"
+
+    revocation_service_url = "https://issuer.eudiw.dev/token_status_list/take"
 
     # ---------------------------------------------------------------------------
     trusted_CAs_path = "/etc/eudiw/pid-issuer/cert/"
 
     # ------------------------------------------------------------------------------------------------
     # eIDAS Node base href (used in lightrequest)
-    eidasnode_url = os.getenv("EIDAS_NODE_URL","https://preprod.issuer.eudiw.dev/EidasNode/")
+    eidasnode_url = os.getenv(
+        "EIDAS_NODE_URL", "https://preprod.issuer.eudiw.dev/EidasNode/"
+    )
 
     # Number of Tries for login in eidas node
     eidasnode_retry = 3
@@ -125,6 +129,25 @@ class ConfService:
     # current version
     current_version = "0.6"
 
+    # IANA registered claims
+    Registered_claims = {
+        "birth_date": "birthdate",
+        "age_over_18": "age_equal_or_over.18",
+        "family_name_birth": "birth_family_name",
+        "given_name_birth": "birth_given_name",
+        "nationality": "nationalities",
+        "birth_place": "place_of_birth.locality",
+        "birth_country": "place_of_birth.country",
+        "birth_state": "place_of_birth.region",
+        "birth_city": "place_of_birth.locality",
+        "resident_address": "address.formatted",
+        "resident_country": "address.country",
+        "resident_state": "address.region",
+        "resident_city": "address.locality",
+        "resident_postal_code": "address.postal_code",
+        "resident_street": "address.street_address",
+        "resident_house_number": "address.house_number",
+    }
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
         "0.1": [
@@ -221,10 +244,10 @@ class ConfService:
         },
     }
 
-    common_name={
+    common_name = {
         "eu.europa.ec.eudi.pid.1": "National ID",
         "org.iso.18013.5.1.mDL": "Driving License",
-        "eu.europa.ec.eudi.pseudonym.age_over_18.1": "Age Verification "
+        "eu.europa.ec.eudi.pseudonym.age_over_18.1": "Age Verification ",
     }
 
     config_doctype = {
@@ -272,10 +295,10 @@ class ConfService:
         },
         "teste": {
             "issuing_authority": "Test EUDIW Issuer",
-            "organization_id":pid_organization_id,
-            "validity":pid_validity,
-            "organization_name":"Test QEAA issuer",
-            "namespace":"teste"
+            "organization_id": pid_organization_id,
+            "validity": pid_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "teste",
         },
         "org.iso.23220.2.photoid.1": {
             "issuing_authority": "Test QEAA issuer",
@@ -312,7 +335,7 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.tax.1",
-            "credential_type": "Tax Number"
+            "credential_type": "Tax Number",
         },
         "eu.europa.ec.eudi.msisdn.1": {
             "issuing_authority": "Test QEAA issuer",
@@ -329,7 +352,6 @@ class ConfService:
             "organization_name": "Test QEAA issuer",
             "namespace": "org.iso.18013.5.reservation.1",
         }
-        
     }
 
     auth_method_supported_credencials = {
@@ -344,7 +366,6 @@ class ConfService:
         ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
-            "eu.europa.ec.eudi.mdl_jwt_vc_json",
             "eu.europa.ec.eudi.mdl_mdoc",
             "eu.europa.ec.eudi.pid_jwt_vc_json",
             "eu.europa.ec.eudi.pid_mdoc",
@@ -356,33 +377,82 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_mdoc",
             "eu.europa.ec.eudi.tax_mdoc",
             "eu.europa.ec.eudi.msisdn_mdoc",
+            "eu.europa.ec.eudi.ehic_mdoc",
         ],
     }
 
-    #eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
-    dynamic_presentation_url = os.getenv("DYNAMIC_PRESENTATION_URL","https://dev.verifier-backend.eudiw.dev/ui/presentations/")
+    # eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
+    dynamic_presentation_url = os.getenv(
+        "DYNAMIC_PRESENTATION_URL",
+        "https://verifier-backend.eudiw.dev/ui/presentations/",
+    )
     dynamic_issuing = {
-        "eu.europa.ec.eudi.pseudonym_over18_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}
+        "eu.europa.ec.eudi.pseudonym_over18_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {"eu.europa.ec.eudi.pid.1": ["age_over_18"]}
         },
-        "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["age_over_18"]}
+        "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint": {
+            "eu.europa.ec.eudi.pid.1": {"eu.europa.ec.eudi.pid.1": ["age_over_18"]}
         },
-        "eu.europa.ec.eudi.por_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        "eu.europa.ec.eudi.por_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {
+                "eu.europa.ec.eudi.pid.1": [
+                    "family_name",
+                    "given_name",
+                    "birth_date",
+                    "age_over_18",
+                    "issuing_authority",
+                    "issuing_country",
+                ]
+            }
         },
-        "eu.europa.ec.eudi.iban_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        "eu.europa.ec.eudi.iban_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {
+                "eu.europa.ec.eudi.pid.1": [
+                    "family_name",
+                    "given_name",
+                    "birth_date",
+                    "age_over_18",
+                    "issuing_authority",
+                    "issuing_country",
+                ]
+            }
         },
-        "eu.europa.ec.eudi.hiid_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        "eu.europa.ec.eudi.hiid_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {
+                "eu.europa.ec.eudi.pid.1": [
+                    "family_name",
+                    "given_name",
+                    "birth_date",
+                    "age_over_18",
+                    "issuing_authority",
+                    "issuing_country",
+                ]
+            }
         },
-        "eu.europa.ec.eudi.tax_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
+        "eu.europa.ec.eudi.tax_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {
+                "eu.europa.ec.eudi.pid.1": [
+                    "family_name",
+                    "given_name",
+                    "birth_date",
+                    "age_over_18",
+                    "issuing_authority",
+                    "issuing_country",
+                ]
+            }
         },
-        "eu.europa.ec.eudi.msisdn_mdoc":{
-            "eu.europa.ec.eudi.pid.1":{"eu.europa.ec.eudi.pid.1":["family_name","given_name","birth_date","age_over_18","issuing_authority", "issuing_country"]}
-        }
+        "eu.europa.ec.eudi.msisdn_mdoc": {
+            "eu.europa.ec.eudi.pid.1": {
+                "eu.europa.ec.eudi.pid.1": [
+                    "family_name",
+                    "given_name",
+                    "birth_date",
+                    "age_over_18",
+                    "issuing_authority",
+                    "issuing_country",
+                ]
+            }
+        },
     }
 
     # Supported certificate algorithms and curves
@@ -432,7 +502,7 @@ class ConfService:
         "timestamp": 1718112634,
     }
 
-    qr_png="app/static/images/eulogo.png"
+    qr_png = "app/static/images/eulogo.png"
 
     # First image option in mdl form. Format: base64 JPEG
     portrait1 = "_9j_4AAQSkZJRgABAQIAJQAlAAD_4QBiRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAMAAAITAAMAAAABAAEAAAAAAAAAAAAlAAAAAQAAACUAAAAB_9sAQwADAgICAgIDAgICAwMDAwQGBAQEBAQIBgYFBgkICgoJCAkJCgwPDAoLDgsJCQ0RDQ4PEBAREAoMEhMSEBMPEBAQ_8AACwgBsQFoAQERAP_EAB4AAQABBAMBAQAAAAAAAAAAAAABAgcICQMEBgoF_8QASRAAAQMDAwMCBQAHBAYGCwAAAQACAwQFEQYHEgghMQlBEyJRYXEUIzJCUoGRFWJyshgzOHWCwhZDobHR8CQlJjQ1REaFs8PU_9oACAEBAAA_ANqL_ZSPClERERERERERERERERERERERERERERUv9vypHhSiIiIiIiIi4Q93_k5I_Psvy7_qiw6Vtk961LfaG1W-mbzmqq2pZTwsbj9oveQGjse5IH3Vir16hnRpYq6S31u_thfNE7DjSRVNXFn7SQxPa4fgrqD1J-iR_wCxvxbj_wDa7gP_ANC_E1f6pPRhpaifUUu51VqCpa3Io7RZqt8z_wAOljZEP-J4Vuz60HS04fq9GbnfztND_wD2LyJ9bDa4ainp27M6pdYW5-BXfp8H6U_s0_NT44M7kj_Wu8L8mq9bvTUdZPHQ9Pd1nphK4QSS6jjje6MeHOYKd3B31bycB7OXYqfW30T-kUYpNi72ad7miqfLeImvYD5MYbE4Px93NVwZ_WQ6WYqlsAse4UzBHHI-aC1Uvw2lzWuMeX1IcXMyWO-XBcxxa4tw53vtLeqP0YanjgbNunPY6mVveC6WesiLHfwue2N0Y_Iesk9F670luLYabVWhtTW--WirGYauhnbLE7_ibnv9shejRERERERERERUv9vypHhSiIiIiIijIX5V6vtu07bKq9Xy501voKCB9TU1NRK2KGGJgy973uOGtaO5JIA8Ela5t5vWY0pp7UE9j2W0B_0opaaV0ZutxqX00VRxdjMUQHMtJ_ZLi0keWrEDfD1N-pzeCpMNs1M3RVoc3j-gWF5j5fd8zsyH-RasbNS7n7k6ypP7P1buHqS90jZPitguN1nqYw_-INkcRnv5XmCSexPhEySMEnAQEjwSnJx8uP8AVTyd_Ef6pyd3-Y9_Pfyge8Yw89vHfwo5O-pVydpuoPenZKsM-1m4d3sTXSfEkpoJS6CQ_V0Tg5hP5C2JdNnrERzPp9MdS1mFO48YxqK0U5c0Euxymp25-UDuXMz_AIXLZbpTWGntb2Ci1TpC_Ul5s9yiZNSV1FM2aCVjs9w9p748HuDkY_aBC_fyFKIiIiIiIiKl_t-VI8KURERERRkfVdK43KitlHLcLhcKekpIGfFlmnlDGMZ_E5xIDR9z2WIPUJ6oPTxs02W1aSvTNf6gAcBTWWpa-lheOwEtSAYwM-zC4_XitPu8PUzvPvdqC63vWuvr1LT3Ob4ptcddIyiiZz5RxthDuBDfqRlWlyfGShJPknsiIiIiIiZP1VTXuJ7uJ8nz9fKvv0zdXe7_AEwaghuGjL1UVFikmDq6xVUhdSVLB-3huPkecftNwR75W7jpv6v9nOp2xCs0BqNkd7hjY64WKsIiraJ3FvLLCf1rORAD4-QPIAlrsht9GOLhnPnwqh4UoiIiIiIipf7flSPClERERFB8K12_m_m33Ttt_Xbg7hXcU9NSjFNSxvBqK6Y_sxRM8kl2AfZoBJ-UFaZOsT1B9fdVdJT6Uo7QNK6UpZnSuoYKovfWOPYGd_ytOG_ugYysRnPz4Kjk7OeRz9cqEREREREREU83YI5HBxkZ8r9vSurNS6HvtLqXSN7rbNdaJwkgq6SZ0U0Z98EHJB75Hus_Omz1dtyNJV9Hp7qApRqqxktjddKSJkdxp2-73BoDJh3OR8rhjsVte2z3R0JvFouh17ttqilvlkr2coqmne5pYWn5mPY4B0cjT-0x7Q4HsQAvYZb9VUiIiIiIipf7flSPClERERF4vdXdLR-zWgLzuVr28C32ayUxnne7HKR2QGRRtP7Ukji1jWeSXADHcrQj1k9WN16rtxo9WSWR1ms1ugNLbaAzukw3k4mR_fjzcCMhoAGBhY85I8EoiIiIiIiIiIiZOMZU8nYI5HBOSMq-nS71abldK-sf7b0VXGostdLH_a1kmcTTVjB5IHlkgGeLx3GRnK3v9P3UJt51Jbe0e4e3V1E8M2I62ieQKi3VAALoZmeWuwcg-HN4ubkOBN0g5rhkFVIiIiIiKl_t-VI8KURERF1pKhkeXukwG-SQcAfnOMDySfZaS_U96vnb27iO2m0TdXS6K0hUPY-SneTDX1wy18vbs5rAXNaT7lx-iwU5HOcnP1RERERERERERERE5H6lXn6Yep3X_S3uFHrjRtQailnaIbpapXEQ3CnySQ7HhwJPF3kZOFvq6c-oHRPUttbQboaFndHT1DjTV1HKQZrfWMDTJBJjsDhzHA-C17XeCALroiIiIiKl_t-VI8KURERFrd9UPreOgbTV9O21l1lh1LdIf_aC4U7-JoqRzDmna7yJXjHI-zPl8uHHT2ZHZJ8E-VSiIiIiIiIiIiIiIp5OHhx_qspegrq6uvSzueyS4zSz6K1G-OmvlKCeMBzgVTR_EweR7sJ_hC36W250d2oKa522qZU0tZEyeGVjgQ-N4Ba4Y7EEEH-a7yIiIiIqX-35UjwpRERF1KqshoKeWsq52xQQsdJJI92A1gBJJz2wACST9F81fUHraPcXfLXWuKOsdWU13vlZUU0_f9ZAJSI3j6Dg1uPsrbIiIiIiIiIiIiIiIiqD3e3t2W5n0jepiu3J23r9kNVVj57toWJklrnleC6W2PPFsZ9_1TsN_wALox4C2GoiIiIipf7flSPClEREWIXqi7nXvbDpJv79P1bqWr1VXU2nDO1-HMhna90wb75dFDI37CRx8gLQq4nx7fRQiIiIiIiIiIiIiIiIskugzqEh6dOoexasulVwsN2YbPeXPGGx00zwBIT7CNwZJgecFfQZSVcVZBHVU0okgmjbJG9juTS0jIcD75BBXaRERERUv9vypHhSiIiLU960u7sNZdNE7JUTnl1vEl-uAz8vKRpjhbjxkN59_wC-tXCIiIiIiIiIiIiIiIiKQ5w8OI9_K3--nJv1Qb5dNFha74kd60bHFpy6xySc3ySQwsMdQCe_GVhae_hwkb4asqkREREVL_b8qR4UoiIi0ber-T_pcTDPjT9v_wArlhAiIiIiIiIiIiIiIiIiLZF6K2sqm3bua60BLWsbRXqwxXFkLnY-JPTzhgLR9fhzSE_YLcKCD4KlERERUv8Ab8qR4UoiIi0besAT_pczdv8A6ft_-VywgRERERERERERERERERFkF0Kbnt2m6p9Bamq68UlBUXFtrrpSwvAgqmmEjiO-fmAz7eV9EDMeGuOCBj8fUELmREREVL_b8qR4UoiIi0besAR_pcz-f_gFv_yuWECIiIiIiIiIiIiIiIiIuSnnnp5o56eZ8UsTg-N7HFrmuB7EEeCPqvpd6fNbU24uymiNb0tQ6Vl4sVJUF7hhxcY2h-e5-bkDkexJHsrjoiIiKl_t-VI8KURERaNvV_8A9rmb_cFD_lcsIERERERERERERERERERS3yt43pBatOoekdljfE9h0xqS4Wscz2c14jqwQP3R_wClHt9QSs4URERFS_2_KkeFKIiItG_rAf7XE3-4Lf8A5XLB9EREREREREREREREREUt8ra56I2pbu-3bqaPkqy61001rucFO5o4x1ErZ45XNI8l7IYgQfHwxj95bS0RERFS_wBvypHhSiIiLRt6wP8Atcz_AO4Lf_lcsIERERERERERERERERERFnr6P-5dZo_qRr9BTOlFHrWzTQFpIDG1FMfixyHIySGiZgwcD4hJBwt17Hl2Sexb7LkRERFS_wBvypHhSiIiLRr6vzg7q7qG_Sw2_wDyuWEKIiIiIiIiIiIiIiIiIivn0WsrH9V21kdDK5lQdSUgif27Hlj7_ugjB8ecr6MYuOMg5JXIiIiKl_t-VI8KURERaPPWAs90o-rJ1yrKb4dJcNP0MlI_OfitZljj9sODv6LBpEREREREREREREREREUs7nus7PR_0db9RdU1XfK0P-PprTNXcKZjQCHufJDTkkEfuiY4wQeWM5GVu2jAGcBcqIiIqX-35UjwpRERFqP9aPb7UrtYaI3WdC-SwutxsImAbiOpEks7Wu7_ALzXOI9vkJ-gWsh3lQiIiIiIiIiIiIiIiIiePC2ieiDSRS3_AHZrJG_rIqO0RNz44vdUk_z-Qf1W2PAHgBSiIiKl_t-VI8KURERWL6zNoX759NeudvKWNz7jVW8VttDSGn9LpntnhZyPYB74-DneQyRxHcBfOpU00tLNLS1EL4pYnFj2PbhzXNJBBHsRggj6hdZERERERERERERERERFLO57rc_6RPT7rLanbbUe5etKCe3P18-hNto5QGyspIGyubM8cst-IZsNaW8uLWu8Pw3YQiIiIqX-35UjwpRERFQ4E9wF85_Wnt8NsOqLcPTA5_o5vU1fAX45cKhxmyAA0EfOQrFIiIiIiIiIiIiIiIiIsjegzYSk6g-o7T-kr1QipsNuD7vd2ui5xyU0OCI3jk3DZH8WE_3sL6EaKip7fTx0lJTxwwQMEcUcbA1kbAMBrQOwAHsF2kRERFS_2_KkeFKIiIi1k-sXsTopmhbX1B0VK-n1I250tkqnxn9XUwvjmcC8e7gWAAjvjstRqIiIiIiIiIiIiIiIilvlbjfRy2Obpba6_wC-N7tL4rtq2sdbrbLKzBFsgwS6M8eY-JOXB2SQ4QRkeDy2NIiIiIqX-35UjwpREREWC3rE9-keFzB41Zbs_YfBqP8AxC0gIiIiIiIiIiIiIiIiLnhiknkZFDGXyvcGMa1uSSTjGPckkAL6Ydi9GUG3uzuitFW6mZTwWeyUdKyMBw_ZhAcfm-YuJJJJ-quAiIiIipf7flSPClERERYl-qHpm36i6K9d1FYzMtlkt1ypHgf6uVtXDGSfryjke37cs-y0FoiIiIiIiIiIiIiIiK4Ow9hfqbenQ1iihfUPrL_QRtibL8IuAnaXfNxcBgAlfS5R05p4Y4md2MYG-AM4XbRERERQfClERERFb3ffbOi3k2e1jtfXSNjZqW01FCyYjPwZXsJilx_ceI3_AH4r5r77Y67TF_uenbxTiGutVTNRVUJIPw54nFj2_fi9p7-4H3X5KIiIiIiIiIiIiIiIr9dDFrmuvVttfTR0z5gb_A9_BpdxY0OcSePsMd19FYYAckDKrRERERQfClERERFQWM847LS96q3STHtNrob6aPa5untZ1z23Cla04orgWhxdk_uSnk4f3g77LX2iIiIiIiIiIiIiIiLMn0pdNVd-6wtP18dHLNTWW319dUzMYS2AfAc1hcT7F7w38kLe991KIiIiKD4UoiIiIitl1B7PWDfzZ7U21WoImGG-0T46ebGTTVbfnhmb_eY9rHAe4aQfK-dndXarWGzeuLpoDXVofQ3S1zGN7T-zKzlhsjCezmOHcH-q8UiIiIiIiIiIiIiIi28-jVsXd9M6Q1PvjqG200LNVCG22OQg_pDqWCWQ1Du4-WN8oiDcH5jCSewbnZeiIiIiKD4UoiIiIipLW-cDP1WM3Wt0d6V6p9vKqCKjp6LWtuhfNZLqWcXte1ufgSEd3Rv_AGT9CQR4WhbXOhdV7dalrtI61sFVaLvbZnQVFNUx8CHtPzY7fMMjsQfBC82iIiIiIiIiIiIiniVeDpp6dNY9S26FDt5o63Okg-Iye7V3Lgyhow4fEkc8hwacZDflcS7AHIEr6ItDaMsW32kbNofTVFHS2uyUkVFSQsYGhkbGtaOw7A4BP816VEREREVLlUiIiIiIoIGMYC1_-rxsW7XGxdHutp-0RyXLQ9aJa98UQ-K-glAjc4kDJEbxGe_YNLz7BaWfooREREREREREREWXPQP0TWzq-uOrTqXUlysVo05TU_GroIWPLqmV5wwh4wRwY8nHcdvqtvvTD0nbYdK2k59N6Ahq6mpuErJ7ldKx4dU1r2tIbkNHFrACSGtwASSr48W-eI_opRERERFS_wBlI8KURERERFbLqVsdZqTp13S0_bKX49dc9F3ukp4g3JfNJQzNjAH15FuF81JZjAIGRn-ePbHsuJEREREREREREU4JOMZJ-i33emLs6_aTpS0_UV1G6C76xml1JWtkbgtbNxbC0Z74-BHCeJ8Oc_6lZcYClERERERUv9vypHhSiIiIiIuGeJskT43NBDuxBGc5-q-fT1CNjrPsJ1Mag0tpkBtmurI71RQj_wCXZPnlCPbDXB2PoCPosaERERERERERERXS6Z9tZd2N-ND6CZQ_pUN0vNM2qjdEXsNO14fKHY8NMbXD7ZX0l0dHS0VLFQUcbIqeCMRxxsHZrQMAD6DHsu2iIiIiIipd5VSIiIiIiKl4JHZakvWk23qKfWOht1aWif8AAuFFPZ6uYMOBNG7mxpI9-D8DPY4K1juUIiIiIiIiIiKWraT6NOw1PUyao6h73SB76Od2nbKHju2Qsa-qlwfB4uiZn7ye4W10AY8KUREREREUHwpRERERERQfCtpv1svpDf7a29bWaxpA-hu1M5kE7Wgy0VQ1v6qeP-F7H4IJ7HBa7IJB-cjcHQ2ottNZ3nQOrrf-h3ixVj6KqiI8PaT3b_E09iCfYheaREREREREREX6thsVx1LeqDTtlo31NwuVVHR0sDG4dLK9wa1v5LnAfQdyvo86Y9nLfsLsZo_a6kDDNZrcxtbM1hb8ask_W1EmD7Oke4_YYH7qut4ClERERERFB8KURERERERUPaMf9q0K-qjRUVF1lapdQwxxuqqOhnqOAA5SfBA5Ox5PFre5WIiIiIiIiIiIizw9I7Y-TcPfup3JuNGySy6EpvjfrO7X1s7XMhb_ACDXv_4R9Vu0Y1oaAGgZyfH18rkRERERERFB8KURERERERUv_ZXz_wDqaVUtR1na9bIf9Q-kiZn-EU0axZRERERERERFLfK3VejltxX6V6crvrq4xiNutb26aiBHd9LSj4HxPtmUTAD-4D7rPweApRERERERFB8KURERERERUuWgD1NKSak6ztePnaR-kPpZWZ_hNOwD_KsWERERERERERSzOe2P5r6CPTe1nYdYdHugWWGl_RW2WkfaaqI4z-lQv_WPwPZznF_fueWfdZPDwpRERERERFB8KURERERERQfC0V-rdaZbb1gXKpdG4suFkoKhri3AJw5uAffHEZ_KwsRERERERERFLW8jhbwPSF0ZeNL9KEt-uTWti1XqSsulE0F2RA1kVOC4FvYmSnkPbII4n3KzmHhSiIiIiIiKD4UoiIiIiIih3L2AK1uesD073DWOhrPv5pqkM8-kmmivLGNy4UEjsxz9jjDHkBxAzxeD4BWnx_Y9lCIiIiIiIiAE-AvZbVbc3zdncKw7c6ZhL7jqCsjpISA1wY1x-aQ5LQA0Bzjlzezce6-krbLQdn2v2909t3p-PhbtN22ntlODyyY4WBuXF3ck4Jz9yvWIiIiIiIiKk9m91UiIiIiIiIvyNQWW1als9dp6-UEVbbrnBLSVdPMzMcsUjC2RjgfGWkj-a-errJ6arn0y72XfRP6LUO0_VPNbp-rkaT-kUb3EtbyPZz4-7HD3wD7qwhGCoRERERERFysaScNHc4x9TnwAB7rbp6UHR3XaNtMfUxr-kkp7re4Hw6ft09O5j4KR5HKrfybyDpACGYwOB5ZcHgN2Vsj4jw3I98LkREREREREUO8KURERERERFxujBdkBv9PvlWK6t-lrSPVTttVaPvcjKK9UbXzWW6tj5voqotIHJo7ujPy8m5yQAW9wFoK3a2h1zstru5bdbgWV1BeLbIWOaPmjmZjLZYXjtJG4fMHDtg9w0gtb4VERERERFW1vI4wM59x5P0wFsY9OD0-nbmVUW9u9llqYNMUE7HWW0VVM-M3aQAOFQ5r2t5Uw5ANIyHu5AEBpzuGpqSnpYWQU8TI44wGsYxoDWgYwAB48D-i5lwzzfBjMjwQ0dj38D6rmBBGQpRERERERUuVSIiIiIiIijAVBjjznH8ljH1vdG2neq_b6aGgNDbtcWmNz7FdZmu4Oe05dTTFmXfDfhwyA4sc4O4u4lrtD2tdBam241Pc9F67sdVZr3Z5TT1VFURkOa5pGSHDIcO-Q4ZY5uHNJBbnzCIiIiIuwyB0rmxxMLnyENYGjJJzjx5yfYBbKPT-9NS5alr6bePqJ05PQWanl5WfTlbCY5q9zXYM1RG7Do48ggMe0OeByxxLCduNPSU1LDHTUsLI4omNZHG1oDWNHgADsAO2AudF1bhEJ6OaPxyaueP8AZH4VaIiIiIiKD4QeFKIiIiIiIiKkxtOcjOexWJXXL0O6b6qtKS3myCltmv7PD_6qub_ljq2gl36LUOaCSwjs1xBLCQ75hyadGWtdC6o261PcdFa209VWe-WyZ1PVUdUwtkicDnIPhwx3Dh8jm_M0kEFebREREXttsdo9w949U0-i9sdIVt_vFV-xDTsDWN7HLnyPIZG3AOXOcACOxW4Xo49MbQexX6Jrndea36y1q10dRCGwk0FqkDW4bE13eV4eXfrHNHgYazB5Z1NiYzw3_wA_-QFWiLp3OobSUM1S5pIY3OFXR1LKqmjqIs8XDK7KIiIiIiKD4QeFKIiIiIiIiIqTGwnJHdYzdXHRDtj1W2eSpu0LLJrOkpzBbL7TNPJuSHNZOwdpo8g9vLQ5xDgVpH376cN0um3WMujNzLCynlIzS19MXS0VczyHwykAkZyMENcMfM0ZVqkRF-9pbROrNcXKKyaM0vc75cJjxjpbdSSVEr_P7rAT7fRbD-nD0etYXusotT9RV5prNaXRxyiwW2V0lbLzbksnlDeEHAkAhpkLiHAOaAHO2f7VbN7Z7J6dZpbbDRtvsFC3HJtNCBJMck8pHkc5CMnu4nyV7oxsJyR7Y_kqkRF-de43SW2ZjScubxwps0TobdFER-x8o-4X6CIiIiIiKD4QeFKIiIiIiIiIi43MZ_C0kHOCPfOf-9eK3R2o0DvNpOo0XuLp6kvNpqSCIphng8HLZGOxlrh7YWqff30e917Dfam47AVtv1RZJBzgt1dWx0tbCP4echEcn55NKsHffTa61tPUba2v2IuErC7iGUNyoa2TH14QTOd_2L0GjvSy6ydUy0Ir9urdp2lrT3qrxeKdn6O36viidJNn-6Iy77LL_an0X9urLURXHeDcm5akDTGXUFppv0GD_Vu5tdI5z5HjmQWubwOAAR3Kz_0FtbtxtfQOoNA6Ls9hhkH600dGyF0p793uABd5Pn6r1oA84GVJa0jBaMeMYUoiIutVBrgIyc8jlc7I2xtDGjAHYKpERERERFS_2VSIiIiIiIiIoyPqqeQHknzjv2yfosMerP1Ldr-m67zaFsloqNXa0pJWsrbfE91NBQsc3kHSTFjg52MYY1pJzklowHYEW31O-qPWe5tulr7pSGy3K4w07rHQUkbIy172scyN0hB5HmOPxHgZxlwGVmlon1Dat9caPU2i77bqP9NjoKesvVAaKOsncSGmLk4S_NxyOTGj5mtPFxIWVO3m_Wgdw6iO2W2udS18jMtpKgcXH7NPh5_C89v31S6F6cG09fuhbrrQ2SsIihukFO-eJ0zskR8WNc4HDfcYXk9p_UI6Wt4LrFZNP7iQUFzmkbBDT3WN1G6aR_Li2P4oaXE474BA7K7Otd7dr9t7tb7Nr3Wtt09U3iRsFA64yNhjqZXfstY4kNJ-2c_de6jmbIxpjfyyAflPYg-D79vwVzoiIqSTnHsfP2XWj5SzlxGGtHFq7Q8KUREREREUHwpRERERERERUOe0ZyccV0prrRR1LaH9JidVvYZGU4lAkcwEAuAzkgZ84UVdBHXiN8kkzPhP5sDJC0h31OPP-HwrNdQ_R1sn1L0Ubdw9Mxi60w5U91ocQVjPlxxdI0ZkZ_dcMfZYfV3QppDYrU9tr6WzsFNDHIyKseBUMrHcg6N7zICWSMyRluMg9uQ-Zemm0YZHucyjfLG45A98E5Bz-e671m0XdLTXNuVrlfTzMla6J0bhlp5ec_w_fysgyNE9Quga_afeK00VYKyE07hI9g-K8tLRLA4jkyUcsg8QR9Fp561uirVXSdq1tRHI-7aLvNRP_Y9wawh0QD3EU84ycPEfD5s4d3cOP7Kyz6It_wDbrqy2nl6P-peKnuFwgphDYq2Zz3T1ELIwQRMQ4MqI8AtJdykJwR2Oe3sr1Kbj9Bu8svSt1TX9120Y94n09qh8j5P0allLhFK4nlJ8BxaWmMjMLmuPJzBk7N7bdKO60cFxttdFWU1UxssE1O8PjkjcAWua4EhwI75HbAPgr9FERcbwS1wB8qpjA1vHAVSIiIiIiIoPhSiIiIiIiIoz3wsaetTrD050nbdRXiWjbdtVXxz6axWwkiN8gALpp3js2KMFpIBDnOIa3A5Obpig6vt9nb6WzqEu-uK65altVS18bZZCynfS_E5vozGwgNgfgsLB4BGDyaCt7fT_ANQOh-orQFt15oe4NkZUs_XUriBNSy4AfE8cjxcwnDs59iOQc1xuuCPYffuuncbXQXWjkt9xpYqiCVvF8cgyC3_xVotS7P01kY64Wdsk9FG0l0HlzIwc_wAxj38q1N5raekklbA0kRDPYHt9sH3Xgq_VNypK_wCJQz_Alxhk4Hzxj7B3n-avJovXmi9-NLVWym7Vtprq25Uj4pWzs5R1LQcA8v3ZM9wR3WofrD6a9Q9HO99LRWO51X9mTPbedNXYEfFjEcmWjkDkyRu4DkQ390-5V1d-N-f9Nnpbtd7vNhfJujtrXRw3F9BTiT-0rdMw86oNYDJGwGPLwQGB2HZ-YNbz-m71rXjYvXNFsvuHeJ36AvtSYKaOdhkNprZX4D2ZIdHE97svGCATyw353HddHMyoa2SKUPYQCHNdnIPf27dx3BC7CIoPhSiIiIiIiIoPhSiIiIiIiKD4XndRajmoHCgtdM-orZewAHyxD-In3_Cxz3B6OND7t6hq9TboWAX-5V8UURfXSOPwmxhwAiHIBgBe5zgMciQT4WEG4fpOXG06irRp3XE9Nb5WE0UdVSfFfE4Pb2Lw5vNoYSOzeQI5HsDn9PoWqdebJ6m1PtFqGOvt1609Utq3Rl7H0dSyY_DjkiOA8tcGD-72w4NcHAbQdu9yqLWtC0VLBS3AOLHRcgQ8t8lufZe4B9vB_qqXxh4ILWkHyCPKsHvft1Pb4KjVVjaXQPDnVEAzyDych39eyw43C1zaND22ovl9uUVFBE0yEzYa9zAPPEnOT44jk4n9kFYma162b2auKr2ypqy1V1LURVEVbO5rXtLC7kx0eXZGC0ghzSMHOVfffzeK19dXRIdezUcVFuDtNcIJ71SjLWzUs36kyw4zzDvkPEkEOa4eMcrlenJ0M610Vp2Xdrcdz7XU6rpGMpbO8YmhpefJskzfLZHHDhH5DcBwDiQ3LbXvRbsVuLaain1HoW0VlwqHtlkrn0zWTOewAMcXs_WEYABHL2-y49kbxqva69Q7F63NZX2-jo2u05fpxI7lTxlsZpKiVwwZWggtdyy5pII5NJdkKHeD7H7qpERERERERERUuUjwpRERERERUPaXsLQ4j7grgp7fS0vzRRAPPfk7uf6rscV0LpaYLpCY5gAR2Y4DuFiP1PbOUWltaaf3qs9DM6RwfY7t-h07nvkE5DYJZQHD5GPBbni7HPPysa4ho-5VX6RDLRu4SR4EQhdwIz57lZH6B1z_AG7Rspbm9jatrMveHDB-xx4K9uD9e2fGCutXUdNXU0tFWRMkhnHGRjh5B8fzz3_K0keqBt1U7cbhWm0Ptc8lNI2eeiujiXNkgJaTEfbmHZJHjzhYPOc_JHJ3bHv9PC2U-jztJqW56s1huNX2uJ2kn28WOYyO5ionJZJwDAD-yOJcTjGQAPPHbpFTwxwtihaAwM4tbjtj6YXKY2kEAYz9F5_VulKHVFtdTTt-HNH88Ew8xSfULq6Mu1wbG_TuocC50AwXAYE8X7rx9Tjz916nLs-FWiIiIiIiIiKl_spHhSiIiIiIiKMBSowfqvxdU6coNVWCv07XtBhuETo3nGcEtwHfkEAg_ZYn26xXDQl-msN2gIkp5CwF2eTmt_ex44kYcD58hfvamrqegsT6p1RiWHlIwDLMOHjBH1X73T_1N2fXlSNKXi6U0lyc-RlJUtfls72OLHxHsAHNeOGM5LwW-V39-t_aPbyGutc1bFQVVG01LpZZOLGRBpPxeZ7YbguJOAOBBI-bOInWXeouqzovuO49rt8kGodt70aW-UrYHu5RxOLDM3IB-E6N7Zg4FzQ1xwTjksC-k3pV1t1Vbix6V09G6js1Fxmvd2czLKSE9-Lc9nSu7ho_Lj2AX0A7cbb6O2p0ZbNCaHssFss9ogEFPDG3j2Hklx7ucTlxd5JJPuvW4HjClUkDzgdvC_MuNmiqqmK5RH4dVB3ZJ9R_Cft9l3YJXyN_WDi8ftN_h_n7rsIiIiIiIiIipf7flSPClEREREREREUcW5zjurC70X-x2_dHQmiX2urqrxreWppqZ8FOHsp2UzPiPmmPJpbGAex75JwvH9RmnnaC25rtUagmdFZ6KJ1RVPow97qYNbycSA3Lm8QQMd8rSnrjdJzt1arXm11TX2FrHOdTSh7mTlzub5HuaXODS573HA-VpwQFslgvtn64emHSu5d6t0N01VpCWGh1FR8S7408JAZUcPl-U8g_95gD3Ak91cTpg6drTSaH3O2baKqm05q23_BdTtbxjpjIz4buBHcuyS8vdl3doPFvEDJjp86e9uOm_Q8eiNu7WYIHETVVTJl0tVNxa1z3P9yeOQB27lXUDGNxxYBjsMDwqkRU8fupwPOApRERERERERFS_wBvypHhSiIiIiIiIijIXE57I2Oke_i1uS4k9gB5OT7LGbYvWOm9-9_debqWuOtmodBudo2gnnje2CSUPL6qWHm0ZLXMYwu9-IPuOX6HVVufbLJpQ6ZLppZq95iayGN0oyGucS4gfKz5S3m75cuxnl2WgnWNqo7Lqm8Wukke9lDcqqlIbFxY1rJS1hB5OzyDc_b2yrrdL3VTrDpgv13r7NRtu1qvVukpqu1TPLKeaXAEUj_lJzGQR2-p-gW-zY-Ww3XazTOptOvMtDqK20t5hlexzC9tREJWkBwBxh3YFvurghjB4aB49voqkRERERERERERERQfClEREREREREXXMxbOIPhvy5vLljsD9FwXO20t3oKi2V8ZdBUxvjkDXFp4Hz3C8PT6Q0ztNo8WDbPRQt9NM88o7ZSPc8y8cCWV2C-RxIAdJIS45ySsO-qay71DQt0u2ituNU3-7syKWlprJU1L-T3NbyDGMJeG5JIA7gLWTF0l9WV7ufw3dO2576qrkc901Xpiuja5zgS4vlkiABPfJc4ZJ-qyzsXp7a10L0xul1FoK7XDcfcu7Wu2QQ0Vtmq3aYoHTtMstV8Np4AYDnjsAAAXHBW2bQGnrLpDR9n0hpygkorVp6jhtFFC9paWwUzBCwDPzEAMADj3d5XqERERERERERERERFB8KURERERERERUDwPypb4_mf-9daf_3ln-GT_KFVL5f_AIz_APjU_wDWf8X_ADKlnhv5b_yLl_6w_wCP_lXKiIiIiIiIiIiIiIv_2Q=="
@@ -443,7 +513,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log_dev"
+    log_dir = "/tmp/log"
     # log_dir = "../../log"
     log_file_info = "logs.log"
 

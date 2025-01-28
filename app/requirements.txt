@@ -25,6 +25,7 @@ gunicorn
 git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
 git+https://github.com/eu-digital-identity-wallet/idpy-oidc.git
 git+https://github.com/eu-digital-identity-wallet/openid4v.git
-git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@9181a0a4514b7de2cc30a84d320b509e9fc5cb59
+#git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@9181a0a4514b7de2cc30a84d320b509e9fc5cb59
+git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1
 git+https://github.com/rohe/fedservice.git@a4bef2e3f230f4b07c6ef45e4c8be55778d0561e
 git+https://github.com/rohe/idpy-sdjwt.git@de1715ef89c7f3db5daf3cdc53fec26d6ade03d9

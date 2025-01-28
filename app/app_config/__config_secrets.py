@@ -26,3 +26,5 @@ flask_secret_key = "secret_here"
 # Defined in eIDAS node service file specificConnector/specificCommunicationDefinitionConnector.xml,
 #                                   entry key="lightToken.connector.request.secret"
 eidasnode_lightToken_secret = "secret_here"
+
+revocation_api_key = "secret_here"

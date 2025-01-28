@@ -51,12 +51,14 @@ from .app_config.config_service import ConfService as log
 
 oidc_metadata = {}
 openid_metadata = {}
+oauth_metadata = {}
 trusted_CAs = {}
 
 
 def setup_metadata():
     global oidc_metadata
     global openid_metadata
+    global oauth_metadata
 
     try:
         credentials_supported = {}
@@ -66,6 +68,11 @@ def setup_metadata():
             dir_path + "/metadata_config/openid-configuration.json"
         ) as openid_metadata:
             openid_metadata = json.load(openid_metadata)
+        
+        with open(
+            dir_path + "/metadata_config/oauth-authorization-server.json"
+        ) as oauth_metadata:
+            oauth_metadata = json.load(oauth_metadata)
 
         with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
             oidc_metadata = json.load(metadata)
@@ -213,6 +220,10 @@ def create_app(test_config=None):
     def favicon():
         return send_from_directory("static/images", "favicon.ico")
 
+    @app.route("/ic-logo.png")
+    def logo():
+        return send_from_directory("static/images", "ic-logo.png")
+    
     app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:
