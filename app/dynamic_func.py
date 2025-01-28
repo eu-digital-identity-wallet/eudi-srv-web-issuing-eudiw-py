@@ -179,6 +179,32 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             if "driving_privileges" in attributes_req:
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
+            
+            if "places_of_work" in attributes_req:
+                json_priv = json.loads(data["places_of_work"])
+                data.update({"places_of_work": json_priv})
+            
+            if "legislation" in attributes_req:
+                json_priv = json.loads(data["legislation"])
+                data.update({"legislation": json_priv})
+            
+            if "employment_details" in attributes_req:
+                json_priv = json.loads(data["employment_details"])
+                data.update({"employment_details": json_priv})
+
+            
+            if "competent_institution" in attributes_req:
+                json_priv = json.loads(data["competent_institution"])
+                data.update({"competent_institution": json_priv})
+
+            
+            if "credential_holder" in attributes_req2:
+                json_priv = json.loads(data["credential_holder"])
+                data.update({"credential_holder": json_priv})
+
+            if "subject" in attributes_req2:
+                json_priv = json.loads(data["subject"])
+                data.update({"subject": json_priv})
 
             if format == "mso_mdoc":
                 for attribute in attributes_req:

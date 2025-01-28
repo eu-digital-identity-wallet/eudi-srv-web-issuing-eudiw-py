@@ -93,6 +93,9 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_jwt_vc_json",
                 "eu.europa.ec.eudi.mdl_mdoc",
+                "eu.europa.ec.eudi.ehic_mdoc",
+                "eu.europa.ec.eudi.sample_pda1_mdoc"
+
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },

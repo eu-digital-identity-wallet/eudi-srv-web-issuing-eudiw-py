@@ -1,8 +1,8 @@
 {
-"eu.europa.ec.eudi.ehic_mdoc": {
+"eu.europa.ec.eudi.sample_pda1_mdoc": {
     "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.ehic.1",
-    "scope": "eu.europa.ec.eudi.ehic.1",
+    "doctype": "eu.europa.ec.eudi.pda1.1",
+    "scope": "eu.europa.ec.eudi.pda1.1",
     "policy": {
         "batch_size": 50,
         "one_time_use": true
@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "EHIC",
+        "name": "PDA1",
         "locale": "en",
         "logo": {
           "uri": "https://examplestate.com/public/pid.png",
@@ -48,7 +48,7 @@
       }
     ],
     "claims": {
-      "eu.europa.ec.eudi.ehic.1": {
+      "eu.europa.ec.eudi.pda1.1": {
         "credential_holder": {
           "mandatory": false,
           "value_type":"credential_holder",
@@ -56,16 +56,6 @@
           "display": [
             {
               "name": "Credential Holder",
-              "locale": "en"            }
-          ]
-        },
-        "subject": {
-          "mandatory": false,
-          "value_type":"subject",
-          "source":"user",
-          "display": [
-            {
-              "name": "Subject",
               "locale": "en"            }
           ]
         },
@@ -79,23 +69,43 @@
               "locale": "en"            }
           ]
         },
-        "starting_date": {
+        "employment_details": {
           "mandatory": true,
-          "value_type":"full-date",
+          "value_type":"employment_details",
           "source":"user",
           "display": [
             {
-              "name": "Starting Date",
+              "name": "Employment Details",
               "locale": "en"            }
           ]
         },
-        "ending_date": {
+        "places_of_work": {
           "mandatory": true,
-          "value_type":"full-date",
+          "value_type":"places_of_work",
           "source":"user",
           "display": [
             {
-              "name": "Ending Date",
+              "name": "Places of Work",
+              "locale": "en"            }
+          ]
+        },
+        "legislation": {
+          "mandatory": true,
+          "value_type":"legislation",
+          "source":"user",
+          "display": [
+            {
+              "name": "Legislation",
+              "locale": "en"            }
+          ]
+        },
+        "status_confirmation": {
+          "mandatory": true,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Status Confirmation",
               "locale": "en"            }
           ]
         },
@@ -103,11 +113,6 @@
           "mandatory": true,
           "value_type":"string",
           "source":"user",
-          "issuer_conditions": {
-            "length": {
-              "equals": 20
-            }
-          },
           "display": [
             {
               "name": "Document ID",
