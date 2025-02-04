@@ -73,7 +73,7 @@ import requests
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
-from . import oidc_metadata, openid_metadata, oauth_metadata
+from . import oidc_metadata, openid_metadata, oauth_metadata, openid_metadata2
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -87,6 +87,7 @@ from app.data_management import (
     session_ids,
     getSessionId_requestUri,
     getSessionId_authCode,
+    credential_offer_references
 )
 
 
@@ -273,6 +274,24 @@ def well_known(service):
         # _endpoint = current_app.server.get_endpoint("provider_config")
         info = {
             "response": openid_metadata,
+            "http_headers": [
+                ("Content-type", "application/json; charset=utf-8"),
+                ("Pragma", "no-cache"),
+                ("Cache-Control", "no-store"),
+            ],
+        }
+
+        _http_response_code = info.get("response_code", 200)
+        resp = make_response(info["response"], _http_response_code)
+
+        for key, value in info["http_headers"]:
+            resp.headers[key] = value
+
+        return resp
+    
+    if service == 'openid-configuration2':
+        info = {
+            "response": openid_metadata2,
             "http_headers": [
                 ("Content-type", "application/json; charset=utf-8"),
                 ("Pragma", "no-cache"),
@@ -1150,6 +1169,10 @@ def credentialOffer():
                     "grants": {"authorization_code": {}},
                 }
 
+                reference_id = str(uuid.uuid4())
+                print("\nreference_id: ", reference_id)
+                credential_offer_references.update({reference_id:{"credential_offer":credential_offer, "expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)}})
+
                 # create URI
                 json_string = json.dumps(credential_offer)
 
@@ -1193,6 +1216,10 @@ def credentialOffer():
     else:
         return redirect(cfgservice.service_url + "credential_offer_choice")
 
+@oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])
+def offer_reference(reference_id):
+    print("\nReferences: ", credential_offer_references)
+    return credential_offer_references[reference_id]["credential_offer"]
 
 """ @oidc.route("/testgetauth", methods=["GET"])
 def testget():
