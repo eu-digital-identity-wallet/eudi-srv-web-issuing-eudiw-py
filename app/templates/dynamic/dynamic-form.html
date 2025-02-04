@@ -263,6 +263,105 @@
                                                     <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
                                                 </div>
                                             </div>
+                                        
+                                        {% elif attr.type == 'list' %}
+                                            <div id="{{ name }}-container" class="list-container">
+                                                 <!-- Title for the Section -->
+                                                <h3 class="section-title">{{ name | replace('_', ' ') | title }}</h3> 
+                                                 <!-- Add Button (Only if max cardinality allows more than 1) -->
+                                                {% if attr.cardinality.max != 1 %}
+                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-container"
+                                                            data-name="{{ name }}" data-attributes='{{ attr.attributes | tojson | safe }}'
+                                                            {% if attr.cardinality.max != "n" %} data-max="{{ attr.cardinality.max }}" {% endif %}>
+                                                        Add {{ name | replace('_', ' ') }}
+                                                    </button>
+                                                {% endif %}  
+
+                                               <!-- Toggle Buttons for Exclusive Selection (Only if more than 1 option) -->
+                                               {% if attr.attributes | length > 1 %}
+                                                    <div class="btn-group toggle-group" data-toggle="buttons">
+                                                        {% for option in attr.attributes %}
+                                                            {% set hide_option = true %}
+
+                                                            {% for other_option in attr.attributes %}
+                                                                {% if option.attribute != other_option.attribute and "not_used_if" in other_option and other_option.not_used_if.attributes is defined %}
+                                                                    {% if option.attribute in other_option.not_used_if.attributes %}
+                                                                            <label class="btn btn-primary toggle-option"
+                                                                                data-target="{{ name }}-{{ option.attribute }}" data-attributes="{{ option }}">
+                                                                                <input type="radio" name="{{ name }}_option" autocomplete="off">
+                                                                                {{ option.attribute | replace('_', ' ') | title }}
+                                                                            </label>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            
+                                                <!-- Containers for Attribute Inputs -->
+                                                {% for option in attr.attributes %}
+                                                    <div id="{{ name }}-{{ option.attribute }}-container" class="sub-container">
+                                                        {% if attr.filled_value %}
+                                                            {% for index, item in enumerate(attr.filled_value) if item.attribute == option.attribute %}
+                                                                <div class="list-item form-group">
+                                                                    <div class="row">
+                                                                        {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            <div class="col-md-6">
+                                                                                <input type="text" class="form-control" placeholder="{{ sub_name }}" 
+                                                                                       name="{{ name }}[{{ index }}][{{ sub_name }}]" 
+                                                                                       value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                       {% if sub_attr.mandatory %} required {% endif %}>
+                                                                            </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {% if option.not_used_if is not defined %}
+                                                                <div class="list-item form-group">
+                                                                    <div class="form-group">
+
+                                                                        {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                            <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
+                                                                                    data-name="{{ option.attribute }}" data-attributes='{{ attr.attributes | tojson | safe }}'
+                                                                                    {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
+                                                                                Add {{ option.attribute | replace('_', ' ') }}
+                                                                            </button>
+                                                                        {% endif %} 
+
+                                                                        <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
+
+
+                                                                        {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            <input type="{% if 'full-date' in sub_attr %} date {% else %} text {% endif %}" class="form-control" placeholder="{{ sub_name }}" 
+                                                                                    name="{{ name }}[0][{{ sub_name }}]" 
+                                                                                    value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                    {% if sub_attr.mandatory %} required {% endif %}>
+                                                                        {% endfor %}
+
+                                                                    </div>
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        
+                                            
+                                        
+                                                    
                                         {% elif attr.type == 'uint' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
@@ -456,53 +555,270 @@
         divtest.innerHTML='<input type="hidden" value="'+room+'" name="NumberCategories">';
         objTo.appendChild(divtest)
     }
+
+
+    const firstToggle = document.querySelector(".toggle-option");
+    if (firstToggle) {
+        console.log("firstToggle: ", firstToggle);
+        firstToggle.dispatchEvent(new Event("click")); // Simulate a click on the first button
+    }
+
+
     document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM fully loaded");
+        
         var isValid= false
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            document.getElementById('fileInput').addEventListener('change', function(event) {
 
-            var files = event.target.files;
-            var preview = document.getElementById('preview');
-            
-            // Clear any existing content
-            preview.innerHTML = '';
+                var files = event.target.files;
+                var preview = document.getElementById('preview');
+                
+                // Clear any existing content
+                preview.innerHTML = '';
 
-            // Loop through all selected files
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
+                // Loop through all selected files
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
 
-                // Only process image files
-                if (!file.type.match('image/jpeg')) {
-                    continue;
-                }
-
-                var imgContainer = document.createElement('div');
-                imgContainer.style.marginBottom = '20px'; // Spacing between each image container
-
-                var img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-
-                img.onload = function() {
-                    if (img.naturalHeight != 433 && img.naturalWidth != 360){
-                        alert("Height and width must be 433 and 360");
-                        img.onerror = reject;
-                        URL.revokeObjectURL(img.src)
+                    // Only process image files
+                    if (!file.type.match('image/jpeg')) {
+                        continue;
                     }
-                    alert("Valid image size");
-                    return true
+
+                    var imgContainer = document.createElement('div');
+                    imgContainer.style.marginBottom = '20px'; // Spacing between each image container
+
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+
+                    img.onload = function() {
+                        if (img.naturalHeight != 433 && img.naturalWidth != 360){
+                            alert("Height and width must be 433 and 360");
+                            img.onerror = reject;
+                            URL.revokeObjectURL(img.src)
+                        }
+                        alert("Valid image size");
+                        return true
+                    }
+                    img.style.width = '20%';
+                    img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
+                    img.style.marginBottom = '10px';
+                    img.style.marginTop = '10px';
+
+                    // Append the image and file info to the container
+                    imgContainer.appendChild(img);
+
+                    // Append the container to the preview div
+                    preview.appendChild(imgContainer);
                 }
-                img.style.width = '20%';
-                img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
-                img.style.marginBottom = '10px';
-                img.style.marginTop = '10px';
+            });
+        }
 
-                // Append the image and file info to the container
-                imgContainer.appendChild(img);
+        document.querySelectorAll(".toggle-option").forEach(button => {
+            button.addEventListener("click", function () {
+                let containerId = this.getAttribute("data-target") + "-container";
 
-                // Append the container to the preview div
-                preview.appendChild(imgContainer);
+                console.log(containerId);
+
+                // Enable all buttons before disabling the selected one
+                document.querySelectorAll(".toggle-option").forEach(btn => {
+                    btn.removeAttribute("disabled");
+                });
+
+                // Disable the clicked button
+                this.setAttribute("disabled", "true");
+
+               // Get the parent container (places_of_work section)
+                const parentContainer = this.closest(".list-container");
+                if (!parentContainer) {
+                    console.error("Parent container not found.");
+                    return;
+                }
+                
+
+                let input = this.getAttribute("data-attributes")
+                // Replace single quotes with double quotes
+                let jsonString = input.replace(/'/g, '"');
+                
+                // Replace Python's None, True, and False with JavaScript's equivalents
+                jsonString = jsonString.replace(/None/g, 'null')
+                                        .replace(/True/g, 'true')
+                                        .replace(/False/g, 'false');
+
+                //console.log(jsonString);
+                // Repopulate the container based on the selected option
+                const selectedOption = JSON.parse(jsonString);
+
+                if("not_used_if" in selectedOption && "logic" in selectedOption.not_used_if && "attributes" in selectedOption.not_used_if){
+                    if(selectedOption.not_used_if.logic == "any"){
+                        selectedOption.not_used_if.attributes.forEach(attribute =>{
+                            hideId = containerId.split("-")[0] + "-" + attribute + "-container"
+                            console.log("ID: ", hideId)
+                            elementToHide = document.getElementById(hideId);
+                            elementToHide.classList.add("hidden");
+                        })
+                    }
+                }
+
+                // Hide all sub-containers
+                //Why is this removing the legislation one too? is it in sub-containers?
+                /* document.querySelectorAll(" .sub-container").forEach(container => {
+                    console.log("\nContainer1: ", container)
+                    if (container.id.includes(containerId.split("-")[0])) {
+                        console.log("\nContainer2: ", container)
+                        console.log(container);
+                        container.classList.add("hidden");
+                    }
+                }); */
+
+                // Show the container related to the clicked toggle option
+                const selectedContainer = document.getElementById(containerId);
+
+                console.log(selectedContainer.innerHTML);
+                console.log(this.getAttribute("data-attributes"));
+
+                //console.log(selectedContainer.innerHTML);
+
+                selectedContainer.classList.remove("hidden");
+
+
+                // Reset all input values inside the selected container
+                selectedContainer.querySelectorAll("input").forEach(input => {
+                    input.value = "";  // Reset input fields
+                });
+
+                // Remove any existing list items inside the selected container
+                selectedContainer.querySelectorAll(".list-item").forEach(item => {
+                    console.log("\nItems:", item)
+                    item.remove();
+                });
+
+
+                const newItem = document.createElement("div");
+                newItem.classList.add("list-item", "form-group");
+                // Start building the inner HTML
+
+                let innerHTML = "";
+                Object.keys(selectedOption).forEach(subName => {
+                    console.log("\nSubname:", subName)
+                    
+                    if (subName != "attribute" && subName != "cardinality" && subName != "not_used_if") {
+                    
+                
+                        const subAttr = selectedOption[subName];
+                        //const newItem = document.createElement("div");
+                        //newItem.classList.add("list-item", "form-group");
+                        innerHTML += `
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="${subName}" 
+                                    name="${containerId}[${subName}]" value="${subAttr.filled_value || ''}" ${subAttr.mandatory ? 'required' : ''}>
+                            </div>
+                        `;
+                        console.log("\nSelected Container:", selectedContainer)
+                        console.log("\nNew Item:", newItem)
+
+                    }
+                
+                });
+
+                innerHTML += `
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                            </div>
+                        </div>
+                    `;
+
+                    
+                
+                newItem.innerHTML = innerHTML;
+                selectedContainer.appendChild(newItem);
+                
+            });
+        });
+
+
+
+        document.addEventListener("click", function (event) {
+            if (event.target && event.target.classList.contains("add-item")) {
+                //event.target.remove();
+                console.log("Add item clicked");
+
+                const containerId = event.target.getAttribute("data-target");
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    console.error(`Container with ID "${containerId}" not found.`);
+                    return;
+                }
+
+                const fieldName = event.target.getAttribute("data-name");
+                const attributesData = event.target.getAttribute("data-attributes");
+
+                console.log("\nfieldName: ", fieldName)
+
+                console.log("\attributesData: ", attributesData)
+
+                try {
+                    const attributes = JSON.parse(attributesData);
+                    console.log("Parsed attributes:", attributes);
+
+                    const maxCardinality = event.target.getAttribute("data-max") === "n" ? Infinity : parseInt(event.target.getAttribute("data-max"), 10);
+                    const index = container.children.length;
+
+                    if (!isNaN(maxCardinality) && index >= maxCardinality) {
+                        alert(`Cannot add more than ${maxCardinality} items for ${fieldName}`);
+                        return;
+                    }
+
+                    let newItem = document.createElement("div");
+                    newItem.classList.add("list-item", "form-group");
+                    newItem.innerHTML = `
+                        <div class="row">
+                            ${attributes.map(attribute => {
+                                return Object.keys(attribute)
+                                    .filter(subName => subName !== "attribute" && subName !== "not_used_if" && subName !== "cardinality")
+                                    .map(subName => {
+                                        const subAttr = attribute[subName];
+                                        const isMandatory = subAttr.mandatory ? "required" : "";
+                                        const value = subAttr.filled_value ? subAttr.filled_value : "";
+                                        return `
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control" placeholder="${subName}" 
+                                                    name="${fieldName}[${index}][${subName}]" value="${value}" ${isMandatory}>
+                                            </div>
+                                        `;
+                                    }).join('');
+                            }).join('')}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(newItem);
+
+                } catch (error) {
+                    console.error("Error parsing attributes:", error);
+                }
+            }
+
+            if (event.target && event.target.classList.contains("remove-item")) {
+                console.log("Remove item clicked");
+                const listItem = event.target.closest(".list-item");
+                if (listItem) {
+                    listItem.remove();
+                }
             }
         });
+
+
+
+
 
 
         function submitForm() {
@@ -562,6 +878,7 @@
                 document.getElementById('myselectCountryForm').submit();
             }
         }
+            
     });
 
 </script>
