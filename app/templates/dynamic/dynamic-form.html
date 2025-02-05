@@ -324,19 +324,18 @@
                                                             {% endfor %}
                                                         {% else %}
                                                             {% if option.not_used_if is not defined %}
+                                                                <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
+
+                                                                {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
+                                                                            data-name="{{ option.attribute }}" data-attributes='{{ option | tojson | safe }}'
+                                                                            {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
+                                                                        Add {{ option.attribute | replace('_', ' ') }}
+                                                                    </button>
+                                                                {% endif %}
+
                                                                 <div class="list-item form-group">
                                                                     <div class="form-group">
-
-                                                                        {% if "cardinality" in option and option.cardinality.max != 1 %}
-                                                                            <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
-                                                                                    data-name="{{ option.attribute }}" data-attributes='{{ attr.attributes | tojson | safe }}'
-                                                                                    {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
-                                                                                Add {{ option.attribute | replace('_', ' ') }}
-                                                                            </button>
-                                                                        {% endif %} 
-
-                                                                        <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
-
 
                                                                         {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
                                                                             <input type="{% if 'full-date' in sub_attr %} date {% else %} text {% endif %}" class="form-control" placeholder="{{ sub_name }}" 
@@ -735,6 +734,27 @@
                     
                 
                 newItem.innerHTML = innerHTML;
+
+                // Append the Add Button separately
+                if ("cardinality" in selectedOption && selectedOption.cardinality.max != 1) {
+                    const addButton = document.createElement("button");
+                    addButton.type = "button";
+                    addButton.classList.add("btn", "btn-primary", "add-item");
+                    addButton.dataset.target = containerId;
+                    console.log("\nTarger: ", containerId)
+                    addButton.dataset.name = selectedOption.attribute;
+                    addButton.dataset.attributes = JSON.stringify(selectedOption);
+                    
+                    if (selectedOption.cardinality.max !== "n") {
+                        addButton.dataset.max = selectedOption.cardinality.max;
+                    }
+
+                    addButton.textContent = `Add ${selectedOption.attribute.replace('_', ' ')}`;
+
+                    // Append after newItem so it is not removed when "Remove" is clicked
+                    newItem.appendChild(addButton);
+                }
+
                 selectedContainer.appendChild(newItem);
                 
             });
@@ -773,32 +793,40 @@
                         return;
                     }
 
-                    let newItem = document.createElement("div");
+                    let newItem = document.createElement("attributesdiv");
                     newItem.classList.add("list-item", "form-group");
-                    newItem.innerHTML = `
-                        <div class="row">
-                            ${attributes.map(attribute => {
-                                return Object.keys(attribute)
-                                    .filter(subName => subName !== "attribute" && subName !== "not_used_if" && subName !== "cardinality")
-                                    .map(subName => {
-                                        const subAttr = attribute[subName];
-                                        const isMandatory = subAttr.mandatory ? "required" : "";
-                                        const value = subAttr.filled_value ? subAttr.filled_value : "";
-                                        return `
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control" placeholder="${subName}" 
-                                                    name="${fieldName}[${index}][${subName}]" value="${value}" ${isMandatory}>
-                                            </div>
-                                        `;
-                                    }).join('');
-                            }).join('')}
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+
+                    let innerHTML = '<div class="row">';
+
+                        for (const [attrKey, attrValue] of Object.entries(attributes)) {
+                        console.log("\nAttribute: ", attrKey)
+                        console.log("\nAttributeValue: ", attrValue)
+
+                        if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
+                        
+                        if (!attrValue || typeof attrValue !== "object") continue;
+
+                        const isMandatory = attrValue.mandatory ? "required" : "";
+                        const value = attrValue.filled_value ? subAttr.filled_value : "";
+
+                        innerHTML += `
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" placeholder="${attrKey}" 
+                                    name="${fieldName}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
                             </div>
+                        `;
+                        
+                    }
+
+                    innerHTML += `</div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
                         </div>
-                    `;
+                    </div>`;
+
+                    newItem.innerHTML = innerHTML;
+
 
                     container.appendChild(newItem);
 
