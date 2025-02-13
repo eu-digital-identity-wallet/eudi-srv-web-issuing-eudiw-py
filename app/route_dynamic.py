@@ -195,26 +195,30 @@ def dynamic_R1(country):
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
-        attributesForm2 = {
-            "family_name": {
+        """ attributesForm2 = {
+            "health_insurance_id": {
                 "type": "string",
                 "filled_value": None,
                 "cardinality": {"min": 1, "max": 1},
-                "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["given_name"],
-                        },
-                "mandatory": True,
+                "mandatory": False,
             },
-            "given_name": {
+            "patient_id": {
                 "type": "string",
                 "filled_value": None,
                 "cardinality": {"min": 1, "max": 1},
-                "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["family_name"],
-                        },
-                "mandatory": True,
+                "mandatory": False,
+            },
+            "tax_number": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
+            },
+            "one_time_token": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
             },
             "places_of_work": {
                 "type": "list",
@@ -229,7 +233,7 @@ def dynamic_R1(country):
                             "logic": "any",
                             "attributes": ["no_fixed_place"],
                         },
-                        "street": {"type": "string", "filled_value": None, "mandatory": True},
+                        "street": {"type": "string", "filled_value": None, "mandatory": False},
                         "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
                     },
                     {
@@ -255,12 +259,19 @@ def dynamic_R1(country):
                 "mandatory": True,
                 "attributes": [
                     {
-                        "member_state": {"type": "string", "filled_value": None, "mandatory": True},
+                        "member_state": {"type": "string", "filled_value": None, "mandatory": False},
                         "starting_date": {"type": "full_date", "filled_value": None, "mandatory": False},
                     },
                 ],
-            }
-        }
+            },
+            "at_least_one_of":[
+                "health_insurance_id",
+                "patient_id",
+                "tax_number",
+                "one_time_token"
+            ]
+            
+        } """
 
         
 
@@ -955,18 +966,95 @@ def Dynamic_form():
 
     form_data = request.form.to_dict()
 
+    print("\nForm Data: ", form_data)
+
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
     cleaned_data = {}
-    for item in form_data:
+
+    grouped = {}
+    for key, value in form_data.items():
+        if not value:
+            continue
+        if "option" in key and "on" in value:
+            continue
+        print("\nKey: ", key)
+        if '[' not in key and ']' not in key:
+            grouped.update({key:value})
+        else:
+            parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
+            print("\nParts: ", parts)
+            
+            sub_key = ""
+            if '-' in key:
+                hyphen_parts = key.split('-')
+                base_key = hyphen_parts[0]
+                #sub_key = hyphen_parts[1]
+                if len(parts) == 3:
+                    sub_key = parts[2]
+                    index = parts[1]
+                else:
+                    sub_key = parts[1]
+                    index = 0
+                print("\nSub Key: ", sub_key)
+
+            else:
+
+                base_key = parts[0]
+                index = int(parts[1])
+                sub_key = parts[2]
+
+            print("\nBase Key: : ", base_key)
+            
+            if base_key not in grouped:
+                grouped.update({base_key:[{sub_key:value}]})
+            
+            else:
+                if index in grouped[base_key]:
+                    grouped[base_key][index].update({sub_key:value})
+                else:
+                    grouped[base_key].append({sub_key:value})
+
+    print("\nGrouped: ", grouped)
+            
+
+
+    """ for key, value in form_data.items():
+        # Split the key into parts using the pattern '[index]' and '[key]' format
+        # We also account for cases where 'no_fixed_place[1]' exists
+        parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
+
+        # The first part is the base group key (e.g. 'credential_holder[0]', 'employment_details[0]')
+        base_key = parts[0]
+
+        # Ensure that the base_key exists in the grouped dictionary
+        current_dict = grouped
+        if base_key not in current_dict:
+            current_dict[base_key] = {}
+
+        # Navigate through the base key and subkeys to add the value
+        for part in parts[1:]:
+            if part not in current_dict[base_key]:
+                current_dict[base_key][part] = {}
+            current_dict = current_dict[base_key][part]
+
+        # Set the value at the final part
+        if len(parts) > 1:
+            current_dict[parts[-1]] = value
+        else:
+            current_dict[base_key] = value
+
+    print("\n grouped:", grouped) """
+
+    for item in grouped:
 
         if item == "portrait":
-            if form_data[item] == "Port1":
+            if grouped[item] == "Port1":
                 cleaned_data["portrait"] = cfgserv.portrait1
-            elif form_data[item] == "Port2":
+            elif grouped[item] == "Port2":
                 cleaned_data["portrait"] = cfgserv.portrait2
-            elif form_data[item] == "Port3":
+            elif grouped[item] == "Port3":
                 portrait= request.files["Image"]
 
                 img = Image.open(portrait)
@@ -990,26 +1078,54 @@ def Dynamic_form():
         elif item == "Category1":
             DrivingPrivileges = []
             i = 1
-            for i in range(int(form_data["NumberCategories"])):
+            for i in range(int(grouped["NumberCategories"])):
                 f = str(i + 1)
                 drivP = {
-                    "vehicle_category_code": form_data["Category" + f],
-                    "issue_date": form_data["IssueDate" + f],
-                    "expiry_date": form_data["ExpiryDate" + f],
+                    "vehicle_category_code": grouped["Category" + f],
+                    "issue_date": grouped["IssueDate" + f],
+                    "expiry_date": grouped["ExpiryDate" + f],
                 }
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
         
-        elif form_data[item] == "true":
+        elif grouped[item] == "true":
             cleaned_data[item] = True
 
-        elif form_data[item] == "false":
+        elif grouped[item] == "false":
             cleaned_data[item] = False
 
+            """ elif '[' in item and ']' in item and "container" not in item:
+
+            parts = item.split('[')
+            main_key = parts[0]
+            index = parts[1].strip(']')
+            print("\nIndex: ", index)
+            print("\nMain Key: ", main_key)
+            
+            indexed_attribute = {}
+
+            for key, value in form_data.items():
+                if  main_key in key and index in key:
+                    sub_key = parts[2].strip(']')
+                    print("\nSub Key: ", sub_key)
+                    indexed_attribute.update({sub_key:value})
+                    
+            
+            if main_key not in cleaned_data:
+                cleaned_data[main_key] = [indexed_attribute]
+            
+            else:
+                cleaned_data[main_key].append(indexed_attribute)
+                
+            form_data.pop(item) """
+            
+            
+
+
         else:
-            if form_data[item] != "" and form_data[item] != "unset":
-             cleaned_data[item] = form_data[item]
+            if grouped[item] != "" and grouped[item] != "unset":
+             cleaned_data[item] = grouped[item]
 
     cleaned_data.update(
         {
@@ -1018,6 +1134,8 @@ def Dynamic_form():
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
+
+    print("\nCleaned Data: ", cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})

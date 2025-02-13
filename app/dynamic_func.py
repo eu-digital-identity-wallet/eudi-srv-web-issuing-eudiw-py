@@ -180,29 +180,29 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
             
-            if "places_of_work" in attributes_req:
+            if "places_of_work" in attributes_req and not isinstance(data["places_of_work"],list):
                 json_priv = json.loads(data["places_of_work"])
                 data.update({"places_of_work": json_priv})
             
-            if "legislation" in attributes_req:
+            if "legislation" in attributes_req and not isinstance(data["legislation"],list):
                 json_priv = json.loads(data["legislation"])
                 data.update({"legislation": json_priv})
             
-            if "employment_details" in attributes_req:
+            if "employment_details" in attributes_req and not isinstance(data["employment_details"],list):
                 json_priv = json.loads(data["employment_details"])
                 data.update({"employment_details": json_priv})
 
             
-            if "competent_institution" in attributes_req:
+            if "competent_institution" in attributes_req and not isinstance(data["competent_institution"],list):
                 json_priv = json.loads(data["competent_institution"])
                 data.update({"competent_institution": json_priv})
 
             
-            if "credential_holder" in attributes_req2:
+            if "credential_holder" in attributes_req2 and not isinstance(data["credential_holder"],list):
                 json_priv = json.loads(data["credential_holder"])
                 data.update({"credential_holder": json_priv})
 
-            if "subject" in attributes_req2:
+            if "subject" in attributes_req2 and not isinstance(data["subject"],list):
                 json_priv = json.loads(data["subject"])
                 data.update({"subject": json_priv})
 

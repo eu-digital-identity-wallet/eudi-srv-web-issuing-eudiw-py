@@ -128,6 +128,107 @@
                                                     {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
                                             </div>
+                                        {% elif attr.type == 'list' %}
+                                            <div id="{{ name }}-container" class="list-container">
+                                                 <!-- Title for the Section -->
+                                                <h3 class="section-title">{{ name | replace('_', ' ') | title }}</h3> 
+                                                 <!-- Add Button (Only if max cardinality allows more than 1) -->
+                                                {% if attr.cardinality.max != 1 %}
+                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-container"
+                                                            data-name="{{ name }}" data-attributes='{{ attr.attributes | tojson | safe }}'
+                                                            {% if attr.cardinality.max != "n" %} data-max="{{ attr.cardinality.max }}" {% endif %}>
+                                                        Add {{ name | replace('_', ' ') }}
+                                                    </button>
+                                                {% endif %}  
+
+                                               <!-- Toggle Buttons for Exclusive Selection (Only if more than 1 option) -->
+                                               {% if attr.attributes | length > 1 %}
+                                                    <div class="btn-group toggle-group" data-toggle="buttons">
+                                                        {% for option in attr.attributes %}
+                                                            {% set hide_option = true %}
+
+                                                            {% for other_option in attr.attributes %}
+                                                                {% if option.attribute != other_option.attribute and "not_used_if" in other_option and other_option.not_used_if.attributes is defined %}
+                                                                    {% if option.attribute in other_option.not_used_if.attributes %}
+                                                                            <label class="btn btn-primary toggle-option"
+                                                                                data-target="{{ name }}-{{ option.attribute }}" data-attributes="{{ option }}">
+                                                                                <input type="radio" name="{{ name }}_option" autocomplete="off">
+                                                                                {{ option.attribute | replace('_', ' ') | title }}
+                                                                            </label>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            
+                                                <!-- Containers for Attribute Inputs -->
+                                                {% for option in attr.attributes %}
+                                                    <div id="{{ name }}-{{ option.attribute }}-container" class="sub-container">
+                                                        {% if attr.filled_value %}
+                                                            {% for index, item in enumerate(attr.filled_value) if item.attribute == option.attribute %}
+                                                                <div class="list-item form-group">
+                                                                    <div class="row">
+                                                                        {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            <div class="col-md-6">
+                                                                                <input type="text" class="form-control" placeholder="{{ sub_name }}" 
+                                                                                       name="{{ name }}[{{ index }}][{{ sub_name }}]" 
+                                                                                       value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                       {% if sub_attr.mandatory %} required {% endif %}>
+                                                                            </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {% if option.not_used_if is not defined %}
+                                                                <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
+
+                                                                {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
+                                                                            data-name="{{ option.attribute }}" data-attributes='{{ option | tojson | safe }}'
+                                                                            {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
+                                                                        Add {{ option.attribute | replace('_', ' ') }}
+                                                                    </button>
+                                                                {% endif %}
+
+                                                                <div class="list-item form-group">
+                                                                    <div class="form-group">
+
+                                                                        {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            {% set input_type = 'date' if sub_attr.value_type == "full-date" else 'text' %}
+                                                                            {% if input_type == "date" %}
+                                                                                {{ sub_name | replace('_', ' ') | title }}
+                                                                            {% endif %}
+                                                                            <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
+                                                                                    name="{{ name }}[0][{{ sub_name }}]" 
+                                                                                    
+                                                                                    value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                    {% if sub_attr.mandatory %} required {% endif %}>
+                                                                        {% endfor %}
+
+                                                                    </div>
+                                                                    {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    {% endif %}
+
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
                                         {% elif attr.type == 'bool' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
@@ -338,7 +439,10 @@
                                                                     <div class="form-group">
 
                                                                         {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
-                                                                            {% set input_type = 'date' if sub_attr.type == "full-date" else 'text' %}
+                                                                            {% set input_type = 'date' if sub_attr.value_type == "full-date" else 'text' %}
+                                                                            {% if input_type == "date" %}
+                                                                                {{ sub_name | replace('_', ' ') | title }}
+                                                                            {% endif %}
                                                                             <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
                                                                                     name="{{ name }}[0][{{ sub_name }}]" 
                                                                                     value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
@@ -819,6 +923,8 @@
                 console.log("Add item clicked");
 
                 const containerId = event.target.getAttribute("data-target");
+                console.log("\nContainer ID: ", containerId)
+
                 const container = document.getElementById(containerId);
                 if (!container) {
                     console.error(`Container with ID "${containerId}" not found.`);
@@ -864,7 +970,7 @@
                         innerHTML += `
                             <div class="col-md-6">
                                 <input type="${inputType}" class="form-control" placeholder="${attrKey}" 
-                                    name="${fieldName}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
+                                    name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
                             </div>
                         `;
                         
