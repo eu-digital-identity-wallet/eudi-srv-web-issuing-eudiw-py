@@ -1,8 +1,8 @@
 {
-"eu.europa.ec.eudi.sample_pda1_mdoc": {
+"eu.europa.ec.eudi.test_ehic_mdoc": {
     "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.pda1.1",
-    "scope": "eu.europa.ec.eudi.pda1.1",
+    "doctype": "eu.europa.ec.eudi.ehic_test.1",
+    "scope": "eu.europa.ec.eudi.ehic_test.1",
     "policy": {
         "batch_size": 50,
         "one_time_use": true
@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "PDA1",
+        "name": "EHIC Testing Logic",
         "locale": "en",
         "logo": {
           "uri": "https://examplestate.com/public/pid.png",
@@ -48,16 +48,72 @@
       }
     ],
     "claims": {
-      "eu.europa.ec.eudi.pda1.1": {
+      "eu.europa.ec.eudi.ehic_test.1": {
         "credential_holder": {
-          "mandatory": false,
-          "value_type":"credential_holder",
+          "mandatory": true,
+          "value_type":"credential_holder_attributes",
           "source":"user",
           "display": [
             {
               "name": "Credential Holder",
               "locale": "en"            }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": 1
+              },
+            "credential_holder_attributes":{
+              "family_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "given_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "birth_date": {
+                "mandatory": true,
+                "value_type": "full-date",
+                "source": "user"
+              }
+            }
+          }
+        },
+        "subject": {
+          "mandatory": true,
+          "value_type":"subject_attributes",
+          "source":"user",
+          "display": [
+            {
+              "name": "Subject",
+              "locale": "en"            }
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": 1
+              },
+            "subject_attributes":{
+              "family_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "given_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "birth_date": {
+                "mandatory": true,
+                "value_type": "full-date",
+                "source": "user"
+              }
+            }
+          }
         },
         "social_security_pin": {
           "mandatory": true,
@@ -69,43 +125,23 @@
               "locale": "en"            }
           ]
         },
-        "employment_details": {
+        "starting_date": {
           "mandatory": true,
-          "value_type":"employment_details",
+          "value_type":"full-date",
           "source":"user",
           "display": [
             {
-              "name": "Employment Details",
+              "name": "Starting Date",
               "locale": "en"            }
           ]
         },
-        "places_of_work": {
+        "ending_date": {
           "mandatory": true,
-          "value_type":"places_of_work",
+          "value_type":"full-date",
           "source":"user",
           "display": [
             {
-              "name": "Places of Work",
-              "locale": "en"            }
-          ]
-        },
-        "legislation": {
-          "mandatory": true,
-          "value_type":"legislation",
-          "source":"user",
-          "display": [
-            {
-              "name": "Legislation",
-              "locale": "en"            }
-          ]
-        },
-        "status_confirmation": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Status Confirmation",
+              "name": "Ending Date",
               "locale": "en"            }
           ]
         },
@@ -121,13 +157,36 @@
         },
         "competent_institution": {
           "mandatory": true,
-          "value_type":"competent_institution",
+          "value_type":"competent_institution_attributes",
           "source":"user",
           "display": [
             {
               "name": "Institution ID",
               "locale": "en"            }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
+            "competent_institution_attributes":{
+              "institution_id": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "institution_name": {
+                "mandatory": false,
+                "value_type": "boolean",
+                "source": "user"
+              },
+              "country_code": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              }
+            }
+          }
         },
         "issuance_date": {
           "mandatory": true,

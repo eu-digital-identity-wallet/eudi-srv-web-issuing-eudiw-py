@@ -363,7 +363,22 @@ class ConfService:
             "validity": qeaa_validity,
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.pda1.1",
-        }
+        },
+        "eu.europa.ec.eudi.pda1_test.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.pda1_test.1",
+        },
+        "eu.europa.ec.eudi.ehic_test.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.ehic_test.1",
+        },
+        
         
     }
 
@@ -375,7 +390,8 @@ class ConfService:
             "eu.europa.ec.eudi.iban_mdoc",
             "eu.europa.ec.eudi.hiid_mdoc",
             "eu.europa.ec.eudi.tax_mdoc",
-            "eu.europa.ec.eudi.msisdn_mdoc"        ],
+            "eu.europa.ec.eudi.msisdn_mdoc"        
+            ],
         "country_selection": [
             "eu.europa.ec.eudi.loyalty_mdoc",
             "eu.europa.ec.eudi.mdl_mdoc",
@@ -390,7 +406,17 @@ class ConfService:
             "eu.europa.ec.eudi.tax_mdoc",
             "eu.europa.ec.eudi.msisdn_mdoc",
             "eu.europa.ec.eudi.ehic_mdoc",
-            "eu.europa.ec.eudi.sample_pda1_mdoc"
+            "eu.europa.ec.eudi.sample_pda1_mdoc",
+            "eu.europa.ec.eudi.pda1_test.1",
+            "eu.europa.ec.eudi.tax_sd_jwt_vc",
+            "eu.europa.ec.eudi.por_sd_jwt_vc",
+            "eu.europa.ec.eudi.photo_sd_jwt_vc",
+            "eu.europa.ec.eudi.msisdn_sd_jwt_vc",
+            "eu.europa.ec.eudi.hiid_sd_jwt_vc",
+            "eu.europa.ec.eudi.iban_sd_jwt_vc",
+            "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
+            "eu.europa.ec.eudi.ehic_test_mdoc",
+            
         ],
     }
 

@@ -1,8 +1,8 @@
 {
 "eu.europa.ec.eudi.test_pda1_mdoc": {
     "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.pda1_Test.1",
-    "scope": "eu.europa.ec.eudi.pda1_Test.1",
+    "doctype": "eu.europa.ec.eudi.pda1_test.1",
+    "scope": "eu.europa.ec.eudi.pda1_test.1",
     "policy": {
         "batch_size": 50,
         "one_time_use": true
@@ -39,7 +39,7 @@
     },
     "display": [
       {
-        "name": "PDA1",
+        "name": "PDA1 Testing Logic",
         "locale": "en",
         "logo": {
           "uri": "https://examplestate.com/public/pid.png",
@@ -48,9 +48,9 @@
       }
     ],
     "claims": {
-      "eu.europa.ec.eudi.pda1.1": {
+      "eu.europa.ec.eudi.pda1_test.1": {
         "credential_holder": {
-          "mandatory": false,
+          "mandatory": true,
           "value_type":"credential_holder_attributes",
           "source":"user",
           "display": [
@@ -59,6 +59,10 @@
               "locale": "en"            }
           ],
           "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": 1
+              },
             "credential_holder_attributes":{
               "family_name": {
                 "mandatory": true,
@@ -156,6 +160,10 @@
               "locale": "en"            }
           ],
           "issuer_conditions": {
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
             "places_of_work_attributes":{
               "place_of_work": {
                 "mandatory": false,
@@ -165,6 +173,10 @@
                   "cardinality": {
                     "min": 0,
                     "max": "n"
+                  },
+                  "not_used_if": {
+                      "logic": "any",
+                      "attributes": ["no_fixed_place"]
                   },
                   "place_of_work_attributes":{
                     "company": {
@@ -219,6 +231,10 @@
                     "min": 0,
                     "max": "n"
                   },
+                  "not_used_if": {
+                      "logic": "any",
+                      "attributes": ["place_of_work"]
+                  },
                   "no_fixed_place_attributes":{
                     "country_code": {
                       "mandatory": true,
@@ -241,6 +257,10 @@
               "locale": "en"            }
           ],
           "issuer_conditions": {
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
             "legislation_attributes":{
               "member_state": {
                 "mandatory": true,
@@ -287,7 +307,7 @@
         },
         "competent_institution": {
           "mandatory": true,
-          "value_type":"competent_institution",
+          "value_type":"competent_institution_attributes",
           "source":"user",
           "display": [
             {
@@ -295,7 +315,11 @@
               "locale": "en"            }
           ],
           "issuer_conditions": {
-            "legislation_attributes":{
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
+            "competent_institution_attributes":{
               "institution_id": {
                 "mandatory": true,
                 "value_type": "string",
@@ -308,7 +332,7 @@
               },
               "country_code": {
                 "mandatory": true,
-                "value_type": "full-date",
+                "value_type": "string",
                 "source": "user"
               }
             }
