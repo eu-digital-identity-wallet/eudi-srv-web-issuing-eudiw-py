@@ -98,14 +98,66 @@ def preauth_form():
 
     form_data.pop("proceed")
     cleaned_data = {}
-    for item in form_data:
 
-        if item == "portrait":
-            if form_data[item] == "Port1":
-                cleaned_data["portrait"] = cfgservice.portrait1
-            elif form_data[item] == "Port2":
-                cleaned_data["portrait"] = cfgservice.portrait2
-            elif form_data[item] == "Port3":
+    grouped = {}
+    for key, value in form_data.items():
+        if not value:
+            continue
+        if "option" in key and "on" in value:
+            continue
+        print("\nKey: ", key)
+        if '[' not in key and ']' not in key:
+            grouped.update({key:value})
+        else:
+            parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
+            print("\nParts: ", parts)
+            
+            sub_key = ""
+            if '-' in key:
+                hyphen_parts = key.split('-')
+                base_key = hyphen_parts[0]
+                #sub_key = hyphen_parts[1]
+                if len(parts) == 3:
+                    sub_key = parts[2]
+                    index = parts[1]
+                else:
+                    sub_key = parts[1]
+                    index = 0
+                print("\nSub Key: ", sub_key)
+
+            else:
+
+                base_key = parts[0]
+                index = int(parts[1])
+                sub_key = parts[2]
+
+            print("\nBase Key: : ", base_key)
+            
+            if base_key not in grouped:
+                grouped.update({base_key:[{sub_key:value}]})
+            
+            else:
+                if index in grouped[base_key]:
+                    grouped[base_key][index].update({sub_key:value})
+                else:
+                    grouped[base_key].append({sub_key:value})
+
+    for item in grouped:
+
+        if item == "nationality":
+            print("\nNationality")
+            print("\nkey: ", item)
+            print("\nvalue: ", grouped[item])
+            cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+
+            print("\n", cleaned_data[item])
+            
+        elif item == "portrait":
+            if grouped[item] == "Port1":
+                cleaned_data["portrait"] = cfgserv.portrait1
+            elif grouped[item] == "Port2":
+                cleaned_data["portrait"] = cfgserv.portrait2
+            elif grouped[item] == "Port3":
                 portrait= request.files["Image"]
 
                 img = Image.open(portrait)
@@ -117,7 +169,11 @@ def preauth_form():
                 response,error_msg = validate_image(portrait)
 
                 if response==False:
-                    return render_template("misc/500.html", error="Invalid Image")
+                    return authentication_error_redirect(
+                        jws_token=session["jws_token"],
+                        error="Invalid Image",
+                        error_description=error_msg,
+                    )
                 else :
                     imgurlbase64=base64.urlsafe_b64encode(bio.getvalue()).decode('utf-8')
                     cleaned_data["portrait"]=imgurlbase64
@@ -125,26 +181,27 @@ def preauth_form():
         elif item == "Category1":
             DrivingPrivileges = []
             i = 1
-            for i in range(int(form_data["NumberCategories"])):
+            for i in range(int(grouped["NumberCategories"])):
                 f = str(i + 1)
                 drivP = {
-                    "vehicle_category_code": form_data["Category" + f],
-                    "issue_date": form_data["IssueDate" + f],
-                    "expiry_date": form_data["ExpiryDate" + f],
+                    "vehicle_category_code": grouped["Category" + f],
+                    "issue_date": grouped["IssueDate" + f],
+                    "expiry_date": grouped["ExpiryDate" + f],
                 }
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
         
-        elif form_data[item] == "true":
+        elif grouped[item] == "true":
             cleaned_data[item] = True
 
-        elif form_data[item] == "false":
+        elif grouped[item] == "false":
             cleaned_data[item] = False
 
+
         else:
-            if form_data[item] != "" and form_data[item] != "unset":
-             cleaned_data[item] = form_data[item]
+            if grouped[item] != "" and grouped[item] != "unset":
+             cleaned_data[item] = grouped[item]
 
     cleaned_data.update(
         {

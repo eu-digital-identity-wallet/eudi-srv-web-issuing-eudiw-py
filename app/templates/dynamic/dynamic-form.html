@@ -170,7 +170,7 @@
                                                                 <div class="list-item form-group">
                                                                     <div class="row">
                                                                         {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
-                                                                            <div class="col-md-6">
+                                                                            <div class="col-md-12">
                                                                                 <input type="text" class="form-control" placeholder="{{ sub_name }}" 
                                                                                        name="{{ name }}[{{ index }}][{{ sub_name }}]" 
                                                                                        value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
@@ -230,46 +230,53 @@
                                                 {% endfor %}
                                             </div>
                                         {% elif attr.type == 'bool' %}
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                <label for="{{ name }}">{{ name }}</label>
-                                                <!-- Hidden input to represent the unchecked state -->
-                                                <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
-                                                <!-- Checkbox input -->
-                                                <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <label for="{{ name }}">{{ name }}</label>
+                                                    <!-- Hidden input to represent the unchecked state -->
+                                                    <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
+                                                    <!-- Checkbox input -->
+                                                    <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <script>
-                                            function setupCheckbox(name) {
-                                                const checkbox = document.getElementById(name);
-                                                const hiddenInput = document.getElementById(name + "_hidden");
-                                                
-                                                // Function to update hidden input based on checkbox state
-                                                function updateHiddenInput() {
-                                                    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                            <script>
+                                                function setupCheckbox(name) {
+                                                    const checkbox = document.getElementById(name);
+                                                    const hiddenInput = document.getElementById(name + "_hidden");
+                                                    
+                                                    // Function to update hidden input based on checkbox state
+                                                    function updateHiddenInput() {
+                                                        hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                                    }
+                                                    
+                                                    // Attach the change event listener
+                                                    checkbox.addEventListener('change', updateHiddenInput);
+                                                    
+                                                    // Call the function to set the initial state correctly
+                                                    updateHiddenInput();
                                                 }
                                                 
-                                                // Attach the change event listener
-                                                checkbox.addEventListener('change', updateHiddenInput);
-                                                
-                                                // Call the function to set the initial state correctly
-                                                updateHiddenInput();
-                                            }
-                                            
-                                            // Setup each checkbox with a unique name
-                                            setupCheckbox("{{ name }}");
-                                        </script>                   
+                                                // Setup each checkbox with a unique name
+                                                setupCheckbox("{{ name }}");
+                                            </script>                   
+                                        {% elif attr.type == 'uint' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    {{ name | replace('_', ' ') | title }}
+                                                    <input type="number" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" min="0">
+                                                </div>
+                                            </div>
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
-                                                {{name}}
+                                                {{ name | replace('_', ' ') | title }}
                                                 <input type="text" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" value="{{attr.filled_value}}" readonly  >
                                              </div>
                                         </div>
                                         {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    {{name}}
+                                                    {{ name | replace('_', ' ') | title }}
                                                     <input type="date" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" 
                                                     {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
@@ -407,7 +414,7 @@
                                                                 <div class="list-item form-group">
                                                                     <div class="row">
                                                                         {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
-                                                                            <div class="col-md-6">
+                                                                            <div class="col-md-12">
                                                                                 <input type="text" class="form-control" placeholder="{{ sub_name }}" 
                                                                                        name="{{ name }}[{{ index }}][{{ sub_name }}]" 
                                                                                        value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
@@ -472,6 +479,7 @@
                                         {% elif attr.type == 'uint' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
+                                                    {{ name | replace('_', ' ') | title }}
                                                     <input type="number" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" min="0">
                                                 </div>
                                             </div>
@@ -498,14 +506,14 @@
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
-                                                {{name}}
+                                                {{ name | replace('_', ' ') | title }}
                                                 <input type="text" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" value="{{value}}" readonly  >
                                              </div>
                                         </div>
                                         {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    {{name}}
+                                                    {{ name | replace('_', ' ') | title }}
                                                     <input type="date" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" >
                                                 </div>
                                             </div>
@@ -514,10 +522,17 @@
                                             <p>Please select one option or upload a file.</p>
                                              
                                             <div class="row g-3">
+                                                <!-- Unset option -->
+                                                <div class="col-md-6">
+                                                    <label>
+                                                        <input type="radio" name="{{ name }}" value="" checked>
+                                                        None (Unset)
+                                                    </label>
+                                                </div>
                                                 
                                                 <div class="col-md-6">
                                                     <label>
-                                                        <input type="radio" name="{{ name }}"value="Port1" checked >
+                                                        <input type="radio" name="{{ name }}"value="Port1">
                                                         <img src="{{url_for('static', filename='image.jpeg')}}" width=50% alt="Option 1">
                                                     </label>
                                                 </div>
@@ -940,7 +955,8 @@
 
                 try {
                     const attributes = JSON.parse(attributesData);
-                    console.log("Parsed attributes:", attributes);
+                    console.log("\nParsed attributes:", attributes);
+                    console.log("type: ", typeof attributes);
 
                     const maxCardinality = event.target.getAttribute("data-max") === "n" ? Infinity : parseInt(event.target.getAttribute("data-max"), 10);
                     const index = container.children.length;
@@ -955,25 +971,58 @@
 
                     let innerHTML = '<div class="row">';
 
+                    // Check if the parsed attributes is an array
+                    if (Array.isArray(attributes)) {
+                        console.log("isArray")
+                        // Iterate through each object in the array
+                        attributes.forEach(attrSet => {
+                            for (const [attrKey, attrValue] of Object.entries(attrSet)) {
+                                console.log("\nAttribute: ", attrKey);
+                                console.log("\nAttributeValue: ", attrValue);
+
+                                if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
+
+                                if (!attrValue || typeof attrValue !== "object") continue;
+
+                                const isMandatory = attrValue.mandatory ? "required" : "";
+                                const value = attrValue.filled_value ? attrValue.filled_value : "";
+                                const inputType = attrValue.type === "full-date" ? "date" : "text";
+                                console.log("\nisMandatory : ", isMandatory);
+                                console.log("\nvalue : ", value);
+                                console.log("\ninputType : ", inputType);
+
+                                innerHTML += `
+                                    <div class="col-md-12">
+                                        <input type="${inputType}" class="form-control" placeholder="${attrKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}" 
+                                            name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
+                                    </div>
+                                `;
+                            }
+                        });
+                    } else if (typeof attributes === 'object') {
+                        // Iterate through the object directly (existing behavior)
                         for (const [attrKey, attrValue] of Object.entries(attributes)) {
-                        console.log("\nAttribute: ", attrKey)
-                        console.log("\nAttributeValue: ", attrValue)
+                            console.log("\nAttribute: ", attrKey);
+                            console.log("\nAttributeValue: ", attrValue);
 
-                        if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
-                        
-                        if (!attrValue || typeof attrValue !== "object") continue;
+                            if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
 
-                        const isMandatory = attrValue.mandatory ? "required" : "";
-                        const value = attrValue.filled_value ? subAttr.filled_value : "";
-                        const inputType = attrValue.type === "full-date" ? "date" : "text";
+                            if (!attrValue || typeof attrValue !== "object") continue;
 
-                        innerHTML += `
-                            <div class="col-md-6">
-                                <input type="${inputType}" class="form-control" placeholder="${attrKey}" 
-                                    name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
-                            </div>
-                        `;
-                        
+                            const isMandatory = attrValue.mandatory ? "required" : "";
+                            const value = attrValue.filled_value ? attrValue.filled_value : "";
+                            const inputType = attrValue.type === "full-date" ? "date" : "text";
+                            console.log("\nisMandatory : ", isMandatory);
+                            console.log("\nvalue : ", value);
+                            console.log("\ninputType : ", inputType);
+
+                            innerHTML += `
+                                <div class="col-md-12">
+                                    <input type="${inputType}" class="form-control" placeholder="${attrKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}" 
+                                        name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
+                                </div>
+                            `;
+                        }
                     }
 
                     innerHTML += `</div>
@@ -984,13 +1033,12 @@
                     </div>`;
 
                     newItem.innerHTML = innerHTML;
-
-
                     container.appendChild(newItem);
 
                 } catch (error) {
                     console.error("Error parsing attributes:", error);
                 }
+
             }
 
             if (event.target && event.target.classList.contains("remove-item")) {

@@ -526,7 +526,7 @@ def red():
         + redirect_data["grant_type"]
         + "&code="
         + request.args.get("code")
-        + "&redirect_uri="
+        + "&redirect_uri="Form
         + redirect_data["redirect_uri"]
     ) """
 
@@ -997,7 +997,7 @@ def Dynamic_form():
                 else:
                     sub_key = parts[1]
                     index = 0
-                print("\nSub Key: ", sub_key)
+                
 
             else:
 
@@ -1006,17 +1006,27 @@ def Dynamic_form():
                 sub_key = parts[2]
 
             print("\nBase Key: : ", base_key)
+            print("\nSub Key: ", sub_key)
+            print("\nIndex: ", index)
             
+
             if base_key not in grouped:
                 grouped.update({base_key:[{sub_key:value}]})
-            
+
+                
+
             else:
-                if index in grouped[base_key]:
-                    grouped[base_key][index].update({sub_key:value})
+                print("\n Index in?", index in grouped[base_key])
+                print("\ntype",type(grouped[base_key]))
+                
+                if len(grouped[base_key]) > int(index):
+                    print("\n at Index: ", grouped[base_key][index])
+                    grouped[base_key][int(index)].update({sub_key:value})
                 else:
                     grouped[base_key].append({sub_key:value})
+            
 
-    print("\nGrouped: ", grouped)
+        print("\nGrouped: ", grouped)
             
 
 
@@ -1049,7 +1059,15 @@ def Dynamic_form():
 
     for item in grouped:
 
-        if item == "portrait":
+        if item == "nationality":
+            print("\nNationality")
+            print("\nkey: ", item)
+            print("\nvalue: ", grouped[item])
+            cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+
+            print("\n", cleaned_data[item])
+            
+        elif item == "portrait":
             if grouped[item] == "Port1":
                 cleaned_data["portrait"] = cfgserv.portrait1
             elif grouped[item] == "Port2":
@@ -1094,33 +1112,6 @@ def Dynamic_form():
 
         elif grouped[item] == "false":
             cleaned_data[item] = False
-
-            """ elif '[' in item and ']' in item and "container" not in item:
-
-            parts = item.split('[')
-            main_key = parts[0]
-            index = parts[1].strip(']')
-            print("\nIndex: ", index)
-            print("\nMain Key: ", main_key)
-            
-            indexed_attribute = {}
-
-            for key, value in form_data.items():
-                if  main_key in key and index in key:
-                    sub_key = parts[2].strip(']')
-                    print("\nSub Key: ", sub_key)
-                    indexed_attribute.update({sub_key:value})
-                    
-            
-            if main_key not in cleaned_data:
-                cleaned_data[main_key] = [indexed_attribute]
-            
-            else:
-                cleaned_data[main_key].append(indexed_attribute)
-                
-            form_data.pop(item) """
-            
-            
 
 
         else:
@@ -1191,7 +1182,7 @@ def Dynamic_form():
         if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
-        if scope == "eu.europa.ec.eudi.pid.1" or scope == "org.iso.18013.5.1.mDL":
+        if scope == "org.iso.18013.5.1.mDL":
             if "birth_date" in presentation_data[credential]:
                 presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
