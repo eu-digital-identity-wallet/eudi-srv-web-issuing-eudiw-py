@@ -40,7 +40,8 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
         un_distinguishing_sign = ""
 
     data = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
-
+    print("\ndynamic_func data: ", data)
+    
     if format == "mso_mdoc":
         url = cfgserv.service_url + "formatter/cbor"
 
@@ -87,14 +88,17 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
             if format == "mso_mdoc":
                 for namescape in namescapes:
+                    print("\nNamespace: ", namescape)
                     attributes_req = getMandatoryAttributes(
                         credentialsSupported[request]["claims"][namescape]
                     )
 
+                    print("\nattributes_req: ", attributes_req)
                     attributes_req2 = getOptionalAttributes(
                         credentialsSupported[request]["claims"][namescape]
                     )
 
+                    print("\nattributes_req2: ", attributes_req2)
                     issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])                    
 
                     pdata = {namescape: {}}
@@ -152,8 +156,12 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 data.update({"issue_date": today.strftime("%Y-%m-%d")})
             if "expiry_date" in issuer_claims:
                 data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
+
             if "issuing_authority" in issuer_claims:
                 data.update({"issuing_authority": doctype_config["issuing_authority"]})
+
+            if "issuing_authority_unicode" in issuer_claims:
+                data.update({"issuing_authority_unicode": doctype_config["issuing_authority"]})
 
             if "credential_type" in issuer_claims:
                 data.update({"credential_type":doctype_config["credential_type"] })
@@ -175,7 +183,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 "issuance_date":"",
                 }) """
 
-            
+            if "at_least_one_of" in attributes_req:
+                attributes_req.pop("at_least_one_of")
+
             if "driving_privileges" in attributes_req:
                 json_priv = json.loads(data["driving_privileges"])
                 data.update({"driving_privileges": json_priv})
@@ -198,6 +208,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 data.update({"competent_institution": json_priv})
 
             
+            if "at_least_one_of" in attributes_req2:
+                        attributes_req2.pop("at_least_one_of")
+                        
             if "credential_holder" in attributes_req2 and not isinstance(data["credential_holder"],list):
                 json_priv = json.loads(data["credential_holder"])
                 data.update({"credential_holder": json_priv})
@@ -217,6 +230,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 for attribute in issuer_claims:
                     if attribute in data:
                         pdata[namescape].update({attribute: data[attribute]})
+                
+                print("\npdata_namespace: ", pdata[namescape])
                 
 
             elif format == "vc+sd-jwt":

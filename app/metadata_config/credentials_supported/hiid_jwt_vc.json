@@ -212,6 +212,14 @@
             "locale": "en"
           }
         ]
+      },
+      "issuer_conditions": {
+          "at_least_one_of":[
+                "health_insurance_id",
+                "patient_id",
+                "tax_number",
+                "one_time_token"
+            ]
       }
     }
   }

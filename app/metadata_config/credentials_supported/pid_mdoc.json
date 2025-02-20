@@ -80,8 +80,9 @@
           ]
         },
         "age_over_18": {
-          "mandatory": true,
-          "source":"issuer",
+          "mandatory": false,
+          "source":"user",
+          "value_type":"bool",
           "display": [
             {
               "name": "Age Over 18",

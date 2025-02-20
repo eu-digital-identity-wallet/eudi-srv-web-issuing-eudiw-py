@@ -1,8 +1,8 @@
 {
   "eu.europa.ec.eudi.photoid": {
       "format": "mso_mdoc",
-      "doctype": "org.iso.23220.2.photoid.1",
-      "scope": "org.iso.23220.2.photoid.1",
+      "doctype": "org.iso.23220.photoID.1",
+      "scope": "org.iso.23220.photoID.1",
       "cryptographic_binding_methods_supported": [
         "jwk", "cose_key"
       ],
@@ -38,7 +38,7 @@
         }
       ],
       "claims": {
-        "org.iso.23220.photoid.1": {
+        "org.iso.23220.1": {
           "portrait": {
             "mandatory": true,
             "value_type":"jpeg",
@@ -59,17 +59,7 @@
                 "locale": "en"            }
             ]
           },
-          "person_id": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Person Identifier",
-                "locale": "en"            }
-            ]
-          },
-          "family_name": {
+          "family_name_unicode": {
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -79,8 +69,28 @@
                 "locale": "en"            }
             ]
           },
-          "given_name": {
+          "given_name_unicode": {
             "mandatory": true,
+            "value_type":"string",
+            "source":"user",
+            "display": [
+              {
+                "name": "Given Name",
+                "locale": "en"            }
+            ]
+          },
+          "family_name_latin1": {
+            "mandatory": false,
+            "value_type":"string",
+            "source":"user",
+            "display": [
+              {
+                "name": "Family Name",
+                "locale": "en"            }
+            ]
+          },
+          "given_name_latin1": {
+            "mandatory": false,
             "value_type":"string",
             "source":"user",
             "display": [
@@ -129,7 +139,18 @@
               }
             ]
           },
-          "family_name_birth": {
+          "birthplace": {
+            "mandatory": false,
+            "value_type":"string",
+            "source":"user",
+            "display": [
+              {
+                "name": "Birthplace",
+                "locale": "en"
+              }
+            ]
+          },
+          "name_at_birth": {
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -140,84 +161,18 @@
               }
             ]
           },
-          "given_name_birth": {
+          "resident_address_unicode": {
             "mandatory": false,
             "value_type":"string",
             "source":"user",
             "display": [
               {
-                "name": "Given Name at Birth",
+                "name": "Resident Address",
                 "locale": "en"
               }
             ]
           },
-          "birth_place": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Birth Place",
-                "locale": "en"
-              }
-            ]
-          },
-          "birth_country": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Birth Country",
-                "locale": "en"
-              }
-            ]
-          },
-          "birth_state": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Birth State",
-                "locale": "en"
-              }
-            ]
-          },
-          "birth_city": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Birth City",
-                "locale": "en"
-              }
-            ]
-          },
-          "resident_country": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Resident Country",
-                "locale": "en"
-              }
-            ]
-          },
-          "resident_state": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Resident State",
-                "locale": "en"
-              }
-            ]
-          },
-          "resident_city": {
+          "resident_city_unicode": {
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -239,34 +194,34 @@
               }
             ]
           },
-          "resident_street": {
+          "resident_country": {
             "mandatory": false,
             "value_type":"string",
             "source":"user",
             "display": [
               {
-                "name": "Resident Street",
+                "name": "Resident Country",
                 "locale": "en"
               }
             ]
           },
-          "resident_house_number": {
+          "resident_city_latin1": {
             "mandatory": false,
             "value_type":"string",
             "source":"user",
             "display": [
               {
-                "name": "Resident House Number",
+                "name": "Resident City",
                 "locale": "en"
               }
             ]
           },
-          "gender": {
+          "sex": {
             "mandatory": false,
             "source":"user",
             "display": [
               {
-                "name": "Gender",
+                "name": "Sex",
                 "locale": "en"
               }
             ]
@@ -278,6 +233,28 @@
             "display": [
               {
                 "name": "Nationality",
+                "locale": "en"
+              }
+            ]
+          },
+          "document_number": {
+            "mandatory": false,
+            "value_type":"string",
+            "source":"user",
+            "display": [
+              {
+                "name": "Document Number",
+                "locale": "en"
+              }
+            ]
+          },
+          "issuing_subdivision": {
+            "mandatory": false,
+            "value_type":"string",
+            "source":"user",
+            "display": [
+              {
+                "name": "Issuing Subdivision",
                 "locale": "en"
               }
             ]
@@ -302,7 +279,7 @@
               }
             ]
           },
-          "issuing_authority": {
+          "issuing_authority_unicode": {
             "mandatory": true,
             "source":"issuer",
             "display": [

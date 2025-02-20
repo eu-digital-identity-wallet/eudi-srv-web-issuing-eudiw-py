@@ -50,7 +50,7 @@
     "claims": {
       "eu.europa.ec.eudi.hiid.1": {
         "health_insurance_id": {
-          "mandatory": true,
+          "mandatory": false,
           "value_type":"string",
           "source":"user",
           "display": [
@@ -60,7 +60,7 @@
           ]
         },
         "patient_id": {
-          "mandatory": true,
+          "mandatory": false,
           "value_type":"string",
           "source":"user",
           "display": [
@@ -70,7 +70,7 @@
           ]
         },
         "tax_number": {
-          "mandatory": true,
+          "mandatory": false,
           "value_type":"string",
           "source":"user",
           "display": [
@@ -80,7 +80,7 @@
           ]
         },
         "one_time_token": {
-          "mandatory": true,
+          "mandatory": false,
           "value_type":"string",
           "source":"user",
           "display": [
@@ -223,6 +223,14 @@
               "locale": "en"
             }
           ]
+        },
+        "issuer_conditions": {
+          "at_least_one_of":[
+                "health_insurance_id",
+                "patient_id",
+                "tax_number",
+                "one_time_token"
+            ]
         }
       }
     }
