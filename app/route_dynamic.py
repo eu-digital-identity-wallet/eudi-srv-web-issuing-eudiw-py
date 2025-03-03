@@ -473,10 +473,10 @@ def red():
             today = date.today()
             expiry = today + timedelta(days=doctype_config["validity"])
 
-            if form_data[doctype]["birth_date"] != "Pending":
+            """ if form_data[doctype]["birth_date"] != "Pending":
                 form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
             else:
-                form_data[doctype].update({"age_over_18":"Pending"})
+                form_data[doctype].update({"age_over_18":"Pending"}) """
 
             form_data[doctype].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
@@ -484,6 +484,10 @@ def red():
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
             if "credential_type" in doctype_config:
                 form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
+
+            form_data[doctype]["nationality"] = ["PT"]
+
+            form_data[doctype]["birth_place"] = "Lisboa"
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -572,6 +576,8 @@ def red():
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
 
+        #print("\ndynamic attributes form: ", attributesForm)
+
         for attribute in data.keys():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
@@ -585,6 +591,7 @@ def red():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+
         if "credential_type" in doctype_config:
                 presentation_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
@@ -765,6 +772,19 @@ def dynamic_R2_data_collect(country, user_id):
                         data[modifier] = data[custom_modifiers[modifier]]
                         data.pop(custom_modifiers[modifier])
 
+            data["nationality"] = [country]
+
+            birth_places = {
+                "EE":"Tallinn",
+                "CZ":"Prague",
+                "NL":"Amsterdam",
+                "LU":"Luxembourg City"
+            }
+
+            if country in birth_places:
+                data["birth_place"] = birth_places[country]
+
+            print("\nopenid data: ", data)
             return data
         except:
             credential_error_resp(
@@ -851,6 +871,10 @@ def credentialCreation(credential_request, data, country):
                     form_data["portrait"] = base64.urlsafe_b64encode(
                         convert_png_to_jpeg(base64.b64decode(form_data["portrait"]))
                     ).decode("utf-8")
+
+                form_data["nationality"] = ["PT"]
+
+                form_data["birth_place"] = "Lisboa"
 
             else:
 
@@ -1063,7 +1087,11 @@ def Dynamic_form():
             print("\nNationality")
             print("\nkey: ", item)
             print("\nvalue: ", grouped[item])
-            cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+
+            if isinstance(grouped[item],list):
+                cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+            else:
+                cleaned_data[item] = grouped[item]
 
             print("\n", cleaned_data[item])
             
@@ -1200,6 +1228,7 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
+    print("\nPresentation_data: ", presentation_data)
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

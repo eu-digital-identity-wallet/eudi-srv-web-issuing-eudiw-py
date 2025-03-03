@@ -130,6 +130,10 @@ class ConfCountries:
                         "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
                         "family_name": "http://interop.gov.pt/MDC/Cidadao/NomeApelido",
                         "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
+                        #"nationality": "http://interop.gov.pt/MDC/Cidadao/Nacionalidade",
+                        #"birth_place":"http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+                        #"nif":"http://interop.gov.pt/MDC/Cidadao/NIF"
+                        
                     },
                     "org.iso.18013.5.1.mDL": {
                         "nif": "http://interop.gov.pt/MDC/Cidadao/NIF",

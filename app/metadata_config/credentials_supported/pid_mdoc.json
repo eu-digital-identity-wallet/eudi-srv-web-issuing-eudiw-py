@@ -220,6 +220,17 @@
             }
           ]
         },
+        "personal_administrative_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Personal Administrative Number",
+              "locale": "en"
+            }
+          ]
+        },
         "sex": {
           "mandatory": false,
           "source":"user",
@@ -227,6 +238,28 @@
           "display": [
             {
               "name": "Sex",
+              "locale": "en"
+            }
+          ]
+        },
+        "email_address": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Email Address",
+              "locale": "en"
+            }
+          ]
+        },
+        "mobile_phone_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Mobile Phone Number",
               "locale": "en"
             }
           ]
@@ -287,6 +320,8 @@
         },
         "document_number": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Document Number",
@@ -294,11 +329,24 @@
             }
           ]
         },
-        "administrative_number": {
+        "location_status": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
-              "name": "Administrative Number",
+              "name": "Location Status",
+              "locale": "en"
+            }
+          ]
+        },
+        "trust_anchor": {
+          "mandatory": false,
+          "value_type": "string",
+          "source": "user",
+          "display": [
+            {
+              "name": "Trust Anchor",
               "locale": "en"
             }
           ]
@@ -323,16 +371,6 @@
                 "locale": "en"            }
             ]
           },
-        "portrait_capture_date": {
-          "mandatory": false,
-          "source":"user",
-          "display": [
-            {
-              "name": "Portrait Capture Date",
-              "locale": "en"
-            }
-          ]
-        },
         "issuing_jurisdiction": {
           "mandatory": false,
           "display": [

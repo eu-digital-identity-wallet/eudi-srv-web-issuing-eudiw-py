@@ -219,6 +219,12 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 json_priv = json.loads(data["subject"])
                 data.update({"subject": json_priv})
 
+            if "age_in_years" in data and isinstance(data["age_in_years"], str):
+                data.update({"age_in_years": int(data["age_in_years"])})
+
+            if "age_birth_year" in data and isinstance(data["age_birth_year"], str):
+                data.update({"age_birth_year": int(data["age_birth_year"])})
+
             if format == "mso_mdoc":
                 for attribute in attributes_req:
                     pdata[namescape].update({attribute: data[attribute]})
