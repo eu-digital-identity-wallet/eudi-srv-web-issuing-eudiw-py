@@ -50,24 +50,70 @@
     "claims": {
       "eu.europa.ec.eudi.ehic.1": {
         "credential_holder": {
-          "mandatory": false,
-          "value_type":"credential_holder",
+          "mandatory": true,
+          "value_type":"credential_holder_attributes",
           "source":"user",
           "display": [
             {
               "name": "Credential Holder",
               "locale": "en"            }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": 1
+              },
+            "credential_holder_attributes":{
+              "family_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "given_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "birth_date": {
+                "mandatory": true,
+                "value_type": "full-date",
+                "source": "user"
+              }
+            }
+          }
         },
         "subject": {
-          "mandatory": false,
-          "value_type":"subject",
+          "mandatory": true,
+          "value_type":"subject_attributes",
           "source":"user",
           "display": [
             {
               "name": "Subject",
               "locale": "en"            }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": 1
+              },
+            "subject_attributes":{
+              "family_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "given_name": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "birth_date": {
+                "mandatory": true,
+                "value_type": "full-date",
+                "source": "user"
+              }
+            }
+          }
         },
         "social_security_pin": {
           "mandatory": true,
@@ -103,11 +149,6 @@
           "mandatory": true,
           "value_type":"string",
           "source":"user",
-          "issuer_conditions": {
-            "length": {
-              "equals": 20
-            }
-          },
           "display": [
             {
               "name": "Document ID",
@@ -116,13 +157,36 @@
         },
         "competent_institution": {
           "mandatory": true,
-          "value_type":"competent_institution",
+          "value_type":"competent_institution_attributes",
           "source":"user",
           "display": [
             {
               "name": "Institution ID",
               "locale": "en"            }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
+            "competent_institution_attributes":{
+              "institution_id": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              },
+              "institution_name": {
+                "mandatory": false,
+                "value_type": "boolean",
+                "source": "user"
+              },
+              "country_code": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              }
+            }
+          }
         },
         "issuance_date": {
           "mandatory": true,

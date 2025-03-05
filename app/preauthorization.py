@@ -105,12 +105,12 @@ def preauth_form():
             continue
         if "option" in key and "on" in value:
             continue
-        print("\nKey: ", key)
+        #print("\nKey: ", key)
         if '[' not in key and ']' not in key:
             grouped.update({key:value})
         else:
             parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            print("\nParts: ", parts)
+            #print("\nParts: ", parts)
             
             sub_key = ""
             if '-' in key:
@@ -123,7 +123,7 @@ def preauth_form():
                 else:
                     sub_key = parts[1]
                     index = 0
-                print("\nSub Key: ", sub_key)
+                #print("\nSub Key: ", sub_key)
 
             else:
 
@@ -131,7 +131,7 @@ def preauth_form():
                 index = int(parts[1])
                 sub_key = parts[2]
 
-            print("\nBase Key: : ", base_key)
+            #print("\nBase Key: : ", base_key)
             
             if base_key not in grouped:
                 grouped.update({base_key:[{sub_key:value}]})
@@ -145,18 +145,18 @@ def preauth_form():
     for item in grouped:
 
         if item == "nationality":
-            print("\nNationality")
-            print("\nkey: ", item)
-            print("\nvalue: ", grouped[item])
+            #print("\nNationality")
+            #print("\nkey: ", item)
+            #print("\nvalue: ", grouped[item])
             cleaned_data[item] = [item['country_code'] for item in grouped[item]]
 
-            print("\n", cleaned_data[item])
+            #print("\n", cleaned_data[item])
             
         elif item == "portrait":
             if grouped[item] == "Port1":
-                cleaned_data["portrait"] = cfgserv.portrait1
+                cleaned_data["portrait"] = cfgservice.portrait1
             elif grouped[item] == "Port2":
-                cleaned_data["portrait"] = cfgserv.portrait2
+                cleaned_data["portrait"] = cfgservice.portrait2
             elif grouped[item] == "Port3":
                 portrait= request.files["Image"]
 

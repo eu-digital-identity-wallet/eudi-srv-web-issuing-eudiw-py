@@ -990,7 +990,7 @@ def Dynamic_form():
 
     form_data = request.form.to_dict()
 
-    print("\nForm Data: ", form_data)
+    #print("\nForm Data: ", form_data)
 
     user_id = generate_unique_id()
 
@@ -1003,12 +1003,12 @@ def Dynamic_form():
             continue
         if "option" in key and "on" in value:
             continue
-        print("\nKey: ", key)
+        #print("\nKey: ", key)
         if '[' not in key and ']' not in key:
             grouped.update({key:value})
         else:
             parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            print("\nParts: ", parts)
+            #print("\nParts: ", parts)
             
             sub_key = ""
             if '-' in key:
@@ -1029,9 +1029,9 @@ def Dynamic_form():
                 index = int(parts[1])
                 sub_key = parts[2]
 
-            print("\nBase Key: : ", base_key)
-            print("\nSub Key: ", sub_key)
-            print("\nIndex: ", index)
+            #print("\nBase Key: : ", base_key)
+            #print("\nSub Key: ", sub_key)
+            #print("\nIndex: ", index)
             
 
             if base_key not in grouped:
@@ -1040,17 +1040,17 @@ def Dynamic_form():
                 
 
             else:
-                print("\n Index in?", index in grouped[base_key])
-                print("\ntype",type(grouped[base_key]))
+                #print("\n Index in?", index in grouped[base_key])
+                #print("\ntype",type(grouped[base_key]))
                 
                 if len(grouped[base_key]) > int(index):
-                    print("\n at Index: ", grouped[base_key][index])
+                    #print("\n at Index: ", grouped[base_key][index])
                     grouped[base_key][int(index)].update({sub_key:value})
                 else:
                     grouped[base_key].append({sub_key:value})
             
 
-        print("\nGrouped: ", grouped)
+        #print("\nGrouped: ", grouped)
             
 
 
@@ -1084,16 +1084,16 @@ def Dynamic_form():
     for item in grouped:
 
         if item == "nationality":
-            print("\nNationality")
-            print("\nkey: ", item)
-            print("\nvalue: ", grouped[item])
+            #print("\nNationality")
+            #print("\nkey: ", item)
+            #print("\nvalue: ", grouped[item])
 
             if isinstance(grouped[item],list):
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
             else:
                 cleaned_data[item] = grouped[item]
 
-            print("\n", cleaned_data[item])
+            #print("\n", cleaned_data[item])
             
         elif item == "portrait":
             if grouped[item] == "Port1":
@@ -1228,7 +1228,7 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
-    print("\nPresentation_data: ", presentation_data)
+    #print("\nPresentation_data: ", presentation_data)
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

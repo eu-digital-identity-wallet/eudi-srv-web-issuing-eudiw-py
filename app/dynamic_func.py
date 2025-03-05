@@ -88,17 +88,17 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
             if format == "mso_mdoc":
                 for namescape in namescapes:
-                    print("\nNamespace: ", namescape)
+                    #print("\nNamespace: ", namescape)
                     attributes_req = getMandatoryAttributes(
                         credentialsSupported[request]["claims"][namescape]
                     )
 
-                    print("\nattributes_req: ", attributes_req)
+                    #print("\nattributes_req: ", attributes_req)
                     attributes_req2 = getOptionalAttributes(
                         credentialsSupported[request]["claims"][namescape]
                     )
 
-                    print("\nattributes_req2: ", attributes_req2)
+                    #print("\nattributes_req2: ", attributes_req2)
                     issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])                    
 
                     pdata = {namescape: {}}
@@ -237,7 +237,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                     if attribute in data:
                         pdata[namescape].update({attribute: data[attribute]})
                 
-                print("\npdata_namespace: ", pdata[namescape])
+                #print("\npdata_namespace: ", pdata[namescape])
                 
 
             elif format == "vc+sd-jwt":

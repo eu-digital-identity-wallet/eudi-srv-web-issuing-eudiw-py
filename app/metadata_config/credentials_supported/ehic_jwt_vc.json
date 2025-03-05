@@ -1,7 +1,7 @@
 {
   "eu.europa.ec.eudi.ehic_sd_jwt_vc": {
     "format": "vc+sd-jwt",
-    "scope": "eu.europa.ec.eudi.ehic_test.1",
+    "scope": "eu.europa.ec.eudi.ehic.1",
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"
     ],
