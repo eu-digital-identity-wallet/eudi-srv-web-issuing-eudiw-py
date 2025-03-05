@@ -9,7 +9,7 @@
     "name": "Digital Credentials Issuer",
     "locale": "en",
     "logo": {
-        "uri": "https://dev.issuer.eudiw.dev/ic-logo.png",
+        "uri": "https://issuer.eudiw.dev/ic-logo.png",
         "alt_text": "EU Digital Identity Wallet Logo"
     }
     }
