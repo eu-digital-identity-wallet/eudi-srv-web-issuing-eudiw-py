@@ -191,9 +191,92 @@ def dynamic_R1(country):
     if country == "FC":
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": str(uuid4())})
+            attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
+
+        """ attributesForm2 = {
+            "health_insurance_id": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
+            },
+            "patient_id": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
+            },
+            "tax_number": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
+            },
+            "one_time_token": {
+                "type": "string",
+                "filled_value": None,
+                "cardinality": {"min": 1, "max": 1},
+                "mandatory": False,
+            },
+            "places_of_work": {
+                "type": "list",
+                "cardinality": {"min": 1, "max": 1},
+                "filled_value": None,
+                "mandatory": False,
+                "attributes": [
+                    {
+                        "attribute": "place_of_work",
+                        "cardinality": {"min": 0, "max": "n"},
+                        "not_used_if": {
+                            "logic": "any",
+                            "attributes": ["no_fixed_place"],
+                        },
+                        "street": {"type": "string", "filled_value": None, "mandatory": False},
+                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
+                    },
+                    {
+                        "attribute": "no_fixed_place",
+                        "cardinality": {"min": 0, "max": "n"},
+                        "not_used_if": {
+                            "logic": "any",
+                            "attributes": ["place_of_work"],
+                        },
+                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
+                    },
+                    {
+                        "attribute": "some_place",
+                        "cardinality": {"min": 0, "max": "n"},
+                        "random_item": {"type": "full-date", "filled_value": None, "mandatory": False},
+                    }
+                ],
+            },
+            "legislation": {
+                "type": "list",
+                "cardinality": {"min": 1, "max": 1},
+                "filled_value": None,
+                "mandatory": True,
+                "attributes": [
+                    {
+                        "member_state": {"type": "string", "filled_value": None, "mandatory": False},
+                        "starting_date": {"type": "full_date", "filled_value": None, "mandatory": False},
+                    },
+                ],
+            },
+            "at_least_one_of":[
+                "health_insurance_id",
+                "patient_id",
+                "tax_number",
+                "one_time_token"
+            ]
+            
+        } """
+
+        
+
+        print("\nAttributes form1: ", attributesForm)
+        print("\nAttributes form2: ", attributesForm2)
 
         return render_template(
             "dynamic/dynamic-form.html",
@@ -390,10 +473,10 @@ def red():
             today = date.today()
             expiry = today + timedelta(days=doctype_config["validity"])
 
-            if form_data[doctype]["birth_date"] != "Pending":
+            """ if form_data[doctype]["birth_date"] != "Pending":
                 form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
             else:
-                form_data[doctype].update({"age_over_18":"Pending"})
+                form_data[doctype].update({"age_over_18":"Pending"}) """
 
             form_data[doctype].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
             form_data[doctype].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
@@ -401,6 +484,10 @@ def red():
             form_data[doctype].update({"issuing_authority":doctype_config["issuing_authority"] })
             if "credential_type" in doctype_config:
                 form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
+
+            form_data[doctype]["nationality"] = ["PT"]
+
+            form_data[doctype]["birth_place"] = "Lisboa"
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -443,7 +530,7 @@ def red():
         + redirect_data["grant_type"]
         + "&code="
         + request.args.get("code")
-        + "&redirect_uri="
+        + "&redirect_uri="Form
         + redirect_data["redirect_uri"]
     ) """
 
@@ -489,6 +576,8 @@ def red():
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
 
+        #print("\ndynamic attributes form: ", attributesForm)
+
         for attribute in data.keys():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
@@ -502,6 +591,7 @@ def red():
         presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
         presentation_data[credential].update({"issuing_country": session["country"]}),
         presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
+
         if "credential_type" in doctype_config:
                 presentation_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
@@ -682,6 +772,19 @@ def dynamic_R2_data_collect(country, user_id):
                         data[modifier] = data[custom_modifiers[modifier]]
                         data.pop(custom_modifiers[modifier])
 
+            data["nationality"] = [country]
+
+            birth_places = {
+                "EE":"Tallinn",
+                "CZ":"Prague",
+                "NL":"Amsterdam",
+                "LU":"Luxembourg City"
+            }
+
+            if country in birth_places:
+                data["birth_place"] = birth_places[country]
+
+            print("\nopenid data: ", data)
             return data
         except:
             credential_error_resp(
@@ -768,6 +871,10 @@ def credentialCreation(credential_request, data, country):
                     form_data["portrait"] = base64.urlsafe_b64encode(
                         convert_png_to_jpeg(base64.b64decode(form_data["portrait"]))
                     ).decode("utf-8")
+
+                form_data["nationality"] = ["PT"]
+
+                form_data["birth_place"] = "Lisboa"
 
             else:
 
@@ -883,18 +990,117 @@ def Dynamic_form():
 
     form_data = request.form.to_dict()
 
+    #print("\nForm Data: ", form_data)
+
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
     cleaned_data = {}
-    for item in form_data:
 
-        if item == "portrait":
-            if form_data[item] == "Port1":
+    grouped = {}
+    for key, value in form_data.items():
+        if not value:
+            continue
+        if "option" in key and "on" in value:
+            continue
+        #print("\nKey: ", key)
+        if '[' not in key and ']' not in key:
+            grouped.update({key:value})
+        else:
+            parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
+            #print("\nParts: ", parts)
+            
+            sub_key = ""
+            if '-' in key:
+                hyphen_parts = key.split('-')
+                base_key = hyphen_parts[0]
+                #sub_key = hyphen_parts[1]
+                if len(parts) == 3:
+                    sub_key = parts[2]
+                    index = parts[1]
+                else:
+                    sub_key = parts[1]
+                    index = 0
+                
+
+            else:
+
+                base_key = parts[0]
+                index = int(parts[1])
+                sub_key = parts[2]
+
+            #print("\nBase Key: : ", base_key)
+            #print("\nSub Key: ", sub_key)
+            #print("\nIndex: ", index)
+            
+
+            if base_key not in grouped:
+                grouped.update({base_key:[{sub_key:value}]})
+
+                
+
+            else:
+                #print("\n Index in?", index in grouped[base_key])
+                #print("\ntype",type(grouped[base_key]))
+                
+                if len(grouped[base_key]) > int(index):
+                    #print("\n at Index: ", grouped[base_key][index])
+                    grouped[base_key][int(index)].update({sub_key:value})
+                else:
+                    grouped[base_key].append({sub_key:value})
+            
+
+        #print("\nGrouped: ", grouped)
+            
+
+
+    """ for key, value in form_data.items():
+        # Split the key into parts using the pattern '[index]' and '[key]' format
+        # We also account for cases where 'no_fixed_place[1]' exists
+        parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
+
+        # The first part is the base group key (e.g. 'credential_holder[0]', 'employment_details[0]')
+        base_key = parts[0]
+
+        # Ensure that the base_key exists in the grouped dictionary
+        current_dict = grouped
+        if base_key not in current_dict:
+            current_dict[base_key] = {}
+
+        # Navigate through the base key and subkeys to add the value
+        for part in parts[1:]:
+            if part not in current_dict[base_key]:
+                current_dict[base_key][part] = {}
+            current_dict = current_dict[base_key][part]
+
+        # Set the value at the final part
+        if len(parts) > 1:
+            current_dict[parts[-1]] = value
+        else:
+            current_dict[base_key] = value
+
+    print("\n grouped:", grouped) """
+
+    for item in grouped:
+
+        if item == "nationality":
+            #print("\nNationality")
+            #print("\nkey: ", item)
+            #print("\nvalue: ", grouped[item])
+
+            if isinstance(grouped[item],list):
+                cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+            else:
+                cleaned_data[item] = grouped[item]
+
+            #print("\n", cleaned_data[item])
+            
+        elif item == "portrait":
+            if grouped[item] == "Port1":
                 cleaned_data["portrait"] = cfgserv.portrait1
-            elif form_data[item] == "Port2":
+            elif grouped[item] == "Port2":
                 cleaned_data["portrait"] = cfgserv.portrait2
-            elif form_data[item] == "Port3":
+            elif grouped[item] == "Port3":
                 portrait= request.files["Image"]
 
                 img = Image.open(portrait)
@@ -918,26 +1124,27 @@ def Dynamic_form():
         elif item == "Category1":
             DrivingPrivileges = []
             i = 1
-            for i in range(int(form_data["NumberCategories"])):
+            for i in range(int(grouped["NumberCategories"])):
                 f = str(i + 1)
                 drivP = {
-                    "vehicle_category_code": form_data["Category" + f],
-                    "issue_date": form_data["IssueDate" + f],
-                    "expiry_date": form_data["ExpiryDate" + f],
+                    "vehicle_category_code": grouped["Category" + f],
+                    "issue_date": grouped["IssueDate" + f],
+                    "expiry_date": grouped["ExpiryDate" + f],
                 }
                 DrivingPrivileges.append(drivP)
 
             cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
         
-        elif form_data[item] == "true":
+        elif grouped[item] == "true":
             cleaned_data[item] = True
 
-        elif form_data[item] == "false":
+        elif grouped[item] == "false":
             cleaned_data[item] = False
 
+
         else:
-            if form_data[item] != "" and form_data[item] != "unset":
-             cleaned_data[item] = form_data[item]
+            if grouped[item] != "" and grouped[item] != "unset":
+             cleaned_data[item] = grouped[item]
 
     cleaned_data.update(
         {
@@ -946,6 +1153,8 @@ def Dynamic_form():
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
+
+    print("\nCleaned Data: ", cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
@@ -1001,7 +1210,7 @@ def Dynamic_form():
         if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
             presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
-        if scope == "eu.europa.ec.eudi.pid.1" or scope == "org.iso.18013.5.1.mDL":
+        if scope == "org.iso.18013.5.1.mDL":
             if "birth_date" in presentation_data[credential]:
                 presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
 
@@ -1019,6 +1228,7 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
+    #print("\nPresentation_data: ", presentation_data)
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

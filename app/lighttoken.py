@@ -70,7 +70,10 @@ def create_request(country, loa):
                 <definition>http://eidas.europa.eu/attributes/naturalperson/DateOfBirth</definition>
             </attribute>
             <attribute>
-                <definition>http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier</definition>
+                <definition>http://eidas.europa.eu/attributes/naturalperson/PlaceOfBirth</definition>
+            </attribute>
+            <attribute>
+                <definition>http://eidas.europa.eu/attributes/naturalperson/Nationality</definition>
             </attribute>
         </requestedAttributes>
     </lightRequest>"""

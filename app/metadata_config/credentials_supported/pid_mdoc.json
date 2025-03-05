@@ -80,8 +80,9 @@
           ]
         },
         "age_over_18": {
-          "mandatory": true,
-          "source":"issuer",
+          "mandatory": false,
+          "source":"user",
+          "value_type":"bool",
           "display": [
             {
               "name": "Age Over 18",
@@ -132,45 +133,12 @@
           ]
         },
         "birth_place": {
-          "mandatory": false,
+          "mandatory": true,
           "value_type":"string",
           "source":"user",
           "display": [
             {
               "name": "Birth Place",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_country": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth Country",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_state": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth State/Province",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_city": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Birth City",
               "locale": "en"
             }
           ]
@@ -252,26 +220,73 @@
             }
           ]
         },
-        "gender": {
+        "personal_administrative_number": {
           "mandatory": false,
+          "value_type":"string",
           "source":"user",
           "display": [
             {
-              "name": "Gender",
+              "name": "Personal Administrative Number",
+              "locale": "en"
+            }
+          ]
+        },
+        "sex": {
+          "mandatory": false,
+          "source":"user",
+          "value_type":"uint",
+          "display": [
+            {
+              "name": "Sex",
+              "locale": "en"
+            }
+          ]
+        },
+        "email_address": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Email Address",
+              "locale": "en"
+            }
+          ]
+        },
+        "mobile_phone_number": {
+          "mandatory": false,
+          "value_type":"string",
+          "source":"user",
+          "display": [
+            {
+              "name": "Mobile Phone Number",
               "locale": "en"
             }
           ]
         },
         "nationality": {
-          "mandatory": false,
+          "mandatory": true,
           "source":"user",
-          "value_type":"string",
+          "value_type":"nationalities",
           "display": [
             {
               "name": "Nationality",
               "locale": "en"
             }
-          ]
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 0,
+              "max": "n"
+              },
+            "nationalities":{
+              "country_code": {
+                "mandatory": true,
+                "value_type": "string",
+                "source": "user"
+              }
+            }
+          }
         },
         "issuance_date": {
           "mandatory": true,
@@ -305,6 +320,8 @@
         },
         "document_number": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
               "name": "Document Number",
@@ -312,11 +329,24 @@
             }
           ]
         },
-        "administrative_number": {
+        "location_status": {
           "mandatory": false,
+          "value_type": "string",
+          "source": "user",
           "display": [
             {
-              "name": "Administrative Number",
+              "name": "Location Status",
+              "locale": "en"
+            }
+          ]
+        },
+        "trust_anchor": {
+          "mandatory": false,
+          "value_type": "string",
+          "source": "user",
+          "display": [
+            {
+              "name": "Trust Anchor",
               "locale": "en"
             }
           ]
@@ -331,16 +361,16 @@
             }
           ]
         },
-        "portrait_capture_date": {
-          "mandatory": false,
-          "source":"user",
-          "display": [
-            {
-              "name": "Portrait Capture Date",
-              "locale": "en"
-            }
-          ]
-        },
+        "portrait": {
+            "mandatory": false,
+            "value_type":"jpeg",
+            "source":"user",
+            "display": [
+              {
+                "name": "Portrait Image",
+                "locale": "en"            }
+            ]
+          },
         "issuing_jurisdiction": {
           "mandatory": false,
           "display": [

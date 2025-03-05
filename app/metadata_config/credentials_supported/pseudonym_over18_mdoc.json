@@ -55,7 +55,7 @@
             "source":"user",
             "display": [
               {
-                "name": "Adult or minor",
+                "name": "Age Over 18",
                 "locale": "en"              }
             ]
           },
@@ -64,7 +64,7 @@
             "source":"issuer",
             "display": [
               {
-                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "name": "Issuance Date",
                 "locale": "en"
               }
             ]
@@ -74,7 +74,7 @@
             "source":"issuer",
             "display": [
               {
-                "name": "Alpha-2 country code, representing the nationality of the PID User.",
+                "name": "Expiry Date",
                 "locale": "en"
               }
             ]
@@ -84,7 +84,7 @@
             "source":"issuer",
             "display": [
               {
-                "name": "Alpha-2 country code, as defined in ISO 3166-1, of the issuing authority’s country or territory",
+                "name": "Issuing Country",
                 "locale": "en"
               }
             ]
@@ -94,7 +94,7 @@
             "source":"issuer",
             "display": [
               {
-                "name": "Issuing authority name. The value shall only use latin1b characters and shall have a maximum length of 150 characters.",
+                "name": "Issuing Authority",
                 "locale": "en"
               }
             ]

@@ -77,6 +77,14 @@ class ConfCountries:
                 "eu.europa.ec.eudi.hiid_mdoc",
                 "eu.europa.ec.eudi.tax_mdoc",
                 "eu.europa.ec.eudi.msisdn_mdoc",
+                "eu.europa.ec.eudi.pda1_mdoc",
+                "eu.europa.ec.eudi.tax_sd_jwt_vc",
+                "eu.europa.ec.eudi.por_sd_jwt_vc",
+                "eu.europa.ec.eudi.msisdn_sd_jwt_vc",
+                "eu.europa.ec.eudi.hiid_sd_jwt_vc",
+                "eu.europa.ec.eudi.iban_sd_jwt_vc",
+                "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
+                "eu.europa.ec.eudi.ehic_mdoc",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
@@ -103,6 +111,10 @@ class ConfCountries:
                         "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
                         "family_name": "http://interop.gov.pt/MDC/Cidadao/NomeApelido",
                         "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
+                        #"nationality": "http://interop.gov.pt/MDC/Cidadao/Nacionalidade",
+                        #"birth_place":"http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+                        #"nif":"http://interop.gov.pt/MDC/Cidadao/NIF"
+                        
                     },
                     "org.iso.18013.5.1.mDL": {
                         "nif": "http://interop.gov.pt/MDC/Cidadao/NIF",

@@ -135,7 +135,7 @@ def cborformatter():
     if request.json["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
             request.json["data"]["eu.europa.ec.eudi.pid.1"],
-            ["family_name", "given_name", "birth_date", "age_over_18"],
+            ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
         )
 
     if request.json["doctype"] == "org.iso.18013.5.1.mDL":
@@ -240,7 +240,7 @@ def sd_jwtformatter():
     if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
             PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"],
-            ["family_name", "given_name", "birth_date", "age_over_18"],
+            ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
         )
     if not b:  # nota all mandatory args are present
         return jsonify(

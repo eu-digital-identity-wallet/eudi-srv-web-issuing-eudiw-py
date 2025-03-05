@@ -115,63 +115,173 @@
                         <!-- <status>EID_COUNTRY_SELECTION</status> -->
                         <h2>Please enter your basic information</h2>
                         <!--bean-ext:form action="" styleClass="mt"-->
-                        <form id="selectCountryForm" method="post" action="{{redirect_url}}" onsubmit="return validateImage()" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
+                        <form id="selectCountryForm" method="post" action="{{redirect_url}}" onsubmit="return submitValidation()" accept-charset="UTF-8" enctype="multipart/form-data" autocapitalize="off" spellcheck="false">
                             <!-- <div class="nodisplay"><input type="hidden" name="TxId" value="ECAS_TX-7404446-Rej9lkLFeXORXm9rG7q4Xqo1xGRJ86gt3hoJcfMG3XyxQrAyn8mu9PbXRCZoKKUbCzLlIzG5jKgHy4vlfgkG5M-rS0vSrmBGYCAxyMeVAWeYi-PVgrhNnzagSfzJvUraGtvIPzqv8cbsV46ZMUiinVIlcDkNWEKzr5uBS6CMnabjUfRGxDHabrZictNyNLy0AsLWy" /></div><input type="hidden" name="loginRequestId" value="ECAS_LR-12907874-lFk8VGOXm5Wv9sTtMFxxCMYjUFYj1oyp1KB0e9CptxxL0NuACxlcyti7UHNPxbdzOqSrnNBPN1ll8kLzi00LRN-rS0vSrmBGYCna66T9IuSKW-P6QgQVzQzxVCzOgIh6P3d1X9xVGnkDA3YFGOAmdliNnzQVzScjsEzc7t8ao1FsJS3VNDfzPNYnzH2FPsp38aFmqD" id="loginRequestId" /> -->
                             <h3>Test Provider Form</h3>
                             <p>This data is only used for issuing credentials for testing purposes.</p>
                             <div id="eidasCountries">
-                                {% for name, value in mandatory_attributes.items() %}    
-                                        {% if value == 'string' %}
+                                {% for name, attr in mandatory_attributes.items() %}    
+                                        {% if attr.type == 'string' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" required >
+                                                    <input type="text" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" 
+                                                    {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
                                             </div>
-                                        {% elif value == 'bool' %}
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                <label for="{{ name }}">{{ name }}</label>
-                                                <!-- Hidden input to represent the unchecked state -->
-                                                <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
-                                                <!-- Checkbox input -->
-                                                <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                        {% elif attr.type == 'list' %}
+                                            <div id="{{ name }}-container" class="list-container">
+                                                 <!-- Title for the Section -->
+                                                <h3 class="section-title">{{ name | replace('_', ' ') | title }}</h3> 
+                                                 <!-- Add Button (Only if max cardinality allows more than 1) -->
+                                                {% if attr.cardinality.max != 1 %}
+                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-container"
+                                                            data-name="{{ name }}" data-attributes='{{ attr.attributes | tojson | safe }}'
+                                                            {% if attr.cardinality.max != "n" %} data-max="{{ attr.cardinality.max }}" {% endif %}>
+                                                        Add {{ name | replace('_', ' ') }}
+                                                    </button>
+                                                {% endif %}  
+
+                                               <!-- Toggle Buttons for Exclusive Selection (Only if more than 1 option) -->
+                                               {% if attr.attributes | length > 1 %}
+                                                    <div class="btn-group toggle-group" data-toggle="buttons">
+                                                        {% for option in attr.attributes %}
+                                                            {% set hide_option = true %}
+
+                                                            {% for other_option in attr.attributes %}
+                                                                {% if option.attribute != other_option.attribute and "not_used_if" in other_option and other_option.not_used_if.attributes is defined %}
+                                                                    {% if option.attribute in other_option.not_used_if.attributes %}
+                                                                            <label class="btn btn-primary toggle-option"
+                                                                                data-target="{{ name }}-{{ option.attribute }}" data-attributes="{{ option }}">
+                                                                                <input type="radio" name="{{ name }}_option" autocomplete="off">
+                                                                                {{ option.attribute | replace('_', ' ') | title }}
+                                                                            </label>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            
+                                                <!-- Containers for Attribute Inputs -->
+                                                {% for option in attr.attributes %}
+                                                    <div id="{{ name }}-{{ option.attribute }}-container" class="sub-container">
+                                                        {% if attr.filled_value %}
+                                                            {% for index, item in enumerate(attr.filled_value) if item.attribute == option.attribute %}
+                                                                <div class="list-item form-group">
+                                                                    <div class="row">
+                                                                        {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            <div class="col-md-12">
+                                                                                <input type="text" class="form-control" placeholder="{{ sub_name }}" 
+                                                                                       name="{{ name }}[{{ index }}][{{ sub_name }}]" 
+                                                                                       value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                       {% if sub_attr.mandatory %} required {% endif %}>
+                                                                            </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {% if option.not_used_if is not defined %}
+                                                                <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
+
+                                                                {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
+                                                                            data-name="{{ option.attribute }}" data-attributes='{{ option | tojson | safe }}'
+                                                                            {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
+                                                                        Add {{ option.attribute | replace('_', ' ') }}
+                                                                    </button>
+                                                                {% endif %}
+
+                                                                <div class="list-item form-group">
+                                                                    <div class="form-group">
+
+                                                                        {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            {% set input_type = 'date' if sub_attr.value_type == "full-date" else 'text' %}
+                                                                            {% if input_type == "date" %}
+                                                                                {{ sub_name | replace('_', ' ') | title }}
+                                                                            {% endif %}
+                                                                            <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
+                                                                                    name="{{ name }}[0][{{ sub_name }}]" 
+                                                                                    
+                                                                                    value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                    {% if sub_attr.mandatory %} required {% endif %}>
+                                                                        {% endfor %}
+
+                                                                    </div>
+                                                                    {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    {% endif %}
+
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
                                             </div>
-                                        </div>
-                                        <script>
-                                            function setupCheckbox(name) {
-                                                const checkbox = document.getElementById(name);
-                                                const hiddenInput = document.getElementById(name + "_hidden");
-                                                
-                                                // Function to update hidden input based on checkbox state
-                                                function updateHiddenInput() {
-                                                    hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                        {% elif attr.type == 'bool' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <label for="{{ name }}">{{ name }}</label>
+                                                    <!-- Hidden input to represent the unchecked state -->
+                                                    <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
+                                                    <!-- Checkbox input -->
+                                                    <input type="checkbox" id="{{ name }}" name="{{ name }}" value="true">
+                                                </div>
+                                            </div>
+                                            <script>
+                                                function setupCheckbox(name) {
+                                                    const checkbox = document.getElementById(name);
+                                                    const hiddenInput = document.getElementById(name + "_hidden");
+                                                    
+                                                    // Function to update hidden input based on checkbox state
+                                                    function updateHiddenInput() {
+                                                        hiddenInput.value = checkbox.checked ? 'true' : 'false';
+                                                    }
+                                                    
+                                                    // Attach the change event listener
+                                                    checkbox.addEventListener('change', updateHiddenInput);
+                                                    
+                                                    // Call the function to set the initial state correctly
+                                                    updateHiddenInput();
                                                 }
                                                 
-                                                // Attach the change event listener
-                                                checkbox.addEventListener('change', updateHiddenInput);
-                                                
-                                                // Call the function to set the initial state correctly
-                                                updateHiddenInput();
-                                            }
-                                            
-                                            // Setup each checkbox with a unique name
-                                            setupCheckbox("{{ name }}");
-                                        </script>                   
+                                                // Setup each checkbox with a unique name
+                                                setupCheckbox("{{ name }}");
+                                            </script>                   
+                                        {% elif attr.type == 'uint' %}
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    {{ name | replace('_', ' ') | title }}
+                                                    <input type="number" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" min="0">
+                                                </div>
+                                            </div>
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
-                                                {{name}}
-                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                                {{ name | replace('_', ' ') | title }}
+                                                <input type="text" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" value="{{attr.filled_value}}" readonly  >
                                              </div>
                                         </div>
-                                        {% elif value == 'full-date' %}
+                                        {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    {{name}}
-                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" required >
+                                                    {{ name | replace('_', ' ') | title }}
+                                                    <input type="date" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" 
+                                                    {% if attr.filled_value %} readonly {% endif %} required >
                                                 </div>
                                             </div>
-                                        {% elif value == 'jpeg'%}
+                                        {% elif attr.type == 'jpeg'%}
                                             <label>Portrait:</label>
                                             <p>Please select one option or upload a file.</p>
                                              
@@ -203,7 +313,7 @@
                                                 </div>
 
                                             </div>
-                                        {% elif value == 'driving_privileges' %}
+                                        {% elif attr.type == 'driving_privileges' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <div class="form-group" id="DrivingP">
@@ -254,20 +364,126 @@
                                     {% endfor %}
                                 </div>
                                 <h3>Optional Elements</h3>
-                                {% for name, value in optional_attributes.items() %}    
-                                        {% if value == 'string' %}
+                                {% for name, attr in optional_attributes.items() %}    
+                                        {% if attr.type == 'string' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    <input type="text" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
+                                                    <input type="text" class="form-control" placeholder="{{ name | replace('_', ' ') | title }}" aria-label="{{ name | replace('_', ' ') | title }}" name="{{ name }}" >
                                                 </div>
                                             </div>
-                                        {% elif value == 'uint' %}
+                                        
+                                        {% elif attr.type == 'list' %}
+                                            <div id="{{ name }}-container" class="list-container">
+                                                 <!-- Title for the Section -->
+                                                <h3 class="section-title">{{ name | replace('_', ' ') | title }}</h3> 
+                                                 <!-- Add Button (Only if max cardinality allows more than 1) -->
+                                                {% if attr.cardinality.max != 1 %}
+                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-container"
+                                                            data-name="{{ name }}" data-attributes='{{ attr.attributes | tojson | safe }}'
+                                                            {% if attr.cardinality.max != "n" %} data-max="{{ attr.cardinality.max }}" {% endif %}>
+                                                        Add {{ name | replace('_', ' ') }}
+                                                    </button>
+                                                {% endif %}  
+
+                                               <!-- Toggle Buttons for Exclusive Selection (Only if more than 1 option) -->
+                                               {% if attr.attributes | length > 1 %}
+                                                    <div class="btn-group toggle-group" data-toggle="buttons">
+                                                        {% for option in attr.attributes %}
+                                                            {% set hide_option = true %}
+
+                                                            {% for other_option in attr.attributes %}
+                                                                {% if option.attribute != other_option.attribute and "not_used_if" in other_option and other_option.not_used_if.attributes is defined %}
+                                                                    {% if option.attribute in other_option.not_used_if.attributes %}
+                                                                            <label class="btn btn-primary toggle-option"
+                                                                                data-target="{{ name }}-{{ option.attribute }}" data-attributes="{{ option }}">
+                                                                                <input type="radio" name="{{ name }}_option" autocomplete="off">
+                                                                                {{ option.attribute | replace('_', ' ') | title }}
+                                                                            </label>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            
+                                                <!-- Containers for Attribute Inputs -->
+                                                {% for option in attr.attributes %}
+                                                    <div id="{{ name }}-{{ option.attribute }}-container" class="sub-container">
+                                                        {% if attr.filled_value %}
+                                                            {% for index, item in enumerate(attr.filled_value) if item.attribute == option.attribute %}
+                                                                <div class="list-item form-group">
+                                                                    <div class="row">
+                                                                        {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            <div class="col-md-12">
+                                                                                <input type="text" class="form-control" placeholder="{{ sub_name }}" 
+                                                                                       name="{{ name }}[{{ index }}][{{ sub_name }}]" 
+                                                                                       value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                       {% if sub_attr.mandatory %} required {% endif %}>
+                                                                            </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {% if option.not_used_if is not defined %}
+                                                                <h4>{{ option.attribute | replace('_', ' ') | title }}</h4>
+
+                                                                {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <button type="button" class="btn btn-primary add-item" data-target="{{ name }}-{{ option.attribute }}-container"
+                                                                            data-name="{{ option.attribute }}" data-attributes='{{ option | tojson | safe }}'
+                                                                            {% if option.cardinality.max != "n" %} data-max="{{ option.cardinality.max }}" {% endif %}>
+                                                                        Add {{ option.attribute | replace('_', ' ') }}
+                                                                    </button>
+                                                                {% endif %}
+
+                                                                <div class="list-item form-group">
+                                                                    <div class="form-group">
+
+                                                                        {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                            {% set input_type = 'date' if sub_attr.value_type == "full-date" else 'text' %}
+                                                                            {% if input_type == "date" %}
+                                                                                {{ sub_name | replace('_', ' ') | title }}
+                                                                            {% endif %}
+                                                                            <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
+                                                                                    name="{{ name }}[0][{{ sub_name }}]" 
+                                                                                    value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                    {% if sub_attr.mandatory %} required {% endif %}>
+                                                                        {% endfor %}
+
+                                                                    </div>
+                                                                    {% if "cardinality" in option and option.cardinality.max != 1 %}
+                                                                    <!-- Remove button -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                                                                        </div>
+                                                                    </div>
+                                                                    {% endif %}
+
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        
+                                            
+                                        
+                                                    
+                                        {% elif attr.type == 'uint' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    <input type="number" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" min="0">
+                                                    {{ name | replace('_', ' ') | title }}
+                                                    <input type="number" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" min="0">
                                                 </div>
                                             </div>
-                                        {% elif value == 'bool' %}
+                                        {% elif attr.type == 'bool' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
                                                 <label for="{{ name }}">{{ name }}</label>
@@ -290,26 +506,33 @@
                                         {% elif name == 'user_pseudonym' %}
                                         <div class="row g-3">
                                             <div class="col-md-12">
-                                                {{name}}
-                                                <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
+                                                {{ name | replace('_', ' ') | title }}
+                                                <input type="text" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" value="{{value}}" readonly  >
                                              </div>
                                         </div>
-                                        {% elif value == 'full-date' %}
+                                        {% elif attr.type == 'full-date' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
-                                                    {{name}}
-                                                    <input type="date" class="form-control" placeholder="{{ name }}" aria-label="{{ name }}" name="{{ name }}" >
+                                                    {{ name | replace('_', ' ') | title }}
+                                                    <input type="date" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" name="{{ name }}" >
                                                 </div>
                                             </div>
-                                        {% elif value == 'jpeg'%}
+                                        {% elif attr.type == 'jpeg'%}
                                             <label>Portrait:</label>
                                             <p>Please select one option or upload a file.</p>
                                              
                                             <div class="row g-3">
+                                                <!-- Unset option -->
+                                                <div class="col-md-6">
+                                                    <label>
+                                                        <input type="radio" name="{{ name }}" value="" checked>
+                                                        None (Unset)
+                                                    </label>
+                                                </div>
                                                 
                                                 <div class="col-md-6">
                                                     <label>
-                                                        <input type="radio" name="{{ name }}"value="Port1" checked >
+                                                        <input type="radio" name="{{ name }}"value="Port1">
                                                         <img src="{{url_for('static', filename='image.jpeg')}}" width=50% alt="Option 1">
                                                     </label>
                                                 </div>
@@ -333,7 +556,7 @@
                                                 </div>
 
                                             </div>
-                                        {% elif value == 'driving_privileges' %}
+                                        {% elif attr.type == 'driving_privileges' %}
                                             <div class="row g-3">
                                                 <div class="col-md-12">
                                                     <div class="form-group" id="DrivingP">
@@ -427,6 +650,7 @@
     <!-- Version 9.7.1.20 - 23/03/2023 - 09:26 -->
 </body>
 <script>
+
     var room = 1;
 
     function AddCategories() {
@@ -439,6 +663,52 @@
         divtest.innerHTML = '<label>Category </label><select class="form-control" name="Category'+ room +'"><option>AM</option><option>A1</option><option>A2</option><option>A</option><option>B1</option><option>B</option><option>C1</option><option>C</option><option>D1</option><option>D</option><option>BE</option><option>C1E</option><option>CE</option><option>D1E</option><option>DE</option></select><div class="col">Issue Date:<input type="date" class="form-control" placeholder="Issue Date" aria-label="Issue Date" name="IssueDate'+ room +'" required></div><div class="col">Expiry Date:<input type="date" class="form-control" placeholder="Expiry Date" aria-label="Expiry Date" name="ExpiryDate'+ room +'" required></div><button class="btn btn-danger" type="button" onclick="remove_education_fields('+ room +');">Delete</button>';
         
         objTo.appendChild(divtest)
+    }
+
+    function submitValidation(){
+
+        let optionalAttributes = JSON.parse('{{ optional_attributes | tojson | safe }}');
+        console.log("optionalAttributes: ", optionalAttributes);
+        let at_least_one_of= optionalAttributes["at_least_one_of"];
+
+        if (!at_least_one_of || at_least_one_of.length === 0) {
+            return true; 
+        }
+
+        let input = document.querySelector('input[name="given_name"]');
+        console.log("Given Name: ", input);
+
+        input = document.querySelector('input[name="health_insurance_id"]');
+        console.log("Health_ID: ", input);
+
+        let isValid = at_least_one_of.some(field => {
+            let input = document.querySelector(`input[name="${field}"]`);
+            console.log(`Checking ${field}:`, input ? input.value : "Not found");
+            return input && input.value.trim() !== "";  
+        });
+
+        if (!isValid) {
+            // Get the names of the required fields that are empty
+            let missingFields = at_least_one_of.filter(field => {
+                let input = document.querySelector(`input[name="${field}"]`);
+                return !input || input.value.trim() === ""; 
+            });
+
+            // Create a message listing all missing fields
+            let missingFieldsMessage = missingFields.map(field => {
+                let formattedField = field.replace(/_/g, " ") 
+                                            .replace(/\b\w/g, char => char.toUpperCase());
+                return formattedField;
+            }).join(", ");
+
+            alert("At least one of the following fields must be filled: " + missingFieldsMessage);
+            return false;
+        }
+
+        validateImage();
+
+        return true;
+
     }
     
     function remove_education_fields(rid) {
@@ -454,53 +724,335 @@
         divtest.innerHTML='<input type="hidden" value="'+room+'" name="NumberCategories">';
         objTo.appendChild(divtest)
     }
+
+
+    const firstToggle = document.querySelector(".toggle-option");
+    if (firstToggle) {
+        console.log("firstToggle: ", firstToggle);
+        firstToggle.dispatchEvent(new Event("click")); // Simulate a click on the first button
+    }
+
+
     document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM fully loaded");
+        
         var isValid= false
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            document.getElementById('fileInput').addEventListener('change', function(event) {
 
-            var files = event.target.files;
-            var preview = document.getElementById('preview');
-            
-            // Clear any existing content
-            preview.innerHTML = '';
+                var files = event.target.files;
+                var preview = document.getElementById('preview');
+                
+                // Clear any existing content
+                preview.innerHTML = '';
 
-            // Loop through all selected files
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
+                // Loop through all selected files
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
 
-                // Only process image files
-                if (!file.type.match('image/jpeg')) {
-                    continue;
-                }
-
-                var imgContainer = document.createElement('div');
-                imgContainer.style.marginBottom = '20px'; // Spacing between each image container
-
-                var img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-
-                img.onload = function() {
-                    if (img.naturalHeight != 433 && img.naturalWidth != 360){
-                        alert("Height and width must be 433 and 360");
-                        img.onerror = reject;
-                        URL.revokeObjectURL(img.src)
+                    // Only process image files
+                    if (!file.type.match('image/jpeg')) {
+                        continue;
                     }
-                    alert("Valid image size");
-                    return true
+
+                    var imgContainer = document.createElement('div');
+                    imgContainer.style.marginBottom = '20px'; // Spacing between each image container
+
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+
+                    img.onload = function() {
+                        if (img.naturalHeight != 433 && img.naturalWidth != 360){
+                            alert("Height and width must be 433 and 360");
+                            img.onerror = reject;
+                            URL.revokeObjectURL(img.src)
+                        }
+                        alert("Valid image size");
+                        return true
+                    }
+                    img.style.width = '20%';
+                    img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
+                    img.style.marginBottom = '10px';
+                    img.style.marginTop = '10px';
+
+                    // Append the image and file info to the container
+                    imgContainer.appendChild(img);
+
+                    // Append the container to the preview div
+                    preview.appendChild(imgContainer);
                 }
-                img.style.width = '20%';
-                img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
-                img.style.marginBottom = '10px';
-                img.style.marginTop = '10px';
+            });
+        }
 
-                // Append the image and file info to the container
-                imgContainer.appendChild(img);
+        document.querySelectorAll(".toggle-option").forEach(button => {
+            button.addEventListener("click", function () {
+                let containerId = this.getAttribute("data-target") + "-container";
 
-                // Append the container to the preview div
-                preview.appendChild(imgContainer);
+                console.log(containerId);
+
+                // Enable all buttons before disabling the selected one
+                document.querySelectorAll(".toggle-option").forEach(btn => {
+                    btn.removeAttribute("disabled");
+                });
+
+                // Disable the clicked button
+                this.setAttribute("disabled", "true");
+
+               // Get the parent container (places_of_work section)
+                const parentContainer = this.closest(".list-container");
+                if (!parentContainer) {
+                    console.error("Parent container not found.");
+                    return;
+                }
+                
+
+                let input = this.getAttribute("data-attributes")
+                // Replace single quotes with double quotes
+                let jsonString = input.replace(/'/g, '"');
+                
+                // Replace Python's None, True, and False with JavaScript's equivalents
+                jsonString = jsonString.replace(/None/g, 'null')
+                                        .replace(/True/g, 'true')
+                                        .replace(/False/g, 'false');
+
+                //console.log(jsonString);
+                // Repopulate the container based on the selected option
+                const selectedOption = JSON.parse(jsonString);
+
+                if("not_used_if" in selectedOption && "logic" in selectedOption.not_used_if && "attributes" in selectedOption.not_used_if){
+                    if(selectedOption.not_used_if.logic == "any"){
+                        selectedOption.not_used_if.attributes.forEach(attribute =>{
+                            hideId = containerId.split("-")[0] + "-" + attribute + "-container"
+                            console.log("ID: ", hideId)
+                            elementToHide = document.getElementById(hideId);
+                            elementToHide.classList.add("hidden");
+                        })
+                    }
+                }
+
+                // Hide all sub-containers
+                //Why is this removing the legislation one too? is it in sub-containers?
+                /* document.querySelectorAll(" .sub-container").forEach(container => {
+                    console.log("\nContainer1: ", container)
+                    if (container.id.includes(containerId.split("-")[0])) {
+                        console.log("\nContainer2: ", container)
+                        console.log(container);
+                        container.classList.add("hidden");
+                    }
+                }); */
+
+                // Show the container related to the clicked toggle option
+                const selectedContainer = document.getElementById(containerId);
+
+                console.log(selectedContainer.innerHTML);
+                console.log(this.getAttribute("data-attributes"));
+
+                //console.log(selectedContainer.innerHTML);
+
+                selectedContainer.classList.remove("hidden");
+
+
+                // Reset all input values inside the selected container
+                selectedContainer.querySelectorAll("input").forEach(input => {
+                    input.value = "";  // Reset input fields
+                });
+
+                // Remove any existing list items inside the selected container
+                selectedContainer.querySelectorAll(".list-item").forEach(item => {
+                    console.log("\nItems:", item)
+                    item.remove();
+                });
+
+
+                const newItem = document.createElement("div");
+                newItem.classList.add("list-item", "form-group");
+                // Start building the inner HTML
+
+                let innerHTML = "";
+                Object.keys(selectedOption).forEach(subName => {
+                    console.log("\nSubname:", subName)
+                    
+                    if (subName != "attribute" && subName != "cardinality" && subName != "not_used_if") {
+                    
+                
+                        const subAttr = selectedOption[subName];
+                        //const newItem = document.createElement("div");
+                        //newItem.classList.add("list-item", "form-group");
+                        innerHTML += `
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="${subName}" 
+                                    name="${containerId}[${subName}]" value="${subAttr.filled_value || ''}" ${subAttr.mandatory ? 'required' : ''}>
+                            </div>
+                        `;
+                        console.log("\nSelected Container:", selectedContainer)
+                        console.log("\nNew Item:", newItem)
+
+                    }
+                
+                });
+
+                innerHTML += `
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                            </div>
+                        </div>
+                    `;
+
+                    
+                
+                newItem.innerHTML = innerHTML;
+
+                // Append the Add Button separately
+                if ("cardinality" in selectedOption && selectedOption.cardinality.max != 1) {
+                    const addButton = document.createElement("button");
+                    addButton.type = "button";
+                    addButton.classList.add("btn", "btn-primary", "add-item");
+                    addButton.dataset.target = containerId;
+                    console.log("\nTarger: ", containerId)
+                    addButton.dataset.name = selectedOption.attribute;
+                    addButton.dataset.attributes = JSON.stringify(selectedOption);
+                    
+                    if (selectedOption.cardinality.max !== "n") {
+                        addButton.dataset.max = selectedOption.cardinality.max;
+                    }
+
+                    addButton.textContent = `Add ${selectedOption.attribute.replace('_', ' ')}`;
+
+                    // Append after newItem so it is not removed when "Remove" is clicked
+                    newItem.appendChild(addButton);
+                }
+
+                selectedContainer.appendChild(newItem);
+                
+            });
+        });
+
+
+
+        document.addEventListener("click", function (event) {
+            if (event.target && event.target.classList.contains("add-item")) {
+                //event.target.remove();
+                console.log("Add item clicked");
+
+                const containerId = event.target.getAttribute("data-target");
+                console.log("\nContainer ID: ", containerId)
+
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    console.error(`Container with ID "${containerId}" not found.`);
+                    return;
+                }
+
+                const fieldName = event.target.getAttribute("data-name");
+                const attributesData = event.target.getAttribute("data-attributes");
+
+                console.log("\nfieldName: ", fieldName)
+
+                console.log("\attributesData: ", attributesData)
+
+                try {
+                    const attributes = JSON.parse(attributesData);
+                    console.log("\nParsed attributes:", attributes);
+                    console.log("type: ", typeof attributes);
+
+                    const maxCardinality = event.target.getAttribute("data-max") === "n" ? Infinity : parseInt(event.target.getAttribute("data-max"), 10);
+                    const index = container.children.length;
+
+                    if (!isNaN(maxCardinality) && index >= maxCardinality) {
+                        alert(`Cannot add more than ${maxCardinality} items for ${fieldName}`);
+                        return;
+                    }
+
+                    let newItem = document.createElement("attributesdiv");
+                    newItem.classList.add("list-item", "form-group");
+
+                    let innerHTML = '<div class="row">';
+
+                    // Check if the parsed attributes is an array
+                    if (Array.isArray(attributes)) {
+                        console.log("isArray")
+                        // Iterate through each object in the array
+                        attributes.forEach(attrSet => {
+                            for (const [attrKey, attrValue] of Object.entries(attrSet)) {
+                                console.log("\nAttribute: ", attrKey);
+                                console.log("\nAttributeValue: ", attrValue);
+
+                                if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
+
+                                if (!attrValue || typeof attrValue !== "object") continue;
+
+                                const isMandatory = attrValue.mandatory ? "required" : "";
+                                const value = attrValue.filled_value ? attrValue.filled_value : "";
+                                const inputType = attrValue.type === "full-date" ? "date" : "text";
+                                console.log("\nisMandatory : ", isMandatory);
+                                console.log("\nvalue : ", value);
+                                console.log("\ninputType : ", inputType);
+
+                                innerHTML += `
+                                    <div class="col-md-12">
+                                        <input type="${inputType}" class="form-control" placeholder="${attrKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}" 
+                                            name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
+                                    </div>
+                                `;
+                            }
+                        });
+                    } else if (typeof attributes === 'object') {
+                        // Iterate through the object directly (existing behavior)
+                        for (const [attrKey, attrValue] of Object.entries(attributes)) {
+                            console.log("\nAttribute: ", attrKey);
+                            console.log("\nAttributeValue: ", attrValue);
+
+                            if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
+
+                            if (!attrValue || typeof attrValue !== "object") continue;
+
+                            const isMandatory = attrValue.mandatory ? "required" : "";
+                            const value = attrValue.filled_value ? attrValue.filled_value : "";
+                            const inputType = attrValue.type === "full-date" ? "date" : "text";
+                            console.log("\nisMandatory : ", isMandatory);
+                            console.log("\nvalue : ", value);
+                            console.log("\ninputType : ", inputType);
+
+                            innerHTML += `
+                                <div class="col-md-12">
+                                    <input type="${inputType}" class="form-control" placeholder="${attrKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}" 
+                                        name="${containerId}[${index}][${attrKey}]" value="${value}" ${isMandatory}>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    innerHTML += `</div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-danger remove-item mt-2">Remove</button>
+                        </div>
+                    </div>`;
+
+                    newItem.innerHTML = innerHTML;
+                    container.appendChild(newItem);
+
+                } catch (error) {
+                    console.error("Error parsing attributes:", error);
+                }
+
+            }
+
+            if (event.target && event.target.classList.contains("remove-item")) {
+                console.log("Remove item clicked");
+                const listItem = event.target.closest(".list-item");
+                if (listItem) {
+                    listItem.remove();
+                }
             }
         });
+
+
+
+
 
 
         function submitForm() {
@@ -560,6 +1112,7 @@
                 document.getElementById('myselectCountryForm').submit();
             }
         }
+            
     });
 
 </script>
