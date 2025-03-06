@@ -707,6 +707,20 @@ def dynamic_R2_data_collect(country, user_id):
                 if custom_modifiers[modifier] in data:
                     data[modifier] = data[custom_modifiers[modifier]]
                     data.pop(custom_modifiers[modifier])
+
+        data["nationality"] = [country]
+
+        birth_places = {
+            "EU":"Brussels",
+            "EE":"Tallinn",
+            "CZ":"Prague",
+            "NL":"Amsterdam",
+            "LU":"Luxembourg"
+        }
+
+        if country in birth_places:
+            data["birth_place"] = birth_places[country]
+            
         return data
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
