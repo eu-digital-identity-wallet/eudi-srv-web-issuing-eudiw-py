@@ -92,12 +92,12 @@ _28 Jan 2025_
 ### Changed
 - Align SD-JWT-VC format of PID with latest drafts
 
-## [0.8.0]
+## [0.7.1]
 
 _05 Mar 2025_
 ### Added:
-- EHIC Credential
-- PDA1 Credential
+- EHIC Credential compliant with LSP DC4EU technical specification.
+- PDA1 Credential compliant with LSP DC4EU technical specification.
 - sd-jwt vc: EHIC, PDA1, HIID, IBAN, MSISDN, POR, Tax, Pseudonym age over 18.
 - Created a new issuer_conditions schema in credential metadate to further specify complex credentials like nested claims.
 
