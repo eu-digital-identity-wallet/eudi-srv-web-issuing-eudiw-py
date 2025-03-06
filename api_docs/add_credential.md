@@ -130,7 +130,7 @@ For more information on the metadata parameters, please refer to https://openid.
 - issuer_conditions: a json structure with extra parameters and logic allowing for more complex credentials.
 
 ### 1.1 Issuer Conditions
-The issuer_conditions structure can be used in the metadata in the following manner:
+The issuer_conditions structure can be used in the metadata as follows:
 - Specific to a claim:
 
   Allows for the usage of nested claims by defining the value_type as another claims structure with the same identifier inside the issuer_conditions. Additionally, it can specify the cardinality not only of the claim itself but also of its nested claims.  
@@ -238,9 +238,9 @@ This claim allows for two nested claims, a place_of_work and a no_fixed_place.
           }
         }
   ```
-- encompassing multiple claims:
+- Encompassing multiple claims:
   
-  Currently this manner supports the condition at_least_one_of which specifies that at least one of these claims need to be present in the credential.  
+  Currently this approach supports the condition at_least_one_of which specifies that at least one of these claims need to be present in the credential.  
   As an example, the Health ID credential requires at least one of the following claims to be present: health_insurance_id, patient_id, tax_number, one_time_token.  
   For this example the following issuer_conditions would be added inside the claims{} field but outside any specific claim.
   
