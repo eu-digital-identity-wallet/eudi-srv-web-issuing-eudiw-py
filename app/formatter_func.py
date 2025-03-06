@@ -144,7 +144,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         'X-Api-Key': revocation_api_key
         }
 
-        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+        response = requests.post(cfgservice.revocation_service_url, headers=headers, data=payload)
 
         if response.status_code == 200:
             revocation_json = response.json()
@@ -241,7 +241,7 @@ def sdjwtFormatter(PID, country):
         'X-Api-Key': revocation_api_key
         }
 
-        response = requests.get(cfgservice.revocation_service_url, headers=headers, data=payload)
+        response = requests.post(cfgservice.revocation_service_url, headers=headers, data=payload)
 
         if response.status_code == 200:
             revocation_json = response.json()

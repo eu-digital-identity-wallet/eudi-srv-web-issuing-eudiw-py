@@ -124,6 +124,7 @@ def getAttributesForm(credentials_requested):
         format = credentialsSupported[request]["format"]
         namescapes = credentialsSupported[request]["claims"]
         attributes_req = {}
+
         if format == "mso_mdoc":
 
             for namescape in namescapes:
@@ -135,6 +136,8 @@ def getAttributesForm(credentials_requested):
             attributes_req.update(
                 getMandatoryAttributes(credentialsSupported[request]["claims"])
             )
+
+        print("\n attributes_req: ", attributes_req)
 
         for attribute in attributes_req:
             if attribute not in attributes:
@@ -157,9 +160,63 @@ def getMandatoryAttributes(attributes):
         attribute_name = list(attributes.keys())[x]
         attribute_data = attributes.get(attribute_name, {})
 
-        if attribute_data["mandatory"] == True:
+        if attribute_name == "issuer_conditions" and attribute_name not in attributes_form:
+            for key,value in attribute_data.items():
+                attributes_form.update({key:value})
+
+        elif attribute_data["mandatory"] == True:
             if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: attribute_data["value_type"]})
+                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
+
+            if "issuer_conditions" in attribute_data:
+                attributes_form[attribute_name]["type"] = "list"
+
+                if "cardinality" in attribute_data["issuer_conditions"]:
+                    attributes_form[attribute_name]["cardinality"] = attribute_data["issuer_conditions"]["cardinality"]
+                
+                if attribute_data["value_type"] in attribute_data["issuer_conditions"]:
+                    #print("\n[]: ", attribute_data["issuer_conditions"])
+                    #print("\nValue Type: ", attribute_data["value_type"])
+                    #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
+                    nested_attributes = {}
+                    nested_attributes_list = []
+
+                    #print("[]", type(attribute_data["issuer_conditions"][attribute_data["value_type"]]))
+
+                    for key, value in attribute_data["issuer_conditions"][attribute_data["value_type"]].items():
+                        print("\nKey_misc: ", key)
+                        #print("\nValue: ", value)
+
+                        if "issuer_conditions" not in value:
+                            nested_attributes[key] = value
+                        
+                        else:
+                            
+                            attributes_append = {"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}
+                           # attributes.append[{"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}]
+
+                            for key2,value2 in value["issuer_conditions"][value["value_type"]].items():
+                                attributes_append[key2] = value2
+
+                                print("\nKey2", key2)
+
+                            if "not_used_if" in value["issuer_conditions"]:
+                                attributes_append["not_used_if"] = value["issuer_conditions"]["not_used_if"]
+
+                            #print("\nattributes_append: ", attributes_append)
+                            nested_attributes_list.append(attributes_append)
+
+                            
+
+                    #print("\nnested_attributes_list: ", nested_attributes_list)
+                    #print("\nnested_attributes: ", nested_attributes)
+                    nested_attributes_list.append(nested_attributes)
+
+                    attributes_form[attribute_name]["attributes"] = nested_attributes_list
+
+            
+
+            
 
     return attributes_form
 
@@ -211,9 +268,61 @@ def getOptionalAttributes(attributes):
         attribute_name = list(attributes.keys())[x]
         attribute_data = attributes.get(attribute_name, {})
 
-        if attribute_data["mandatory"] == False:
+        if attribute_name == "issuer_conditions" and attribute_name not in attributes_form:
+            for key,value in attribute_data.items():
+                attributes_form.update({key:value})
+
+        elif attribute_data["mandatory"] == False:
+            
             if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: attribute_data["value_type"]})
+                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
+
+            if "issuer_conditions" in attribute_data:
+                attributes_form[attribute_name]["type"] = "list"
+
+                if "cardinality" in attribute_data["issuer_conditions"]:
+                    attributes_form[attribute_name]["cardinality"] = attribute_data["issuer_conditions"]["cardinality"]
+                
+                if attribute_data["value_type"] in attribute_data["issuer_conditions"]:
+                    #print("\n[]: ", attribute_data["issuer_conditions"])
+                    #print("\nValue Type: ", attribute_data["value_type"])
+                    #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
+                    nested_attributes = {}
+                    nested_attributes_list = []
+
+                    #print("[]", type(attribute_data["issuer_conditions"][attribute_data["value_type"]]))
+
+                    for key, value in attribute_data["issuer_conditions"][attribute_data["value_type"]].items():
+                        print("\nKey: ", key)
+                        #print("\nValue: ", value)
+
+                        if "issuer_conditions" not in value:
+                            nested_attributes[key] = value
+                            print("\nKey,value",key,value)
+                        
+                        else:
+                            
+                            attributes_append = {"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}
+                           # attributes.append[{"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}]
+
+                            for key2,value2 in value["issuer_conditions"][value["value_type"]].items():
+                                attributes_append[key2] = value2
+
+                                print("\nKey2", key2)
+
+                            if "not_used_if" in value["issuer_conditions"]:
+                                attributes_append["not_used_if"] = value["issuer_conditions"]["not_used_if"]
+
+                            #print("\nattributes_append: ", attributes_append)
+                            nested_attributes_list.append(attributes_append)
+
+                            
+
+                    #print("\nnested_attributes_list: ", nested_attributes_list)
+                    #print("\nnested_attributes: ", nested_attributes)
+                    nested_attributes_list.append(nested_attributes)
+
+                    attributes_form[attribute_name]["attributes"] = nested_attributes_list
 
     return attributes_form
 

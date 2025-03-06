@@ -34,7 +34,7 @@ deferredRequests = {}
 oid4vp_requests = {}
 form_dynamic_data = {}
 session_ids = {}
-
+credential_offer_references = {}
 
 def getSessionId_requestUri(target_request_uri):
     matching_session_id = None
@@ -136,6 +136,11 @@ def clear_par():
         if datetime.now() > form_dynamic_data[id]["expires"]:
             cfgservice.app_logger.info("Removing form id: " + str(id))
             form_dynamic_data.pop(id)
+    
+    for id in credential_offer_references.copy():
+        if datetime.now() > credential_offer_references[id]["expires"]:
+            cfgservice.app_logger.info("Removing credential reference id: " + str(id))
+            credential_offer_references.pop(id)
 
 def run_scheduler():
     #print("Run scheduler.")

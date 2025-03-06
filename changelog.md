@@ -80,3 +80,31 @@ _04 Oct 2024_
 - Conflicting dependencies
 - Dynamic Issuing always requests full PID attestation instead of the required attributes.
   
+
+## [0.7.0]
+
+_28 Jan 2025_
+### Added:
+- Authorization server metadata
+- Attestation Revocation
+-  Issuer logo to metadata
+
+### Changed
+- Align SD-JWT-VC format of PID with latest drafts
+
+## [0.7.1]
+
+_05 Mar 2025_
+### Added:
+- EHIC Credential compliant with LSP DC4EU technical specification.
+- PDA1 Credential compliant with LSP DC4EU technical specification.
+- sd-jwt vc: EHIC, PDA1, HIID, IBAN, MSISDN, POR, Tax, Pseudonym age over 18.
+- Created a new issuer_conditions schema in credential metadate to further specify complex credentials like nested claims.
+
+### Changed
+- Backend logic management creating the form and credentials based on metadata issuer_condtitions
+- Front-end form changes to dynamically create a form based on metadata issuer_conditions with nested fields, cardinality and nested mandatory.
+- Update PID to version 1.5
+
+### Fixed
+- Status code on oauth2 PAR is 200 should be 201

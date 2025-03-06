@@ -127,6 +127,133 @@ For more information on the metadata parameters, please refer to https://openid.
 **Extra Parameters** 
 - source: Where the attributed is sourced from. Either the user or issuer (Example: Issuance Date is filled in by the issuer while given_name is filled in by the user on the form)
 - value_type: Type of the value expected. This will add the attribute to the forms. (Can be string, full-date, jpeg, driving_privileges, uint, bool)
+- issuer_conditions: a json structure with extra parameters and logic allowing for more complex credentials.
+
+### 1.1 Issuer Conditions
+The issuer_conditions structure can be used in the metadata as follows:
+- Specific to a claim:
+
+  Allows for the usage of nested claims by defining the value_type as another claims structure with the same identifier inside the issuer_conditions. Additionally, it can specify the cardinality not only of the claim itself but also of its nested claims.  
+  As an example we have the credential Portable Document A1 (PDA1) which has a claim places_of_work.  
+This claim allows for two nested claims, a place_of_work and a no_fixed_place.  
+  We can define the value_type as the structure places_of_work_attributes, the identifier we will use inside issuer_conditions, the places_of_work_attributes will contain two claim structures, place_of_work and no_fixed_place. Inside these two structures we define the nested claim as seen below.  
+  Within each nested claim, we can once again add issuer_conditions, specifying its cardinality and a not_used_if field. In this case, the not_used_if field ensures that place_of_work cannot be used if no_fixed_place is present, and vice versa.
+  
+  ```json
+  "places_of_work": {
+          "mandatory": true,
+          "value_type":"places_of_work_attributes",
+          "source":"user",
+          "display": [
+            {
+              "name": "Places of Work",
+              "locale": "en"            }
+          ],
+          "issuer_conditions": {
+            "cardinality": {
+              "min": 1,
+              "max": 1
+            },
+            "places_of_work_attributes":{
+              "place_of_work": {
+                "mandatory": false,
+                "value_type": "place_of_work_attributes",
+                "source": "user",
+                "issuer_conditions": {
+                  "cardinality": {
+                    "min": 0,
+                    "max": "n"
+                  },
+                  "not_used_if": {
+                      "logic": "any",
+                      "attributes": ["no_fixed_place"]
+                  },
+                  "place_of_work_attributes":{
+                    "company": {
+                      "mandatory": true,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "flag_base_home_state": {
+                      "mandatory": false,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "company_id": {
+                      "mandatory": false,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "id_type": {
+                      "mandatory": false,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "street": {
+                      "mandatory": false,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "town": {
+                      "mandatory": true,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "postal_code": {
+                      "mandatory": false,
+                      "value_type": "string",
+                      "source": "user"
+                    },
+                    "country_code": {
+                      "mandatory": true,
+                      "value_type": "string",
+                      "source": "user"
+                    }
+                  }
+                }
+              },
+              "no_fixed_place": {
+                "mandatory": false,
+                "value_type": "no_fixed_place_attributes",
+                "source": "user",
+                "issuer_conditions": {
+                  "cardinality": {
+                    "min": 0,
+                    "max": "n"
+                  },
+                  "not_used_if": {
+                      "logic": "any",
+                      "attributes": ["place_of_work"]
+                  },
+                  "no_fixed_place_attributes":{
+                    "country_code": {
+                      "mandatory": true,
+                      "value_type": "string",
+                      "source": "user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+  ```
+- Encompassing multiple claims:
+  
+  Currently this approach supports the condition at_least_one_of which specifies that at least one of these claims need to be present in the credential.  
+  As an example, the Health ID credential requires at least one of the following claims to be present: health_insurance_id, patient_id, tax_number, one_time_token.  
+  For this example the following issuer_conditions would be added inside the claims{} field but outside any specific claim.
+  
+```json
+"issuer_conditions": {
+          "at_least_one_of":[
+                "health_insurance_id",
+                "patient_id",
+                "tax_number",
+                "one_time_token"
+            ]
+        }
+```
 
 
 ## 2. Service Configuration

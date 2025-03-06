@@ -68,7 +68,7 @@ def setup_metadata():
             dir_path + "/metadata_config/openid-configuration.json"
         ) as openid_metadata:
             openid_metadata = json.load(openid_metadata)
-        
+
         with open(
             dir_path + "/metadata_config/oauth-authorization-server.json"
         ) as oauth_metadata:
@@ -223,7 +223,7 @@ def create_app(test_config=None):
     @app.route("/ic-logo.png")
     def logo():
         return send_from_directory("static/images", "ic-logo.png")
-    
+
     app.config.from_mapping(SECRET_KEY="dev")
 
     if test_config is None:
