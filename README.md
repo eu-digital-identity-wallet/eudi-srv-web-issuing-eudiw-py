@@ -47,6 +47,7 @@ This version of the EUDIW Issuer supports the [OpenId for Verifiable Credential 
 | Proof                                                             | ✅ JWT, ✅ CWT                                                  |
 | Credential response encryption                                    | ❌                                                              |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
+| Nonce Endpoint                                                    | ❌ To be added in a future relase                               |
 | Pushed authorization request                                      | ✅                                                              |
 | Wallet authentication                                             | ✅ public client                                                |
 | Demonstrating Proof of Possession (DPoP)                          | ❌                                                              |
