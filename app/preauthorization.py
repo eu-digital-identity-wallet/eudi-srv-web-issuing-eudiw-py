@@ -436,7 +436,7 @@ def generate_preauth_token(data, authorization_details):
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    if response.status_code != 200:
+    if response.status_code != 201:
         return make_response("invalid_request", 400)
     
     par_response = response.json()
