@@ -32,20 +32,25 @@ This version of the EUDIW Issuer supports the [OpenId for Verifiable Credential 
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow](api_docs/authorization.md)              | ✅ Support for PAR, PKCE, credential configuration id, scope    |
+| [Authorization Code flow](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope               |
 | [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅                                                              |
+| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
 | Dynamic Credential Request                                        | ✅                                                              |
 | mso_mdoc format                                                   | ✅                                                              |
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
 | [Token Endpoint](api_docs/token.md)                               | ✅                                                              |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
 | [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations                  |
-| Credential Issuer MetaData                                        | ✅                                                              | 
-| [Batch Endpoint](api_docs/batch_credential.md)                     | ✅                                                              | 
+| Credential Issuer MetaData                                        | ✅ Unsigned metadata                                            | 
+| [Batch Endpoint](api_docs/batch_credential.md)                    | ✅                                                              | 
 | [Deferred Endpoint](api_docs/deferred.md)                         | ✅                                                              |
 | Proof                                                             | ✅ JWT, ✅ CWT                                                  |
+| Credential response encryption                                    | ❌                                                              |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
+| Pushed authorization request                                      | ✅                                                              |
+| Wallet authentication                                             | ✅ public client                                                |
+| Demonstrating Proof of Possession (DPoP)                          | ❌                                                              |
+| PKCE                                                              | ✅                                                              |
 
 
 You can use the EUDIW Issuer at https://issuer.eudiw.dev/, or install it locally.
