@@ -792,7 +792,7 @@ def dynamic_R2_data_collect(country, user_id):
                 "EE":"Tallinn",
                 "CZ":"Prague",
                 "NL":"Amsterdam",
-                "LU":"Luxembourg City"
+                "LU":"Luxembourg"
             }
 
             if country in birth_places:
