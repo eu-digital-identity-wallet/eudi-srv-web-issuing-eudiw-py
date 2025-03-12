@@ -644,11 +644,13 @@ def dynamic_R2():
 
     country, user_id = user.split(".", 1)
 
+
     credential_request = json_request["credential_requests"]
 
     session["country"] = country
     session["version"] = cfgserv.current_version
     session["route"] = "/dynamic/form_R2"
+
 
     data = dynamic_R2_data_collect(
         country=country, user_id=user_id
@@ -658,6 +660,7 @@ def dynamic_R2():
         return data
 
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+
 
     credential_response = credentialCreation(
         credential_request=credential_request, data=data, country=country
@@ -824,30 +827,47 @@ def credentialCreation(credential_request, data, country):
     document_mappings = cfgserv.document_mappings
 
     credential_response = {"credential_responses": []}
-    for credential in credential_request:
 
-        if "credential_identifier" in credential:
-            doctype = credentials_supported[credential["credential_identifier"]][
+
+    for proof in credential_request["proofs"]:
+
+        if "credential_identifier" in credential_request:
+            doctype = credentials_supported[credential_request["credential_identifier"]][
                 "scope"
             ]
-            format = credentials_supported[credential["credential_identifier"]][
+            format = credentials_supported[credential_request["credential_identifier"]][
                 "format"
             ]
-        elif "vct" in credential and "format" in credential:
-            doctype = vct2scope(credential["vct"])
-            format = credential["format"]
 
-        elif "format" in credential and "doctype" in credential:
-            format = credential["format"]
-            doctype = credential["doctype"]
+        elif "credential_configuration_id" in credential_request:
 
+            if "vct" in credentials_supported[credential_request["credential_configuration_id"]]:
+                doctype = vct2scope(credentials_supported[credential_request["credential_configuration_id"]]["vct"])
+            else:
+                doctype = credentials_supported[credential_request["credential_configuration_id"]]["scope"]
+
+            format = credentials_supported[credential_request["credential_configuration_id"]]["format"]
+        
         else:
             return {
                 "error": "invalid_credential_request",
                 "error_description": "invalid request",
             }
 
-        device_publickey = credential["device_publickey"]
+        """ elif "vct" in credential and "format" in credential:
+            doctype = vct2scope(credential["vct"])
+            format = credential["format"]
+
+        elif "format" in credential and "doctype" in credential:
+            format = credential["format"]
+            doctype = credential["doctype"] """
+        
+
+        
+        if "jwt" in proof:
+            device_publickey = proof["jwt"]
+
+        #device_publickey = credential["device_publickey"]
 
         # formatting_functions = document_mappings[doctype]["formatting_functions"]
 
