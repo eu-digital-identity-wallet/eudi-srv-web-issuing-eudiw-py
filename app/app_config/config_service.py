@@ -62,6 +62,9 @@ class ConfService:
         service_url + "EidasNode/SpecificConnectorRequest"
     )
 
+    #Nonce endpoint
+    nonce_key = "/etc/eudiw/pid-issuer/privKey/nonce_rsa4096.pem"
+
     # eIDAS node PID attributes
     eidasnode_pid_attributes = ["CurrentFamilyName", "CurrentGivenName", "DateOfBirth"]
 

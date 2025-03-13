@@ -686,13 +686,13 @@ def token():
 
         session_id = getSessionId_authCode(preauth_code)
 
-        cfgservice.app_logger.info(
+        """ cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
             + "Pre-Authorized Token Request, Payload: "
             + str(request.form.to_dict())
-        )
+        ) """
 
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
             error_message = {
@@ -1007,6 +1007,25 @@ def notification():
 
     return _resp
 
+@oidc.route("/nonce", methods=["POST"])
+def nonce():
+
+    _resp = service_endpoint(current_app.server.get_endpoint("nonce"))
+
+    if isinstance(_resp, Response):
+        cfgservice.app_logger.info(
+            "Nonce response, Payload: "
+            + str(_resp)
+        )
+        return _resp
+
+    cfgservice.app_logger.info(
+        "Nonce response, Payload: "
+        + str(_resp)
+    )
+
+    return _resp
+
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
@@ -1269,6 +1288,28 @@ def service_endpoint(endpoint):
             req_args = request.json
             req_args["access_token"] = accessToken
             req_args["oidc_config"] = cfgoidc
+            _resp = endpoint.process_request(req_args)
+
+            if isinstance(_resp, ResponseMessage) and "error" in _resp:
+                cfgservice.app_logger.error("Error response: {}".format(_resp))
+                _resp = make_response(_resp.to_json(), 400)
+
+        except Exception as err:
+            cfgservice.app_logger.error(err)
+            return make_response(
+                json.dumps({"error": "invalid_request", "error_description": str(err)}),
+                400,
+            )
+
+        return _resp
+    
+    if endpoint.name == "nonce":
+        try:
+            req_args = {}
+            req_args["key_path"] = cfgservice.nonce_key
+            req_args["iss"] = cfgservice.service_url[:-1]
+            req_args["source_endpoint"] = cfgservice.service_url + "nonce"
+            req_args["aud"] = [cfgservice.service_url + "credential"]
             _resp = endpoint.process_request(req_args)
 
             if isinstance(_resp, ResponseMessage) and "error" in _resp:

@@ -826,7 +826,7 @@ def credentialCreation(credential_request, data, country):
     credentials_supported = oidc_metadata["credential_configurations_supported"]
     document_mappings = cfgserv.document_mappings
 
-    credential_response = {"credential_responses": []}
+    credential_response = {"credentials": []}
 
 
     for proof in credential_request["proofs"]:
@@ -955,7 +955,7 @@ def credentialCreation(credential_request, data, country):
 
         pdata = dynamic_formatter(format, doctype, form_data, device_publickey)
 
-        credential_response["credential_responses"].append({"credential": pdata})
+        credential_response["credentials"].append({"credential": pdata})
 
         """ formatting_function_data = formatting_functions.get(format)
 
