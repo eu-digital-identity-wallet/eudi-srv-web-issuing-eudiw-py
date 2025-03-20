@@ -14,17 +14,6 @@
           "proof_signing_alg_values_supported": [
             "ES256"
           ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
         }
       },
       "display": [
@@ -37,9 +26,9 @@
           }
         }
       ],
-      "claims": {
-        "org.iso.23220.1": {
-          "portrait": {
+      "claims": [
+          {
+            "path":["org.iso.23220.1","portrait"],
             "mandatory": true,
             "value_type":"jpeg",
             "source":"user",
@@ -49,7 +38,8 @@
                 "locale": "en"            }
             ]
           },
-          "portrait_capture_date": {
+          {
+            "path":["org.iso.23220.1","portrait_capture_date"],
             "mandatory": false,
             "value_type":"full-date",
             "source":"user",
@@ -59,7 +49,8 @@
                 "locale": "en"            }
             ]
           },
-          "family_name_unicode": {
+          {
+            "path":["org.iso.23220.1","family_name_unicode"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -69,7 +60,8 @@
                 "locale": "en"            }
             ]
           },
-          "given_name_unicode": {
+          {
+            "path":["org.iso.23220.1","given_name_unicode"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -79,7 +71,8 @@
                 "locale": "en"            }
             ]
           },
-          "family_name_latin1": {
+          {
+            "path":["org.iso.23220.1","family_name_latin1"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -89,7 +82,8 @@
                 "locale": "en"            }
             ]
           },
-          "given_name_latin1": {
+          {
+            "path":["org.iso.23220.1","given_name_latin1"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -99,7 +93,8 @@
                 "locale": "en"            }
             ]
           },
-          "birth_date": {
+          {
+            "path":["org.iso.23220.1","birth_date"],
             "mandatory": true,
             "value_type":"full-date",
             "source":"user",
@@ -109,7 +104,8 @@
                 "locale": "en"            }
             ]
           },
-          "age_over_18": {
+          {
+            "path":["org.iso.23220.1","age_over_18"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -119,7 +115,8 @@
               }
             ]
           },
-          "age_in_years": {
+          {
+            "path":["org.iso.23220.1","age_in_years"],
             "mandatory": false,
             "value_type":"uint",
             "display": [
@@ -129,7 +126,8 @@
               }
             ]
           },
-          "age_birth_year": {
+          {
+            "path":["org.iso.23220.1","age_birth_year"],
             "mandatory": false,
             "value_type":"uint",
             "display": [
@@ -139,7 +137,8 @@
               }
             ]
           },
-          "birthplace": {
+          {
+            "path":["org.iso.23220.1","birthplace"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -150,7 +149,8 @@
               }
             ]
           },
-          "name_at_birth": {
+          {
+            "path":["org.iso.23220.1","name_at_birth"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -161,7 +161,8 @@
               }
             ]
           },
-          "resident_address_unicode": {
+          {
+            "path":["org.iso.23220.1","resident_address_unicode"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -172,7 +173,8 @@
               }
             ]
           },
-          "resident_city_unicode": {
+          {
+            "path":["org.iso.23220.1","resident_city_unicode"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -183,7 +185,8 @@
               }
             ]
           },
-          "resident_postal_code": {
+          {
+            "path":["org.iso.23220.1","resident_postal_code"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -194,7 +197,8 @@
               }
             ]
           },
-          "resident_country": {
+          {
+            "path":["org.iso.23220.1","resident_country"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -205,7 +209,8 @@
               }
             ]
           },
-          "resident_city_latin1": {
+          {
+            "path":["org.iso.23220.1","resident_city_latin1"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -216,7 +221,8 @@
               }
             ]
           },
-          "sex": {
+          {
+            "path":["org.iso.23220.1","sex"],
             "mandatory": false,
             "source":"user",
             "display": [
@@ -226,7 +232,8 @@
               }
             ]
           },
-          "nationality": {
+          {
+            "path":["org.iso.23220.1","nationality"],
             "mandatory": false,
             "source":"user",
             "value_type":"string",
@@ -237,7 +244,8 @@
               }
             ]
           },
-          "document_number": {
+          {
+            "path":["org.iso.23220.1","document_number"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -248,7 +256,8 @@
               }
             ]
           },
-          "issuing_subdivision": {
+          {
+            "path":["org.iso.23220.1","issuing_subdivision"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -259,7 +268,8 @@
               }
             ]
           },
-          "issuance_date": {
+          {
+            "path":["org.iso.23220.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -269,7 +279,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["org.iso.23220.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -279,7 +290,8 @@
               }
             ]
           },
-          "issuing_authority_unicode": {
+          {
+            "path":["org.iso.23220.1","issuing_authority_unicode"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -289,7 +301,8 @@
               }
             ]
           },
-          "issuing_country": {
+          {
+            "path":["org.iso.23220.1","issuing_country"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -299,7 +312,7 @@
               }
             ]
           }
-        }
-      }
+        
+      ]
     }
   }

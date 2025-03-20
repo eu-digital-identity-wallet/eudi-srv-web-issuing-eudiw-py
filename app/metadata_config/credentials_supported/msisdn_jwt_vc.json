@@ -13,17 +13,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -37,8 +26,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:msisdn:1",
-    "claims": {
-      "phone_number": {
+    "claims": [
+      {
+        "path":["phone_number"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -48,7 +38,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_family_name": {
+      {
+        "path":["registered_family_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -58,7 +49,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_given_name": {
+      {
+        "path":["registered_given_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -68,7 +60,8 @@
             "locale": "en"            }
         ]
       },
-      "contract_owner": {
+      {
+        "path":["contract_owner"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -78,7 +71,8 @@
             "locale": "en"            }
         ]
       },
-      "end_user": {
+      {
+        "path":["end_user"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -88,7 +82,8 @@
             "locale": "en"            }
         ]
       },
-      "mobile_operator": {
+      {
+        "path":["mobile_operator"],
         "mandatory": true,
         "value_type":"string",
         "source":"Mobile Operator",
@@ -98,7 +93,8 @@
             "locale": "en"            }
         ]
       },
-      "issuance_date": {
+      {
+        "path":["issuance_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -108,7 +104,8 @@
           }
         ]
       },
-      "expiry_date": {
+      {
+        "path":["expiry_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -118,7 +115,8 @@
           }
         ]
       },
-      "credential_type": {
+      {
+        "path":["credential_type"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -128,7 +126,8 @@
           }
         ]
       },
-      "issuing_organization": {
+      {
+        "path":["issuing_organization"],
         "mandatory": true,
         "value_type":"string",
         "source":"issuer",
@@ -138,7 +137,8 @@
             "locale": "en"            }
         ]
       },
-      "phone_number_in_use": {
+      {
+        "path":["phone_number_in_use"],
         "mandatory": false,
         "value_type":"uint",
         "source":"user",
@@ -148,7 +148,8 @@
             "locale": "en"            }
         ]
       },
-      "document_number": {
+      {
+        "path":["document_number"],
         "mandatory": false,
         "display": [
           {
@@ -156,6 +157,6 @@
             "locale": "en"            }
         ]
       }
-    }
+    ]
   }
 }

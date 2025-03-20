@@ -47,9 +47,9 @@
         }
       }
     ],
-    "claims": {
-      "eu.europa.ec.eudi.por.1": {
-        "legal_person_identifier": {
+    "claims": [
+        {
+          "path":["eu.europa.ec.eudi.por.1","legal_person_identifier"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -59,7 +59,8 @@
               "locale": "en"            }
           ]
         },
-        "legal_name": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","legal_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -69,7 +70,8 @@
               "locale": "en"            }
           ]
         },
-        "full_powers": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","full_powers"],
           "mandatory": true,
           "value_type":"bool",
           "source":"user",
@@ -79,7 +81,8 @@
               "locale": "en"            }
           ]
         },
-        "eService": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","eService"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -89,7 +92,8 @@
               "locale": "en"            }
           ]
         },
-        "effective_from_date": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","effective_from_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -100,7 +104,8 @@
             }
           ]
         },
-        "effective_until_date": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","effective_until_date"],
           "mandatory": false,
           "value_type":"full-date",
           "source":"user",
@@ -110,7 +115,8 @@
               "locale": "en"            }
           ]
         },
-        "issuance_date": {
+        {
+          "path":["eu.europa.ec.eudi.por.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -120,7 +126,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["eu.europa.ec.eudi.por.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -130,7 +137,8 @@
               }
             ]
           },
-          "issuing_authority": {
+          {
+            "path":["eu.europa.ec.eudi.por.1","issuing_authority"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -140,7 +148,8 @@
               }
             ]
           },
-          "issuing_jurisdiction": {
+          {
+            "path":["eu.europa.ec.eudi.por.1","issuing_jurisdiction"],
             "mandatory": false,
             "display": [
               {
@@ -149,7 +158,8 @@
               }
             ]
           },
-          "issuing_country": {
+          {
+            "path":["eu.europa.ec.eudi.por.1","issuing_country"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -159,7 +169,6 @@
               }
             ]
           }
-      }
-    }
+    ]
   }
 }

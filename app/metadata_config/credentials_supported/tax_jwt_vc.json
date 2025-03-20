@@ -37,8 +37,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:tax:1",
-    "claims": {
-      "tax_number": {
+    "claims": [
+      {
+        "path":["tax_number"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -48,7 +49,8 @@
             "locale": "en"            }
         ]
       },
-      "affiliation_country": {
+      {
+        "path":["affiliation_country"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -58,7 +60,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_given_name": {
+      {
+        "path":["registered_given_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -68,7 +71,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_family_name": {
+      {
+        "path":["registered_family_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -78,7 +82,8 @@
             "locale": "en"            }
         ]
       },
-      "resident_address": {
+      {
+        "path":["resident_address"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -88,7 +93,8 @@
             "locale": "en"            }
         ]
       },
-      "birth_date": {
+      {
+        "path":["birth_date"],
         "mandatory": true,
         "value_type":"full-date",
         "source":"user",
@@ -99,7 +105,8 @@
           }
         ]
       },
-      "church_tax_ID": {
+      {
+        "path":["church_tax_ID"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -110,7 +117,8 @@
           }
         ]
       },
-      "iban": {
+      {
+        "path":["iban"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -121,7 +129,8 @@
           }
         ]
       },
-      "credential_type": {
+      {
+        "path":["credential_type"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -131,7 +140,8 @@
           }
         ]
       },
-      "issuance_date": {
+      {
+        "path":["issuance_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -141,7 +151,8 @@
           }
         ]
       },
-      "expiry_date": {
+      {
+        "path":["expiry_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -151,7 +162,8 @@
           }
         ]
       },
-      "issuing_authority": {
+      {
+        "path":["issuing_authority"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -161,7 +173,8 @@
           }
         ]
       },
-      "issuing_jurisdiction": {
+      {
+        "path":["issuing_jurisdiction"],
         "mandatory": false,
         "display": [
           {
@@ -170,7 +183,8 @@
           }
         ]
       },
-      "issuing_country": {
+      {
+        "path":["issuing_country"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -180,6 +194,6 @@
           }
         ]
       }
-    }
+    ]
   }
 }

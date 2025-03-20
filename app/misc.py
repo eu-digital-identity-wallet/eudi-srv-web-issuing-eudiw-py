@@ -86,6 +86,15 @@ def convert_png_to_jpeg(png_bytes):
 
     return jpeg_bytes
 
+def getNamespaces(claims):
+    namespaces = []
+    for claim in claims:
+        if "path" in claim:
+            if claim["path"][0] not in namespaces:
+                namespaces.append(claim["path"][0])
+    
+    print("\nNamespaces", namespaces)
+    return namespaces
 
 def getMandatoryAttributes(attributes):
     """
@@ -122,14 +131,14 @@ def getAttributesForm(credentials_requested):
     attributes = {}
     for request in credentials_requested:
         format = credentialsSupported[request]["format"]
-        namescapes = credentialsSupported[request]["claims"]
+
+        namescapes = getNamespaces(credentialsSupported[request]["claims"])
         attributes_req = {}
 
         if format == "mso_mdoc":
-
             for namescape in namescapes:
                 attributes_req = getMandatoryAttributes(
-                    credentialsSupported[request]["claims"][namescape]
+                    credentialsSupported[request]["claims"],namescape
                 )
 
         elif format == "vc+sd-jwt":
@@ -149,32 +158,37 @@ def getAttributesForm(credentials_requested):
     return attributes
 
 
-def getMandatoryAttributes(attributes):
+def getMandatoryAttributes(claims, namespace):
     """
     Function to get mandatory attributes from credential
     """
 
     attributes_form = {}
 
-    for x, value in enumerate(list(attributes.keys())):
-        attribute_name = list(attributes.keys())[x]
-        attribute_data = attributes.get(attribute_name, {})
+    #for x, value in enumerate(list(attributes.keys())):
 
-        if attribute_name == "issuer_conditions" and attribute_name not in attributes_form:
-            for key,value in attribute_data.items():
+    for claim in claims:
+        
+        if "overall_issuer_conditions" in claim:
+            for key,value in claim["issuer_conditions"].items():
                 attributes_form.update({key:value})
+        
+        elif claim["mandatory"] == True and claim["path"][0] == namespace:
 
-        elif attribute_data["mandatory"] == True:
-            if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
+            attribute_name = claim["path"][1]
 
-            if "issuer_conditions" in attribute_data:
+            print("\nMisc attribute_name: ", attribute_name)
+
+            if "value_type" in claim:
+                attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+
+            if "issuer_conditions" in claim:
                 attributes_form[attribute_name]["type"] = "list"
 
-                if "cardinality" in attribute_data["issuer_conditions"]:
-                    attributes_form[attribute_name]["cardinality"] = attribute_data["issuer_conditions"]["cardinality"]
+                if "cardinality" in claim["issuer_conditions"]:
+                    attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
                 
-                if attribute_data["value_type"] in attribute_data["issuer_conditions"]:
+                if claim["value_type"] in claim["issuer_conditions"]:
                     #print("\n[]: ", attribute_data["issuer_conditions"])
                     #print("\nValue Type: ", attribute_data["value_type"])
                     #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
@@ -183,7 +197,7 @@ def getMandatoryAttributes(attributes):
 
                     #print("[]", type(attribute_data["issuer_conditions"][attribute_data["value_type"]]))
 
-                    for key, value in attribute_data["issuer_conditions"][attribute_data["value_type"]].items():
+                    for key, value in claim["issuer_conditions"][claim["value_type"]].items():
                         print("\nKey_misc: ", key)
                         #print("\nValue: ", value)
 
@@ -217,7 +231,7 @@ def getMandatoryAttributes(attributes):
             
 
             
-
+    print("\nMandatory attributes: ", attributes_form)
     return attributes_form
 
 def getAttributesForm2(credentials_requested):
@@ -233,13 +247,14 @@ def getAttributesForm2(credentials_requested):
     attributes = {}
     for request in credentials_requested:
         format = credentialsSupported[request]["format"]
-        namescapes = credentialsSupported[request]["claims"]
+        namescapes = getNamespaces(credentialsSupported[request]["claims"])
         attributes_req = {}
+
         if format == "mso_mdoc":
 
             for namescape in namescapes:
                 attributes_req = getOptionalAttributes(
-                    credentialsSupported[request]["claims"][namescape]
+                    credentialsSupported[request]["claims"],namescape
                 )
 
         elif format == "vc+sd-jwt":
@@ -257,33 +272,35 @@ def getAttributesForm2(credentials_requested):
     return attributes
 
 
-def getOptionalAttributes(attributes):
+def getOptionalAttributes(claims, namespace):
     """
     Function to get mandatory attributes from credential
     """
 
     attributes_form = {}
 
-    for x, value in enumerate(list(attributes.keys())):
-        attribute_name = list(attributes.keys())[x]
-        attribute_data = attributes.get(attribute_name, {})
-
-        if attribute_name == "issuer_conditions" and attribute_name not in attributes_form:
-            for key,value in attribute_data.items():
+    for claim in claims:
+        
+        if "overall_issuer_conditions" in claim:
+            for key,value in claim["issuer_conditions"].items():
                 attributes_form.update({key:value})
 
-        elif attribute_data["mandatory"] == False:
-            
-            if "value_type" in attribute_data:
-                attributes_form.update({attribute_name: {"type": attribute_data["value_type"],"filled_value":None}})
+        elif claim["mandatory"] == False and claim["path"][0] == namespace:
 
-            if "issuer_conditions" in attribute_data:
+            attribute_name = claim["path"][1]
+
+            print("\nMisc attribute_name: ", attribute_name)
+
+            if "value_type" in claim:
+                attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+
+            if "issuer_conditions" in claim:
                 attributes_form[attribute_name]["type"] = "list"
 
-                if "cardinality" in attribute_data["issuer_conditions"]:
-                    attributes_form[attribute_name]["cardinality"] = attribute_data["issuer_conditions"]["cardinality"]
+                if "cardinality" in claim["issuer_conditions"]:
+                    attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
                 
-                if attribute_data["value_type"] in attribute_data["issuer_conditions"]:
+                if claim["value_type"] in claim["issuer_conditions"]:
                     #print("\n[]: ", attribute_data["issuer_conditions"])
                     #print("\nValue Type: ", attribute_data["value_type"])
                     #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
@@ -292,13 +309,12 @@ def getOptionalAttributes(attributes):
 
                     #print("[]", type(attribute_data["issuer_conditions"][attribute_data["value_type"]]))
 
-                    for key, value in attribute_data["issuer_conditions"][attribute_data["value_type"]].items():
-                        print("\nKey: ", key)
+                    for key, value in claim["issuer_conditions"][claim["value_type"]].items():
+                        print("\nKey_misc: ", key)
                         #print("\nValue: ", value)
 
                         if "issuer_conditions" not in value:
                             nested_attributes[key] = value
-                            print("\nKey,value",key,value)
                         
                         else:
                             
@@ -324,22 +340,21 @@ def getOptionalAttributes(attributes):
 
                     attributes_form[attribute_name]["attributes"] = nested_attributes_list
 
+    print("\nOptional attributes: ", attributes_form)
     return attributes_form
 
-def getIssuerFilledAttributes(attributes):
+def getIssuerFilledAttributes(claims, namespace):
     """
     Function to get mandatory attributes from credential
     """
 
     attributes_form = {}
 
-    for x, value in enumerate(list(attributes.keys())):
-        attribute_name = list(attributes.keys())[x]
-        attribute_data = attributes.get(attribute_name, {})
+    for claim in claims:
+        if "source" in claim and claim["source"] == "issuer" and claim["path"][0] == namespace:
+            attributes_form.update({claim["path"][1]:""})
 
-        if "source" in attribute_data and attribute_data["source"] == "issuer":
-            attributes_form.update({attribute_name: ""})
-
+    print("\nIssuer attributes: ", attributes_form)
     return attributes_form
 
 

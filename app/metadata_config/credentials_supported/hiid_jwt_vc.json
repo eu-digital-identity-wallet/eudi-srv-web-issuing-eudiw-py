@@ -37,8 +37,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:hiid:1",
-    "claims": {
-      "health_insurance_id": {
+    "claims": [
+      {
+        "path":["health_insurance_id"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -48,7 +49,8 @@
             "locale": "en"            }
         ]
       },
-      "patient_id": {
+      {
+        "path":["patient_id"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -58,7 +60,8 @@
             "locale": "en"            }
         ]
       },
-      "tax_number": {
+      {
+        "path":["tax_number"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -68,7 +71,8 @@
             "locale": "en"            }
         ]
       },
-      "one_time_token": {
+      {
+        "path":["one_time_token"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -78,7 +82,8 @@
             "locale": "en"            }
         ]
       },
-      "affiliation_country": {
+      {
+        "path":["affiliation_country"],
         "mandatory": true,
         "value_type":"string",
         "source":"Affiliation Country",
@@ -88,7 +93,8 @@
             "locale": "en"            }
         ]
       },
-      "issuance_date": {
+      {
+        "path":["issuance_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -98,7 +104,8 @@
           }
         ]
       },
-      "expiry_date": {
+      {
+        "path":["expiry_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -108,7 +115,8 @@
           }
         ]
       },
-      "matching_institution-id": {
+      {
+        "path":["matching_institution-id"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -118,7 +126,8 @@
             "locale": "en"            }
         ]
       },
-      "matching_registered_family_name": {
+      {
+        "path":["matching_registered_family_name"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -128,7 +137,8 @@
             "locale": "en"            }
         ]
       },
-      "matching_registered_given_name": {
+      {
+        "path":["matching_registered_given_name"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -138,7 +148,8 @@
             "locale": "en"            }
         ]
       },
-      "matching_resident_address": {
+      {
+        "path":["matching_resident_address"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -148,7 +159,8 @@
             "locale": "en"            }
         ]
       },
-      "matching_birth_place": {
+      {
+        "path":["matching_birth_place"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -158,7 +170,8 @@
             "locale": "en"            }
         ]
       },
-      "matching_birth_date": {
+      {
+        "path":["matching_birth_date"],
         "mandatory": false,
         "value_type":"full-date",
         "source":"user",
@@ -168,7 +181,8 @@
             "locale": "en"            }
         ]
       },
-      "issuing_authority": {
+      {
+        "path":["issuing_authority"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -178,7 +192,8 @@
           }
         ]
       },
-      "document_number": {
+      {
+        "path":["document_number"],
         "mandatory": false,
         "display": [
           {
@@ -186,7 +201,8 @@
             "locale": "en"            }
         ]
       },
-      "administrative_number": {
+      {
+        "path":["administrative_number"],
         "mandatory": false,
         "display": [
           {
@@ -194,7 +210,8 @@
             "locale": "en"            }
         ]
       },
-      "issuing_country": {
+      {
+        "path":["issuing_country"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -204,7 +221,8 @@
           }
         ]
       },
-      "issuing_jurisdiction": {
+      {
+        "path":["issuing_jurisdiction"],
         "mandatory": false,
         "display": [
           {
@@ -213,14 +231,16 @@
           }
         ]
       },
-      "issuer_conditions": {
+      {
+        "issuer_conditions": {
           "at_least_one_of":[
                 "health_insurance_id",
                 "patient_id",
                 "tax_number",
                 "one_time_token"
             ]
+        }
       }
-    }
+    ]
   }
 }

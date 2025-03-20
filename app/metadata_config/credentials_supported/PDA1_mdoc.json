@@ -24,17 +24,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -47,9 +36,9 @@
         }
       }
     ],
-    "claims": {
-      "eu.europa.ec.eudi.pda1.1": {
-        "credential_holder": {
+    "claims": [
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","credential_holder"],
           "mandatory": true,
           "value_type":"credential_holder_attributes",
           "source":"user",
@@ -82,7 +71,8 @@
             }
           }
         },
-        "social_security_pin": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","social_security_pin"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -92,7 +82,8 @@
               "locale": "en"            }
           ]
         },
-        "employment_details": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","employment_details"],
           "mandatory": true,
           "value_type":"employment_details_attributes",
           "source":"user",
@@ -150,7 +141,8 @@
             }
           }
         },
-        "places_of_work": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","places_of_work"],
           "mandatory": true,
           "value_type":"places_of_work_attributes",
           "source":"user",
@@ -247,7 +239,8 @@
             }
           }
         },
-        "legislation": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","legislation"],
           "mandatory": true,
           "value_type":"legislation_attributes",
           "source":"user",
@@ -285,7 +278,8 @@
             }
           }
         },
-        "status_confirmation": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","status_confirmation"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -295,7 +289,8 @@
               "locale": "en"            }
           ]
         },
-        "document_id": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","document_id"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -305,7 +300,8 @@
               "locale": "en"            }
           ]
         },
-        "competent_institution": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","competent_institution"],
           "mandatory": true,
           "value_type":"competent_institution_attributes",
           "source":"user",
@@ -338,7 +334,8 @@
             }
           }
         },
-        "issuance_date": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","issuance_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -348,7 +345,8 @@
             }
           ]
         },
-        "expiry_date": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","expiry_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -358,7 +356,8 @@
             }
           ]
         },
-        "issuing_authority": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","issuing_authority"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -368,7 +367,8 @@
             }
           ]
         },
-        "issuing_country": {
+        {
+          "path":["eu.europa.ec.eudi.pda1.1","issuing_country"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -378,7 +378,6 @@
             }
           ]
         }
-      }
-    }
+    ]
   }
 }

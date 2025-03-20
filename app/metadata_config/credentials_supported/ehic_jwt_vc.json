@@ -37,8 +37,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:ehic:1",
-    "claims": {
-      "credential_holder": {
+    "claims": [
+      {
+        "path":["credential_holder"],
         "mandatory": true,
         "value_type":"credential_holder_attributes",
         "source":"user",
@@ -51,27 +52,38 @@
           "cardinality": {
             "min": 0,
             "max": 1
-            },
-          "credential_holder_attributes":{
-            "family_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "given_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "birth_date": {
-              "mandatory": true,
-              "value_type": "full-date",
-              "source": "user"
             }
-          }
         }
       },
-      "subject": {
+      {"path":["credential_holder","family_name"],
+        "mandatory": true,
+        "value_type":"string",
+        "source":"user",
+        "display": [
+          {
+            "name": "Family Name",
+            "locale": "en"            }
+        ]},
+      {"path":["credential_holder","given_name"],
+      "mandatory": true,
+      "value_type":"string",
+      "source":"user",
+      "display": [
+        {
+          "name": "Given Name",
+          "locale": "en"            }
+        ]},
+      {"path":["credential_holder","birth_date"],
+        "mandatory": true,
+        "value_type":"full-date",
+        "source":"user",
+        "display": [
+          {
+            "name": "Birth Date",
+            "locale": "en"            }
+        ]},
+      {
+        "path":["subject"],
         "mandatory": true,
         "value_type":"subject_attributes",
         "source":"user",
@@ -84,27 +96,38 @@
           "cardinality": {
             "min": 0,
             "max": 1
-            },
-          "subject_attributes":{
-            "family_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "given_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "birth_date": {
-              "mandatory": true,
-              "value_type": "full-date",
-              "source": "user"
             }
-          }
         }
       },
-      "social_security_pin": {
+      {"path":["subject","family_name"],
+        "mandatory": true,
+        "value_type":"string",
+        "source":"user",
+        "display": [
+          {
+            "name": "Family Name",
+            "locale": "en"            }
+        ]},
+      {"path":["subject","given_name"],
+      "mandatory": true,
+      "value_type":"string",
+      "source":"user",
+      "display": [
+        {
+          "name": "Given Name",
+          "locale": "en"            }
+        ]},
+      {"path":["subject","birth_date"],
+        "mandatory": true,
+        "value_type":"full-date",
+        "source":"user",
+        "display": [
+          {
+            "name": "Birth Date",
+            "locale": "en"            }
+        ]},
+      {
+        "path":["social_security_pin"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -114,7 +137,8 @@
             "locale": "en"            }
         ]
       },
-      "starting_date": {
+      {
+        "path":["starting_date"],
         "mandatory": true,
         "value_type":"full-date",
         "source":"user",
@@ -124,7 +148,8 @@
             "locale": "en"            }
         ]
       },
-      "ending_date": {
+      {
+        "path":["ending_date"],
         "mandatory": true,
         "value_type":"full-date",
         "source":"user",
@@ -134,7 +159,8 @@
             "locale": "en"            }
         ]
       },
-      "document_id": {
+      {
+        "path":["document_id"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -144,7 +170,8 @@
             "locale": "en"            }
         ]
       },
-      "competent_institution": {
+      {
+        "path":["competent_institution"],
         "mandatory": true,
         "value_type":"competent_institution_attributes",
         "source":"user",
@@ -157,27 +184,38 @@
           "cardinality": {
             "min": 1,
             "max": 1
-          },
-          "competent_institution_attributes":{
-            "institution_id": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "institution_name": {
-              "mandatory": false,
-              "value_type": "boolean",
-              "source": "user"
-            },
-            "country_code": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            }
           }
         }
       },
-      "issuance_date": {
+      {"path":["competent_institution","institution_id"],
+        "mandatory": true,
+        "value_type":"string",
+        "source":"user",
+        "display": [
+          {
+            "name": "Institution ID",
+            "locale": "en"            }
+        ]},
+      {"path":["competent_institution","institution_name"],
+      "mandatory": false,
+      "value_type":"string",
+      "source":"user",
+      "display": [
+        {
+          "name": "Institution Name",
+          "locale": "en"            }
+        ]},
+      {"path":["competent_institution","country_code"],
+        "mandatory": true,
+        "value_type":"string",
+        "source":"user",
+        "display": [
+          {
+            "name": "Country Code",
+            "locale": "en"            }
+        ]},
+      {
+        "path":["issuance_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -187,7 +225,8 @@
           }
         ]
       },
-      "expiry_date": {
+      {
+        "path":["expiry_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -197,7 +236,8 @@
           }
         ]
       },
-      "issuing_authority": {
+      {
+        "path":["issuing_authority"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -207,7 +247,8 @@
           }
         ]
       },
-      "issuing_country": {
+      {
+        "path":["issuing_country"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -217,6 +258,6 @@
           }
         ]
       }
-    }
+    ]
   }
 }

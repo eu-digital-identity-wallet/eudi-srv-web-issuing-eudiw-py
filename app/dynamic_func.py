@@ -20,7 +20,7 @@ import json
 from flask import session
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from misc import calculate_age, getIssuerFilledAttributes, getMandatoryAttributes, getOptionalAttributes
+from misc import calculate_age, getIssuerFilledAttributes, getMandatoryAttributes, getNamespaces, getOptionalAttributes
 from redirect_func import json_post
 import base64
 from flask import session
@@ -84,22 +84,22 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
             expiry = today + datetime.timedelta(days=doctype_config["validity"])
 
-            namescapes = credentialsSupported[request]["claims"]
+            namescapes = getNamespaces(credentialsSupported[request]["claims"])
 
             if format == "mso_mdoc":
                 for namescape in namescapes:
                     #print("\nNamespace: ", namescape)
                     attributes_req = getMandatoryAttributes(
-                        credentialsSupported[request]["claims"][namescape]
+                        credentialsSupported[request]["claims"], namescape
                     )
 
                     #print("\nattributes_req: ", attributes_req)
                     attributes_req2 = getOptionalAttributes(
-                        credentialsSupported[request]["claims"][namescape]
+                        credentialsSupported[request]["claims"], namescape
                     )
 
                     #print("\nattributes_req2: ", attributes_req2)
-                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])                    
+                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"],namescape)                    
 
                     pdata = {namescape: {}}
 
@@ -122,14 +122,14 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
                 for namescape in namescapes:
                     attributes_req = getMandatoryAttributes(
-                        credentialsSupported[request]["claims"][namescape]
+                        credentialsSupported[request]["claims"], namescape
                     )
 
                     attributes_req2 = getOptionalAttributes(
-                        credentialsSupported[request]["claims"][namescape]
+                        credentialsSupported[request]["claims"], namescape
                     )
 
-                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"][namescape])
+                    issuer_claims = getIssuerFilledAttributes(credentialsSupported[request]["claims"], namescape)
 
                     pdata["claims"] = {namescape: {}}
 

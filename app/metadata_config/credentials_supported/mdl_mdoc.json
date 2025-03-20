@@ -14,17 +14,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -37,9 +26,9 @@
         }
       }
     ],
-    "claims": {
-      "org.iso.18013.5.1": {
-        "family_name": {
+    "claims": [
+          {
+          "path":["org.iso.18013.5.1","family_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -49,7 +38,8 @@
               "locale": "en"            }
           ]
         },
-        "given_name": {
+        {
+          "path":["org.iso.18013.5.1","given_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -59,7 +49,8 @@
               "locale": "en"            }
           ]
         },
-        "birth_date": {
+        {
+          "path":["org.iso.18013.5.1","birth_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -69,7 +60,8 @@
               "locale": "en"            }
           ]
         },
-        "issue_date": {
+        {
+          "path":["org.iso.18013.5.1","issue_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -79,7 +71,8 @@
             }
           ]
         },
-        "expiry_date": {
+        {
+          "path":["org.iso.18013.5.1","expiry_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -89,7 +82,8 @@
             }
           ]
         },
-        "issuing_country": {
+        {
+          "path":["org.iso.18013.5.1","issuing_country"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -99,7 +93,8 @@
             }
           ]
         },
-        "issuing_authority": {
+        {
+          "path":["org.iso.18013.5.1","issuing_authority"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -109,7 +104,8 @@
             }
           ]
         },
-        "document_number": {
+        {
+          "path":["org.iso.18013.5.1","document_number"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -119,7 +115,8 @@
               "locale": "en"            }
           ]
         },
-        "portrait": {
+        {
+          "path":["org.iso.18013.5.1","portrait"],
           "mandatory": true,
           "value_type":"jpeg",
           "source":"user",
@@ -129,7 +126,8 @@
               "locale": "en"            }
           ]
         },
-        "driving_privileges": {
+        {
+          "path":["org.iso.18013.5.1","driving_privileges"],
           "mandatory": true,
           "value_type":"driving_privileges",
           "source":"user",
@@ -139,7 +137,8 @@
               "locale": "en"            }
           ]
         },
-        "un_distinguishing_sign": {
+        {
+          "path":["org.iso.18013.5.1","un_distinguishing_sign"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -149,7 +148,8 @@
             }
           ]
         },
-        "administrative_number": {
+        {
+          "path":["org.iso.18013.5.1","administrative_number"],
           "mandatory": false,
           "source":"issuer",
           "display": [
@@ -159,7 +159,8 @@
             }
           ]
         },
-        "sex": {
+        {
+          "path":["org.iso.18013.5.1","sex"],
           "mandatory": false,
           "source":"user",
           "value_type":"uint",
@@ -170,7 +171,8 @@
             }
           ]
         },
-        "height": {
+        {
+          "path":["org.iso.18013.5.1","height"],
           "mandatory": false,
           "source":"user",
           "value_type":"uint",
@@ -181,7 +183,8 @@
             }
           ]
         },
-        "weight": {
+        {
+          "path":["org.iso.18013.5.1","weight"],
           "mandatory": false,
           "source":"user",
           "value_type":"uint",
@@ -192,7 +195,8 @@
             }
           ]
         },
-        "eye_colour": {
+        {
+          "path":["org.iso.18013.5.1","eye_colour"],
           "mandatory": false,
           "source":"user",
           "value_type":"string",
@@ -203,7 +207,8 @@
             }
           ]
         },
-        "hair_colour": {
+        {
+          "path":["org.iso.18013.5.1","hair_colour"],
           "mandatory": false,
           "source":"user",
           "value_type":"string",
@@ -214,7 +219,8 @@
             }
           ]
         },
-        "birth_place": {
+        {
+          "path":["org.iso.18013.5.1","birth_place"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -225,7 +231,8 @@
             }
           ]
         },
-        "resident_address": {
+        {
+          "path":["org.iso.18013.5.1","resident_address"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -236,7 +243,8 @@
             }
           ]
         },
-        "portrait_capture_date": {
+        {
+          "path":["org.iso.18013.5.1","portrait_capture_date"],
           "mandatory": false,
           "value_type":"full-date",
           "source":"user",
@@ -247,7 +255,8 @@
             }
           ]
         },
-        "age_in_years": {
+        {
+          "path":["org.iso.18013.5.1","age_in_years"],
           "mandatory": false,
           "value_type":"uint",
           "source":"user",
@@ -258,7 +267,8 @@
             }
           ]
         },
-        "age_birth_year": {
+        {
+          "path":["org.iso.18013.5.1","age_birth_year"],
           "mandatory": false,
           "value_type":"uint",
           "source":"user",
@@ -269,7 +279,8 @@
             }
           ]
         },
-        "age_over_18": {
+        {
+          "path":["org.iso.18013.5.1","age_over_18"],
           "mandatory": false,
           "source":"issuer",
           "display": [
@@ -279,7 +290,8 @@
             }
           ]
         },
-        "Issuing jurisdiction": {
+        {
+          "path":["org.iso.18013.5.1","issuing_jurisdiction"],
           "mandatory": false,
           "display": [
             {
@@ -288,7 +300,8 @@
             }
           ]
         },
-        "nationality": {
+        {
+          "path":["org.iso.18013.5.1","nationality"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -299,7 +312,8 @@
             }
           ]
         },
-        "resident_city": {
+        {
+          "path":["org.iso.18013.5.1","resident_city"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -310,7 +324,8 @@
             }
           ]
         },
-        "resident_state": {
+        {
+          "path":["org.iso.18013.5.1","resident_state"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -321,7 +336,8 @@
             }
           ]
         },
-        "resident_postal_code": {
+        {
+          "path":["org.iso.18013.5.1","resident_postal_code"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -332,7 +348,8 @@
             }
           ]
         },
-        "resident_country": {
+        {
+          "path":["org.iso.18013.5.1","resident_country"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -343,7 +360,8 @@
             }
           ]
         },
-        "biometric_template_xx": {
+        {
+          "path":["org.iso.18013.5.1","biometric_template_xx"],
           "mandatory": false,
           "display": [
             {
@@ -352,7 +370,8 @@
             }
           ]
         },
-        "family_name_national_character": {
+        {
+          "path":["org.iso.18013.5.1","family_name_national_character"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -363,7 +382,8 @@
             }
           ]
         },
-        "given_name_national_character": {
+        {
+          "path":["org.iso.18013.5.1","given_name_national_character"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -374,7 +394,8 @@
             }
           ]
         },
-        "signature_usual_mark": {
+        {
+          "path":["org.iso.18013.5.1","signature_usual_mark"],
           "mandatory": false,
           "display": [
             {
@@ -383,7 +404,7 @@
             }
           ]
         }
-      }
-    }
+      
+    ]
   }
 }

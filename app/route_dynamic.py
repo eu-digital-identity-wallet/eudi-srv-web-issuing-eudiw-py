@@ -189,91 +189,13 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
+        print("\nCredentials_requested: ", session["credentials_requested"])
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
-        """ attributesForm2 = {
-            "health_insurance_id": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "patient_id": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "tax_number": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "one_time_token": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "places_of_work": {
-                "type": "list",
-                "cardinality": {"min": 1, "max": 1},
-                "filled_value": None,
-                "mandatory": False,
-                "attributes": [
-                    {
-                        "attribute": "place_of_work",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["no_fixed_place"],
-                        },
-                        "street": {"type": "string", "filled_value": None, "mandatory": False},
-                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
-                    },
-                    {
-                        "attribute": "no_fixed_place",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["place_of_work"],
-                        },
-                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
-                    },
-                    {
-                        "attribute": "some_place",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "random_item": {"type": "full-date", "filled_value": None, "mandatory": False},
-                    }
-                ],
-            },
-            "legislation": {
-                "type": "list",
-                "cardinality": {"min": 1, "max": 1},
-                "filled_value": None,
-                "mandatory": True,
-                "attributes": [
-                    {
-                        "member_state": {"type": "string", "filled_value": None, "mandatory": False},
-                        "starting_date": {"type": "full_date", "filled_value": None, "mandatory": False},
-                    },
-                ],
-            },
-            "at_least_one_of":[
-                "health_insurance_id",
-                "patient_id",
-                "tax_number",
-                "one_time_token"
-            ]
-            
-        } """
-
-        
 
         print("\nAttributes form1: ", attributesForm)
         print("\nAttributes form2: ", attributesForm2)

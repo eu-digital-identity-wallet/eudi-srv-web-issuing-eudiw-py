@@ -24,17 +24,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -47,9 +36,9 @@
         }
       }
     ],
-    "claims": {
-      "org.iso.18013.5.reservation.1": {
-        "booking_service_name": {
+    "claims": [
+        {
+          "path":["org.iso.18013.5.reservation.1","booking_service_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -59,7 +48,8 @@
               "locale": "en"            }
           ]
         },
-        "reservation_id": {
+        {
+          "path":["org.iso.18013.5.reservation.1","reservation_id"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -69,7 +59,8 @@
               "locale": "en"            }
           ]
         },
-        "reservation_date": {
+        {
+          "path":["org.iso.18013.5.reservation.1","reservation_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -79,7 +70,8 @@
               "locale": "en"            }
           ]
         },
-        "service_provider_name": {
+        {
+          "path":["org.iso.18013.5.reservation.1","service_provider_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -89,7 +81,8 @@
               "locale": "en"            }
           ]
         },
-        "location": {
+        {
+          "path":["org.iso.18013.5.reservation.1","location"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -99,7 +92,8 @@
               "locale": "en"            }
           ]
         },
-        "check_in_date": {
+        {
+          "path":["org.iso.18013.5.reservation.1","check_in_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -109,7 +103,8 @@
               "locale": "en"            }
           ]
         },
-        "check_out_date": {
+        {
+          "path":["org.iso.18013.5.reservation.1","check_out_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -119,7 +114,8 @@
               "locale": "en"            }
           ]
         },
-        "guests": {
+        {
+          "path":["org.iso.18013.5.reservation.1","guests"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -129,7 +125,8 @@
               "locale": "en"            }
           ]
         },
-        "car_rental": {
+        {
+          "path":["org.iso.18013.5.reservation.1","car_rental"],
           "mandatory": true,
           "value_type":"bool",
           "source":"user",
@@ -139,7 +136,8 @@
               "locale": "en"            }
           ]
         },
-        "num_of_rooms": {
+        {
+          "path":["org.iso.18013.5.reservation.1","num_of_rooms"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -149,7 +147,8 @@
               "locale": "en"            }
           ]
         },
-        "family_name": {
+        {
+          "path":["org.iso.18013.5.reservation.1","family_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -159,7 +158,8 @@
               "locale": "en"            }
           ]
         },
-        "given_name": {
+        {
+          "path":["org.iso.18013.5.reservation.1","given_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -169,7 +169,8 @@
               "locale": "en"            }
           ]
         },
-        "birth_date": {
+        {
+          "path":["org.iso.18013.5.reservation.1","birth_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -179,7 +180,6 @@
               "locale": "en"            }
           ]
         }
-      }
-    }
+    ]
   }
 }

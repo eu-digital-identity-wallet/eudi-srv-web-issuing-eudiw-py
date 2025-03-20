@@ -47,9 +47,9 @@
         }
       }
     ],
-    "claims": {
-      "eu.europa.ec.eudi.msisdn.1": {
-        "phone_number": {
+    "claims": [
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","phone_number"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -59,7 +59,8 @@
               "locale": "en"            }
           ]
         },
-        "registered_family_name": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","registered_family_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -69,7 +70,8 @@
               "locale": "en"            }
           ]
         },
-        "registered_given_name": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","registered_given_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -79,7 +81,8 @@
               "locale": "en"            }
           ]
         },
-        "contract_owner": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","contract_owner"],
           "mandatory": true,
           "value_type":"bool",
           "source":"user",
@@ -89,7 +92,8 @@
               "locale": "en"            }
           ]
         },
-        "end_user": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","end_user"],
           "mandatory": true,
           "value_type":"bool",
           "source":"user",
@@ -99,7 +103,8 @@
               "locale": "en"            }
           ]
         },
-        "mobile_operator": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","mobile_operator"],
           "mandatory": true,
           "value_type":"string",
           "source":"Mobile Operator",
@@ -109,7 +114,8 @@
               "locale": "en"            }
           ]
         },
-        "issuance_date": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","issuance_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -119,7 +125,8 @@
             }
           ]
         },
-        "expiry_date": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","expiry_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -129,7 +136,8 @@
             }
           ]
         },
-        "credential_type": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","credential_type"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -139,7 +147,8 @@
             }
           ]
         },
-        "issuing_organization": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","issuing_organization"],
           "mandatory": true,
           "value_type":"string",
           "source":"issuer",
@@ -149,7 +158,8 @@
               "locale": "en"            }
           ]
         },
-        "phone_number_in_use": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","phone_number_in_use"],
           "mandatory": false,
           "value_type":"uint",
           "source":"user",
@@ -159,7 +169,8 @@
               "locale": "en"            }
           ]
         },
-        "document_number": {
+        {
+          "path":["eu.europa.ec.eudi.msisdn.1","document_number"],
           "mandatory": false,
           "display": [
             {
@@ -167,7 +178,7 @@
               "locale": "en"            }
           ]
         }
-      }
-    }
+      
+    ]
   }
 }

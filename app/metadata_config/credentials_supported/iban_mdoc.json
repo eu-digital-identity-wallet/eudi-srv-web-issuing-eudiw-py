@@ -24,17 +24,6 @@
           "proof_signing_alg_values_supported": [
             "ES256"
           ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
         }
       },
       "display": [
@@ -47,9 +36,9 @@
           }
         }
       ],
-      "claims": {
-        "eu.europa.ec.eudi.iban.1": {
-          "iban": {
+      "claims": [
+         {
+            "path":["eu.europa.ec.eudi.iban.1","iban"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -59,7 +48,8 @@
                 "locale": "en"            }
             ]
           },
-          "national_account_number": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","national_account_number"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -69,7 +59,8 @@
                 "locale": "en"            }
             ]
           },
-          "account_product": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","account_product"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -79,7 +70,8 @@
                 "locale": "en"            }
             ]
           },
-          "account_name": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","account_name"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -89,7 +81,8 @@
                 "locale": "en"            }
             ]
           },
-          "account_type": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","account_type"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -99,7 +92,8 @@
                 "locale": "en"            }
             ]
           },
-          "currency": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","currency"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -109,7 +103,8 @@
                 "locale": "en"            }
             ]
           },
-          "bank_account_status": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","bank_account_status"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -119,7 +114,8 @@
                 "locale": "en"            }
             ]
           },
-          "payment_possibility": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","payment_possibility"],
             "mandatory": true,
             "value_type":"bool",
             "source":"user",
@@ -129,7 +125,8 @@
                 "locale": "en"            }
             ]
           },
-          "registered_family_name": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","registered_family_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -139,7 +136,8 @@
                 "locale": "en"            }
             ]
           },
-          "registered_given_name": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","registered_given_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -149,7 +147,8 @@
                 "locale": "en"            }
             ]
           },
-          "date_of_birth": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","date_of_birth"],
             "mandatory": true,
             "value_type":"full-date",
             "source":"user",
@@ -160,7 +159,8 @@
               }
             ]
           },
-          "account_holder_owner": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","account_holder_owner"],
             "mandatory": true,
             "value_type":"bool",
             "source":"user",
@@ -170,7 +170,8 @@
                 "locale": "en"            }
             ]
           },
-          "coowner": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","coowner"],
             "mandatory": true,
             "value_type":"bool",
             "source":"user",
@@ -180,7 +181,8 @@
                 "locale": "en"            }
             ]
           },
-          "disponent": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","disponent"],
             "mandatory": false,
             "value_type":"bool",
             "display": [
@@ -189,7 +191,8 @@
                 "locale": "en"            }
             ]
           },
-          "issuing_organization": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","issuing_organization"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -199,7 +202,8 @@
                 "locale": "en"            }
             ]
           },
-          "national_bank_code": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","national_bank_code"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -209,7 +213,8 @@
                 "locale": "en"            }
             ]
           },
-          "issuance_date": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -219,7 +224,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -229,7 +235,8 @@
               }
             ]
           },
-          "credential_type": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","credential_type"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -239,7 +246,8 @@
               }
             ]
           },
-          "business_identifier_code": {
+          {
+            "path":["eu.europa.ec.eudi.iban.1","business_identifier_code"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -249,7 +257,7 @@
                 "locale": "en"            }
             ]
           }
-        }
-      }
+      
+      ]
     }
   }

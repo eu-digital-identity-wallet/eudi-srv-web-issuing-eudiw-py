@@ -47,9 +47,9 @@
           }
         }
       ],
-      "claims": {
-        "eu.europa.ec.eudi.tax.1": {
-          "tax_number": {
+      "claims": [
+          {
+            "path":["eu.europa.ec.eudi.tax.1","tax_number"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -59,7 +59,8 @@
                 "locale": "en"            }
             ]
           },
-          "affiliation_country": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","affiliation_country"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -69,7 +70,8 @@
                 "locale": "en"            }
             ]
           },
-          "registered_given_name": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","registered_given_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -79,7 +81,8 @@
                 "locale": "en"            }
             ]
           },
-          "registered_family_name": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","registered_family_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -89,7 +92,8 @@
                 "locale": "en"            }
             ]
           },
-          "resident_address": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","resident_address"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -99,7 +103,8 @@
                 "locale": "en"            }
             ]
           },
-          "birth_date": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","birth_date"],
             "mandatory": true,
             "value_type":"full-date",
             "source":"user",
@@ -110,7 +115,8 @@
               }
             ]
           },
-          "church_tax_ID": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","church_tax_ID"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -121,7 +127,8 @@
               }
             ]
           },
-          "iban": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","iban"],
             "mandatory": false,
             "value_type":"string",
             "source":"user",
@@ -132,7 +139,8 @@
               }
             ]
           },
-          "credential_type": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","credential_type"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -142,7 +150,8 @@
               }
             ]
           },
-          "issuance_date": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -152,7 +161,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -162,7 +172,8 @@
               }
             ]
           },
-          "issuing_authority": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","issuing_authority"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -172,7 +183,8 @@
               }
             ]
           },
-          "issuing_jurisdiction": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","issuing_jurisdiction"],
             "mandatory": false,
             "display": [
               {
@@ -181,7 +193,8 @@
               }
             ]
           },
-          "issuing_country": {
+          {
+            "path":["eu.europa.ec.eudi.tax.1","issuing_country"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -191,7 +204,6 @@
               }
             ]
           }
-        }
-      }
+      ]
     }
   }

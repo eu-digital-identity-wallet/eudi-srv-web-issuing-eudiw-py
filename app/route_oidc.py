@@ -848,12 +848,17 @@ def credential():
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
     if isinstance(_response, Response):
+        if _response.content_type == "application/jwt":
+            response_str = str(_response.get_data())
+        else:
+            response_str = str(json.loads(_response.get_data()))
+
         cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
             + "Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
+            + response_str
         )
         return _response
 
@@ -1049,12 +1054,17 @@ def deferred_credential():
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
     if isinstance(_resp, Response):
+        if _resp.content_type == "application/jwt":
+            response_str = str(_resp.get_data())
+        else:
+            response_str = str(json.loads(_resp.get_data()))
+
         cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
-            + "Deferred response, Payload: "
-            + str(json.loads(_resp.get_data()))
+            + "Credential response, Payload: "
+            + response_str
         )
         return _resp
 
@@ -1259,6 +1269,7 @@ def service_endpoint(endpoint):
             req_args["oidc_config"] = cfgoidc
             req_args["aud"] = cfgservice.service_url[:-1]
             args = endpoint.process_request(req_args)
+
             if "response_args" in args:
                 if "error" in args["response_args"]:
                     return (
@@ -1267,6 +1278,10 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
+            elif "encrypted_response" in args:
+                response = make_response(args["encrypted_response"])
+                response.headers["Content-Type"] = "application/jwt"
+                return response
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
                     cfgservice.app_logger.error("Error response: {}".format(args))
@@ -1340,6 +1355,11 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
+            elif "encrypted_response" in args:
+                response = make_response(args["encrypted_response"])
+                response.headers["Content-Type"] = "application/jwt"
+                return response
+            
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
                     cfgservice.app_logger.error("Error response: {}".format(args))

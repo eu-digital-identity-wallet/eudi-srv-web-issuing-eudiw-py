@@ -13,17 +13,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -37,8 +26,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:iban:1",
-    "claims": {
-      "iban": {
+    "claims": [
+      {
+        "path":["iban"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -48,7 +38,8 @@
             "locale": "en"            }
         ]
       },
-      "national_account_number": {
+      {
+        "path":["national_account_number"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -58,7 +49,8 @@
             "locale": "en"            }
         ]
       },
-      "account_product": {
+      {
+        "path":["account_product"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -68,7 +60,8 @@
             "locale": "en"            }
         ]
       },
-      "account_name": {
+      {
+        "path":["account_name"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -78,7 +71,8 @@
             "locale": "en"            }
         ]
       },
-      "account_type": {
+      {
+        "path":["account_type"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -88,7 +82,8 @@
             "locale": "en"            }
         ]
       },
-      "currency": {
+      {
+        "path":["currency"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -98,7 +93,8 @@
             "locale": "en"            }
         ]
       },
-      "bank_account_status": {
+      {
+        "path":["bank_account_status"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -108,7 +104,8 @@
             "locale": "en"            }
         ]
       },
-      "payment_possibility": {
+      {
+        "path":["payment_possibility"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -118,7 +115,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_family_name": {
+      {
+        "path":["registered_family_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -128,7 +126,8 @@
             "locale": "en"            }
         ]
       },
-      "registered_given_name": {
+      {
+        "path":["registered_given_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -138,7 +137,8 @@
             "locale": "en"            }
         ]
       },
-      "date_of_birth": {
+      {
+        "path":["date_of_birth"],
         "mandatory": true,
         "value_type":"full-date",
         "source":"user",
@@ -149,7 +149,8 @@
           }
         ]
       },
-      "account_holder_owner": {
+      {
+        "path":["account_holder_owner"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -159,7 +160,8 @@
             "locale": "en"            }
         ]
       },
-      "coowner": {
+      {
+        "path":["coowner"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -169,7 +171,8 @@
             "locale": "en"            }
         ]
       },
-      "disponent": {
+      {
+        "path":["disponent"],
         "mandatory": false,
         "value_type":"bool",
         "display": [
@@ -178,7 +181,8 @@
             "locale": "en"            }
         ]
       },
-      "issuing_organization": {
+      {
+        "path":["issuing_organization"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -188,7 +192,8 @@
             "locale": "en"            }
         ]
       },
-      "national_bank_code": {
+      {
+        "path":["national_bank_code"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -198,7 +203,8 @@
             "locale": "en"            }
         ]
       },
-      "issuance_date": {
+      {
+        "path":["issuance_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -208,7 +214,8 @@
           }
         ]
       },
-      "expiry_date": {
+      {
+        "path":["expiry_date"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -218,7 +225,8 @@
           }
         ]
       },
-      "credential_type": {
+      {
+        "path":["credential_type"],
         "mandatory": true,
         "source":"issuer",
         "display": [
@@ -228,7 +236,8 @@
           }
         ]
       },
-      "business_identifier_code": {
+      {
+        "path":["business_identifier_code"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -238,6 +247,6 @@
             "locale": "en"            }
         ]
       }
-    }
+    ]
   }
 }

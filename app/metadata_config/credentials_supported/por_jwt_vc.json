@@ -37,8 +37,9 @@
       }
     ],
     "vct": "urn:eu.europa.ec.eudi:por:1",
-    "claims": {
-      "legal_person_identifier": {
+    "claims": [
+      {
+        "path":["legal_person_identifier"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -48,7 +49,8 @@
             "locale": "en"            }
         ]
       },
-      "legal_name": {
+      {
+        "path":["legal_name"],
         "mandatory": true,
         "value_type":"string",
         "source":"user",
@@ -58,7 +60,8 @@
             "locale": "en"            }
         ]
       },
-      "full_powers": {
+      {
+        "path":["full_powers"],
         "mandatory": true,
         "value_type":"bool",
         "source":"user",
@@ -68,7 +71,8 @@
             "locale": "en"            }
         ]
       },
-      "eService": {
+      {
+        "path":["eService"],
         "mandatory": false,
         "value_type":"string",
         "source":"user",
@@ -78,7 +82,8 @@
             "locale": "en"            }
         ]
       },
-      "effective_from_date": {
+      {
+        "path":["effective_from_date"],
         "mandatory": true,
         "value_type":"full-date",
         "source":"user",
@@ -89,7 +94,8 @@
           }
         ]
       },
-      "effective_until_date": {
+      {
+        "path":["effective_until_date"],
         "mandatory": false,
         "value_type":"full-date",
         "source":"user",
@@ -99,7 +105,8 @@
             "locale": "en"            }
         ]
       },
-      "issuance_date": {
+      {
+        "path":["issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -109,7 +116,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -119,7 +127,8 @@
               }
             ]
           },
-          "issuing_authority": {
+          {
+            "path":["issuing_authority"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -129,7 +138,8 @@
               }
             ]
           },
-          "issuing_jurisdiction": {
+          {
+            "path":["issuing_jurisdiction"],
             "mandatory": false,
             "display": [
               {
@@ -138,7 +148,8 @@
               }
             ]
           },
-          "issuing_country": {
+          {
+            "path":["issuing_country"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -148,6 +159,6 @@
               }
             ]
           }
-    }
+      ]
   }
 }

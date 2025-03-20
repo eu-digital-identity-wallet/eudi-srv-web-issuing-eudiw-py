@@ -24,17 +24,6 @@
         "proof_signing_alg_values_supported": [
           "ES256"
         ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
       }
     },
     "display": [
@@ -47,9 +36,9 @@
         }
       }
     ],
-    "claims": {
-      "eu.europa.ec.eudi.pid.1": {
-        "family_name": {
+    "claims": [
+          {
+          "path":["eu.europa.ec.eudi.pid.1","family_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -59,7 +48,8 @@
               "locale": "en"            }
           ]
         },
-        "given_name": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","given_name"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -69,7 +59,8 @@
               "locale": "en"            }
           ]
         },
-        "birth_date": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","birth_date"],
           "mandatory": true,
           "value_type":"full-date",
           "source":"user",
@@ -79,7 +70,8 @@
               "locale": "en"            }
           ]
         },
-        "age_over_18": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","age_over_18"],
           "mandatory": false,
           "source":"user",
           "value_type":"bool",
@@ -90,7 +82,8 @@
             }
           ]
         },
-        "age_in_years": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","age_in_years"],
           "mandatory": false,
           "value_type":"uint",
           "display": [
@@ -100,7 +93,8 @@
             }
           ]
         },
-        "age_birth_year": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","age_birth_year"],
           "mandatory": false,
           "value_type":"uint",
           "display": [
@@ -110,7 +104,8 @@
             }
           ]
         },
-        "family_name_birth": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","family_name_birth"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -121,7 +116,8 @@
             }
           ]
         },
-        "given_name_birth": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","given_name_birth"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -132,7 +128,8 @@
             }
           ]
         },
-        "birth_place": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","birth_place"],
           "mandatory": true,
           "value_type":"string",
           "source":"user",
@@ -143,7 +140,8 @@
             }
           ]
         },
-        "resident_address": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_address"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -154,7 +152,8 @@
             }
           ]
         },
-        "resident_country": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_country"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -165,7 +164,8 @@
             }
           ]
         },
-        "resident_state": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_state"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -176,7 +176,8 @@
             }
           ]
         },
-        "resident_city": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_city"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -187,7 +188,8 @@
             }
           ]
         },
-        "resident_postal_code": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_postal_code"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -198,7 +200,8 @@
             }
           ]
         },
-        "resident_street": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_street"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -209,7 +212,8 @@
             }
           ]
         },
-        "resident_house_number": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","resident_house_number"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -220,7 +224,8 @@
             }
           ]
         },
-        "personal_administrative_number": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","personal_administrative_number"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -231,7 +236,8 @@
             }
           ]
         },
-        "sex": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","sex"],
           "mandatory": false,
           "source":"user",
           "value_type":"uint",
@@ -242,7 +248,8 @@
             }
           ]
         },
-        "email_address": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","email_address"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -253,7 +260,8 @@
             }
           ]
         },
-        "mobile_phone_number": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","mobile_phone_number"],
           "mandatory": false,
           "value_type":"string",
           "source":"user",
@@ -264,7 +272,8 @@
             }
           ]
         },
-        "nationality": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","nationality"],
           "mandatory": true,
           "source":"user",
           "value_type":"nationalities",
@@ -288,7 +297,8 @@
             }
           }
         },
-        "issuance_date": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","issuance_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -298,7 +308,8 @@
             }
           ]
         },
-        "expiry_date": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","expiry_date"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -308,7 +319,8 @@
             }
           ]
         },
-        "issuing_authority": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","issuing_authority"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -318,7 +330,8 @@
             }
           ]
         },
-        "document_number": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","document_number"],
           "mandatory": false,
           "value_type": "string",
           "source": "user",
@@ -329,18 +342,8 @@
             }
           ]
         },
-        "location_status": {
-          "mandatory": false,
-          "value_type": "string",
-          "source": "user",
-          "display": [
-            {
-              "name": "Location Status",
-              "locale": "en"
-            }
-          ]
-        },
-        "trust_anchor": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","trust_anchor"],
           "mandatory": false,
           "value_type": "string",
           "source": "user",
@@ -351,7 +354,8 @@
             }
           ]
         },
-        "issuing_country": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","issuing_country"],
           "mandatory": true,
           "source":"issuer",
           "display": [
@@ -361,7 +365,8 @@
             }
           ]
         },
-        "portrait": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","portrait"],
             "mandatory": false,
             "value_type":"jpeg",
             "source":"user",
@@ -371,7 +376,8 @@
                 "locale": "en"            }
             ]
           },
-        "issuing_jurisdiction": {
+        {
+          "path":["eu.europa.ec.eudi.pid.1","issuing_jurisdiction"],
           "mandatory": false,
           "display": [
             {
@@ -380,7 +386,7 @@
             }
           ]
         }
-      }
-    }
+    
+    ]
   }
 }
