@@ -96,27 +96,6 @@ def getNamespaces(claims):
     print("\nNamespaces", namespaces)
     return namespaces
 
-def getMandatoryAttributes(attributes):
-    """
-    Function to get mandatory attributes from credential
-    """
-
-    attributes_form = []
-    for attribute in attributes:
-        if attributes[attribute]["mandatory"] == True:
-            attributes_form.append(attribute)
-
-    """ attributes_form = {}
-
-    for x, value in enumerate(list(attributes.keys())):
-        attribute_name = list(attributes.keys())[x]
-        attribute_data = attributes.get(attribute_name, {})
-
-        if attribute_data["mandatory"] == True:    
-            attributes_form.update({attribute_name}) """
-
-    return attributes_form
-
 
 def getAttributesForm(credentials_requested):
     """
@@ -129,13 +108,16 @@ def getAttributesForm(credentials_requested):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     attributes = {}
+    print("\ncredentials_requested: ", credentials_requested)
+    
     for request in credentials_requested:
         format = credentialsSupported[request]["format"]
 
-        namescapes = getNamespaces(credentialsSupported[request]["claims"])
         attributes_req = {}
+        print("\nFormat misc: ", format)
 
         if format == "mso_mdoc":
+            namescapes = getNamespaces(credentialsSupported[request]["claims"])
             for namescape in namescapes:
                 attributes_req = getMandatoryAttributes(
                     credentialsSupported[request]["claims"],namescape
@@ -143,7 +125,7 @@ def getAttributesForm(credentials_requested):
 
         elif format == "vc+sd-jwt":
             attributes_req.update(
-                getMandatoryAttributes(credentialsSupported[request]["claims"])
+                getMandatoryAttributesSDJWT(credentialsSupported[request]["claims"])
             )
 
         print("\n attributes_req: ", attributes_req)
@@ -234,6 +216,335 @@ def getMandatoryAttributes(claims, namespace):
     print("\nMandatory attributes: ", attributes_form)
     return attributes_form
 
+def getMandatoryAttributesSDJWT(claims):
+    """
+    Function to get mandatory attributes from credential in sd-jwt vc format
+    """
+    print("\nClaims: ", claims)
+    print("\nlen Claims: ", len(claims))
+    attributes_form = {}
+
+    level1_claims = []
+    level2_claims = []
+    level3_claims = []
+
+    for claim in claims:
+        if "overall_issuer_conditions" in claim:
+            for key,value in claim["overall_issuer_conditions"].items():
+                attributes_form.update({key:value})
+
+        
+        claim_depth = len(claim["path"])
+        print("\nClaim path: ", claim["path"])
+
+        if claim_depth == 1:
+            if claim["mandatory"] == True:
+                level1_claims.append(claim)
+        elif claim_depth == 2:
+            level2_claims.append(claim)
+        elif claim_depth == 3:
+            level3_claims.append(claim)
+
+    print("\nlevel1_claims: ", level1_claims)
+    print("\nlevel2_claims: ", level2_claims)
+    print("\nlevel3_claims: ", level3_claims)
+    
+
+    for claim in level1_claims:
+        attribute_name = claim["path"][0]
+
+        print("\nMisc attribute_name: ", attribute_name)
+
+        if "value_type" in claim:
+            attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+
+        if "issuer_conditions" in claim:
+            if "cardinality" in claim["issuer_conditions"]:
+                attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
+
+    print("\nAttributes_form1: ", attributes_form)
+
+    for claim in level2_claims:  
+        attributes = {}
+        attribute_name = claim["path"][0]
+        print("\nMisc attribute_name: ", attribute_name)
+        
+        if attribute_name not in attributes_form:
+            continue
+
+        attributes_form[attribute_name]["type"] = "list"
+        
+        level2_name = claim["path"][1]
+        print("\nMisc level2_name: ", level2_name)
+        attributes[level2_name] = {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]} 
+        
+        if "issuer_conditions" in claim:
+            if "cardinality" in claim["issuer_conditions"]:
+                attributes["cardinality"] = claim["issuer_conditions"]["cardinality"]
+            if "not_used_if" in claim["issuer_conditions"]:
+                attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
+            
+            print("\nIssuer_conditions: ", attributes)
+        
+        if "attributes" in attributes_form[attribute_name]:
+            print("\n1")
+            if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
+                print("\n2")
+                attributes_form[attribute_name]["attributes"].append(attributes)
+            else:
+                print("\n3")
+                attributes_form[attribute_name]["attributes"][0].update(attributes)
+        else:
+            print("\n4")
+            attributes_form[attribute_name]["attributes"] = [attributes]
+
+    print("\nAttributes_form2: ", attributes_form)
+
+    for claim in level3_claims: 
+
+        attribute_name = claim["path"][0]
+        print("\nMisc attribute_name: ", attribute_name)
+
+        if attribute_name not in attributes_form:
+            continue
+
+        level2_name = claim["path"][1]
+        print("\nMisc level2_name: ", level2_name)
+        
+
+        level3_name = claim["path"][2]
+        print("\nMisc level3_name: ", level3_name)
+        
+
+        attributes = {}
+
+        for attribute in attributes_form[attribute_name]["attributes"]:
+            if level2_name in attribute:
+                attribute.update({
+                    "attribute": level2_name,
+                    level3_name : {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]}
+                })
+                attribute.pop(level2_name)
+
+                if "cardinality" in attribute:
+                    attribute["cardinality"] = attribute["cardinality"]
+                if "not_used_if" in attribute:
+                    attribute["not_used_if"] = attribute["not_used_if"]
+
+            elif "attribute" in attribute:
+                attribute.update({
+                    level3_name : {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]}
+                })
+    
+    print("\nattributes_form: ", attributes_form)
+    return attributes_form
+
+
+def getOptionalAttributesSDJWT(claims):
+    """
+    Function to get optional attributes from credential in sd-jwt vc format
+    """
+    attributes_form = {}
+
+    level1_claims = []
+    level2_claims = []
+    level3_claims = []
+
+    for claim in claims:
+        if "overall_issuer_conditions" in claim:
+            for key,value in claim["overall_issuer_conditions"].items():
+                attributes_form.update({key:value})
+
+        
+        claim_depth = len(claim["path"])
+
+        if claim_depth == 1:
+            if claim["mandatory"] == False:
+                level1_claims.append(claim)
+        elif claim_depth == 2:
+            level2_claims.append(claim)
+        elif claim_depth == 3:
+            level3_claims.append(claim)
+    
+
+    for claim in level1_claims:
+        attribute_name = claim["path"][0]
+
+        if "value_type" in claim:
+            attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+
+        if "issuer_conditions" in claim:
+            if "cardinality" in claim["issuer_conditions"]:
+                attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
+
+    for claim in level2_claims:  
+        attributes = {}
+        attribute_name = claim["path"][0]
+        
+        if attribute_name not in attributes_form:
+            continue
+        
+        attributes_form[attribute_name]["type"] = "list"
+
+        level2_name = claim["path"][1]
+        attributes[level2_name] = {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]} 
+        
+
+        if "issuer_conditions" in claim:
+            if "cardinality" in claim["issuer_conditions"]:
+                attributes["cardinality"] = claim["issuer_conditions"]["cardinality"]
+            if "not_used_if" in claim["issuer_conditions"]:
+                attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
+            
+            print("\nIssuer_conditions: ", attributes)
+        
+        if "attributes" in attributes_form[attribute_name]:
+            if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
+                attributes_form[attribute_name]["attributes"].append(attributes)
+            else:
+                attributes_form[attribute_name]["attributes"][0].update(attributes)
+        else:
+            attributes_form[attribute_name]["attributes"] = [attributes]
+
+    for claim in level3_claims: 
+
+        attribute_name = claim["path"][0]
+
+        if attribute_name not in attributes_form:
+            continue
+
+        level2_name = claim["path"][1]
+
+        level3_name = claim["path"][2]
+        
+
+        attributes = {}
+
+        for attribute in attributes_form[attribute_name]["attributes"]:
+            if level2_name in attribute:
+                attribute.update({
+                    "attribute": level2_name,
+                    level3_name : {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]}
+                })
+                attribute.pop(level2_name)
+
+                if "cardinality" in attribute:
+                    attribute["cardinality"] = attribute["cardinality"]
+                if "not_used_if" in attribute:
+                    attribute["not_used_if"] = attribute["not_used_if"]
+
+            elif "attribute" in attribute:
+                attribute.update({
+                    level3_name : {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]}
+                })
+
+    return attributes_form
+
+
+    """ for claim in claims:
+        
+        if "overall_issuer_conditions" in claim:
+            for key,value in claim["issuer_conditions"].items():
+                attributes_form.update({key:value})
+        
+        elif claim["mandatory"] == True:
+            
+            claim_depth = len(claim["path"])
+
+            if claim_depth == 1:
+                attribute_name = claim["path"][0]
+
+                print("\nMisc attribute_name: ", attribute_name)
+
+                if "value_type" in claim:
+                    attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+
+                if "issuer_conditions" in claim:
+                    if "cardinality" in claim["issuer_conditions"]:
+                        attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
+            
+            elif claim_depth == 2:
+                attributes = {}
+                attribute_name = claim["path"][0]
+                print("\nMisc attribute_name: ", attribute_name)
+
+                level2_name = claim["path"][1]
+                print("\nMisc level2_name: ", level2_name)
+                attributes[level2_name] = {"mandatory":claim["mandatory"],"value_type":claim["value_type"],"source":claim["source"]} 
+                
+                if "issuer_conditions" in claim:
+                    if "cardinality" in claim["issuer_conditions"]:
+                        attributes["cardinality"] = claim["issuer_conditions"]["cardinality"]
+                    if "not_used_if" in claim["issuer_conditions"]:
+                        attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
+
+                attributes_form[attribute_name]["attributes"] = [attributes]
+                
+            elif claim_depth == 3:
+                attributes = {}
+                attribute_name = claim["path"][0]
+                print("\nMisc attribute_name: ", attribute_name)
+
+                level2_name = claim["path"][1]
+                print("\nMisc level2_name: ", level2_name)
+
+                level3_name = claim["path"][2]
+                print("\nMisc level3_name: ", level3_name) 
+
+
+
+            if "issuer_conditions" in claim:
+                attributes_form[attribute_name]["type"] = "list"
+
+                if "cardinality" in claim["issuer_conditions"]:
+                    attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
+                
+                if claim["value_type"] in claim["issuer_conditions"]:
+                    #print("\n[]: ", attribute_data["issuer_conditions"])
+                    #print("\nValue Type: ", attribute_data["value_type"])
+                    #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
+                    nested_attributes = {}
+                    nested_attributes_list = []
+
+                    #print("[]", type(attribute_data["issuer_conditions"][attribute_data["value_type"]]))
+
+                    for key, value in claim["issuer_conditions"][claim["value_type"]].items():
+                        print("\nKey_misc: ", key)
+                        #print("\nValue: ", value)
+
+                        if "issuer_conditions" not in value:
+                            nested_attributes[key] = value
+                        
+                        else:
+                            
+                            attributes_append = {"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}
+                           # attributes.append[{"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}]
+
+                            for key2,value2 in value["issuer_conditions"][value["value_type"]].items():
+                                attributes_append[key2] = value2
+
+                                print("\nKey2", key2)
+
+                            if "not_used_if" in value["issuer_conditions"]:
+                                attributes_append["not_used_if"] = value["issuer_conditions"]["not_used_if"]
+
+                            #print("\nattributes_append: ", attributes_append)
+                            nested_attributes_list.append(attributes_append)
+
+                            
+
+                    #print("\nnested_attributes_list: ", nested_attributes_list)
+                    #print("\nnested_attributes: ", nested_attributes)
+                    nested_attributes_list.append(nested_attributes)
+
+                    attributes_form[attribute_name]["attributes"] = nested_attributes_list """
+
+            
+
+            
+    print("\nMandatory attributes: ", attributes_form)
+    return attributes_form
+
 def getAttributesForm2(credentials_requested):
     """
     Function to get attributes needed to populate form depending credentials requested by user
@@ -247,11 +558,10 @@ def getAttributesForm2(credentials_requested):
     attributes = {}
     for request in credentials_requested:
         format = credentialsSupported[request]["format"]
-        namescapes = getNamespaces(credentialsSupported[request]["claims"])
         attributes_req = {}
 
         if format == "mso_mdoc":
-
+            namescapes = getNamespaces(credentialsSupported[request]["claims"])
             for namescape in namescapes:
                 attributes_req = getOptionalAttributes(
                     credentialsSupported[request]["claims"],namescape
@@ -259,7 +569,7 @@ def getAttributesForm2(credentials_requested):
 
         elif format == "vc+sd-jwt":
             attributes_req.update(
-                getOptionalAttributes(credentialsSupported[request]["claims"])
+                getOptionalAttributesSDJWT(credentialsSupported[request]["claims"])
             )
 
         for attribute in attributes_req:
@@ -357,6 +667,19 @@ def getIssuerFilledAttributes(claims, namespace):
     print("\nIssuer attributes: ", attributes_form)
     return attributes_form
 
+def getIssuerFilledAttributesSDJWT(claims):
+    """
+    Function to get mandatory attributes from credential
+    """
+
+    attributes_form = {}
+
+    for claim in claims:
+        if "source" in claim and claim["source"] == "issuer":
+            attributes_form.update({claim["path"][0]:""})
+
+    print("\nIssuer attributes: ", attributes_form)
+    return attributes_form
 
 def generate_unique_id():
     """Function to generate a random uuid"""
@@ -381,6 +704,18 @@ def validate_image(file):
         return False, "Failed to open image."
 
     return True, None
+
+#Searches for credential metadata from doctype and format
+def doctype2credential(doctype,format):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential_id, credential in credentialsSupported.items():
+        if credential["format"] != format or credential["scope"] != doctype:
+            continue
+        else:
+            print("\nmisc Credential_ID: ", credential_id)
+            print("\nmisc format: ", format)
+            print("\nmisc doctype: ", doctype)
+            return credential
 
 def vct2scope(vct: str):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]

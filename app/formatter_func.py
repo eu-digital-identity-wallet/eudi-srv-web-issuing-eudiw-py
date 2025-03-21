@@ -211,11 +211,11 @@ def sdjwtFormatter(PID, country):
     seed = int(hash_object.hexdigest(), 16)
     doctype = PID["doctype"]
     if doctype == "org.iso.18013.5.1.mDL":
-        PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
+        PID_Claims_data = PID["data"]["claims"]
         iat = DatestringFormatter(PID_Claims_data["issue_date"])
         PID_Claims_data.pop("issue_date")
     else :
-        PID_Claims_data = PID["data"]["claims"][doctype]
+        PID_Claims_data = PID["data"]["claims"]
         iat = DatestringFormatter(PID_Claims_data["issuance_date"])
         PID_Claims_data.pop("issuance_date")
 
@@ -266,10 +266,11 @@ def sdjwtFormatter(PID, country):
 
     JWT_PID_DATA = {}
 
-    for x, value in enumerate(list(pid_data["claims"].keys())):
-        namespace = list(pid_data["claims"].keys())[x]
-        PID_DATA = pid_data["claims"].get(namespace, {})
-        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
+    #for x, value in enumerate(list(pid_data["claims"].keys())):
+
+        #namespace = list(pid_data["claims"].keys())[x]
+    PID_DATA = pid_data["claims"]
+    JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
 
     datafinal.update(JWT_PID_DATA)
 
