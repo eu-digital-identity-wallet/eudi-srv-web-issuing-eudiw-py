@@ -123,7 +123,7 @@ def getAttributesForm(credentials_requested):
                     credentialsSupported[request]["claims"],namescape
                 )
 
-        elif format == "vc+sd-jwt":
+        elif format == "dc+sd-jwt":
             attributes_req.update(
                 getMandatoryAttributesSDJWT(credentialsSupported[request]["claims"])
             )
@@ -252,13 +252,18 @@ def getMandatoryAttributesSDJWT(claims):
 
     for claim in level1_claims:
         attribute_name = claim["path"][0]
+        if attribute_name == "nationality":
+            
+            attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+            attributes_form[attribute_name]["cardinality"] = {'min': 0,'max': 'n'}
+            attributes_form[attribute_name]["attributes"] = [{'country_code': {'mandatory': True,'value_type': 'string','source': 'user'}}]
 
         print("\nMisc attribute_name: ", attribute_name)
 
-        if "value_type" in claim:
+        if "value_type" in claim and attribute_name != "nationality":
             attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
 
-        if "issuer_conditions" in claim:
+        if "issuer_conditions" in claim and attribute_name != "nationality":
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
 
@@ -369,11 +374,16 @@ def getOptionalAttributesSDJWT(claims):
 
     for claim in level1_claims:
         attribute_name = claim["path"][0]
+        if attribute_name == "nationality":
+            
+            attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
+            attributes_form[attribute_name]["cardinality"] = {'min': 0,'max': 'n'}
+            attributes_form[attribute_name]["attributes"] = [{'country_code': {'mandatory': True,'value_type': 'string','source': 'user'}}]
 
-        if "value_type" in claim:
+        if "value_type" in claim and attribute_name != "nationality":
             attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
 
-        if "issuer_conditions" in claim:
+        if "issuer_conditions" in claim and attribute_name != "nationality":
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
 
@@ -567,7 +577,7 @@ def getAttributesForm2(credentials_requested):
                     credentialsSupported[request]["claims"],namescape
                 )
 
-        elif format == "vc+sd-jwt":
+        elif format == "dc+sd-jwt":
             attributes_req.update(
                 getOptionalAttributesSDJWT(credentialsSupported[request]["claims"])
             )
@@ -705,6 +715,21 @@ def validate_image(file):
 
     return True, None
 
+def getSubClaims(claimLv1, vct):
+    subclaims = []
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential_id, credential in credentialsSupported.items():
+        if "vct" not in credential or credential["vct"] != vct:
+            continue
+        else:
+            for claim in credential["claims"]:
+                if claim["path"][0] != claimLv1:
+                    continue
+                else:
+                    subclaims.append(claim["path"])
+    return subclaims
+
+
 #Searches for credential metadata from doctype and format
 def doctype2credential(doctype,format):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -722,6 +747,12 @@ def vct2scope(vct: str):
     for credential in credentialsSupported:
         if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["vct"] == vct:
             return credentialsSupported[credential]["scope"]
+        
+def vct2id(vct):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential in credentialsSupported:
+        if "vct" in credentialsSupported[credential] and credentialsSupported[credential]["vct"] == vct:
+            return credential
 
 def doctype2vct(doctype: str):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]

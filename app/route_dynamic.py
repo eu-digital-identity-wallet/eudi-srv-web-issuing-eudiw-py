@@ -59,6 +59,7 @@ from misc import (
     scope2details,
     calculate_age,
     validate_image,
+    vct2id,
     vct2scope,
 )
 from dynamic_func import dynamic_formatter
@@ -90,6 +91,8 @@ def Supported_Countries():
         )
 
     authorization_params = session["authorization_params"]
+    print("\nauthorization_params: ", authorization_params)
+
     authorization_details = []
     if "authorization_details" in authorization_params:
         authorization_details.extend(
@@ -114,9 +117,11 @@ def Supported_Countries():
                 credentials_requested.append(cred["credential_configuration_id"])
         elif "vct" in cred:
             if cred["vct"] not in credentials_requested:
-                credentials_requested.append(cred["vct"])
+                credentials_requested.append(vct2id(cred["vct"]))
 
     session["credentials_requested"] = credentials_requested
+
+    print("\ncredentials_requested: ", credentials_requested)
 
     display_countries = {}
     for country in cfgcountries.supported_countries:
@@ -128,7 +133,8 @@ def Supported_Countries():
             display_countries.update(
                 {str(country): str(cfgcountries.supported_countries[country]["name"])}
             )
-
+    
+    print("\ndisplay_countries: ", display_countries)
     form_keys = request.form.keys()
     form_country = request.form.get("country")
 
@@ -753,6 +759,8 @@ def credentialCreation(credential_request, data, country):
 
     for proof in credential_request["proofs"]:
 
+        print("\ndynamic_route credential_request: ", credential_request)
+
         if "credential_identifier" in credential_request:
             doctype = credentials_supported[credential_request["credential_identifier"]][
                 "scope"
@@ -784,7 +792,7 @@ def credentialCreation(credential_request, data, country):
             format = credential["format"]
             doctype = credential["doctype"] """
         
-
+        print("\ndynamic_route format: ", format)
         
         if "jwt" in proof:
             device_publickey = proof["jwt"]

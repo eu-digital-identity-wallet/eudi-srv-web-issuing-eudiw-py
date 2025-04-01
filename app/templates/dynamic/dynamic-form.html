@@ -202,6 +202,7 @@
                                                                     <div class="form-group">
 
                                                                         {% for sub_name, sub_attr in option.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
+                                                                        
                                                                             {% set input_type = 'date' if sub_attr.value_type == "full-date" else 'text' %}
                                                                             {% if input_type == "date" %}
                                                                                 {{ sub_name | replace('_', ' ') | title }}
@@ -412,7 +413,7 @@
                                                         {% if attr.filled_value %}
                                                             {% for index, item in enumerate(attr.filled_value) if item.attribute == option.attribute %}
                                                                 <div class="list-item form-group">
-                                                                    <div class="row">
+                                                                    <div class="row">list
                                                                         {% for sub_name, sub_attr in item.items() if sub_name != "attribute" and sub_name != "cardinality" and sub_name != "not_used_if" %}
                                                                             <div class="col-md-12">
                                                                                 <input type="text" class="form-control" placeholder="{{ sub_name }}" 
@@ -450,10 +451,33 @@
                                                                             {% if input_type == "date" %}
                                                                                 {{ sub_name | replace('_', ' ') | title }}
                                                                             {% endif %}
-                                                                            <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
-                                                                                    name="{{ name }}[0][{{ sub_name }}]" 
-                                                                                    value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
-                                                                                    {% if sub_attr.mandatory %} required {% endif %}>
+
+                                                                            {% if sub_attr.value_type == "bool" %}
+                                                                                <div class="row g-3">
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="{{ name }}">{{ sub_name | replace('_', ' ') | title }}</label>
+                                                                                        <div class="inline-checkbox-group">
+                                                                                            <label class="radio-inline">
+                                                                                                <input type="radio" id="{{ name }}[0][{{ sub_name }}]_unset" name="{{ name }}[0][{{ sub_name }}]" value="unset" {% if sub_attr.filled_value is none %} checked {% endif %}>
+                                                                                                Unset
+                                                                                            </label>
+                                                                                            <label class="radio-inline">
+                                                                                                <input type="radio" id="{{ name }}[0][{{ sub_name }}]_true" name="{{ name }}[0][{{ sub_name }}]" value="true" {% if sub_attr.filled_value == true %} checked {% endif %}>
+                                                                                                True
+                                                                                            </label>
+                                                                                            <label class="radio-inline">
+                                                                                                <input type="radio" id="{{ name }}[0][{{ sub_name }}]_false" name="{{ name }}[0][{{ sub_name }}]" value="false" {% if sub_attr.filled_value == false %} checked {% endif %}>
+                                                                                                False
+                                                                                            </label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% else %}
+                                                                                <input type="{{ input_type }}" class="form-control" placeholder="{{ sub_name | replace('_', ' ') | title }}" aria-label="{{ sub_name | replace('_', ' ') | title }}" 
+                                                                                        name="{{ name }}[0][{{ sub_name }}]" 
+                                                                                        value="{{ sub_attr.filled_value if sub_attr.filled_value is not none else '' }}"
+                                                                                        {% if sub_attr.mandatory %} required {% endif %}>
+                                                                            {% endif %}
                                                                         {% endfor %}
 
                                                                     </div>

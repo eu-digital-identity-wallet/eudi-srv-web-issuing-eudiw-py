@@ -1,6 +1,6 @@
 {
   "eu.europa.ec.eudi.pid_jwt_vc_json": {
-    "format": "vc+sd-jwt",
+    "format": "dc+sd-jwt",
     "scope": "eu.europa.ec.eudi.pid.1",
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"
@@ -61,7 +61,25 @@
         ]
       },
       {
-        "path":["age_over_18"],
+        "path":["age_equal_or_over"],
+        "mandatory": false,
+        "source":"user",
+        "value_type":"18_test",
+        "display": [
+          {
+            "name": "Age Over 18",
+            "locale": "en"
+          }
+        ],
+        "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              }
+           }
+      },
+      {
+        "path":["age_equal_or_over","18"],
         "mandatory": false,
         "source":"user",
         "value_type":"bool",
@@ -266,7 +284,7 @@
         "path":["nationality"],
         "mandatory": true,
         "source":"user",
-        "value_type":"nationalities",
+        "value_type":"list",
         "display": [
           {
             "name": "Nationality",

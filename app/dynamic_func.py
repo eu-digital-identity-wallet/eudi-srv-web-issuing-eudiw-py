@@ -47,7 +47,7 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     if format == "mso_mdoc":
         url = cfgserv.service_url + "formatter/cbor"
 
-    elif format == "vc+sd-jwt":
+    elif format == "dc+sd-jwt":
         url = cfgserv.service_url + "formatter/sd-jwt"
 
     r = json_post(
@@ -67,7 +67,7 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     if format == "mso_mdoc":
         mdoc = bytes(r["mdoc"], "utf-8")
         credential = mdoc.decode("utf-8")
-    elif format == "vc+sd-jwt":
+    elif format == "dc+sd-jwt":
         credential = r["sd-jwt"]
 
     return credential
@@ -101,7 +101,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
             pdata = {namescape: {}}
 
-    elif format == "vc+sd-jwt":
+    elif format == "dc+sd-jwt":
         pdata = {
             "evidence": [
                 {
@@ -238,7 +238,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         #print("\npdata_namespace: ", pdata[namescape])
         
 
-    elif format == "vc+sd-jwt":
+    elif format == "dc+sd-jwt":
         print("\nattributes_req", attributes_req)
         for attribute in attributes_req:
             pdata["claims"].update({attribute: data[attribute]})

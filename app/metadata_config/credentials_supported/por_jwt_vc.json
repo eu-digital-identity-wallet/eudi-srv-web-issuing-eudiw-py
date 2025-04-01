@@ -1,6 +1,6 @@
 {
   "eu.europa.ec.eudi.por_sd_jwt_vc": {
-    "format": "vc+sd-jwt",
+    "format": "dc+sd-jwt",
     "scope": "eu.europa.ec.eudi.por.1",
     "cryptographic_binding_methods_supported": [
       "jwk", "cose_key"

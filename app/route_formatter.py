@@ -221,7 +221,7 @@ def sd_jwtformatter():
 
     if PID["doctype"] == "org.iso.18013.5.1.mDL":
         (b, l) = validate_mandatory_args(
-            PID["data"]["claims"]["org.iso.18013.5.1"],
+            PID["data"]["claims"],
             [
                 "family_name",
                 "given_name",
@@ -239,7 +239,7 @@ def sd_jwtformatter():
 
     if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
-            PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"],
+            PID["data"]["claims"],
             ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
         )
     if not b:  # nota all mandatory args are present

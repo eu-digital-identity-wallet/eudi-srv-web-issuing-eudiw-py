@@ -43,7 +43,7 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
-from misc import doctype2vct
+from misc import doctype2vct, getSubClaims
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
@@ -196,6 +196,55 @@ def cbor2elems(mdoc):
         d[n] = l
     return d
 
+def sdjwtNestedClaims(claims,vct):
+    print("\nClaims: ", claims)
+    print("\nvct: ", vct)
+    nestedDict = {}
+    #for claim in claims:
+        #print("\nClaim: ", claim)
+        #subClaims = getSubClaims(claim,vct)
+        #print("\nsubClaims: ", subClaims)
+
+    for claim, value in claims.items():
+        print("\nClaim: ", claim)
+        print("\nvalue: ", value)
+        if isinstance(value, list) and claim != "nationality":
+            subClaims = []
+            for element in value:
+                if isinstance(element,dict):
+                    subClaimsElement = {}
+                    for attribute, value2 in element.items():
+                        subClaimsElement.update({SDObj(value=attribute):value2})
+                subClaims.append(subClaimsElement)
+
+            nestedDict.update({SDObj(value=claim):subClaims})
+
+
+        else:
+            nestedDict.update({SDObj(value=claim):value})
+
+    return nestedDict
+
+    """ for subClaim in subClaims:
+        if len(subClaim) == 1 and SDObj(value=subClaim[0]) not in nestedDict:
+            nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
+
+        elif  len(subClaim) == 2:
+            path1 = subClaim[0]
+            path2 = subClaim[1]
+
+            if SDObj(value=subClaim[0]) not in nestedDict:
+                nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
+
+            if isinstance(claims[subClaim[0]], list):
+                for element in claims[subClaim[0]]:
+
+
+
+        
+        elif  len(subClaim) == 3: """
+            
+
 
 def sdjwtFormatter(PID, country):
     """Construct sd-jwt with the country private key
@@ -270,11 +319,20 @@ def sdjwtFormatter(PID, country):
 
         #namespace = list(pid_data["claims"].keys())[x]
     PID_DATA = pid_data["claims"]
-    JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
+    
+    #print("\nsdjwtNestedClaims: ",sdjwtNestedClaims(pid_data["claims"],vct))
+
+    #JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
+
+    print("\nold_data: ", DATA_sd_jwt(PID_DATA))
+
+    JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"],vct))
 
     datafinal.update(JWT_PID_DATA)
 
     claims.update(datafinal)
+
+    print("\nClaims: ", claims)
 
     with open(
         cfgcountries.supported_countries[country]["pid_mdoc_cert"], "rb"
@@ -322,6 +380,9 @@ def sdjwtFormatter(PID, country):
         },
         "holder_key": {
             "kty": "EC",
+            "d": jwt.utils.base64url_encode(
+                priv_d.to_bytes((priv_d.bit_length() + 7) // 8, "big")
+            ).decode("utf-8"),
             "crv": public_key_curve_identifier,
             "x": jwt.utils.base64url_encode(public_key_x).decode("utf-8"),
             "y": jwt.utils.base64url_encode(public_key_y).decode("utf-8"),
@@ -334,7 +395,7 @@ def sdjwtFormatter(PID, country):
 
     ### Produce SD-JWT and SVC for selected example
     SDJWTIssuer.unsafe_randomness = False
-    SDJWTIssuer.SD_JWT_HEADER="vc+sd-jwt"
+    SDJWTIssuer.SD_JWT_HEADER="dc+sd-jwt"
     sdjwt_at_issuer = SDJWTIssuer(
         claims,
         keys["issuer_key"],

@@ -1092,7 +1092,7 @@ def credential_offer():
     for cred in credentialsSupported:
         credential = credentialsSupported[cred]
 
-        if credential["format"] == "vc+sd-jwt":
+        if credential["format"] == "dc+sd-jwt":
             # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
             if (
                 cred in cfgservice.auth_method_supported_credencials["PID_login"]
