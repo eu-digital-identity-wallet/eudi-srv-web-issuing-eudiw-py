@@ -207,10 +207,33 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 json_priv = json.loads(data["competent_institution"])
                 data.update({"competent_institution": json_priv})
 
+            if "credential_holder" in attributes_req and isinstance(data["credential_holder"],list):
+                data.update({"credential_holder": data["credential_holder"][0]})
+
+            if "credential_holder" in attributes_req2 and isinstance(data["credential_holder"],list):
+                data.update({"credential_holder": data["credential_holder"][0]})
+
+            if "subject" in attributes_req and isinstance(data["subject"],list):
+                data.update({"subject": data["subject"][0]})
+
+            if "subject" in attributes_req2 and isinstance(data["subject"],list):
+                data.update({"subject": data["subject"][0]})
+
+            if "competent_institution" in attributes_req and isinstance(data["competent_institution"],list):
+                data.update({"competent_institution": data["competent_institution"][0]})
+
+            if "competent_institution" in attributes_req2 and isinstance(data["competent_institution"],list):
+                data.update({"competent_institution": data["competent_institution"][0]})
+
+            if "legislation" in attributes_req and isinstance(data["legislation"],list):
+                data.update({"legislation": data["legislation"][0]})
+
+            if "legislation" in attributes_req2 and isinstance(data["legislation"],list):
+                data.update({"legislation": data["legislation"][0]})
             
             if "at_least_one_of" in attributes_req2:
                         attributes_req2.pop("at_least_one_of")
-                        
+            
             if "credential_holder" in attributes_req2 and not isinstance(data["credential_holder"],list):
                 json_priv = json.loads(data["credential_holder"])
                 data.update({"credential_holder": json_priv})

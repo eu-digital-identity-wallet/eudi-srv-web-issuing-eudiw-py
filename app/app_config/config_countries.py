@@ -85,6 +85,8 @@ class ConfCountries:
                 "eu.europa.ec.eudi.iban_sd_jwt_vc",
                 "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
                 "eu.europa.ec.eudi.ehic_mdoc",
+                "eu.europa.ec.eudi.ehic_sd_jwt_vc",
+                "eu.europa.ec.eudi.pda1_sd_jwt_vc"
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },

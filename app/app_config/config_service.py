@@ -147,6 +147,9 @@ class ConfService:
         "resident_postal_code": "address.postal_code",
         "resident_street": "address.street_address",
         "resident_house_number": "address.house_number",
+        "portrait":"picture",
+        "mobile_phone_number":"phone_number",
+        "email_address":"email"
     }
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {
@@ -399,6 +402,8 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_sd_jwt_vc",
             "eu.europa.ec.eudi.iban_sd_jwt_vc",
             "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
+            "eu.europa.ec.eudi.pda1_sd_jwt_vc",
+            "eu.europa.ec.eudi.ehic_sd_jwt_vc"
         ],
     }
 
