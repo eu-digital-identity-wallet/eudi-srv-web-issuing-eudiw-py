@@ -63,7 +63,7 @@ import werkzeug
 
 from idpyoidc.server.exception import FailedAuthentication, ClientAuthenticationError
 from idpyoidc.server.oidc.token import Token
-from app.misc import auth_error_redirect, authentication_error_redirect, scope2details
+from app.misc import auth_error_redirect, authentication_error_redirect, scope2details, vct2id
 
 from datetime import datetime, timedelta
 
@@ -578,9 +578,13 @@ def auth_choice():
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
+
         elif "vct" in cred:
-            if cred["vct"] not in credentials_requested:
-                credentials_requested.append(cred["vct"])
+            cred_id = vct2id(cred["vct"])
+            if cred_id not in credentials_requested:
+                credentials_requested.append(cred_id)
+
+    print("\ncredentials_requested: ", credentials_requested)
 
     for cred in credentials_requested:
         if (
@@ -588,11 +592,22 @@ def auth_choice():
             and cred not in supported_credencials["country_selection"]
         ):
             country_selection = False
+
         elif (
             cred not in supported_credencials["PID_login"]
             and cred in supported_credencials["country_selection"]
         ):
             pid_auth = False
+        
+        elif cred not in supported_credencials["PID_login"] and cred not in supported_credencials["country_selection"]:
+            country_selection = False
+            pid_auth = False
+
+    if country_selection == False and pid_auth == True:
+        return redirect(cfgservice.service_url + "oid4vp")
+    elif country_selection == True and pid_auth == False:
+        return redirect(cfgservice.service_url + "dynamic/")
+
 
     error = ""
     if pid_auth == False and country_selection == False:

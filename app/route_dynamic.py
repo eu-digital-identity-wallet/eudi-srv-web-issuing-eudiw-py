@@ -135,6 +135,16 @@ def Supported_Countries():
             )
     
     print("\ndisplay_countries: ", display_countries)
+
+    if len(display_countries) == 1:
+        country = next(iter(display_countries))
+
+        session["returnURL"] = cfgserv.OpenID_first_endpoint
+        session["country"] = country
+        cfgserv.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + country)
+        return dynamic_R1(session["country"])
+
+
     form_keys = request.form.keys()
     form_country = request.form.get("country")
 
