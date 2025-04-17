@@ -108,3 +108,18 @@ _05 Mar 2025_
 
 ### Fixed
 - Status code on oauth2 PAR is 200 should be 201
+
+## [0.7.2]
+
+_15 Apr 2025_
+### Changed
+- oid4vp presentation_id to transaction_id
+
+### Fixed
+- EHIC and PDA1 not appearing in credential offer selection
+- Some PID sd-jwt vc attribure identifiers
+- PDA1 and EHIC formatting
+- Remove padding from mdoc base64 url encode
+- Fix jwk coordinate padding
+- remove location_status from PID mdoc
+

@@ -329,17 +329,6 @@
             }
           ]
         },
-        "location_status": {
-          "mandatory": false,
-          "value_type": "string",
-          "source": "user",
-          "display": [
-            {
-              "name": "Location Status",
-              "locale": "en"
-            }
-          ]
-        },
         "trust_anchor": {
           "mandatory": false,
           "value_type": "string",

@@ -181,7 +181,7 @@ def openid4vp():
         "openid/pid_login_qr_code.html",
         url_data=deeplink_url,
         qrcode=qr_img_base64,
-        presentation_id=response_cross["presentation_id"],
+        presentation_id=response_cross["transaction_id"],
         redirect_url= cfgservice.service_url
     )
 
@@ -193,7 +193,7 @@ def getpidoid4vp():
         cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device")
 
         response_code = request.args.get("response_code")
-        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["presentation_id"]
+        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"]["transaction_id"]
         url = (
             cfgservice.dynamic_presentation_url
             + presentation_id

@@ -43,7 +43,7 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
-from misc import doctype2vct
+from misc import doctype2vct, urlsafe_b64encode_nopad
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
@@ -159,7 +159,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
                     
           )
 
-    return base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
+    return urlsafe_b64encode_nopad(mdoci.dump()) #base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
 
 
 def cbor2elems(mdoc):
@@ -427,24 +427,24 @@ def KeyData(key, type):
         x = key.public_numbers().x.to_bytes(
             (key.public_numbers().x.bit_length() + 7) // 8,  # Number of bytes needed
             "big",  # Byte order
-        )
+        ).rjust(32, b'\x00')
 
         y = key.public_numbers().y.to_bytes(
             (key.public_numbers().y.bit_length() + 7) // 8,  # Number of bytes needed
             "big",  # Byte order
-        )
+        ).rjust(32, b'\x00')
     else:
         # Extract the x and y coordinates from the public key
         x = key.private_numbers().public_numbers.x.to_bytes(
             (key.private_numbers().public_numbers.x.bit_length() + 7)
             // 8,  # Number of bytes needed
             "big",  # Byte order
-        )
+        ).rjust(32, b'\x00')
 
         y = key.private_numbers().public_numbers.y.to_bytes(
             (key.private_numbers().public_numbers.y.bit_length() + 7)
             // 8,  # Number of bytes needed
             "big",  # Byte order
-        )
+        ).rjust(32, b'\x00')
 
     return (curve_identifier, x, y)

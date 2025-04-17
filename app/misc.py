@@ -22,6 +22,7 @@ Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD
 
 This misc.py file includes different miscellaneous functions.
 """
+import base64
 import datetime
 
 # from app.route_oidc import authentication_error_redirect
@@ -54,6 +55,17 @@ def create_dict(dict, item):
             pass
     return d
 
+def urlsafe_b64encode_nopad(data: bytes) -> str:
+    """
+    Encodes bytes using URL-safe base64 and removes padding.
+    
+    Args:
+        data (bytes): The data to encode.
+
+    Returns:
+        str: Base64 URL-safe encoded string without padding.
+    """
+    return base64.urlsafe_b64encode(data).decode('utf-8').rstrip('=')
 
 def calculate_age(date_of_birth: str):
     """returns the age, based on the date_of_birth
