@@ -369,6 +369,13 @@ class ConfService:
             "organization_name": "Test QEAA issuer",
             "namespace": "eu.europa.ec.eudi.pda1.1",
         },
+        "eu.europa.ec.eudi.cor.1": {
+            "issuing_authority": "Test QEAA issuer",
+            "organization_id": pid_organization_id,
+            "validity": qeaa_validity,
+            "organization_name": "Test QEAA issuer",
+            "namespace": "eu.europa.ec.eudi.cor.1",
+        },
     }
 
     auth_method_supported_credencials = {
@@ -402,7 +409,9 @@ class ConfService:
             "eu.europa.ec.eudi.hiid_sd_jwt_vc",
             "eu.europa.ec.eudi.iban_sd_jwt_vc",
             "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
-        ],
+            "eu.europa.ec.eudi.cor_mdoc",
+            "eu.europa.ec.eudi.pda1_sd_jwt_vc",
+            "eu.europa.ec.eudi.ehic_sd_jwt_vc"         
     }
 
     # eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"

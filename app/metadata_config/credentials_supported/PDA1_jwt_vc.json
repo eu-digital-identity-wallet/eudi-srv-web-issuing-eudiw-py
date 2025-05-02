@@ -701,6 +701,13 @@
               }
            ]
         }
-     ]
+     ],
+     "issuer_config":{
+      "issuing_authority":"Test PID issuer",
+      "organization_id":"EUDI Wallet Reference Implementation",
+      "validity":90,
+      "organization_name":"Test PID issuer",
+      "doctype":"eu.europa.ec.eudi.pda1.1"
+    }
   }
 }

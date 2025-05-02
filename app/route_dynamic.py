@@ -59,6 +59,7 @@ from misc import (
     scope2details,
     calculate_age,
     validate_image,
+    vct2doctype,
     vct2id,
     vct2scope,
 )
@@ -121,7 +122,7 @@ def Supported_Countries():
 
     session["credentials_requested"] = credentials_requested
 
-    print("\ncredentials_requested: ", credentials_requested)
+    print("\nroute dynamic credentials_requested: ", credentials_requested)
 
     display_countries = {}
     for country in cfgcountries.supported_countries:
@@ -205,7 +206,7 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
-        print("\nCredentials_requested: ", session["credentials_requested"])
+        print("\ndynamic_R1 Credentials_requested: ", session["credentials_requested"])
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
@@ -782,7 +783,7 @@ def credentialCreation(credential_request, data, country):
         elif "credential_configuration_id" in credential_request:
 
             if "vct" in credentials_supported[credential_request["credential_configuration_id"]]:
-                doctype = vct2scope(credentials_supported[credential_request["credential_configuration_id"]]["vct"])
+                doctype = vct2doctype(credentials_supported[credential_request["credential_configuration_id"]]["vct"])
             else:
                 doctype = credentials_supported[credential_request["credential_configuration_id"]]["scope"]
 
@@ -1057,7 +1058,7 @@ def Dynamic_form():
 
     for item in grouped:
 
-        if item == "nationality":
+        if item == "nationality" or item == "nationalities":
             #print("\nNationality")
             #print("\nkey: ", item)
             #print("\nvalue: ", grouped[item])
@@ -1143,7 +1144,10 @@ def Dynamic_form():
 
     for credential_requested in session["credentials_requested"]:
         
+        print("\ncredential_requested: ", credential_requested)
+
         scope= credentialsSupported[credential_requested]["scope"]
+        print("\nscope: ", scope)
 
         """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
@@ -1168,7 +1172,12 @@ def Dynamic_form():
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
-        doctype_config=cfgserv.config_doctype[scope]
+        if scope in cfgserv.config_doctype:
+            doctype_config=cfgserv.config_doctype[scope]
+        
+        print("\ncredential\n", credentialsSupported[credential_requested])
+        if "issuer_config" in credentialsSupported[credential_requested]:
+            doctype_config = credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])

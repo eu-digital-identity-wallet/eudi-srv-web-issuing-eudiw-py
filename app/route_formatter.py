@@ -237,7 +237,7 @@ def sd_jwtformatter():
             ],
         )
 
-    if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
+    """   if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
             PID["data"]["claims"],
             ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
@@ -249,7 +249,7 @@ def sd_jwtformatter():
                 "error_message": cfgservice.error_list["401"],
                 "mdoc": "",
             }
-        )
+        ) """
 
     # try:
 

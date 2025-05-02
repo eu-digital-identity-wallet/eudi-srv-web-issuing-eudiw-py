@@ -73,7 +73,7 @@ import requests
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
-from . import oidc_metadata, openid_metadata, oauth_metadata
+from . import oidc_metadata, openid_metadata, oauth_metadata, oidc_metadata_clean
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -237,7 +237,7 @@ def verify_user():
 def well_known(service):
     if service == "openid-credential-issuer":
         info = {
-            "response": oidc_metadata,
+            "response": oidc_metadata_clean,
             "http_headers": [
                 ("Content-type", "application/json; charset=utf-8"),
                 ("Pragma", "no-cache"),
@@ -584,7 +584,7 @@ def auth_choice():
             if cred_id not in credentials_requested:
                 credentials_requested.append(cred_id)
 
-    print("\ncredentials_requested: ", credentials_requested)
+    print("\nauth_choice credentials_requested: ", credentials_requested)
 
     for cred in credentials_requested:
         if (

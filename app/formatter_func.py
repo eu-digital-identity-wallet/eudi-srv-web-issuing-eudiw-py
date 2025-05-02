@@ -199,6 +199,7 @@ def cbor2elems(mdoc):
 def sdjwtNestedClaims(claims,vct):
     print("\nClaims: ", claims)
     print("\nvct: ", vct)
+
     nestedDict = {}
     #for claim in claims:
         #print("\nClaim: ", claim)
@@ -208,21 +209,31 @@ def sdjwtNestedClaims(claims,vct):
     for claim, value in claims.items():
         print("\nClaim: ", claim)
         print("\nvalue: ", value)
-        if isinstance(value, list) and claim != "nationality":
+        if isinstance(value, list) and claim != "nationalities" and len(value) > 1:
             subClaims = []
             for element in value:
                 if isinstance(element,dict):
                     subClaimsElement = {}
                     for attribute, value2 in element.items():
                         subClaimsElement.update({SDObj(value=attribute):value2})
+
                 subClaims.append(subClaimsElement)
 
             nestedDict.update({SDObj(value=claim):subClaims})
 
+        elif isinstance(value, list) and claim != "nationalities" and len(value) == 1:
+            subClaims = {}
+            for element in value:
+                if isinstance(element,dict):
+                    for attribute, value2 in element.items():
+                        subClaims.update({SDObj(value=attribute):value2})
+
+            nestedDict.update({SDObj(value=claim):subClaims})
 
         else:
             nestedDict.update({SDObj(value=claim):value})
 
+    print("\nNestedDict: ", nestedDict)
     return nestedDict
 
     """ for subClaim in subClaims:
@@ -255,6 +266,8 @@ def sdjwtFormatter(PID, country):
 
     Return: Returns the sd-jwt
     """
+
+    print("\nPID: ", PID)
     hash_object = hashlib.sha256()
 
     seed = int(hash_object.hexdigest(), 16)
@@ -318,13 +331,18 @@ def sdjwtFormatter(PID, country):
     #for x, value in enumerate(list(pid_data["claims"].keys())):
 
         #namespace = list(pid_data["claims"].keys())[x]
-    PID_DATA = pid_data["claims"]
+    #PID_DATA = pid_data["claims"]
     
     #print("\nsdjwtNestedClaims: ",sdjwtNestedClaims(pid_data["claims"],vct))
 
     #JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
 
-    print("\nold_data: ", DATA_sd_jwt(PID_DATA))
+    """ for x, value in enumerate(list(pid_data["claims"].keys())):
+        namespace = list(pid_data["claims"].keys())[x]
+        PID_DATA = pid_data["claims"]
+        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA)) """
+
+    #print("\nold_data: ", DATA_sd_jwt(PID_DATA))
 
     JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"],vct))
 
@@ -417,6 +435,7 @@ def DATA_sd_jwt(PID):
     age_equal_or_over={}
     place_of_birth={}
     address_dict={}
+    print("\nPID2: ", PID)
     for i in PID:
         if i in cfgservice.Registered_claims:
 
@@ -445,6 +464,7 @@ def DATA_sd_jwt(PID):
     if age_equal_or_over:
             data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
             Data.update(data)
+
     if place_of_birth:
             data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
             Data.update(data)

@@ -20,7 +20,7 @@ import json
 from flask import session
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from misc import calculate_age, doctype2credential, getIssuerFilledAttributes, getIssuerFilledAttributesSDJWT, getMandatoryAttributes, getMandatoryAttributesSDJWT, getNamespaces, getOptionalAttributes, getOptionalAttributesSDJWT
+from misc import calculate_age, doctype2credential, doctype2credentialSDJWT, getIssuerFilledAttributes, getIssuerFilledAttributesSDJWT, getMandatoryAttributes, getMandatoryAttributesSDJWT, getNamespaces, getOptionalAttributes, getOptionalAttributesSDJWT
 from redirect_func import json_post
 import base64
 from flask import session
@@ -76,14 +76,13 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
 def formatter(data, un_distinguishing_sign, doctype, format):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     today = datetime.date.today()
-    
-    requested_credential = doctype2credential(doctype, format)
 
     doctype_config = cfgserv.config_doctype[doctype]
 
     expiry = today + datetime.timedelta(days=doctype_config["validity"])
 
     if format == "mso_mdoc":
+        requested_credential = doctype2credential(doctype, format)
         namescapes = getNamespaces(requested_credential["claims"])
         for namescape in namescapes:
             #print("\nNamespace: ", namescape)
@@ -102,6 +101,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             pdata = {namescape: {}}
 
     elif format == "dc+sd-jwt":
+        requested_credential = doctype2credentialSDJWT(doctype, format)
+        
         pdata = {
             "evidence": [
                 {
@@ -143,6 +144,10 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 )
             }
         )
+
+    if "age_over_18" in data:
+        attributes_req2.update({"age_over_18":data["age_over_18"]})
+
     
     if "un_distinguishing_sign" in issuer_claims:
         data.update({"un_distinguishing_sign": un_distinguishing_sign})
