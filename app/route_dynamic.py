@@ -135,8 +135,6 @@ def Supported_Countries():
                 {str(country): str(cfgcountries.supported_countries[country]["name"])}
             )
     
-    print("\ndisplay_countries: ", display_countries)
-
     if len(display_countries) == 1:
         country = next(iter(display_countries))
 
@@ -521,7 +519,7 @@ def red():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
 
-        doctype_config=cfgserv.config_doctype[scope]
+        doctype_config=credential["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
@@ -1171,9 +1169,6 @@ def Dynamic_form():
             
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
-
-        if scope in cfgserv.config_doctype:
-            doctype_config=cfgserv.config_doctype[scope]
         
         print("\ncredential\n", credentialsSupported[credential_requested])
         if "issuer_config" in credentialsSupported[credential_requested]:

@@ -273,11 +273,13 @@ def create_app(test_config=None):
         route_dynamic,
         route_oid4vp,
         preauthorization,
+        revocation
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
+    app.register_blueprint(revocation.revocation)
     app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
     app.register_blueprint(preauthorization.preauth)

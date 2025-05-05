@@ -41,7 +41,7 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     else:
         un_distinguishing_sign = ""
 
-    data = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
+    data, requested_credential = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
     print("\ndynamic_func data: ", data)
     
     if format == "mso_mdoc":
@@ -55,7 +55,7 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
         {
             "version": session["version"],
             "country": session["country"],
-            "doctype": doctype,
+            "credential_metadata": requested_credential,
             "device_publickey": device_publickey,
             "data": data,
         },
@@ -77,12 +77,13 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     today = datetime.date.today()
 
-    doctype_config = cfgserv.config_doctype[doctype]
-
-    expiry = today + datetime.timedelta(days=doctype_config["validity"])
-
     if format == "mso_mdoc":
         requested_credential = doctype2credential(doctype, format)
+        
+        doctype_config = requested_credential["issuer_config"]
+
+        expiry = today + datetime.timedelta(days=doctype_config["validity"])
+
         namescapes = getNamespaces(requested_credential["claims"])
         for namescape in namescapes:
             #print("\nNamespace: ", namescape)
@@ -102,6 +103,10 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
     elif format == "dc+sd-jwt":
         requested_credential = doctype2credentialSDJWT(doctype, format)
+
+        doctype_config = requested_credential["issuer_config"]
+
+        expiry = today + datetime.timedelta(days=doctype_config["validity"])
         
         pdata = {
             "evidence": [
@@ -282,4 +287,4 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 pdata["claims"].update({attribute: data[attribute]})
 
 
-    return pdata
+    return pdata, requested_credential

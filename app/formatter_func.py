@@ -49,12 +49,12 @@ from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
 
 
-def mdocFormatter(data, doctype, country, device_publickey):
+def mdocFormatter(data, credential_metadata, country, device_publickey):
     """Construct and sign the mdoc with the country private key
 
     Keyword arguments:
     + data -- doctype data "dictionary" with one or more "namespace": {"namespace data and fields"} tuples
-    + doctype -- mdoc doctype
+    + credential_metadata -- metadata
     + country -- Issuing country
     + device_publickey -- Holder's device public key
 
@@ -75,7 +75,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
     priv_d = private_key.private_numbers().private_value
     
     issuance_date = datetime.datetime.today()
-    expiry_date = issuance_date + datetime.timedelta(days=cfgservice.config_doctype[doctype]["validity"])
+    expiry_date = issuance_date + datetime.timedelta(days=credential_metadata["issuer_config"]["validity"])
 
     validity = {
         "issuance_date": issuance_date.strftime('%Y-%m-%d'),
@@ -114,7 +114,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
             "expiry_date": data[first_key]["expiry_date"],
         } """
     
-    namespace = cfgservice.config_doctype[doctype]["namespace"]
+    namespace = credential_metadata["issuer_config"]["namespace"]
 
     if "portrait" in data[namespace]:
         data[namespace]["portrait"] = base64.urlsafe_b64decode(
@@ -122,7 +122,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         )
 
     if "user_pseudonym" in data[namespace]:
-        data[doctype]["user_pseudonym"] = data[doctype]["user_pseudonym"].encode('utf-8')
+        data[credential_metadata["doctype"]]["user_pseudonym"] = data[credential_metadata["doctype"]]["user_pseudonym"].encode('utf-8')
 
     # Construct the COSE private key
     cose_pkey = {
@@ -138,7 +138,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     revocation_json = None
     if revocation_api_key:
-        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
+        payload = "doctype=" + credential_metadata["doctype"] + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
         headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Api-Key': revocation_api_key
@@ -150,7 +150,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
             revocation_json = response.json()
 
     mdoci.new(
-        doctype=doctype,
+        doctype=credential_metadata["doctype"],
         data=data,
         validity=validity,
         devicekeyinfo=device_publickey,
