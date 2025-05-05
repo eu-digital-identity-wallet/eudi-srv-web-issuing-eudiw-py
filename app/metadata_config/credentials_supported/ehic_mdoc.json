@@ -2,7 +2,7 @@
   "eu.europa.ec.eudi.ehic_mdoc":{
      "format":"mso_mdoc",
      "doctype":"eu.europa.ec.eudi.ehic.1",
-     "scope":"eu.europa.ec.eudi.ehic.1",
+     "scope":"eu.europa.ec.eudi.ehic_mdoc",
      "policy":{
         "batch_size":50,
         "one_time_use":true
@@ -268,6 +268,13 @@
               }
            ]
         }
-     ]
+     ],
+     "issuer_config":{
+            "issuing_authority":"Test PID issuer",
+            "organization_id":"EUDI Wallet Reference Implementation",
+            "validity":90,
+            "organization_name":"Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.ehic.1"
+        }
   }
 }

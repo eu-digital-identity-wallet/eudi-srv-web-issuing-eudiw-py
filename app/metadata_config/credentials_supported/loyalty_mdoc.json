@@ -2,7 +2,7 @@
   "eu.europa.ec.eudi.loyalty_mdoc": {
       "format": "mso_mdoc",
       "doctype": "eu.europa.ec.eudi.loyalty.1",
-      "scope": "eu.europa.ec.eudi.loyalty.1",
+      "scope": "eu.europa.ec.eudi.loyalty_mdoc",
       "cryptographic_binding_methods_supported": [
         "jwk", "cose_key"
       ],
@@ -94,6 +94,13 @@
               }
             ]
           }
-      ]
+      ],
+      "issuer_config":{
+            "issuing_authority":"Test PID issuer",
+            "organization_id":"EUDI Wallet Reference Implementation",
+            "validity":90,
+            "organization_name":"Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.loyalty.1"
+        }
     }
   }
