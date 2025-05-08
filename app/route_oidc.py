@@ -875,7 +875,7 @@ def credential():
         )
         return _response
 
-    if (
+    """ if (
         "transaction_id" in _response
         and _response["transaction_id"] not in deferredRequests
     ):
@@ -901,7 +901,7 @@ def credential():
             + str(_response)
         )
 
-        return make_response(jsonify(_response), 202)
+        return make_response(jsonify(_response), 202) """
 
     cfgservice.app_logger.info(
         ", Session ID: "
@@ -910,76 +910,6 @@ def credential():
         + "Credential response, Payload: "
         + str(_response)
     )
-    return _response
-
-
-@oidc.route("/batch_credential", methods=["POST"])
-def batchCredential():
-
-    headers = dict(request.headers)
-    payload = json.loads(request.data)
-
-    if "Authorization" not in headers:
-        return make_response("Authorization error", 400)
-
-    access_token = headers["Authorization"][7:]
-    session_id = getSessionId_accessToken(access_token)
-
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch Credential Request, Payload: "
-        + str(payload)
-    )
-
-    _response = service_endpoint(current_app.server.get_endpoint("credential"))
-
-    if isinstance(_response, Response):
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
-        )
-        return _response
-
-    if (
-        "transaction_id" in _response
-        and _response["transaction_id"] not in deferredRequests
-    ):
-
-        request_data = request.data
-        request_headers = dict(request.headers)
-        deferredRequests.update(
-            {
-                _response["transaction_id"]: {
-                    "data": request_data,
-                    "headers": request_headers,
-                    "expires": datetime.now()
-                    + timedelta(minutes=cfgservice.deffered_expiry),
-                }
-            }
-        )
-
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch credential response, Payload: "
-            + str(_response)
-        )
-        return make_response(jsonify(_response), 202)
-
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch credential response, Payload: "
-        + str(_response)
-    )
-
     return _response
 
 
@@ -1063,6 +993,8 @@ def deferred_credential():
         + "Deferred Credential Request, Payload:, Payload: "
         + str(payload)
     )
+
+    current_app.server.get_endpoint("credential").process_deferred()
 
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
@@ -1289,7 +1221,7 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
-            elif "encrypted_response" in args:
+            if "encrypted_response" in args:
                 response = make_response(args["encrypted_response"])
                 response.headers["Content-Type"] = "application/jwt"
                 return response
@@ -1366,6 +1298,7 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
+            
             elif "encrypted_response" in args:
                 response = make_response(args["encrypted_response"])
                 response.headers["Content-Type"] = "application/jwt"
