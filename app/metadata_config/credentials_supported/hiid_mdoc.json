@@ -310,7 +310,7 @@
            ]
         },
         {
-           "issuer_conditions":{
+           "overall_issuer_conditions":{
               "at_least_one_of":[
                  "health_insurance_id",
                  "patient_id",

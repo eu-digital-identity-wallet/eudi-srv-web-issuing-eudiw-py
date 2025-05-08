@@ -43,7 +43,7 @@
            "path":[
               "health_insurance_id"
            ],
-           "mandatory":true,
+           "mandatory":false,
            "value_type":"string",
            "source":"user",
            "display":[
@@ -57,7 +57,7 @@
            "path":[
               "patient_id"
            ],
-           "mandatory":true,
+           "mandatory":false,
            "value_type":"string",
            "source":"user",
            "display":[
@@ -71,7 +71,7 @@
            "path":[
               "tax_number"
            ],
-           "mandatory":true,
+           "mandatory":false,
            "value_type":"string",
            "source":"user",
            "display":[
@@ -85,7 +85,7 @@
            "path":[
               "one_time_token"
            ],
-           "mandatory":true,
+           "mandatory":false,
            "value_type":"string",
            "source":"user",
            "display":[
@@ -282,7 +282,7 @@
            ]
         },
         {
-           "issuer_conditions":{
+           "overall_issuer_conditions":{
               "at_least_one_of":[
                  "health_insurance_id",
                  "patient_id",

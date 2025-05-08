@@ -1,7 +1,7 @@
 {
   "eu.europa.ec.eudi.photoid":{
      "format":"mso_mdoc",
-     "doctype":"org.iso.23220.photoID.1",
+     "doctype":"org.iso.23220.2.photoid.1",
      "scope":"eu.europa.ec.eudi.photoid",
      "cryptographic_binding_methods_supported":[
         "jwk",
@@ -30,7 +30,7 @@
      "claims":[
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "portrait"
            ],
            "mandatory":true,
@@ -45,7 +45,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "portrait_capture_date"
            ],
            "mandatory":false,
@@ -60,7 +60,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "family_name_unicode"
            ],
            "mandatory":true,
@@ -75,7 +75,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "given_name_unicode"
            ],
            "mandatory":true,
@@ -90,7 +90,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "family_name_latin1"
            ],
            "mandatory":false,
@@ -105,7 +105,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "given_name_latin1"
            ],
            "mandatory":false,
@@ -120,7 +120,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "birth_date"
            ],
            "mandatory":true,
@@ -135,7 +135,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "age_over_18"
            ],
            "mandatory":true,
@@ -149,7 +149,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "age_in_years"
            ],
            "mandatory":false,
@@ -163,7 +163,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "age_birth_year"
            ],
            "mandatory":false,
@@ -177,7 +177,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "birthplace"
            ],
            "mandatory":false,
@@ -192,7 +192,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "name_at_birth"
            ],
            "mandatory":false,
@@ -207,7 +207,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "resident_address_unicode"
            ],
            "mandatory":false,
@@ -222,7 +222,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "resident_city_unicode"
            ],
            "mandatory":false,
@@ -237,7 +237,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "resident_postal_code"
            ],
            "mandatory":false,
@@ -252,7 +252,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "resident_country"
            ],
            "mandatory":false,
@@ -267,7 +267,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "resident_city_latin1"
            ],
            "mandatory":false,
@@ -282,7 +282,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "sex"
            ],
            "mandatory":false,
@@ -296,7 +296,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "nationality"
            ],
            "mandatory":false,
@@ -311,7 +311,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "document_number"
            ],
            "mandatory":false,
@@ -326,7 +326,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "issuing_subdivision"
            ],
            "mandatory":false,
@@ -341,7 +341,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "issuance_date"
            ],
            "mandatory":true,
@@ -355,7 +355,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "expiry_date"
            ],
            "mandatory":true,
@@ -369,7 +369,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "issuing_authority_unicode"
            ],
            "mandatory":true,
@@ -383,7 +383,7 @@
         },
         {
            "path":[
-              "org.iso.23220.1",
+              "org.iso.23220.photoid.1",
               "issuing_country"
            ],
            "mandatory":true,
@@ -401,7 +401,7 @@
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
         "organization_name":"Test PID issuer",
-        "namespace":"org.iso.23220.1"
+        "namespace":"org.iso.23220.photoid.1"
      }
   }
 }

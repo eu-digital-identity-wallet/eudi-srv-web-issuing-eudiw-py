@@ -24,11 +24,11 @@ import uuid
 import cbor2
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 import urllib
-
+from formatter_func import cbor2elems
 import requests
 import segno
 from .app_config.config_service import ConfService as cfgservice
-from app.misc import auth_error_redirect, authentication_error_redirect, scope2details, vct2id
+from app.misc import auth_error_redirect, authentication_error_redirect, scope2details, vct2doctype, vct2id
 from app.validate_vp_token import validate_vp_token
 from . import oidc_metadata, openid_metadata, oauth_metadata, oidc_metadata_clean
 from datetime import datetime, timedelta
@@ -45,13 +45,14 @@ from app.data_management import (
 )
 
 revocation = Blueprint("revocation", __name__, url_prefix="/revocation")
-    
-@revocation.route("revocation_choice", methods=["GET"])
+
+#TODO finish revocation pages.
+""" @revocation.route("revocation_choice", methods=["GET"])
 def revocation_choice():
-    """Page for selecting credentials
+    Page for selecting credentials
 
     Loads credentials supported by EUDIW Issuer
-    """
+   
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     
     credentials = {"sd-jwt vc format": {}, "mdoc format": {}}
@@ -61,25 +62,15 @@ def revocation_choice():
 
         if credential["format"] == "dc+sd-jwt":
             # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
-            if (
-                cred in cfgservice.auth_method_supported_credencials["PID_login"]
-                or cred
-                in cfgservice.auth_method_supported_credencials["country_selection"]
-            ):
-                credentials["sd-jwt vc format"].update(
-                    # {"Personal Identification Data": cred}
-                    {cred: credential["display"][0]["name"]}
-                )
+            credentials["sd-jwt vc format"].update(
+                # {"Personal Identification Data": cred}
+                {cred: credential["display"][0]["name"]}
+            )
 
         if credential["format"] == "mso_mdoc":
-            if (
-                cred in cfgservice.auth_method_supported_credencials["PID_login"]
-                or cred
-                in cfgservice.auth_method_supported_credencials["country_selection"]
-            ):
-                credentials["mdoc format"].update(
-                    {cred: credential["display"][0]["name"]}
-                )
+            credentials["mdoc format"].update(
+                {cred: credential["display"][0]["name"]}
+            )
 
     return render_template(
         "openid/revocation_choice.html",
@@ -95,23 +86,18 @@ def oid4vp_call():
     form.remove("proceed")
     session_id = str(uuid.uuid4())
 
-    authorization_details = []
-    authorization_details.extend(scope2details(form))
-
-    credentials_requested = []
-    for cred in authorization_details:
-        if "credential_configuration_id" in cred:
-            if cred["credential_configuration_id"] not in credentials_requested:
-                credentials_requested.append(cred["credential_configuration_id"])
+    print("\nform: ", form)
 
     input_descriptors = []
 
-    for id in credentials_requested:
+    #print("\nrequested: ", credentials_requested)
+
+    for id in form:
         credential = credentialsSupported[id]
         fields = []
 
         if credential["format"] == "mso_mdoc":
-            id2 = credential["doctype"]
+            doctype = credential["doctype"]
             format = {
                 "mso_mdoc": {
                     "alg": [
@@ -129,42 +115,82 @@ def oid4vp_call():
                     fields.append(
                         {
                         "path": [
-                            "$['" + claim["path"][0] + "']['" + claim["path"][1] + "']"
+                            "$" + "".join(f"['{p}']" for p in claim["path"])
                         ],
                         "intent_to_retain": False
                         }
                     )
+
+            
+            input_descriptors.append(
+                {
+                    "id": doctype,
+                    "format": format,
+                    "name": "EUDI PID",
+                    "purpose": "We need to verify your identity",
+                    "constraints": {
+                    "fields": fields
+                    }
+                }
+            )
                     
         elif credential["format"] == "dc+sd-jwt":
             format = {
-          "vc+sd-jwt": {
-            "sd-jwt_alg_values": [
-              "ES256",
-              "ES384",
-              "ES512"
-            ],
-            "kb-jwt_alg_values": [
-              "RS256",
-              "RS384",
-              "RS512",
-              "ES256",
-              "ES384",
-              "ES512"
-            ]
-          }
-        }
-        
-        input_descriptors.append(
-            {
-                "id": id2,
-                "format": format,
-                "name": "EUDI PID",
-                "purpose": "We need to verify your identity",
-                "constraints": {
-                "fields": fields
+                "vc+sd-jwt": {
+                    "sd-jwt_alg_values": [
+                    "ES256",
+                    "ES384",
+                    "ES512"
+                    ],
+                    "kb-jwt_alg_values": [
+                    "RS256",
+                    "RS384",
+                    "RS512",
+                    "ES256",
+                    "ES384",
+                    "ES512"
+                    ]
                 }
             }
-        )
+        
+
+            fields.append(
+                {
+                    "path": [
+                        "$.vct"
+                    ],
+                    "filter": {
+                        "type": "string",
+                        "const": credentialsSupported[id]["vct"]
+                    }
+                },
+            )
+
+            for claim in credential["claims"]:
+                    if claim["mandatory"] == True:
+                        fields.append(
+                            {
+                                "path": [
+                                    "$." + ".".join(claim["path"])
+                                ],
+                                "intent_to_retain": False
+                            }
+                        )
+            print("\nfields: ", fields)
+
+            input_descriptors.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "format": format,
+                    "name": "EUDI PID",
+                    "purpose": "We need to verify your identity",
+                    "constraints": {
+                    "fields": fields
+                    }
+                }
+            )
+
+            print("\ninput_descriptors: ", input_descriptors)
 
         
 
@@ -227,12 +253,7 @@ def oid4vp_call():
     out = io.BytesIO()
     qrcode.save(out, kind='png', scale=3)
 
-    """ qrcode.to_artistic(
-        background=cfgtest.qr_png,
-        target=out,
-        kind="png",
-        scale=4,
-    ) """
+
     # qrcode.terminal()
     # qr_img_base64 = qrcode.png_data_uri(scale=4)
 
@@ -248,6 +269,44 @@ def oid4vp_call():
         redirect_url= cfgservice.service_url
     )
 
+def b64url_decode(data):
+    padding = '=' * (-len(data) % 4)
+    return base64.urlsafe_b64decode(data + padding)
+
+def decode_sd_jwt(sd_jwt: str):
+    # Split SD-JWT into its parts
+    parts = sd_jwt.split('~')
+    jwt = parts[0]
+    disclosures = parts[1:]
+
+    # JWT parts: header, payload, signature
+    header_b64, payload_b64, signature_b64 = jwt.split('.')
+    
+    header = json.loads(b64url_decode(header_b64))
+    payload = json.loads(b64url_decode(payload_b64))
+    # signature = b64url_decode(signature_b64)  # only if verifying
+
+    print("\nheader: ", header)
+    print("\npayload: ", payload)
+    print("\ndisclosures: ", disclosures)
+    # Decode disclosures
+
+    decoded_disclosures = []
+
+    for disclosure in disclosures:
+        decoded_disclosure = base64.urlsafe_b64decode(disclosure + "==")
+        print("\ndecoded_disclosure", decoded_disclosure)
+        if "." in disclosure:
+            continue
+
+        decoded_disclosures.append(json.loads(decoded_disclosure))
+
+
+    return {
+        "header": header,
+        "payload": payload,
+        "disclosures": decoded_disclosures
+    }
 
 @revocation.route("getoid4vp", methods=["GET", "POST"])
 def oid4vp_get():
@@ -265,7 +324,6 @@ def oid4vp_get():
         )
 
     elif "presentation_id" in request.args:
-        cfgservice.app_logger.info(", Session ID: " + session["session_id"] + ", " + "oid4vp flow: cross_device")
         presentation_id = request.args.get("presentation_id")
 
         url = (
@@ -285,19 +343,55 @@ def oid4vp_get():
 
     response_json = response.json()
 
-    mdoc = response_json["vp_token"][0]
-    mdoc_ver = None
+    print("\nresponse: ", response_json)
 
-    try:
-        mdoc_ver = base64.urlsafe_b64decode(mdoc)
+    credentials = {"dc+sd-jwt":[],
+                   "mso_mdoc": []}
+    resp = {"dc+sd-jwt":[],
+            "mso_mdoc": []}
+    
+    for desc in response_json['presentation_submission']['descriptor_map']:
+        format = desc['format']
+        path = desc['path']
+        index_str = path[path.find('[') + 1:path.find(']')]
+        index = int(index_str)
 
-    except:
-        mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
+        print("\nformat", format)
+        print("\nindex", index)
+        print("\ncredential", response_json["vp_token"][index])
 
-    mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
+        if format == "mso_mdoc":
+            credentials["mso_mdoc"].append(response_json["vp_token"][index])
+        elif format == "vc+sd-jwt":
+            credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
 
-    status = cbor2.loads(mdoc_cbor["documents"][0]["issuerSigned"]["issuerAuth"][2])
 
-    status2 = cbor2.loads(status.value)["status"]
+    for credential in credentials["mso_mdoc"]:
+        mdoc_ver = None
 
-    return status2
+        try:
+            mdoc_ver = base64.urlsafe_b64decode(credential)
+
+        except:
+            mdoc_ver = base64.urlsafe_b64decode(credential + "==")
+
+        mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
+
+        #print("\nDocuments: ", cbor2.loads(mdoc_cbor["documents"]))
+
+        status = cbor2.loads(mdoc_cbor["documents"][0]["issuerSigned"]["issuerAuth"][2])
+
+        status2 = cbor2.loads(status.value)["status"]
+
+        print("\nstatus2: ", status2)
+        #cbor_elements = cbor2elems(credential)
+
+        resp["mso_mdoc"].append(credential)
+
+    for credential in credentials["dc+sd-jwt"]:
+        resp["dc+sd-jwt"].append(decode_sd_jwt(credential)["disclosures"])
+    
+    print("\nresp: ", resp)
+
+    return resp
+ """

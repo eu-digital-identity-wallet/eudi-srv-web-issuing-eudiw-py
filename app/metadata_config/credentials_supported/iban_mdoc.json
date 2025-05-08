@@ -340,7 +340,8 @@
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
         "organization_name":"Test PID issuer",
-        "namespace":"eu.europa.ec.eudi.iban.1"
+        "namespace":"eu.europa.ec.eudi.iban.1",
+        "credential_type": "IBAN"
      }
   }
 }

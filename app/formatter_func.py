@@ -43,7 +43,7 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
-from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad
+from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
@@ -230,6 +230,13 @@ def sdjwtNestedClaims(claims,vct):
 
             nestedDict.update({SDObj(value=claim):subClaims})
 
+        elif isinstance(value, dict):
+            subClaims = {}
+            for attribute, value2 in value.items():
+                subClaims.update({SDObj(value=attribute):value2})
+
+            nestedDict.update({SDObj(value=claim):subClaims})
+
         else:
             nestedDict.update({SDObj(value=claim):value})
 
@@ -268,18 +275,16 @@ def sdjwtFormatter(PID, country):
     """
 
     print("\nPID: ", PID)
+
     hash_object = hashlib.sha256()
 
     seed = int(hash_object.hexdigest(), 16)
-    doctype = PID["doctype"]
-    if doctype == "org.iso.18013.5.1.mDL":
-        PID_Claims_data = PID["data"]["claims"]
-        iat = DatestringFormatter(PID_Claims_data["issue_date"])
-        PID_Claims_data.pop("issue_date")
-    else :
-        PID_Claims_data = PID["data"]["claims"]
-        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-        PID_Claims_data.pop("issuance_date")
+    #doctype = PID["credential_metadata"]["issuer_config"]["doctype"]
+
+    
+    PID_Claims_data = PID["data"]["claims"]
+    iat = DatestringFormatter(PID_Claims_data["issuance_date"])
+    PID_Claims_data.pop("issuance_date")
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 
@@ -292,7 +297,9 @@ def sdjwtFormatter(PID, country):
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
 
-    vct = doctype2vct(doctype)
+    vct = PID["credential_metadata"]["vct"] #doctype2vct(doctype)
+
+    doctype = vct2doctype(vct)
 
     revocation_json = None
 

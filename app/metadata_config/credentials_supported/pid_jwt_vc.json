@@ -1,5 +1,5 @@
 {
-  "eu.europa.ec.eudi.pid_jwt_vc_json":{
+  "eu.europa.ec.eudi.pid_vc_sd_jwt":{
      "format":"dc+sd-jwt",
      "scope":"eu.europa.ec.eudi.pid_vc_sd_jwt",
      "cryptographic_binding_methods_supported":[

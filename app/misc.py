@@ -163,9 +163,9 @@ def getMandatoryAttributes(claims, namespace):
     #for x, value in enumerate(list(attributes.keys())):
 
     for claim in claims:
-        
+        print("\nclaim: ", claim)
         if "overall_issuer_conditions" in claim:
-            for key,value in claim["issuer_conditions"].items():
+            for key,value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key:value})
         
         elif claim["mandatory"] == True and claim["path"][0] == namespace:
@@ -246,16 +246,17 @@ def getMandatoryAttributesSDJWT(claims):
             for key,value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key:value})
 
+        else:
         
-        claim_depth = len(claim["path"])
+            claim_depth = len(claim["path"])
 
-        if claim_depth == 1:
-            if claim["mandatory"] == True:
-                level1_claims.append(claim)
-        elif claim_depth == 2:
-            level2_claims.append(claim)
-        elif claim_depth == 3:
-            level3_claims.append(claim)
+            if claim_depth == 1:
+                if claim["mandatory"] == True:
+                    level1_claims.append(claim)
+            elif claim_depth == 2:
+                level2_claims.append(claim)
+            elif claim_depth == 3:
+                level3_claims.append(claim)
 
     
 
@@ -303,13 +304,10 @@ def getMandatoryAttributesSDJWT(claims):
         if "attributes" in attributes_form[attribute_name]:
             #print("\n1")
             if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
-                p#rint("\n2")
                 attributes_form[attribute_name]["attributes"].append(attributes)
             else:
-                #print("\n3")
                 attributes_form[attribute_name]["attributes"][0].update(attributes)
         else:
-            #print("\n4")
             attributes_form[attribute_name]["attributes"] = [attributes]
 
     #print("\nAttributes_form2: ", attributes_form)
@@ -369,17 +367,17 @@ def getOptionalAttributesSDJWT(claims):
             for key,value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key:value})
 
-        
-        claim_depth = len(claim["path"])
+        else:
+            claim_depth = len(claim["path"])
 
-        if claim_depth == 1:
-            if claim["mandatory"] == False:
-                level1_claims.append(claim)
-        elif claim_depth == 2:
-            level2_claims.append(claim)
-        elif claim_depth == 3:
-            level3_claims.append(claim)
-    
+            if claim_depth == 1:
+                if claim["mandatory"] == False:
+                    level1_claims.append(claim)
+            elif claim_depth == 2:
+                level2_claims.append(claim)
+            elif claim_depth == 3:
+                level3_claims.append(claim)
+        
 
     for claim in level1_claims:
         attribute_name = claim["path"][0]
@@ -610,7 +608,7 @@ def getOptionalAttributes(claims, namespace):
     for claim in claims:
         
         if "overall_issuer_conditions" in claim:
-            for key,value in claim["issuer_conditions"].items():
+            for key,value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key:value})
 
         elif claim["mandatory"] == False and claim["path"][0] == namespace:
