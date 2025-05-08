@@ -1,0 +1,17 @@
+# Batch Credential Request (Post)
+
+**Endpoint**: <https://issuer.eudiw.dev/nonce> (or <https://localhost/nonce> if installed locally)
+
+Request:  
+POST /nonce HTTP/1.1   
+Content-Length: 0
+
+Response:
+
+HTTP/1.1 200 OK  
+Content-Type: application/json  
+```json
+{  
+    "c_nonce": "eyJ0eXBlIjoiY25vbmNlK2p3dCIsImFsZyI6IlJTQS1PQUVQIiwiZW5jIjoiQTI1NkdDTSJ9.I7xww7qgKbBiwN8-WGhx-8TnLWaKwQMbNd5n_dxxhYppwEc7fxnSXWE6r6F77lJmxyk-tgRDXe5EXv1y54z5hZUzXBmbas2IwLMy8Qyoljd_aajpUDlbSY9EpYs5ThdV43IyaJRYd71qA6OLtRD9P4hlEi4igNlJi-zDX_ktkD9dH93bzRJ5rj1zMomLojQsFoZz2KyD-xJ5NUGq4UA47CnZjWcdDfHZZdjx1q2NkmMQXnYoT9CfjC6UVdNFoC2YR9p4BKO8v8KRE3BuP96gAd_VyzyVgEr1HMyuHrGYPSl1g6BzbGMD6u9TZ0C4ArzqRg3feZmSeaHOQxSNaHAuRSFYDoAZ-wSPdVJ0hDL6Jck_I00M0gvKM8sCoLHraF_d76xEQIvsaB7HsFWWwRRpoEtmfMQ_QBSIWaQ3VKgZ6qz58GjSOAa2Sd3zAheatZrZB0rWo0U8IuwoWbFY7s-bLwdhWQsGPaQ3egsW-sedcpH-xT4MxX9y4XJ9Sg3EapJNW3J4caRsqLl036Df16O7sNLjwSThwDIMGN3PJ-GYlT09AYmC117_ZUkXGvvDfe12MlEq9JjI0Fs2NfXAMv13i1uplwwZSzXBljS7eT61HuGATJHSI7iRDZqJSuIyxjQROLAkT0Wa-goi0X70LZ4zaxYhTVaorVH0nyoseECvYrs.rXegqzWABkN1xOKw.BLje0_LTxBr0D3a9zeJO2-M8CK7s5hBjIQjqTDTHBNz4ETcdJGyUzfRZcaBs1yLdX-3gVm4SJebaF8uErEyceYgQeWc_1rcjbyaGSVp6gTYSx6XohaZ-HyUWBvJ91YKOUzLqqsM5EyMKHxq6NbijziJIBARk0ZiD2g_VJUUsDqHdYMlvKJoNUXlVKLU-HVpYWtOqsw63z0j3yPTLyLg0qYB9qTfHZavNIvW5dJYxu2RmzpyyZ7ArmzkD.A064SrBe4UjVT1s8B_tHKw"
+}  
+```

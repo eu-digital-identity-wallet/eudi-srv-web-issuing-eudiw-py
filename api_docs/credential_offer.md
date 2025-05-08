@@ -6,11 +6,11 @@
 
 A form is presented showing the Request Credentials for your EUDI Wallet that can be requested.
 
-![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/3bf05140-2416-44b5-970f-7b1c8bc2525a)
+![image](./images/credential_offer1.png)
 
 After choosing the credential(s) and submitting, a QR code and DeepLink is generated:
 
-![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/368e34fb-7f06-4c99-8c2b-e4601bccfa9e)
+![image](./images/credential_offer2.png)
 
 This generated DeepLink contains information about the credentials chosen in the form.
 

@@ -51,7 +51,6 @@ def redirect_getpid_or_mdl(version, returnURL, error_num: int, l):
     for r, v in l:
         rlist[r] = v
 
-    # print("redirect_getpid: " + url_get(returnURL, rlist))
     return redirect(url_get(returnURL, rlist))
 
 

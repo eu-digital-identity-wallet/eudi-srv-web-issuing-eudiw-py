@@ -92,8 +92,6 @@ def Supported_Countries():
         )
 
     authorization_params = session["authorization_params"]
-    print("\nauthorization_params: ", authorization_params)
-
     authorization_details = []
     if "authorization_details" in authorization_params:
         authorization_details.extend(
@@ -121,8 +119,6 @@ def Supported_Countries():
                 credentials_requested.append(vct2id(cred["vct"]))
 
     session["credentials_requested"] = credentials_requested
-
-    print("\nroute dynamic credentials_requested: ", credentials_requested)
 
     display_countries = {}
     for country in cfgcountries.supported_countries:
@@ -204,16 +200,11 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
-        print("\ndynamic_R1 Credentials_requested: ", session["credentials_requested"])
         attributesForm = getAttributesForm(session["credentials_requested"])
         if "user_pseudonym" in attributesForm:
             attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
-
-
-        print("\nAttributes form1: ", attributesForm)
-        print("\nAttributes form2: ", attributesForm2)
 
         return render_template(
             "dynamic/dynamic-form.html",
@@ -513,8 +504,6 @@ def red():
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
 
-        #print("\ndynamic attributes form: ", attributesForm)
-
         for attribute in data.keys():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
@@ -738,7 +727,6 @@ def dynamic_R2_data_collect(country, user_id):
             if country in birth_places:
                 data["birth_place"] = birth_places[country]
 
-            print("\nopenid data: ", data)
             return data
         except:
             credential_error_resp(
@@ -767,8 +755,6 @@ def credentialCreation(credential_request, data, country):
 
 
     for proof in credential_request["proofs"]:
-
-        print("\ndynamic_route credential_request: ", credential_request)
 
         if "credential_identifier" in credential_request:
             doctype = credentials_supported[credential_request["credential_identifier"]][
@@ -800,9 +786,7 @@ def credentialCreation(credential_request, data, country):
         elif "format" in credential and "doctype" in credential:
             format = credential["format"]
             doctype = credential["doctype"] """
-        
-        print("\ndynamic_route format: ", format)
-        
+                
         if "jwt" in proof:
             device_publickey = proof["jwt"]
 
@@ -941,7 +925,6 @@ def Dynamic_form():
     session["country"] = "FC"
     # if GET
     if request.method == "GET":
-        # print("/pid/form GET: " + str(request.args))
         if (
             session.get("country") is None or session.get("returnURL") is None
         ):  # someone is trying to connect directly to this endpoint
@@ -963,8 +946,6 @@ def Dynamic_form():
 
     form_data = request.form.to_dict()
 
-    #print("\nForm Data: ", form_data)
-
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
@@ -976,12 +957,10 @@ def Dynamic_form():
             continue
         if "option" in key and "on" in value:
             continue
-        #print("\nKey: ", key)
         if '[' not in key and ']' not in key:
             grouped.update({key:value})
         else:
             parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            #print("\nParts: ", parts)
             
             sub_key = ""
             if '-' in key:
@@ -1001,10 +980,6 @@ def Dynamic_form():
                 base_key = parts[0]
                 index = int(parts[1])
                 sub_key = parts[2]
-
-            #print("\nBase Key: : ", base_key)
-            #print("\nSub Key: ", sub_key)
-            #print("\nIndex: ", index)
             
 
             if base_key not in grouped:
@@ -1013,60 +988,21 @@ def Dynamic_form():
                 
 
             else:
-                #print("\n Index in?", index in grouped[base_key])
-                #print("\ntype",type(grouped[base_key]))
                 
                 if len(grouped[base_key]) > int(index):
-                    #print("\n at Index: ", grouped[base_key][index])
                     grouped[base_key][int(index)].update({sub_key:value})
                 else:
                     grouped[base_key].append({sub_key:value})
             
 
-        #print("\nGrouped: ", grouped)
-            
-
-
-    """ for key, value in form_data.items():
-        # Split the key into parts using the pattern '[index]' and '[key]' format
-        # We also account for cases where 'no_fixed_place[1]' exists
-        parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-
-        # The first part is the base group key (e.g. 'credential_holder[0]', 'employment_details[0]')
-        base_key = parts[0]
-
-        # Ensure that the base_key exists in the grouped dictionary
-        current_dict = grouped
-        if base_key not in current_dict:
-            current_dict[base_key] = {}
-
-        # Navigate through the base key and subkeys to add the value
-        for part in parts[1:]:
-            if part not in current_dict[base_key]:
-                current_dict[base_key][part] = {}
-            current_dict = current_dict[base_key][part]
-
-        # Set the value at the final part
-        if len(parts) > 1:
-            current_dict[parts[-1]] = value
-        else:
-            current_dict[base_key] = value
-
-    print("\n grouped:", grouped) """
-
     for item in grouped:
 
         if item == "nationality" or item == "nationalities":
-            #print("\nNationality")
-            #print("\nkey: ", item)
-            #print("\nvalue: ", grouped[item])
 
             if isinstance(grouped[item],list):
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
             else:
                 cleaned_data[item] = grouped[item]
-
-            #print("\n", cleaned_data[item])
             
         elif item == "portrait":
             if grouped[item] == "Port1":
@@ -1142,11 +1078,7 @@ def Dynamic_form():
 
     for credential_requested in session["credentials_requested"]:
         
-        print("\ncredential_requested: ", credential_requested)
-
         scope= credentialsSupported[credential_requested]["scope"]
-        print("\nscope: ", scope)
-
         """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
@@ -1170,7 +1102,6 @@ def Dynamic_form():
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
         
-        print("\ncredential\n", credentialsSupported[credential_requested])
         if "issuer_config" in credentialsSupported[credential_requested]:
             doctype_config = credentialsSupported[credential_requested]["issuer_config"]
 
@@ -1206,7 +1137,6 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
-    #print("\nPresentation_data: ", presentation_data)
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

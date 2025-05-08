@@ -32,8 +32,6 @@ from app import oidc_metadata
 
 def dynamic_formatter(format, doctype, form_data, device_publickey):
 
-    print("\ndynamic_func format: ", format)
-    print("\ndynamic_func form_data: ", form_data)
     if doctype == "org.iso.18013.5.1.mDL":
         un_distinguishing_sign = cfgcountries.supported_countries[session["country"]][
             "un_distinguishing_sign"
@@ -42,7 +40,6 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
         un_distinguishing_sign = ""
 
     data, requested_credential = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
-    print("\ndynamic_func data: ", data)
     
     if format == "mso_mdoc":
         url = cfgserv.service_url + "formatter/cbor"
@@ -86,17 +83,14 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
         namescapes = getNamespaces(requested_credential["claims"])
         for namescape in namescapes:
-            #print("\nNamespace: ", namescape)
             attributes_req = getMandatoryAttributes(
                 requested_credential["claims"], namescape
             )
 
-            #print("\nattributes_req: ", attributes_req)
             attributes_req2 = getOptionalAttributes(
                 requested_credential["claims"], namescape
             )
 
-            #print("\nattributes_req2: ", attributes_req2)
             issuer_claims = getIssuerFilledAttributes(requested_credential["claims"],namescape)                    
 
             pdata = {namescape: {}}
@@ -267,21 +261,16 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         for attribute in issuer_claims:
             if attribute in data:
                 pdata[namescape].update({attribute: data[attribute]})
-        
-        #print("\npdata_namespace: ", pdata[namescape])
-        
+                
 
     elif format == "dc+sd-jwt":
-        print("\nattributes_req", attributes_req)
         for attribute in attributes_req:
             pdata["claims"].update({attribute: data[attribute]})
         
-        print("\nattributes_req2", attributes_req2)
         for attribute in attributes_req2:
             if attribute in data:
                 pdata["claims"].update({attribute: data[attribute]})
 
-        print("\nissuer_claims", issuer_claims)
         for attribute in issuer_claims:
             if attribute in data:
                 pdata["claims"].update({attribute: data[attribute]})

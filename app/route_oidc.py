@@ -584,8 +584,6 @@ def auth_choice():
             if cred_id not in credentials_requested:
                 credentials_requested.append(cred_id)
 
-    print("\nauth_choice credentials_requested: ", credentials_requested)
-
     for cred in credentials_requested:
         if (
             cred in supported_credencials["PID_login"]
@@ -1196,7 +1194,6 @@ def credentialOffer():
                 }
 
                 reference_id = str(uuid.uuid4())
-                #print("\nreference_id: ", reference_id)
                 credential_offer_references.update({reference_id:{"credential_offer":credential_offer, "expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)}})
 
                 # create URI
@@ -1244,7 +1241,6 @@ def credentialOffer():
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])
 def offer_reference(reference_id):
-    #print("\nReferences: ", credential_offer_references)
     return credential_offer_references[reference_id]["credential_offer"]
 
 """ @oidc.route("/testgetauth", methods=["GET"])

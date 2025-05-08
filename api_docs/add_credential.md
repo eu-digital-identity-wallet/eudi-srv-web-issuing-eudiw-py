@@ -16,7 +16,7 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
   "eu.europa.ec.eudi.loyalty_mdoc": {
       "format": "mso_mdoc",
       "doctype": "eu.europa.ec.eudi.loyalty.1",
-      "scope": "eu.europa.ec.eudi.loyalty.1",
+      "scope": "eu.europa.ec.eudi.loyalty_mdoc",
       "cryptographic_binding_methods_supported": [
         "jwk", "cose_key"
       ],
@@ -28,17 +28,6 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
           "proof_signing_alg_values_supported": [
             "ES256"
           ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
         }
       },
       "display": [
@@ -46,14 +35,14 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
           "name": "Loyalty",
           "locale": "en",
           "logo": {
-            "url": "https://examplestate.com/public/pid.png",
+            "uri": "https://examplestate.com/public/pid.png",
             "alt_text": "A square figure of a PID"
           }
         }
       ],
-      "claims": {
-        "eu.europa.ec.eudi.loyalty.1": {
-          "given_name": {
+      "claims": [
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","given_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -64,7 +53,8 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
               }
             ]
           },
-          "family_name": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","family_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -74,7 +64,8 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
                 "locale": "en"              }
             ]
           },
-          "company": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","company"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -84,7 +75,8 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
                 "locale": "en"              }
             ]
           },
-          "client_id": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","client_id"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -94,7 +86,8 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
                 "locale": "en"              }
             ]
           },
-          "issuance_date": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -104,7 +97,8 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -114,8 +108,14 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
               }
             ]
           }
+      ],
+      "issuer_config":{
+            "issuing_authority":"Test PID issuer",
+            "organization_id":"EUDI Wallet Reference Implementation",
+            "validity":90,
+            "organization_name":"Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.loyalty.1"
         }
-      }
     }
   }
 ```
@@ -128,6 +128,7 @@ For more information on the metadata parameters, please refer to https://openid.
 - source: Where the attributed is sourced from. Either the user or issuer (Example: Issuance Date is filled in by the issuer while given_name is filled in by the user on the form)
 - value_type: Type of the value expected. This will add the attribute to the forms. (Can be string, full-date, jpeg, driving_privileges, uint, bool)
 - issuer_conditions: a json structure with extra parameters and logic allowing for more complex credentials.
+- issuer_config: a json structure with extra parameters used in credential creation
 
 ### 1.1 Issuer Conditions
 The issuer_conditions structure can be used in the metadata as follows:
@@ -245,7 +246,7 @@ This claim allows for two nested claims, a place_of_work and a no_fixed_place.
   For this example the following issuer_conditions would be added inside the claims{} field but outside any specific claim.
   
 ```json
-"issuer_conditions": {
+"overall_issuer_conditions": {
           "at_least_one_of":[
                 "health_insurance_id",
                 "patient_id",

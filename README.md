@@ -10,17 +10,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 
 The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service, supporting the OpenId4VCI (draft 13) protocol.
 
-The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for the following credentials:
-
-
-| Credential/Attestation | Format    |
-|------------------------|-----------|
-| PID                    | mso_mdoc  |
-| PID                    | SD-JWT-VC |
-| mDL                    | mso_mdoc  | 
-| mDL                    | SD-JWT-VC  | 
-| (Q)EAA age-over-18 pseudonym | mso_mdoc |
-| (Q)EAA loyalty card | mso_mdoc |
+The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for various credentials.
 
 For authenticating the user, it requires the use of eIDAS node, OAUTH2 server or a simple form (for testing purposes).
 

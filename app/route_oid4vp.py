@@ -346,8 +346,6 @@ def getpidoid4vp():
                 elif attribute in attributesForm2:
                     attributesForm2[attribute]["filled_value"] = value
 
-        #print("\nAttributes form1: ", attributesForm)
-        #print("\nAttributes form2: ", attributesForm2)
         
         return render_template(
             "dynamic/dynamic-form.html",
