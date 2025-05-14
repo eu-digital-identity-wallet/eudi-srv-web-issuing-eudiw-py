@@ -131,10 +131,10 @@
            ],
            "mandatory":true,
            "value_type":"string",
-           "source":"Mobile Operator",
+           "source":"user",
            "display":[
               {
-                 "name":"",
+                 "name":"Mobile Operator",
                  "locale":"en"
               }
            ]

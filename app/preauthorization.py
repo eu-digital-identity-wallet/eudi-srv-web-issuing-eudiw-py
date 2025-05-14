@@ -234,7 +234,7 @@ def preauth_form():
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
-        doctype_config=credential["issuer_config"]
+        doctype_config=credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])

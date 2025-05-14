@@ -247,8 +247,10 @@ def dynamic_R1(country):
         if isinstance(country_data["scope"], dict):
             scope_final = list()
             for request in credentials_requested:
-                scope = credentialsSupported[request]["scope"]
-
+                if credentialsSupported[request]["format"] == "mso_mdoc":
+                    scope = credentialsSupported[request]["doctype"]
+                elif credentialsSupported[request]["format"] == "dc+sd-jwt":
+                    scope = credentialsSupported[request]["issuer_config"]["doctype"]
                 if scope not in scope_final:
                     scope_final.append(scope)
 
@@ -361,15 +363,20 @@ def red():
 
         credential_requested = session["credentials_requested"]
         credentialsSupported = oidc_metadata["credential_configurations_supported"]
-            
+
         for id in credential_requested:
-            doctype= credentialsSupported[id]["doctype"]
-            portuguese_fields.update({doctype:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
+            format = credentialsSupported[id]["format"]
+            if format == "mso_mdoc":
+                doctype= credentialsSupported[id]["doctype"]
+            elif format == "dc+sd-jwt":
+                doctype= credentialsSupported[id]["issuer_config"]["doctype"]
+            
+            portuguese_fields.update({doctype:{"config":cfgcountries.supported_countries["PT"]["oidc_auth"]["scope"][doctype],"format":format}})
 
         for doctype in portuguese_fields:
-            for fields in portuguese_fields[doctype]:
+            for fields in portuguese_fields[doctype]["config"]:
                 for item in data:
-                    if item["name"] == portuguese_fields[doctype][fields]:
+                    if item["name"] == portuguese_fields[doctype]["config"][fields]:
                         if item["state"] == "Pending":
                             value = "Pending"
                         else:
@@ -381,12 +388,13 @@ def red():
                             form_data[doctype].update({fields:value})
                         #form_data[doctype][fields] = item["value"]
                         break
-        
+    
         for doctype in portuguese_fields:
             if "birth_date" in form_data[doctype] and form_data[doctype]["birth_date"] != "Pending":
                 form_data[doctype]["birth_date"] = datetime.strptime(
                     form_data[doctype]["birth_date"], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
+
 
             if "driving_privileges" in form_data[doctype] and form_data[doctype]["driving_privileges"] != "Pending":
                 json_priv = json.loads(form_data[doctype]["driving_privileges"])
@@ -413,9 +421,14 @@ def red():
             if "credential_type" in doctype_config:
                 form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
-            form_data[doctype]["nationality"] = ["PT"]
+            
 
-            form_data[doctype]["birth_place"] = "Lisboa"
+            if portuguese_fields[doctype]["format"] == "mso_mdoc":
+                form_data[doctype]["nationality"] = ["PT"]
+                form_data[doctype]["birth_place"] = "Lisboa"
+            elif portuguese_fields[doctype]["format"] == "dc+sd-jwt":
+                form_data[doctype]["place_of_birth"] = [{'locality': 'Lisboa'}]
+                form_data[doctype]["nationalities"] = ["PT"]
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -508,7 +521,7 @@ def red():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
 
-        doctype_config=credential["issuer_config"]
+        doctype_config=credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
@@ -638,6 +651,7 @@ def dynamic_R2_data_collect(country, user_id):
                     data.pop(custom_modifiers[modifier])
 
         data["nationality"] = [country]
+        data["nationalities"] = [country]
 
         birth_places = {
             "EU":"Brussels",
@@ -649,6 +663,7 @@ def dynamic_R2_data_collect(country, user_id):
 
         if country in birth_places:
             data["birth_place"] = birth_places[country]
+            data["place_of_birth"] = [{'locality': birth_places[country]}]
             
         return data
 
@@ -660,8 +675,10 @@ def dynamic_R2_data_collect(country, user_id):
         # headers = attribute_request["header"]
         try:
             r2 = requests.get(url)
-
+            print("\nr2", r2)
+            print("\nr2", r2.text)
             json_response = r2.json()
+            print("\njson_response", json_response)
             for attribute in json_response:
                 if attribute["state"] == "Pending":
                     return {"error": "Pending",
@@ -716,6 +733,7 @@ def dynamic_R2_data_collect(country, user_id):
                         data.pop(custom_modifiers[modifier])
 
             data["nationality"] = [country]
+            data["nationalities"] = [country]
 
             birth_places = {
                 "EE":"Tallinn",
@@ -726,6 +744,7 @@ def dynamic_R2_data_collect(country, user_id):
 
             if country in birth_places:
                 data["birth_place"] = birth_places[country]
+                data["place_of_birth"] = [{'locality': birth_places[country]}]
 
             return data
         except:
@@ -769,7 +788,7 @@ def credentialCreation(credential_request, data, country):
             if "vct" in credentials_supported[credential_request["credential_configuration_id"]]:
                 doctype = vct2doctype(credentials_supported[credential_request["credential_configuration_id"]]["vct"])
             else:
-                doctype = credentials_supported[credential_request["credential_configuration_id"]]["scope"]
+                doctype = credentials_supported[credential_request["credential_configuration_id"]]["doctype"]
 
             format = credentials_supported[credential_request["credential_configuration_id"]]["format"]
         
@@ -830,8 +849,10 @@ def credentialCreation(credential_request, data, country):
                     ).decode("utf-8")
 
                 form_data["nationality"] = ["PT"]
+                form_data["nationalities"] = ["PT"]
 
                 form_data["birth_place"] = "Lisboa"
+                form_data["place_of_birth"] = [{'locality': "Lisboa"}]
 
             else:
 

@@ -573,7 +573,7 @@ def getSubClaims(claimLv1, vct):
 def doctype2credential(doctype,format):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential_id, credential in credentialsSupported.items():
-        if credential["format"] != format or credential["scope"] != doctype:
+        if credential["format"] != format or credential["doctype"] != doctype:
             continue
         else:
             return credential

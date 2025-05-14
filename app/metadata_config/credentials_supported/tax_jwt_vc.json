@@ -210,7 +210,7 @@
            "mandatory":false,
            "display":[
               {
-                 "name":"",
+                 "name":"Issuing Jurisdiction",
                  "locale":"en"
               }
            ]

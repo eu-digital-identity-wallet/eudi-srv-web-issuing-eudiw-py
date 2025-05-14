@@ -69,7 +69,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Family Name",
                   "locale":"en"
                }
             ]
@@ -84,7 +84,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Given Name",
                   "locale":"en"
                }
             ]
@@ -99,7 +99,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Birth Date",
                   "locale":"en"
                }
             ]
@@ -148,7 +148,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Employment Type",
                   "locale":"en"
                }
             ]
@@ -163,7 +163,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Name",
                   "locale":"en"
                }
             ]
@@ -178,7 +178,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Employment ID",
                   "locale":"en"
                }
             ]
@@ -193,7 +193,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"ID Type",
                   "locale":"en"
                }
             ]
@@ -208,7 +208,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Street",
                   "locale":"en"
                }
             ]
@@ -223,7 +223,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Town",
                   "locale":"en"
                }
             ]
@@ -238,7 +238,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Postal Code",
                   "locale":"en"
                }
             ]
@@ -253,7 +253,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Country Code",
                   "locale":"en"
                }
             ]
@@ -288,7 +288,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Place of Work",
                   "locale":"en"
                }
             ],
@@ -315,7 +315,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"No Fixed Place",
                   "locale":"en"
                }
             ],
@@ -343,7 +343,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Company",
                   "locale":"en"
                }
             ]
@@ -359,7 +359,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Flag Base Home State",
                   "locale":"en"
                }
             ]
@@ -375,7 +375,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Company ID",
                   "locale":"en"
                }
             ]
@@ -391,7 +391,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"ID Type",
                   "locale":"en"
                }
             ]
@@ -407,7 +407,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Street",
                   "locale":"en"
                }
             ]
@@ -423,7 +423,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Town",
                   "locale":"en"
                }
             ]
@@ -439,7 +439,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Postal Code",
                   "locale":"en"
                }
             ]
@@ -455,7 +455,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Country Code",
                   "locale":"en"
                }
             ]
@@ -471,7 +471,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Country Code",
                   "locale":"en"
                }
             ]
@@ -506,7 +506,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Member State",
                   "locale":"en"
                }
             ]
@@ -521,7 +521,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Transitional Rules",
                   "locale":"en"
                }
             ]
@@ -536,7 +536,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Starting Date",
                   "locale":"en"
                }
             ]
@@ -551,7 +551,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Ending Date",
                   "locale":"en"
                }
             ]
@@ -593,7 +593,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Institution ID",
+                  "name":"Competent Institution",
                   "locale":"en"
                }
             ],
@@ -614,7 +614,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Institution ID",
                   "locale":"en"
                }
             ]
@@ -629,7 +629,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Institution Name",
                   "locale":"en"
                }
             ]
@@ -644,7 +644,7 @@
             "source":"user",
             "display":[
                {
-                  "name":"Credential Holder",
+                  "name":"Country Code",
                   "locale":"en"
                }
             ]

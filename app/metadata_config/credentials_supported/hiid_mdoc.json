@@ -116,10 +116,10 @@
            ],
            "mandatory":true,
            "value_type":"string",
-           "source":"Affiliation Country",
+           "source":"user",
            "display":[
               {
-                 "name":"",
+                 "name":"Affiliation Country",
                  "locale":"en"
               }
            ]
