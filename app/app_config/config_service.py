@@ -414,7 +414,8 @@ class ConfService:
             "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
             "eu.europa.ec.eudi.cor_mdoc",
             "eu.europa.ec.eudi.pda1_sd_jwt_vc",
-            "eu.europa.ec.eudi.ehic_sd_jwt_vc"         
+            "eu.europa.ec.eudi.ehic_sd_jwt_vc"   
+        ]
     }
 
     # eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
