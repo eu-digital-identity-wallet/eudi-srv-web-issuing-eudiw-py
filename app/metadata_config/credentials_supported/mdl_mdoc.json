@@ -53,7 +53,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Given names",
+                 "name":"Given name",
                  "locale":"en"
               }
            ]
@@ -96,7 +96,7 @@
            "source":"issuer",
            "display":[
               {
-                 "name":"Date when mDL expires",
+                 "name":"Expiry Date",
                  "locale":"en"
               }
            ]
@@ -154,7 +154,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Portrait of mDL holder",
+                 "name":"Portrait",
                  "locale":"en"
               }
            ]
@@ -169,7 +169,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Categories of vehicles",
+                 "name":"Driving Privileges",
                  "locale":"en"
               }
            ]
@@ -332,7 +332,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Age attestation: How old are you (in years)?",
+                 "name":"Age in Years",
                  "locale":"en"
               }
            ]
@@ -347,7 +347,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Age attestation: In what year were you born?",
+                 "name":"Birth Year",
                  "locale":"en"
               }
            ]
@@ -361,7 +361,7 @@
            "source":"issuer",
            "display":[
               {
-                 "name":"Age attestation: Nearest “true” attestation above request",
+                 "name":"Age over 18",
                  "locale":"en"
               }
            ]
@@ -419,7 +419,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Resident state/province/district",
+                 "name":"Resident State",
                  "locale":"en"
               }
            ]
@@ -434,7 +434,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Resident postal code",
+                 "name":"Resident Postal Code",
                  "locale":"en"
               }
            ]
@@ -449,7 +449,7 @@
            "source":"user",
            "display":[
               {
-                 "name":"Resident country",
+                 "name":"Resident Country",
                  "locale":"en"
               }
            ]
