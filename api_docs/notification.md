@@ -16,7 +16,7 @@ Payload:
 + *notification_id* - Received after a Batch Credential or Credential request
 + *event* - type of event that occurred
 
-![image](https://github.com/devisefutures/eudiw-issuer/assets/61158161/9f3228f6-39f0-4de0-ba5b-abe78c97e353)
+![image](./images/notification1.png)
 
 If everything goes well, a *HTTP/1.1 204 No Content* will be received in the Wallet
 

@@ -1,185 +1,245 @@
 {
-"org.iso.18013.5.1.reservation_mdoc": {
-    "format": "mso_mdoc",
-    "doctype": "org.iso.18013.5.1.reservation",
-    "scope": "org.iso.18013.5.1.reservation",
-    "policy": {
-        "batch_size": 50,
-        "one_time_use": true
-    },
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_alg_values_supported": [
+  "org.iso.18013.5.1.reservation_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"org.iso.18013.5.1.reservation",
+     "scope":"org.iso.18013.5.1.reservation_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
         -7
-      ],
-    "credential_crv_values_supported": [
-      1
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "Reservation",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/pid.png",
-          "alt_text": "A square figure of a PID"
+     ],
+     "credential_crv_values_supported":[
+        1
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         }
-      }
-    ],
-    "claims": {
-      "org.iso.18013.5.reservation.1": {
-        "booking_service_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The booking service providing the booking reservation.",
-              "locale": "en"            }
-          ]
-        },
-        "reservation_id": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The identifier of the booking reservation from the booking service.",
-              "locale": "en"            }
-          ]
-        },
-        "reservation_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Date of the reservation.",
-              "locale": "en"            }
-          ]
-        },
-        "service_provider_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The name of the service provider (e.g. Hotel) the reservation refers to ",
-              "locale": "en"            }
-          ]
-        },
-        "location": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The location or place the reservation refers to (e.g. city, service provider place, etc.)",
-              "locale": "en"            }
-          ]
-        },
-        "check_in_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "The check-in date for the reservation.",
-              "locale": "en"            }
-          ]
-        },
-        "check_out_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "The check-out date for the reservation.",
-              "locale": "en"            }
-          ]
-        },
-        "guests": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The guest of the reservation (num of adults, num of children, etc).",
-              "locale": "en"            }
-          ]
-        },
-        "car_rental": {
-          "mandatory": true,
-          "value_type":"bool",
-          "source":"user",
-          "display": [
-            {
-              "name": "Indicates inclusion of car rental in the reservation.",
-              "locale": "en"            }
-          ]
-        },
-        "num_of_rooms": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "The number of rooms the reservation refers to.",
-              "locale": "en"            }
-          ]
-        },
-        "family_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Current last name(s) or surname(s) of the holder. ",
-              "locale": "en"            }
-          ]
-        },
-        "given_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Current first name(s), including middle name(s), of the holder. ",
-              "locale": "en"            }
-          ]
-        },
-        "birth_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Day, month, and year on which the holder was born.",
-              "locale": "en"            }
-          ]
+     },
+     "display":[
+        {
+           "name":"Reservation",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/pid.png",
+              "alt_text":"A square figure of a PID"
+           }
         }
-      }
-    }
+     ],
+     "claims":[
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "booking_service_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The booking service providing the booking reservation.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "reservation_id"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The identifier of the booking reservation from the booking service.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "reservation_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Date of the reservation.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "service_provider_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The name of the service provider (e.g. Hotel) the reservation refers to ",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "location"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The location or place the reservation refers to (e.g. city, service provider place, etc.)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "check_in_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The check-in date for the reservation.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "check_out_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The check-out date for the reservation.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "guests"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The guest of the reservation (num of adults, num of children, etc).",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "car_rental"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Indicates inclusion of car rental in the reservation.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "num_of_rooms"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"The number of rooms the reservation refers to.",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Current last name(s) or surname(s) of the holder. ",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Current first name(s), including middle name(s), of the holder. ",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.reservation.1",
+              "birth_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Day, month, and year on which the holder was born.",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"org.iso.18013.5.reservation.1"
+     }
   }
 }

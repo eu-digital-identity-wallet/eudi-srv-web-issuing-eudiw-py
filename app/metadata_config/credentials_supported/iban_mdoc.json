@@ -1,255 +1,347 @@
 {
-  "eu.europa.ec.eudi.iban_mdoc": {
-      "format": "mso_mdoc",
-      "doctype": "eu.europa.ec.eudi.iban.1",
-      "scope": "eu.europa.ec.eudi.iban.1",
-      "policy": {
-          "batch_size": 50,
-          "one_time_use": true
-      },
-      "cryptographic_binding_methods_supported": [
-        "jwk", "cose_key"
-      ],
-      "credential_alg_values_supported": [
-          -7
-        ],
-      "credential_crv_values_supported": [
+  "eu.europa.ec.eudi.iban_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"eu.europa.ec.eudi.iban.1",
+     "scope":"eu.europa.ec.eudi.iban_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
+        -7
+     ],
+     "credential_crv_values_supported":[
         1
-      ],
-      "credential_signing_alg_values_supported": [
+     ],
+     "credential_signing_alg_values_supported":[
         "ES256"
-      ],
-      "proof_types_supported": {
-        "jwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         }
-      },
-      "display": [
+     },
+     "display":[
         {
-          "name": "IBAN",
-          "locale": "en",
-          "logo": {
-            "uri": "https://examplestate.com/public/iban.png",
-            "alt_text": "A square figure of a iban"
-          }
+           "name":"IBAN",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/iban.png",
+              "alt_text":"A square figure of a iban"
+           }
         }
-      ],
-      "claims": {
-        "eu.europa.ec.eudi.iban.1": {
-          "iban": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
+     ],
+     "claims":[
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "iban"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "IBAN",
-                "locale": "en"            }
-            ]
-          },
-          "national_account_number": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "National Account Number",
-                "locale": "en"            }
-            ]
-          },
-          "account_product": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Account Product",
-                "locale": "en"            }
-            ]
-          },
-          "account_name": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Account Name",
-                "locale": "en"            }
-            ]
-          },
-          "account_type": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Account Type",
-                "locale": "en"            }
-            ]
-          },
-          "currency": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Currency",
-                "locale": "en"            }
-            ]
-          },
-          "bank_account_status": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Bank Account Status",
-                "locale": "en"            }
-            ]
-          },
-          "payment_possibility": {
-            "mandatory": true,
-            "value_type":"bool",
-            "source":"user",
-            "display": [
-              {
-                "name": "Payment Possibility",
-                "locale": "en"            }
-            ]
-          },
-          "registered_family_name": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Registered Family Name",
-                "locale": "en"            }
-            ]
-          },
-          "registered_given_name": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Registered Given Name",
-                "locale": "en"            }
-            ]
-          },
-          "date_of_birth": {
-            "mandatory": true,
-            "value_type":"full-date",
-            "source":"user",
-            "display": [
-              {
-                "name": "Date of Birth",
-                "locale": "en"
+                 "name":"IBAN",
+                 "locale":"en"
               }
-            ]
-          },
-          "account_holder_owner": {
-            "mandatory": true,
-            "value_type":"bool",
-            "source":"user",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "national_account_number"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Account Holder Owner",
-                "locale": "en"            }
-            ]
-          },
-          "coowner": {
-            "mandatory": true,
-            "value_type":"bool",
-            "source":"user",
-            "display": [
-              {
-                "name": "Coowner",
-                "locale": "en"            }
-            ]
-          },
-          "disponent": {
-            "mandatory": false,
-            "value_type":"bool",
-            "display": [
-              {
-                "name": "Disponent",
-                "locale": "en"            }
-            ]
-          },
-          "issuing_organization": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Issuing Organization",
-                "locale": "en"            }
-            ]
-          },
-          "national_bank_code": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "National Bank Code",
-                "locale": "en"            }
-            ]
-          },
-          "issuance_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
-              {
-                "name": "Issuance Date",
-                "locale": "en"
+                 "name":"National Account Number",
+                 "locale":"en"
               }
-            ]
-          },
-          "expiry_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "account_product"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Expiry Date",
-                "locale": "en"
+                 "name":"Account Product",
+                 "locale":"en"
               }
-            ]
-          },
-          "credential_type": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "account_name"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Credential Type",
-                "locale": "en"
+                 "name":"Account Name",
+                 "locale":"en"
               }
-            ]
-          },
-          "business_identifier_code": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "account_type"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Bussiness Identifier Code",
-                "locale": "en"            }
-            ]
-          }
+                 "name":"Account Type",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "currency"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Currency",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "bank_account_status"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Bank Account Status",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "payment_possibility"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Payment Possibility",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "registered_family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Registered Family Name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "registered_given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Registered Given Name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "date_of_birth"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Date of Birth",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "account_holder_owner"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Account Holder Owner",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "coowner"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Coowner",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "disponent"
+           ],
+           "mandatory":false,
+           "value_type":"bool",
+           "display":[
+              {
+                 "name":"Disponent",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "issuing_organization"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Issuing Organization",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "national_bank_code"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"National Bank Code",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "credential_type"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Credential Type",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.iban.1",
+              "business_identifier_code"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Bussiness Identifier Code",
+                 "locale":"en"
+              }
+           ]
         }
-      }
-    }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"eu.europa.ec.eudi.iban.1",
+        "credential_type": "IBAN"
+     }
   }
+}

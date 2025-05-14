@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+    <meta name="Title" content="Request Credentials" />
+    <meta name="Keywords" content="EUDI Wallet, Credentials, Enrolment" />
+    <meta name="Description" content="Request Credentials for EUDI Wallet" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/vnd.microsoft.icon" />
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.gif') }}" type="image/gif" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}" />
+    <link href="{{ url_for('static', filename='bootstrap-3.4.1-dist/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='css/stylesheets/custom/custom_en_9.7.1.20.1679559965505.css') }}" media="all" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='fontawesome-free-5.15.4-web/css/fontawesome.min.css') }}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" id="jqueryId" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.min.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/promiz/promiz-1.0.6.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-3.4.1-dist/js/bootstrap.min.js') }}" charset="UTF-8" defer="true"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/html5shiv/html5shiv-3.7.3.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/respond/respond-1.4.2.js') }}" charset="UTF-8"></script>
+    <meta name="referrer" content="no-referrer">
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/loc/loc_en_9.7.1.20.1679559965505.js') }}" charset="UTF-8"></script>
+    <title>Request Credentials for your EUDI Wallet</title>
+</head>
+
+<body id="responsive-main-nav1">
+    <div class="main container-fluid">
+        <header role="banner" class="main-header">
+            <div class="container">
+                <div class="row">
+                    <img src="{{url_for('static', filename='ic-logo.svg')}}">
+                </div>
+            </div>
+        </header>
+        <div role="main" class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Request Credentials for your EUDI Wallet</h1>
+                    <div id="content" class="content-wrap1 content-center col-md-6 text-center">
+                        <h2>QR Code</h2>
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <img src="{{qrcode}}">
+                            </div>
+                            <div class="col-md-3 col-md-offset-2">
+                                <p>Scan the QR Code with your phone's camera app or click Request to be redirected</p>
+                            </div>
+                            
+                        </div>
+                        
+                        <a href="{{url_data}}" class="btn btn-primary">Request</a>
+                        <a href="revocation_choice" class="btn btn-back">Back</a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Version 9.7.1.20 - 23/03/2023 - 09:26 -->
+</body>
+<script>
+
+$('#check').change(function() {
+  $('#btncheck').prop("disabled", !this.checked);
+});
+
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+
+var presentation_id= '{{presentation_id}}'
+function Ajax_request() {
+    $.ajax({
+        url: '{{redirect_url}}pid_authorization',
+        method: 'GET',
+        data:{"presentation_id": presentation_id },
+        success: function(response) {
+            console.log('Success:', response);
+            window.location.replace(location.origin + "/revocation/getoid4vp?presentation_id=" + presentation_id);
+            clearInterval(intervalId);
+            
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+        }
+    });
+}
+
+function makeRequests() {
+    let counter = 0;
+    const intervalId = setInterval(() => {
+        if (counter >= 15) {
+            clearInterval(intervalId); 
+            console.log('Stopped making requests after 30 seconds.');
+        } else {
+            Ajax_request(); 
+            counter++;
+        }
+    }, 4000);
+}
+
+makeRequests();
+
+</script>
+</html>

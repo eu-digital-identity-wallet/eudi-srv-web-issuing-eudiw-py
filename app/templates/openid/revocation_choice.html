@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+    <meta name="Title" content="Request Credentials" />
+    <meta name="Keywords" content="EUDI Wallet, Credentials, Enrolment" />
+    <meta name="Description" content="Request Credentials for EUDI Wallet" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/vnd.microsoft.icon" />
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.gif') }}" type="image/gif" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}" />
+    <link href="{{ url_for('static', filename='bootstrap-3.4.1-dist/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='css/stylesheets/custom/custom_en_9.7.1.20.1679559965505.css') }}" media="all" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='fontawesome-free-5.15.4-web/css/fontawesome.min.css') }}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" id="jqueryId" src="{{ url_for('static', filename='scripts/jquery/jquery-3.6.3.min.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/promiz/promiz-1.0.6.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-3.4.1-dist/js/bootstrap.min.js') }}" charset="UTF-8" defer="true"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/html5shiv/html5shiv-3.7.3.js') }}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/respond/respond-1.4.2.js') }}" charset="UTF-8"></script>
+    <meta name="referrer" content="no-referrer">
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/loc/loc_en_9.7.1.20.1679559965505.js') }}" charset="UTF-8"></script>
+    <title>Request Credentials for your EUDI Wallet</title>
+</head>
+
+<body id="responsive-main-nav1">
+    <div class="main container-fluid">
+        <header role="banner" class="main-header">
+            <div class="container">
+                <div class="row">
+                    <img src="{{url_for('static', filename='ic-logo.svg')}}">
+                </div>
+            </div>
+        </header>
+        <div role="main" class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Revoke Credentials from your EUDI Wallet</h1>
+                    <div id="content" class="content-wrap1 content-center col-md-6 col-sm-7">
+                        <div class="genericErrors" id="genericErrorsDesc">
+                        </div>
+                        <h2>Please select credentials</h2>
+                       <form id="selectCredential" method="post" action="{{redirect_url}}" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded;charset=UTF-8" autocapitalize="off" spellcheck="false">
+                            <h3>Credentials</h3>
+                                {% for credential_type in cred%}
+                                    <h4>{{credential_type}}</h4>
+                                    {% for credential_id in cred[credential_type] %}
+                                        <div class="form-check col-md-12">
+                                            <label class="form-check-label" for="flexCheckDefault">
+                                                <input class="form-check-input" id="check" type="checkbox" name="{{ credential_id }}" value="{{ credential_id }}"  style="transform: scale(1.8);">
+                                                {{ cred[credential_type][credential_id]}}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            <div class="clearfix"></div>
+
+                            <span class="more-submit">
+                                <input type="submit" name="proceed" accesskey="S" value="Submit" class="btn btn-primary" title="Submit" id="btncheck" disabled />
+                                <input type="button" name="Cancelled" accesskey="C" value="Cancel" id="cancelBtnId" class="btn btn-cancel btn-alternate cancellable" title="Cancel" onclick="window.location.href = '/';" />
+                            </span>
+                        </form>
+                        
+                    </div>
+                    <h2 id="validation-message"></h2>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Version 9.7.1.20 - 23/03/2023 - 09:26 -->
+</body>
+<script>
+
+$(document).ready(function() {
+  $('input[type="checkbox"]').change(function() {
+    var atLeastOneChecked = $('input[type="checkbox"]:checked').length > 0;
+    $('#btncheck').prop("disabled", !atLeastOneChecked);
+  });
+});
+
+</script>
+</html>

@@ -1,165 +1,220 @@
 {
-"eu.europa.ec.eudi.por_mdoc": {
-    "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.por.1",
-    "scope": "eu.europa.ec.eudi.por.1",
-    "policy": {
-        "batch_size": 50,
-        "one_time_use": true
-    },
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_alg_values_supported": [
+  "eu.europa.ec.eudi.por_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"eu.europa.ec.eudi.por.1",
+     "scope":"eu.europa.ec.eudi.por_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
         -7
-      ],
-    "credential_crv_values_supported": [
-      1
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "Power Of Representation",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/por.png",
-          "alt_text": "A square figure of a PoR"
+     ],
+     "credential_crv_values_supported":[
+        1
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
+        },
+        "cwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ],
+           "proof_alg_values_supported":[
+              -7
+           ],
+           "proof_crv_values_supported":[
+              1
+           ]
         }
-      }
-    ],
-    "claims": {
-      "eu.europa.ec.eudi.por.1": {
-        "legal_person_identifier": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Legal Person Identifier",
-              "locale": "en"            }
-          ]
-        },
-        "legal_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Legal Name",
-              "locale": "en"            }
-          ]
-        },
-        "full_powers": {
-          "mandatory": true,
-          "value_type":"bool",
-          "source":"user",
-          "display": [
-            {
-              "name": "Full Powers",
-              "locale": "en"            }
-          ]
-        },
-        "eService": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "eService",
-              "locale": "en"            }
-          ]
-        },
-        "effective_from_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Effective From Date",
-              "locale": "en"
-            }
-          ]
-        },
-        "effective_until_date": {
-          "mandatory": false,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Effective Until Date",
-              "locale": "en"            }
-          ]
-        },
-        "issuance_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+     },
+     "display":[
+        {
+           "name":"Power Of Representation",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/por.png",
+              "alt_text":"A square figure of a PoR"
+           }
+        }
+     ],
+     "claims":[
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "legal_person_identifier"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Issuance Date",
-                "locale": "en"
+                 "name":"Legal Person Identifier",
+                 "locale":"en"
               }
-            ]
-          },
-          "expiry_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "legal_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Expiry Date",
-                "locale": "en"
+                 "name":"Legal Name",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_authority": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "full_powers"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
               {
-                "name": "Issuing Authority",
-                "locale": "en"
+                 "name":"Full Powers",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_jurisdiction": {
-            "mandatory": false,
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "eService"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "",
-                "locale": "en"
+                 "name":"eService",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_country": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "effective_from_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
               {
-                "name": "Issuing Country",
-                "locale": "en"
+                 "name":"Effective From Date",
+                 "locale":"en"
               }
-            ]
-          }
-      }
-    }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "effective_until_date"
+           ],
+           "mandatory":false,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Effective Until Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "issuing_jurisdiction"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Issuing Jurisdiction",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.por.1",
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Country",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"eu.europa.ec.eudi.por.1"
+     }
   }
 }

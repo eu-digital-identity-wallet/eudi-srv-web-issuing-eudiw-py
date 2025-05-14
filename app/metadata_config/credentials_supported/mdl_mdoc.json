@@ -1,389 +1,522 @@
 {
-"eu.europa.ec.eudi.mdl_mdoc": {
-    "format": "mso_mdoc",
-    "doctype": "org.iso.18013.5.1.mDL",
-    "scope": "org.iso.18013.5.1.mDL",
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "mDL",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/mdl.png",
-          "alt_text": "A square figure of a mDL"
+  "eu.europa.ec.eudi.mdl_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"org.iso.18013.5.1.mDL",
+     "scope":"eu.europa.ec.eudi.mdl_mdoc",
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         }
-      }
-    ],
-    "claims": {
-      "org.iso.18013.5.1": {
-        "family_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Family name",
-              "locale": "en"            }
-          ]
-        },
-        "given_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Given names",
-              "locale": "en"            }
-          ]
-        },
-        "birth_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Date of birth",
-              "locale": "en"            }
-          ]
-        },
-        "issue_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Date of issue",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Date when mDL expires",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_country": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuing country",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_authority": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuing authority",
-              "locale": "en"
-            }
-          ]
-        },
-        "document_number": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Licence number",
-              "locale": "en"            }
-          ]
-        },
-        "portrait": {
-          "mandatory": true,
-          "value_type":"jpeg",
-          "source":"user",
-          "display": [
-            {
-              "name": "Portrait of mDL holder",
-              "locale": "en"            }
-          ]
-        },
-        "driving_privileges": {
-          "mandatory": true,
-          "value_type":"driving_privileges",
-          "source":"user",
-          "display": [
-            {
-              "name": "Categories of vehicles",
-              "locale": "en"            }
-          ]
-        },
-        "un_distinguishing_sign": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "UN distinguishing sign",
-              "locale": "en"
-            }
-          ]
-        },
-        "administrative_number": {
-          "mandatory": false,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Administrative number",
-              "locale": "en"
-            }
-          ]
-        },
-        "sex": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"uint",
-          "display": [
-            {
-              "name": "Sex",
-              "locale": "en"
-            }
-          ]
-        },
-        "height": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"uint",
-          "display": [
-            {
-              "name": "Height (cm)",
-              "locale": "en"
-            }
-          ]
-        },
-        "weight": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"uint",
-          "display": [
-            {
-              "name": "Weight (kg)",
-              "locale": "en"
-            }
-          ]
-        },
-        "eye_colour": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"string",
-          "display": [
-            {
-              "name": "Eye colour",
-              "locale": "en"
-            }
-          ]
-        },
-        "hair_colour": {
-          "mandatory": false,
-          "source":"user",
-          "value_type":"string",
-          "display": [
-            {
-              "name": "Hair colour",
-              "locale": "en"
-            }
-          ]
-        },
-        "birth_place": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Place of birth",
-              "locale": "en"
-            }
-          ]
-        },
-        "resident_address": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Permanent place of residence",
-              "locale": "en"
-            }
-          ]
-        },
-        "portrait_capture_date": {
-          "mandatory": false,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Portrait image timestamp",
-              "locale": "en"
-            }
-          ]
-        },
-        "age_in_years": {
-          "mandatory": false,
-          "value_type":"uint",
-          "source":"user",
-          "display": [
-            {
-              "name": "Age attestation: How old are you (in years)?",
-              "locale": "en"
-            }
-          ]
-        },
-        "age_birth_year": {
-          "mandatory": false,
-          "value_type":"uint",
-          "source":"user",
-          "display": [
-            {
-              "name": "Age attestation: In what year were you born?",
-              "locale": "en"
-            }
-          ]
-        },
-        "age_over_18": {
-          "mandatory": false,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Age attestation: Nearest “true” attestation above request",
-              "locale": "en"
-            }
-          ]
-        },
-        "Issuing jurisdiction": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Issuing jurisdiction",
-              "locale": "en"
-            }
-          ]
-        },
-        "nationality": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Nationality",
-              "locale": "en"
-            }
-          ]
-        },
-        "resident_city": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Resident city",
-              "locale": "en"
-            }
-          ]
-        },
-        "resident_state": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Resident state/province/district",
-              "locale": "en"
-            }
-          ]
-        },
-        "resident_postal_code": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Resident postal code",
-              "locale": "en"
-            }
-          ]
-        },
-        "resident_country": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Resident country",
-              "locale": "en"
-            }
-          ]
-        },
-        "biometric_template_xx": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Fingerprint biometric information",
-              "locale": "en"
-            }
-          ]
-        },
-        "family_name_national_character": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Family name in national characters",
-              "locale": "en"
-            }
-          ]
-        },
-        "given_name_national_character": {
-          "mandatory": false,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Given name in national characters",
-              "locale": "en"
-            }
-          ]
-        },
-        "signature_usual_mark": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Signature / usual mark",
-              "locale": "en"
-            }
-          ]
+     },
+     "display":[
+        {
+           "name":"mDL",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/mdl.png",
+              "alt_text":"A square figure of a mDL"
+           }
         }
-      }
-    }
+     ],
+     "claims":[
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Family name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Given name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "birth_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Date of birth",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "issue_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Date of issue",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing country",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "document_number"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Licence number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "portrait"
+           ],
+           "mandatory":true,
+           "value_type":"jpeg",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Portrait",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "driving_privileges"
+           ],
+           "mandatory":true,
+           "value_type":"driving_privileges",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Driving Privileges",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "un_distinguishing_sign"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"UN distinguishing sign",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "administrative_number"
+           ],
+           "mandatory":false,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Administrative number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "sex"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Sex",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "height"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Height (cm)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "weight"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Weight (kg)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "eye_colour"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Eye colour",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "hair_colour"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Hair colour",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "birth_place"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Place of birth",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "resident_address"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Permanent place of residence",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "portrait_capture_date"
+           ],
+           "mandatory":false,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Portrait image timestamp",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "age_in_years"
+           ],
+           "mandatory":false,
+           "value_type":"uint",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Age in Years",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "age_birth_year"
+           ],
+           "mandatory":false,
+           "value_type":"uint",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Year",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "age_over_18"
+           ],
+           "mandatory":false,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Age over 18",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "issuing_jurisdiction"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Issuing jurisdiction",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "nationality"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Nationality",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "resident_city"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Resident city",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "resident_state"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Resident State",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "resident_postal_code"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Resident Postal Code",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "resident_country"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Resident Country",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "biometric_template_xx"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Fingerprint biometric information",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "family_name_national_character"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Family name in national characters",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "given_name_national_character"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Given name in national characters",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "org.iso.18013.5.1",
+              "signature_usual_mark"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Signature / usual mark",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"org.iso.18013.5.1"
+     }
   }
 }

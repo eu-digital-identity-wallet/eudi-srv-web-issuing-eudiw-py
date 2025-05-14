@@ -252,10 +252,10 @@ def getpidoid4vp():
                     == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
                 ):
                     is_ageOver18 = True
-                    attributesForm.update({"user_pseudonym": str(uuid4())})
+                    attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
             elif "vct" in cred_request:
                 if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
-                    attributesForm.update({"user_pseudonym": str(uuid4())})
+                    attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
     elif (
         "authorization_params" in session and "scope" in session["authorization_params"]
@@ -267,7 +267,7 @@ def getpidoid4vp():
             in cred_scopes
         ):
             is_ageOver18 = True
-            attributesForm.update({"user_pseudonym": str(uuid4())})
+            attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
     if is_ageOver18 == True:
         for doctype in mdoc_json:
@@ -335,7 +335,7 @@ def getpidoid4vp():
 
         attributesForm = getAttributesForm(credentials_requested)
         if "user_pseudonym" in attributesForm:
-            attributesForm.update({"user_pseudonym": str(uuid4())})
+            attributesForm.update({"user_pseudonym": {"type":"string", "filled_value":str(uuid4())}})
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
@@ -346,8 +346,6 @@ def getpidoid4vp():
                 elif attribute in attributesForm2:
                     attributesForm2[attribute]["filled_value"] = value
 
-        #print("\nAttributes form1: ", attributesForm)
-        #print("\nAttributes form2: ", attributesForm2)
         
         return render_template(
             "dynamic/dynamic-form.html",

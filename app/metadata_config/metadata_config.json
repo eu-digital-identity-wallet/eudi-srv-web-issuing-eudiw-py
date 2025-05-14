@@ -1,9 +1,29 @@
 {
   "credential_issuer": "https://issuer.eudiw.dev",
   "credential_endpoint": "https://issuer.eudiw.dev/credential",
-  "batch_credential_endpoint": "https://issuer.eudiw.dev/batch_credential",
   "notification_endpoint": "https://issuer.eudiw.dev/notification",
   "deferred_credential_endpoint": "https://issuer.eudiw.dev/deferred_credential",
+  "nonce_endpoint":"https://issuer.eudiw.dev/nonce",
+  "batch_credential_issuance": {
+      "batch_size": 15
+    },
+  "credential_response_encryption": {
+    "alg_values_supported": [
+      "RSA1_5",
+      "RSA-OAEP",
+      "RSA-OAEP-256",
+      "ECDH-ES"
+    ],
+    "enc_values_supported": [
+      "A128CBC-HS256",
+      "A192CBC-HS384",
+      "A256CBC-HS512",
+      "A128GCM",
+      "A192GCM",
+      "A256GCM"
+    ],
+    "encryption_required": false
+  },
   "display": [
     {
     "name": "Digital Credentials Issuer",

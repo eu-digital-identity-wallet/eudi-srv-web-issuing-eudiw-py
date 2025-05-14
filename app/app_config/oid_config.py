@@ -275,6 +275,11 @@ CONFIG = {
           "class": "openid4v.openid_credential_issuer.notification.Notification",
           "kwargs":{}
         },
+        "nonce": {
+          "path": "nonce",
+          "class": "openid4v.openid_credential_issuer.nonce.Nonce",
+          "kwargs":{}
+        },
         "deferred_credential": {
           "path": "deferred_credential",
           "class": "openid4v.openid_credential_issuer.deferred_credential.Deferred_Credential",

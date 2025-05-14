@@ -2,7 +2,7 @@
   "eu.europa.ec.eudi.loyalty_mdoc": {
       "format": "mso_mdoc",
       "doctype": "eu.europa.ec.eudi.loyalty.1",
-      "scope": "eu.europa.ec.eudi.loyalty.1",
+      "scope": "eu.europa.ec.eudi.loyalty_mdoc",
       "cryptographic_binding_methods_supported": [
         "jwk", "cose_key"
       ],
@@ -13,17 +13,6 @@
         "jwt": {
           "proof_signing_alg_values_supported": [
             "ES256"
-          ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
           ]
         }
       },
@@ -37,9 +26,9 @@
           }
         }
       ],
-      "claims": {
-        "eu.europa.ec.eudi.loyalty.1": {
-          "given_name": {
+      "claims": [
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","given_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -50,7 +39,8 @@
               }
             ]
           },
-          "family_name": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","family_name"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -60,7 +50,8 @@
                 "locale": "en"              }
             ]
           },
-          "company": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","company"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -70,7 +61,8 @@
                 "locale": "en"              }
             ]
           },
-          "client_id": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","client_id"],
             "mandatory": true,
             "value_type":"string",
             "source":"user",
@@ -80,7 +72,8 @@
                 "locale": "en"              }
             ]
           },
-          "issuance_date": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","issuance_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -90,7 +83,8 @@
               }
             ]
           },
-          "expiry_date": {
+          {
+            "path":["eu.europa.ec.eudi.loyalty.1","expiry_date"],
             "mandatory": true,
             "source":"issuer",
             "display": [
@@ -100,7 +94,13 @@
               }
             ]
           }
+      ],
+      "issuer_config":{
+            "issuing_authority":"Test PID issuer",
+            "organization_id":"EUDI Wallet Reference Implementation",
+            "validity":90,
+            "organization_name":"Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.loyalty.1"
         }
-      }
     }
   }

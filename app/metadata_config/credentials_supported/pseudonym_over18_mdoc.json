@@ -1,105 +1,126 @@
 {
-  "eu.europa.ec.eudi.pseudonym_over18_mdoc": {
-      "format": "mso_mdoc",
-      "doctype": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
-      "scope": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
-      "cryptographic_binding_methods_supported": [
-        "jwk", "cose_key"
+   "eu.europa.ec.eudi.pseudonym_over18_mdoc":{
+      "format":"mso_mdoc",
+      "doctype":"eu.europa.ec.eudi.pseudonym.age_over_18.1",
+      "scope":"eu.europa.ec.eudi.pseudonym_over18_mdoc",
+      "cryptographic_binding_methods_supported":[
+         "jwk",
+         "cose_key"
       ],
-      "credential_signing_alg_values_supported": [
-        "ES256"
+      "credential_signing_alg_values_supported":[
+         "ES256"
       ],
-      "proof_types_supported": {
-        "jwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ]
-        },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
-        }
+      "proof_types_supported":{
+         "jwt":{
+            "proof_signing_alg_values_supported":[
+               "ES256"
+            ]
+         }
       },
-      "display": [
-        {
-          "name": "Age over 18 Pseudonym",
-          "locale": "en",
-          "logo": {
-            "uri": "https://examplestate.com/public/pid.png",
-            "alt_text": "A square figure of a Age over 18"
-          }
-        }
+      "display":[
+         {
+            "name":"Age over 18 Pseudonym",
+            "locale":"en",
+            "logo":{
+               "uri":"https://examplestate.com/public/pid.png",
+               "alt_text":"A square figure of a Age over 18"
+            }
+         }
       ],
-      "claims": {
-        "eu.europa.ec.eudi.pseudonym.age_over_18.1": {
-          "user_pseudonym": {
-            "mandatory": true,
+      "claims":[
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "user_pseudonym"
+            ],
+            "mandatory":true,
             "value_type":"string",
             "source":"issuer",
-            "display": [
-              {
-                "name": "User pseudonym",
-                "locale": "en"              }
+            "display":[
+               {
+                  "name":"User pseudonym",
+                  "locale":"en"
+               }
             ]
-          },
-          "age_over_18": {
-            "mandatory": true,
+         },
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "age_over_18"
+            ],
+            "mandatory":true,
             "value_type":"bool",
             "source":"user",
-            "display": [
-              {
-                "name": "Age Over 18",
-                "locale": "en"              }
+            "display":[
+               {
+                  "name":"Age Over 18",
+                  "locale":"en"
+               }
             ]
-          },
-          "issuance_date": {
-            "mandatory": true,
+         },
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "issuance_date"
+            ],
+            "mandatory":true,
             "source":"issuer",
-            "display": [
-              {
-                "name": "Issuance Date",
-                "locale": "en"
-              }
+            "display":[
+               {
+                  "name":"Issuance Date",
+                  "locale":"en"
+               }
             ]
-          },
-          "expiry_date": {
-            "mandatory": true,
+         },
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "expiry_date"
+            ],
+            "mandatory":true,
             "source":"issuer",
-            "display": [
-              {
-                "name": "Expiry Date",
-                "locale": "en"
-              }
+            "display":[
+               {
+                  "name":"Expiry Date",
+                  "locale":"en"
+               }
             ]
-          },
-          "issuing_country": {
-            "mandatory": true,
+         },
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "issuing_country"
+            ],
+            "mandatory":true,
             "source":"issuer",
-            "display": [
-              {
-                "name": "Issuing Country",
-                "locale": "en"
-              }
+            "display":[
+               {
+                  "name":"Issuing Country",
+                  "locale":"en"
+               }
             ]
-          },
-          "issuing_authority": {
-            "mandatory": true,
+         },
+         {
+            "path":[
+               "eu.europa.ec.eudi.pseudonym.age_over_18.1",
+               "issuing_authority"
+            ],
+            "mandatory":true,
             "source":"issuer",
-            "display": [
-              {
-                "name": "Issuing Authority",
-                "locale": "en"
-              }
+            "display":[
+               {
+                  "name":"Issuing Authority",
+                  "locale":"en"
+               }
             ]
-          }
-        }
+         }
+      ],
+      "issuer_config":{
+         "issuing_authority":"Test PID issuer",
+         "organization_id":"EUDI Wallet Reference Implementation",
+         "validity":90,
+         "organization_name":"Test PID issuer",
+         "namespace":"eu.europa.ec.eudi.pseudonym.age_over_18.1"
       }
-    }
-  }
+   }
+}

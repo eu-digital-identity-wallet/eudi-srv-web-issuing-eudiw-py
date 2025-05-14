@@ -22,6 +22,7 @@ Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT for
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
 """
 
+import copy
 import json
 import os
 import sys
@@ -50,13 +51,30 @@ from .app_config.config_service import ConfService as log
 
 
 oidc_metadata = {}
+oidc_metadata_clean = {}
 openid_metadata = {}
 oauth_metadata = {}
 trusted_CAs = {}
 
 
+def remove_keys(obj, keys_to_remove):
+    if isinstance(obj, dict):
+        new_obj = {
+            k: remove_keys(v, keys_to_remove)
+            for k, v in obj.items()
+            if k not in keys_to_remove
+        }
+        return new_obj if new_obj else None
+    elif isinstance(obj, list):
+        new_list = [remove_keys(item, keys_to_remove) for item in obj]
+        new_list = [item for item in new_list if item is not None]
+        return new_list if new_list else None
+    else:
+        return obj
+    
 def setup_metadata():
     global oidc_metadata
+    global oidc_metadata_clean
     global openid_metadata
     global oauth_metadata
 
@@ -76,6 +94,7 @@ def setup_metadata():
 
         with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
             oidc_metadata = json.load(metadata)
+            oidc_metadata_clean = copy.deepcopy(oidc_metadata)
 
         for file in os.listdir(dir_path + "/metadata_config/credentials_supported/"):
             if file.endswith("json"):
@@ -99,9 +118,11 @@ def setup_metadata():
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
+    
+    oidc_metadata_clean["credential_configurations_supported"] = remove_keys(copy.deepcopy(credentials_supported),{"issuer_conditions", "issuer_config", "overall_issuer_conditions"})
+
 
 setup_metadata()
-
 
 def setup_trusted_CAs():
     global trusted_CAs
@@ -252,11 +273,13 @@ def create_app(test_config=None):
         route_dynamic,
         route_oid4vp,
         preauthorization,
+        revocation
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
+    app.register_blueprint(revocation.revocation)
     app.register_blueprint(route_oid4vp.oid4vp)
     app.register_blueprint(route_dynamic.dynamic)
     app.register_blueprint(preauthorization.preauth)
