@@ -1,173 +1,237 @@
 {
-"eu.europa.ec.eudi.msisdn_mdoc": {
-    "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.msisdn.1",
-    "scope": "eu.europa.ec.eudi.msisdn.1",
-    "policy": {
-        "batch_size": 50,
-        "one_time_use": true
-    },
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_alg_values_supported": [
+  "eu.europa.ec.eudi.msisdn_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"eu.europa.ec.eudi.msisdn.1",
+     "scope":"eu.europa.ec.eudi.msisdn_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
         -7
-      ],
-    "credential_crv_values_supported": [
-      1
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "MSISDN",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/msisdn.png",
-          "alt_text": "A square figure of a msisdn"
+     ],
+     "credential_crv_values_supported":[
+        1
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
+        },
+        "cwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ],
+           "proof_alg_values_supported":[
+              -7
+           ],
+           "proof_crv_values_supported":[
+              1
+           ]
         }
-      }
-    ],
-    "claims": {
-      "eu.europa.ec.eudi.msisdn.1": {
-        "phone_number": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Phone Number",
-              "locale": "en"            }
-          ]
-        },
-        "registered_family_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Registered Family Name",
-              "locale": "en"            }
-          ]
-        },
-        "registered_given_name": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Registered Given Name",
-              "locale": "en"            }
-          ]
-        },
-        "contract_owner": {
-          "mandatory": true,
-          "value_type":"bool",
-          "source":"user",
-          "display": [
-            {
-              "name": "Contract Owner",
-              "locale": "en"            }
-          ]
-        },
-        "end_user": {
-          "mandatory": true,
-          "value_type":"bool",
-          "source":"user",
-          "display": [
-            {
-              "name": "End User",
-              "locale": "en"            }
-          ]
-        },
-        "mobile_operator": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"Mobile Operator",
-          "display": [
-            {
-              "name": "",
-              "locale": "en"            }
-          ]
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuance Date",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Expiry Date",
-              "locale": "en"
-            }
-          ]
-        },
-        "credential_type": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Credential Type",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_organization": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuing Organization",
-              "locale": "en"            }
-          ]
-        },
-        "phone_number_in_use": {
-          "mandatory": false,
-          "value_type":"uint",
-          "source":"user",
-          "display": [
-            {
-              "name": "Phone Number in Use",
-              "locale": "en"            }
-          ]
-        },
-        "document_number": {
-          "mandatory": false,
-          "display": [
-            {
-              "name": "Document Number",
-              "locale": "en"            }
-          ]
+     },
+     "display":[
+        {
+           "name":"MSISDN",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/msisdn.png",
+              "alt_text":"A square figure of a msisdn"
+           }
         }
-      }
-    }
+     ],
+     "claims":[
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "phone_number"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Phone Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "registered_family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Registered Family Name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "registered_given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Registered Given Name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "contract_owner"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Contract Owner",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "end_user"
+           ],
+           "mandatory":true,
+           "value_type":"bool",
+           "source":"user",
+           "display":[
+              {
+                 "name":"End User",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "mobile_operator"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Mobile Operator",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "credential_type"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Credential Type",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "issuing_organization"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Organization",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "phone_number_in_use"
+           ],
+           "mandatory":false,
+           "value_type":"uint",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Phone Number in Use",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.msisdn.1",
+              "document_number"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Document Number",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"eu.europa.ec.eudi.msisdn.1",
+        "credential_type": "MSISDN"
+     }
   }
 }

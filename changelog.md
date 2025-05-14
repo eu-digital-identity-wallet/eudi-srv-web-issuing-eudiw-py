@@ -123,3 +123,15 @@ _15 Apr 2025_
 - Fix jwk coordinate padding
 - remove location_status from PID mdoc
 
+## [0.8.0]
+
+_05 May 2025_
+### Added:
+- Nonce Endpoint
+
+### Changed
+- Credential endpoint oid4vci d15
+- Deferred endpoint oid4vci d15
+- Metadata oid4vci d15
+- Set scopes to credential id
+- Further separation of sd-jwt vc and mdoc formatters based on metadata

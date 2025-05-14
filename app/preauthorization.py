@@ -105,12 +105,10 @@ def preauth_form():
             continue
         if "option" in key and "on" in value:
             continue
-        #print("\nKey: ", key)
         if '[' not in key and ']' not in key:
             grouped.update({key:value})
         else:
             parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            #print("\nParts: ", parts)
             
             sub_key = ""
             if '-' in key:
@@ -123,15 +121,12 @@ def preauth_form():
                 else:
                     sub_key = parts[1]
                     index = 0
-                #print("\nSub Key: ", sub_key)
 
             else:
 
                 base_key = parts[0]
                 index = int(parts[1])
                 sub_key = parts[2]
-
-            #print("\nBase Key: : ", base_key)
             
             if base_key not in grouped:
                 grouped.update({base_key:[{sub_key:value}]})
@@ -145,12 +140,7 @@ def preauth_form():
     for item in grouped:
 
         if item == "nationality":
-            #print("\nNationality")
-            #print("\nkey: ", item)
-            #print("\nvalue: ", grouped[item])
             cleaned_data[item] = [item['country_code'] for item in grouped[item]]
-
-            #print("\n", cleaned_data[item])
             
         elif item == "portrait":
             if grouped[item] == "Port1":
@@ -244,7 +234,7 @@ def preauth_form():
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
 
-        doctype_config=cfgservice.config_doctype[scope]
+        doctype_config=credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])

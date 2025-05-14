@@ -63,7 +63,7 @@ import werkzeug
 
 from idpyoidc.server.exception import FailedAuthentication, ClientAuthenticationError
 from idpyoidc.server.oidc.token import Token
-from app.misc import auth_error_redirect, authentication_error_redirect, scope2details
+from app.misc import auth_error_redirect, authentication_error_redirect, scope2details, vct2id
 
 from datetime import datetime, timedelta
 
@@ -73,7 +73,7 @@ import requests
 from .app_config.config_service import ConfService as cfgservice
 from .app_config.config_oidc_endpoints import ConfService as cfgoidc
 
-from . import oidc_metadata, openid_metadata, oauth_metadata
+from . import oidc_metadata, openid_metadata, oauth_metadata, oidc_metadata_clean
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -237,7 +237,7 @@ def verify_user():
 def well_known(service):
     if service == "openid-credential-issuer":
         info = {
-            "response": oidc_metadata,
+            "response": oidc_metadata_clean,
             "http_headers": [
                 ("Content-type", "application/json; charset=utf-8"),
                 ("Pragma", "no-cache"),
@@ -578,9 +578,11 @@ def auth_choice():
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
+
         elif "vct" in cred:
-            if cred["vct"] not in credentials_requested:
-                credentials_requested.append(cred["vct"])
+            cred_id = vct2id(cred["vct"])
+            if cred_id not in credentials_requested:
+                credentials_requested.append(cred_id)
 
     for cred in credentials_requested:
         if (
@@ -588,11 +590,22 @@ def auth_choice():
             and cred not in supported_credencials["country_selection"]
         ):
             country_selection = False
+
         elif (
             cred not in supported_credencials["PID_login"]
             and cred in supported_credencials["country_selection"]
         ):
             pid_auth = False
+        
+        elif cred not in supported_credencials["PID_login"] and cred not in supported_credencials["country_selection"]:
+            country_selection = False
+            pid_auth = False
+
+    if country_selection == False and pid_auth == True:
+        return redirect(cfgservice.service_url + "oid4vp")
+    elif country_selection == True and pid_auth == False:
+        return redirect(cfgservice.service_url + "dynamic/")
+
 
     error = ""
     if pid_auth == False and country_selection == False:
@@ -686,13 +699,13 @@ def token():
 
         session_id = getSessionId_authCode(preauth_code)
 
-        cfgservice.app_logger.info(
+        """ cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
             + "Pre-Authorized Token Request, Payload: "
             + str(request.form.to_dict())
-        )
+        ) """
 
         if req_args["tx_code"] != transaction_codes[code]["tx_code"]:
             error_message = {
@@ -848,16 +861,21 @@ def credential():
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
     if isinstance(_response, Response):
+        if _response.content_type == "application/jwt":
+            response_str = str(_response.get_data())
+        else:
+            response_str = str(json.loads(_response.get_data()))
+
         cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
             + "Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
+            + response_str
         )
         return _response
 
-    if (
+    """ if (
         "transaction_id" in _response
         and _response["transaction_id"] not in deferredRequests
     ):
@@ -883,7 +901,7 @@ def credential():
             + str(_response)
         )
 
-        return make_response(jsonify(_response), 202)
+        return make_response(jsonify(_response), 202) """
 
     cfgservice.app_logger.info(
         ", Session ID: "
@@ -892,76 +910,6 @@ def credential():
         + "Credential response, Payload: "
         + str(_response)
     )
-    return _response
-
-
-@oidc.route("/batch_credential", methods=["POST"])
-def batchCredential():
-
-    headers = dict(request.headers)
-    payload = json.loads(request.data)
-
-    if "Authorization" not in headers:
-        return make_response("Authorization error", 400)
-
-    access_token = headers["Authorization"][7:]
-    session_id = getSessionId_accessToken(access_token)
-
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch Credential Request, Payload: "
-        + str(payload)
-    )
-
-    _response = service_endpoint(current_app.server.get_endpoint("credential"))
-
-    if isinstance(_response, Response):
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch Credential response, Payload: "
-            + str(json.loads(_response.get_data()))
-        )
-        return _response
-
-    if (
-        "transaction_id" in _response
-        and _response["transaction_id"] not in deferredRequests
-    ):
-
-        request_data = request.data
-        request_headers = dict(request.headers)
-        deferredRequests.update(
-            {
-                _response["transaction_id"]: {
-                    "data": request_data,
-                    "headers": request_headers,
-                    "expires": datetime.now()
-                    + timedelta(minutes=cfgservice.deffered_expiry),
-                }
-            }
-        )
-
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Batch credential response, Payload: "
-            + str(_response)
-        )
-        return make_response(jsonify(_response), 202)
-
-    cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Batch credential response, Payload: "
-        + str(_response)
-    )
-
     return _response
 
 
@@ -1007,6 +955,25 @@ def notification():
 
     return _resp
 
+@oidc.route("/nonce", methods=["POST"])
+def nonce():
+
+    _resp = service_endpoint(current_app.server.get_endpoint("nonce"))
+
+    if isinstance(_resp, Response):
+        cfgservice.app_logger.info(
+            "Nonce response, Payload: "
+            + str(_resp)
+        )
+        return _resp
+
+    cfgservice.app_logger.info(
+        "Nonce response, Payload: "
+        + str(_resp)
+    )
+
+    return _resp
+
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
@@ -1027,15 +994,22 @@ def deferred_credential():
         + str(payload)
     )
 
+    current_app.server.get_endpoint("credential").process_deferred()
+
     _resp = service_endpoint(current_app.server.get_endpoint("deferred_credential"))
 
     if isinstance(_resp, Response):
+        if _resp.content_type == "application/jwt":
+            response_str = str(_resp.get_data())
+        else:
+            response_str = str(json.loads(_resp.get_data()))
+
         cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
-            + "Deferred response, Payload: "
-            + str(json.loads(_resp.get_data()))
+            + "Credential response, Payload: "
+            + response_str
         )
         return _resp
 
@@ -1063,7 +1037,7 @@ def credential_offer():
     for cred in credentialsSupported:
         credential = credentialsSupported[cred]
 
-        if credential["format"] == "vc+sd-jwt":
+        if credential["format"] == "dc+sd-jwt":
             # if credential["scope"] == "eu.europa.ec.eudiw.pid.1":
             if (
                 cred in cfgservice.auth_method_supported_credencials["PID_login"]
@@ -1152,7 +1126,6 @@ def credentialOffer():
                 }
 
                 reference_id = str(uuid.uuid4())
-                #print("\nreference_id: ", reference_id)
                 credential_offer_references.update({reference_id:{"credential_offer":credential_offer, "expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)}})
 
                 # create URI
@@ -1200,7 +1173,6 @@ def credentialOffer():
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])
 def offer_reference(reference_id):
-    #print("\nReferences: ", credential_offer_references)
     return credential_offer_references[reference_id]["credential_offer"]
 
 """ @oidc.route("/testgetauth", methods=["GET"])
@@ -1240,6 +1212,7 @@ def service_endpoint(endpoint):
             req_args["oidc_config"] = cfgoidc
             req_args["aud"] = cfgservice.service_url[:-1]
             args = endpoint.process_request(req_args)
+
             if "response_args" in args:
                 if "error" in args["response_args"]:
                     return (
@@ -1248,6 +1221,10 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
+            if "encrypted_response" in args:
+                response = make_response(args["encrypted_response"])
+                response.headers["Content-Type"] = "application/jwt"
+                return response
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
                     cfgservice.app_logger.error("Error response: {}".format(args))
@@ -1283,6 +1260,28 @@ def service_endpoint(endpoint):
             )
 
         return _resp
+    
+    if endpoint.name == "nonce":
+        try:
+            req_args = {}
+            req_args["key_path"] = cfgservice.nonce_key
+            req_args["iss"] = cfgservice.service_url[:-1]
+            req_args["source_endpoint"] = cfgservice.service_url + "nonce"
+            req_args["aud"] = [cfgservice.service_url + "credential"]
+            _resp = endpoint.process_request(req_args)
+
+            if isinstance(_resp, ResponseMessage) and "error" in _resp:
+                cfgservice.app_logger.error("Error response: {}".format(_resp))
+                _resp = make_response(_resp.to_json(), 400)
+
+        except Exception as err:
+            cfgservice.app_logger.error(err)
+            return make_response(
+                json.dumps({"error": "invalid_request", "error_description": str(err)}),
+                400,
+            )
+
+        return _resp
 
     if endpoint.name == "deferred_credential":
         try:
@@ -1299,6 +1298,12 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
+            
+            elif "encrypted_response" in args:
+                response = make_response(args["encrypted_response"])
+                response.headers["Content-Type"] = "application/jwt"
+                return response
+            
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
                     cfgservice.app_logger.error("Error response: {}".format(args))

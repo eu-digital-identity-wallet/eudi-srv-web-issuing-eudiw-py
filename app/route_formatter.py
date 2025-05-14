@@ -89,7 +89,7 @@ def cborformatter():
     """
 
     (b, l) = validate_mandatory_args(
-        request.json, ["version", "country", "doctype", "device_publickey", "data"]
+        request.json, ["version", "country", "credential_metadata", "device_publickey", "data"]
     )
     if not b:  # nota all mandatory args are present
         return jsonify(
@@ -114,7 +114,7 @@ def cborformatter():
             }
         )
 
-    if request.json["doctype"] == "org.iso.18013.5.1.mDL":
+    """if request.json["doctype"] == "org.iso.18013.5.1.mDL":
         (b, l) = validate_mandatory_args(
             request.json["data"]["org.iso.18013.5.1"],
             [
@@ -136,9 +136,9 @@ def cborformatter():
         (b, l) = validate_mandatory_args(
             request.json["data"]["eu.europa.ec.eudi.pid.1"],
             ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
-        )
+        ) """
 
-    if request.json["doctype"] == "org.iso.18013.5.1.mDL":
+    if request.json["credential_metadata"]["doctype"] == "org.iso.18013.5.1.mDL":
         expiry_date = request.json["data"]["org.iso.18013.5.1"].get("expiry_date")
         issue_date = request.json["data"]["org.iso.18013.5.1"].get("issue_date")
 
@@ -172,7 +172,7 @@ def cborformatter():
     
     base64_mdoc = mdocFormatter(
         request.json["data"],
-        request.json["doctype"],
+        request.json["credential_metadata"],
         request.json["country"],
         request.json["device_publickey"],
     )
@@ -205,7 +205,7 @@ def sd_jwtformatter():
     + error_message - Error information.
     """
 
-    (b, l) = validate_mandatory_args(
+    """ (b, l) = validate_mandatory_args(
         request.json, ["version", "country", "doctype", "device_publickey", "data"]
     )
     if not b:  # nota all mandatory args are present
@@ -215,31 +215,13 @@ def sd_jwtformatter():
                 "error_message": cfgservice.error_list["401"],
                 "mdoc": "",
             }
-        )
+        ) """
 
     PID = request.get_json()
 
-    if PID["doctype"] == "org.iso.18013.5.1.mDL":
+    """   if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
         (b, l) = validate_mandatory_args(
-            PID["data"]["claims"]["org.iso.18013.5.1"],
-            [
-                "family_name",
-                "given_name",
-                "birth_date",
-                "issue_date",
-                "expiry_date",
-                "issuing_country",
-                "issuing_authority",
-                "document_number",
-                "portrait",
-                "driving_privileges",
-                "un_distinguishing_sign",
-            ],
-        )
-
-    if PID["doctype"] == "eu.europa.ec.eudi.pid.1":
-        (b, l) = validate_mandatory_args(
-            PID["data"]["claims"]["eu.europa.ec.eudi.pid.1"],
+            PID["data"]["claims"],
             ["family_name", "given_name", "birth_date", "nationality", "birth_place"],
         )
     if not b:  # nota all mandatory args are present
@@ -249,7 +231,7 @@ def sd_jwtformatter():
                 "error_message": cfgservice.error_list["401"],
                 "mdoc": "",
             }
-        )
+        ) """
 
     # try:
 

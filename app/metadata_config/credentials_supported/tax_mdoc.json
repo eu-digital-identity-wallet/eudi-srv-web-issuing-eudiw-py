@@ -1,197 +1,265 @@
 {
-  "eu.europa.ec.eudi.tax_mdoc": {
-      "format": "mso_mdoc",
-      "doctype": "eu.europa.ec.eudi.tax.1",
-      "scope": "eu.europa.ec.eudi.tax.1",
-      "policy": {
-          "batch_size": 50,
-          "one_time_use": true
-      },
-      "cryptographic_binding_methods_supported": [
-        "jwk", "cose_key"
-      ],
-      "credential_alg_values_supported": [
-          -7
-        ],
-      "credential_crv_values_supported": [
+  "eu.europa.ec.eudi.tax_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"eu.europa.ec.eudi.tax.1",
+     "scope":"eu.europa.ec.eudi.tax_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
+        -7
+     ],
+     "credential_crv_values_supported":[
         1
-      ],
-      "credential_signing_alg_values_supported": [
+     ],
+     "credential_signing_alg_values_supported":[
         "ES256"
-      ],
-      "proof_types_supported": {
-        "jwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ]
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         },
-        "cwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ],
-          "proof_alg_values_supported": [
-            -7
-          ],
-          "proof_crv_values_supported": [
-            1
-          ]
+        "cwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ],
+           "proof_alg_values_supported":[
+              -7
+           ],
+           "proof_crv_values_supported":[
+              1
+           ]
         }
-      },
-      "display": [
+     },
+     "display":[
         {
-          "name": "Tax Number",
-          "locale": "en",
-          "logo": {
-            "uri": "https://examplestate.com/public/tax.png",
-            "alt_text": "A square figure of a tax"
-          }
+           "name":"Tax Number",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/tax.png",
+              "alt_text":"A square figure of a tax"
+           }
         }
-      ],
-      "claims": {
-        "eu.europa.ec.eudi.tax.1": {
-          "tax_number": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
+     ],
+     "claims":[
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "tax_number"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Tax Number",
-                "locale": "en"            }
-            ]
-          },
-          "affiliation_country": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Affiliation Country",
-                "locale": "en"            }
-            ]
-          },
-          "registered_given_name": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Registered Given Name",
-                "locale": "en"            }
-            ]
-          },
-          "registered_family_name": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Registered Family Name",
-                "locale": "en"            }
-            ]
-          },
-          "resident_address": {
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Resident Address",
-                "locale": "en"            }
-            ]
-          },
-          "birth_date": {
-            "mandatory": true,
-            "value_type":"full-date",
-            "source":"user",
-            "display": [
-              {
-                "name": "Birth Date",
-                "locale": "en"
+                 "name":"Tax Number",
+                 "locale":"en"
               }
-            ]
-          },
-          "church_tax_ID": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "affiliation_country"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Church Tax ID",
-                "locale": "en"
+                 "name":"Affiliation Country",
+                 "locale":"en"
               }
-            ]
-          },
-          "iban": {
-            "mandatory": false,
-            "value_type":"string",
-            "source":"user",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "registered_given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "IBAN",
-                "locale": "en"
+                 "name":"Registered Given Name",
+                 "locale":"en"
               }
-            ]
-          },
-          "credential_type": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "registered_family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Credential Type",
-                "locale": "en"
+                 "name":"Registered Family Name",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuance_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "resident_address"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Issuance Date",
-                "locale": "en"
+                 "name":"Resident Address",
+                 "locale":"en"
               }
-            ]
-          },
-          "expiry_date": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "birth_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
               {
-                "name": "Expiry Date",
-                "locale": "en"
+                 "name":"Birth Date",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_authority": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "church_tax_ID"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "Issuing Authority",
-                "locale": "en"
+                 "name":"Church Tax ID",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_jurisdiction": {
-            "mandatory": false,
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "iban"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
               {
-                "name": "",
-                "locale": "en"
+                 "name":"IBAN",
+                 "locale":"en"
               }
-            ]
-          },
-          "issuing_country": {
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "credential_type"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
               {
-                "name": "Issuing Country",
-                "locale": "en"
+                 "name":"Credential Type",
+                 "locale":"en"
               }
-            ]
-          }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "issuing_jurisdiction"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Issuing Jurisdiction",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.tax.1",
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Country",
+                 "locale":"en"
+              }
+           ]
         }
-      }
-    }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "namespace":"eu.europa.ec.eudi.tax.1",
+        "credential_type": "Tax Number"
+     }
   }
+}

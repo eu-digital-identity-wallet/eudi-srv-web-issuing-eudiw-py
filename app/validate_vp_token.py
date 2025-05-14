@@ -65,16 +65,6 @@ def validate_vp_token(response_json, credentials_requested):
 
         return True, "Definition id received is different from the requested."
 
-    elif (
-        response_json["presentation_submission"]["descriptor_map"][0]["id"]
-        != auth_request_values["id"]
-    ):
-
-        return (
-            True,
-            "Id from descriptor is not same as the id in the authorization request.",
-        )
-
     elif response_json["presentation_submission"]["descriptor_map"][0]["path"] == "$":
 
         pos = 0

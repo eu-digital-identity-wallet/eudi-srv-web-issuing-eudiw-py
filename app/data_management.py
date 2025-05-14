@@ -98,22 +98,27 @@ def clear_par():
                 + str(expire_time)
             ) """
 
-    for req in deferredRequests.copy():
+    """ for req in deferredRequests.copy():
             
             if datetime.now() > deferredRequests[req]["expires"]:
                 deferredRequests.pop(req)
             else:
                 request_data = json.loads(deferredRequests[req]["data"])
+                print("\ndata: ", request_data)
                 request_data.update({"transaction_id": req})
+                print("\ntransaction_id: ", req)
                 request_data = json.dumps(request_data)
+                print("\ndata2: ", request_data)
                 request_headers = deferredRequests[req]["headers"]
+                print("\nheaders: ", request_headers)
 
                 response = requests.post(cfgservice.service_url+"credential", data=request_data, headers=request_headers)
+                print("\nresponse", response.text)
                 response_data = response.json()
 
                 if response.status_code == 200:
-                    if "credential" in response_data or "credential_responses" in response_data:
-                        deferredRequests.pop(req)
+                    if "credentials" in response_data or "encrypted_response" in response_data and not "decrypted_transaction_id" in response_data:
+                        deferredRequests.pop(req) """
     
     for code in transaction_codes.copy():
         if datetime.now() > transaction_codes[code]["expires"]:

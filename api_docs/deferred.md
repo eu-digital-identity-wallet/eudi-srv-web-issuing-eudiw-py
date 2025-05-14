@@ -2,10 +2,8 @@
 
 This endpoint is used to issue a Credential previously requested at the Credential Endpoint or Batch Credential Endpoint in cases where the Credential Issuer was not able to immediately issue this Credential. Support for this endpoint is OPTIONAL.
 
-There must be a batch credential request or credential and where its response contains:
+There must be a credential request where it's response contains:
 
-+ *c_nonce* - Required. String containing a nonce
-+ *c_nonce_expires_in* - Required. Json integer denoting lifetime of c_nonce
 + *transaction_id* - String identifying a Deferred Issuance transaction
 
 Deferred Endpoint only works if the response contains a *transaction_id* which is then used to make the request.
@@ -29,8 +27,6 @@ Deferred Endpoint only works if the response contains a *transaction_id* which i
 
 Response:
 
-+ *c_nonce* - String containing a nonce
-+ *c_nonce_expires_in* - Json integer denoting lifetime of c_nonce
-+ *credential* - Optional. Contains issued Credential
-+ *credential_responses* - Optional. Contains issued Credentials
-+ *notification_id* - Used by the Wallet to notify the Credential Issuer of certain events for issued Credentials. These events enable the Credential Issuer to take subsequent actions after issuance.
++ *credentials* - OPTIONAL. Contains an array of one or more issued Credentials. It MUST NOT be used if the transaction_id parameter is present.
++ *transaction_id* - OPTIONAL. String identifying a Deferred Issuance transaction. This parameter is contained in the response if the Credential Issuer cannot immediately issue the Credential. 
++ *notification_id* - OPTIONAL. String identifying one or more Credentials issued in one Credential Response.

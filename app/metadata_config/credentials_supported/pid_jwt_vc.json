@@ -1,374 +1,580 @@
 {
-  "eu.europa.ec.eudi.pid_jwt_vc_json": {
-    "format": "vc+sd-jwt",
-    "scope": "eu.europa.ec.eudi.pid.1",
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "PID test (sd-jwt-vc)",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/pid.png",
-          "alt_text": "A square figure of a PID"
+  "eu.europa.ec.eudi.pid_vc_sd_jwt":{
+     "format":"dc+sd-jwt",
+     "scope":"eu.europa.ec.eudi.pid_vc_sd_jwt",
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         }
-      }
-    ],
-    "vct": "urn:eu.europa.ec.eudi:pid:1",
-    "claims": {
-      "family_name": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Family Name(s)",
-            "locale": "en"            }
-        ]
-      },
-      "given_name": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Given Name(s)",
-            "locale": "en"            }
-        ]
-      },
-      "birth_date": {
-        "mandatory": true,
-        "value_type":"full-date",
-        "source":"user",
-        "display": [
-          {
-            "name": "Birth Date",
-            "locale": "en"            }
-        ]
-      },
-      "age_over_18": {
-        "mandatory": false,
-        "source":"user",
-        "value_type":"bool",
-        "display": [
-          {
-            "name": "Age Over 18",
-            "locale": "en"
-          }
-        ]
-      },
-      "age_in_years": {
-        "mandatory": false,
-        "value_type":"uint",
-        "display": [
-          {
-            "name": "Age in Years",
-            "locale": "en"
-          }
-        ]
-      },
-      "age_birth_year": {
-        "mandatory": false,
-        "value_type":"uint",
-        "display": [
-          {
-            "name": "Age Year of Birth",
-            "locale": "en"
-          }
-        ]
-      },
-      "family_name_birth": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Birth Family Name(s)",
-            "locale": "en"
-          }
-        ]
-      },
-      "given_name_birth": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Birth Given Name(s)",
-            "locale": "en"
-          }
-        ]
-      },
-      "birth_place": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Birth Place",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_address": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident Address",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_country": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident Country",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_state": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident State",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_city": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident City",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_postal_code": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident Postal Code",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_street": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident Street",
-            "locale": "en"
-          }
-        ]
-      },
-      "resident_house_number": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Resident House Number",
-            "locale": "en"
-          }
-        ]
-      },
-      "personal_administrative_number": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Personal Administrative Number",
-            "locale": "en"
-          }
-        ]
-      },
-      "sex": {
-        "mandatory": false,
-        "source":"user",
-        "value_type":"uint",
-        "display": [
-          {
-            "name": "Sex",
-            "locale": "en"
-          }
-        ]
-      },
-      "email_address": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Email Address",
-            "locale": "en"
-          }
-        ]
-      },
-      "mobile_phone_number": {
-        "mandatory": false,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Mobile Phone Number",
-            "locale": "en"
-          }
-        ]
-      },
-      "nationality": {
-        "mandatory": true,
-        "source":"user",
-        "value_type":"nationalities",
-        "display": [
-          {
-            "name": "Nationality",
-            "locale": "en"
-          }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 0,
-            "max": "n"
-            },
-          "nationalities":{
-            "country_code": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            }
-          }
+     },
+     "display":[
+        {
+           "name":"PID test (sd-jwt-vc)",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/pid.png",
+              "alt_text":"A square figure of a PID"
+           }
         }
-      },
-      "issuance_date": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuance Date",
-            "locale": "en"
-          }
-        ]
-      },
-      "expiry_date": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Expiry Date",
-            "locale": "en"
-          }
-        ]
-      },
-      "issuing_authority": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuance Authority",
-            "locale": "en"
-          }
-        ]
-      },
-      "document_number": {
-        "mandatory": false,
-        "value_type": "string",
-        "source": "user",
-        "display": [
-          {
-            "name": "Document Number",
-            "locale": "en"
-          }
-        ]
-      },
-      "location_status": {
-        "mandatory": false,
-        "value_type": "string",
-        "source": "user",
-        "display": [
-          {
-            "name": "Location Status",
-            "locale": "en"
-          }
-        ]
-      },
-      "trust_anchor": {
-        "mandatory": false,
-        "value_type": "string",
-        "source": "user",
-        "display": [
-          {
-            "name": "Trust Anchor",
-            "locale": "en"
-          }
-        ]
-      },
-      "issuing_country": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuing Country",
-            "locale": "en"
-          }
-        ]
-      },
-      "portrait": {
-          "mandatory": false,
-          "value_type":"jpeg",
-          "source":"user",
-          "display": [
-            {
-              "name": "Portrait Image",
-              "locale": "en"            }
-          ]
+     ],
+     "vct":"urn:eu.europa.ec.eudi:pid:1",
+     "claims":[
+        {
+           "path":[
+              "family_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Family Name(s)",
+                 "locale":"en"
+              }
+           ]
         },
-      "issuing_jurisdiction": {
-        "mandatory": false,
-        "display": [
-          {
-            "name": "Issuing Jurisdiction",
-            "locale": "en"
-          }
-        ]
-      }
-    }
+        {
+           "path":[
+              "given_name"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Given Name(s)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "birth_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "place_of_birth"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Place",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              }
+           }
+        },
+        {
+           "path":[
+              "place_of_birth",
+              "locality"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth locality",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "place_of_birth",
+              "region"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Region",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "place_of_birth",
+              "country"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Country",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "nationalities"
+           ],
+           "mandatory":true,
+           "source":"user",
+           "value_type":"list",
+           "display":[
+              {
+                 "name":"Nationalities",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":"n"
+              },
+              "nationalities":{
+                 "country_code":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 }
+              }
+           }
+        },
+        {
+           "path":[
+              "address"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"test",
+           "display":[
+              {
+                 "name":"Address",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              }
+           }
+        },
+        {
+           "path":[
+              "address",
+              "street_address"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Street",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "locality"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Locality",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "region"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Region",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "postal_code"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Postal Code",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "country"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Country",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "formatted"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"string",
+           "display":[
+              {
+                 "name":"Full Address",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "address",
+              "house_number"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"House Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "personal_administrative_number"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Personal Administrative Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "portrait"
+           ],
+           "mandatory":false,
+           "value_type":"jpeg",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Portrait Image",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "birth_family_name"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Family Name(s)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "birth_given_name"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Birth Given Name(s)",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "sex"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Sex",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_equal_or_over"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"18_test",
+           "display":[
+              {
+                 "name":"Age Over 18",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              }
+           }
+        },
+        {
+           "path":[
+              "email_address"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Email Address",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "mobile_phone_number"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Mobile Phone Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_equal_or_over",
+              "16"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"bool",
+           "display":[
+              {
+                 "name":"Age Over 16",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_equal_or_over",
+              "18"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"bool",
+           "display":[
+              {
+                 "name":"Age Over 18",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_equal_or_over",
+              "65"
+           ],
+           "mandatory":false,
+           "source":"user",
+           "value_type":"bool",
+           "display":[
+              {
+                 "name":"Age Over 65",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_in_years"
+           ],
+           "mandatory":false,
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Age in Years",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "age_birth_year"
+           ],
+           "mandatory":false,
+           "value_type":"uint",
+           "display":[
+              {
+                 "name":"Age Year of Birth",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "document_number"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Document Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "trust_anchor"
+           ],
+           "mandatory":false,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Trust Anchor",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Country",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_jurisdiction"
+           ],
+           "mandatory":false,
+           "display":[
+              {
+                 "name":"Issuing Jurisdiction",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+        "issuing_authority":"Test PID issuer",
+        "organization_id":"EUDI Wallet Reference Implementation",
+        "validity":90,
+        "organization_name":"Test PID issuer",
+        "doctype":"eu.europa.ec.eudi.pid.1"
+     }
   }
 }

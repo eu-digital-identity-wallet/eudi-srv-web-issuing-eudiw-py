@@ -1,372 +1,713 @@
 {
-  "eu.europa.ec.eudi.pda1_sd_jwt_vc": {
-    "format": "vc+sd-jwt",
-    "scope": "eu.europa.ec.eudi.pda1.1",
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
+   "eu.europa.ec.eudi.pda1_sd_jwt_vc":{
+      "format":"dc+sd-jwt",
+      "scope":"eu.europa.ec.eudi.pda1_sd_jwt_vc",
+      "cryptographic_binding_methods_supported":[
+         "jwk",
+         "cose_key"
+      ],
+      "credential_signing_alg_values_supported":[
+         "ES256"
+      ],
+      "proof_types_supported":{
+         "jwt":{
+            "proof_signing_alg_values_supported":[
+               "ES256"
+            ]
+         },
+         "cwt":{
+            "proof_signing_alg_values_supported":[
+               "ES256"
+            ],
+            "proof_alg_values_supported":[
+               -7
+            ],
+            "proof_crv_values_supported":[
+               1
+            ]
+         }
       },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
+      "display":[
+         {
+            "name":"PDA1 (sd-jwt-vc)",
+            "locale":"en",
+            "logo":{
+               "uri":"https://examplestate.com/public/pid.png",
+               "alt_text":"A square figure of a PID"
+            }
+         }
+      ],
+      "vct":"urn:eu.europa.ec.eudi:pda1:1",
+      "claims":[
+         {
+            "path":[
+               "credential_holder"
+            ],
+            "mandatory":true,
+            "value_type":"credential_holder_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Credential Holder",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":0,
+                  "max":1
+               }
+            }
+         },
+         {
+            "path":[
+               "credential_holder",
+               "family_name"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Family Name",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "credential_holder",
+               "given_name"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Given Name",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "credential_holder",
+               "birth_date"
+            ],
+            "mandatory":true,
+            "value_type":"full-date",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Birth Date",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "social_security_pin"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Social Security Pin",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details"
+            ],
+            "mandatory":true,
+            "value_type":"employment_details_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Employment Details",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":1,
+                  "max":"n"
+               }
+            }
+         },
+         {
+            "path":[
+               "employment_details",
+               "employment_type"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Employment Type",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "name"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Name",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "employer_id"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Employment ID",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "id_type"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"ID Type",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "street"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Street",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "town"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Town",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "postal_code"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Postal Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "employment_details",
+               "country_code"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Country Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work"
+            ],
+            "mandatory":true,
+            "value_type":"places_of_work_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Places of Work",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":1,
+                  "max":1
+               }
+            }
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work"
+            ],
+            "mandatory":false,
+            "value_type":"place_of_work_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Place of Work",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":0,
+                  "max":"n"
+               },
+               "not_used_if":{
+                  "logic":"any",
+                  "attributes":[
+                     "no_fixed_place"
+                  ]
+               }
+            }
+         },
+         {
+            "path":[
+               "places_of_work",
+               "no_fixed_place"
+            ],
+            "mandatory":false,
+            "value_type":"no_fixed_place_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"No Fixed Place",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":0,
+                  "max":"n"
+               },
+               "not_used_if":{
+                  "logic":"any",
+                  "attributes":[
+                     "place_of_work"
+                  ]
+               }
+            }
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "company"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Company",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "flag_base_home_state"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Flag Base Home State",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "company_id"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Company ID",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "id_type"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"ID Type",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "street"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Street",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "town"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Town",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "postal_code"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Postal Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "place_of_work",
+               "country_code"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Country Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "places_of_work",
+               "no_fixed_place",
+               "country_code"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Country Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "legislation"
+            ],
+            "mandatory":true,
+            "value_type":"legislation_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Legislation",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":1,
+                  "max":1
+               }
+            }
+         },
+         {
+            "path":[
+               "legislation",
+               "member_state"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Member State",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "legislation",
+               "transitional_rules"
+            ],
+            "mandatory":false,
+            "value_type":"boolean",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Transitional Rules",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "legislation",
+               "starting_date"
+            ],
+            "mandatory":true,
+            "value_type":"full-date",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Starting Date",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "legislation",
+               "ending_date"
+            ],
+            "mandatory":true,
+            "value_type":"full-date",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Ending Date",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "status_confirmation"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Status Confirmation",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "document_id"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Document ID",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "competent_institution"
+            ],
+            "mandatory":true,
+            "value_type":"competent_institution_attributes",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Competent Institution",
+                  "locale":"en"
+               }
+            ],
+            "issuer_conditions":{
+               "cardinality":{
+                  "min":1,
+                  "max":1
+               }
+            }
+         },
+         {
+            "path":[
+               "competent_institution",
+               "institution_id"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Institution ID",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "competent_institution",
+               "institution_name"
+            ],
+            "mandatory":false,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Institution Name",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "competent_institution",
+               "country_code"
+            ],
+            "mandatory":true,
+            "value_type":"string",
+            "source":"user",
+            "display":[
+               {
+                  "name":"Country Code",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "issuance_date"
+            ],
+            "mandatory":true,
+            "source":"issuer",
+            "display":[
+               {
+                  "name":"Issuance Date",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "expiry_date"
+            ],
+            "mandatory":true,
+            "source":"issuer",
+            "display":[
+               {
+                  "name":"Expiry Date",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "issuing_authority"
+            ],
+            "mandatory":true,
+            "source":"issuer",
+            "display":[
+               {
+                  "name":"Issuance Authority",
+                  "locale":"en"
+               }
+            ]
+         },
+         {
+            "path":[
+               "issuing_country"
+            ],
+            "mandatory":true,
+            "source":"issuer",
+            "display":[
+               {
+                  "name":"Issuing Country",
+                  "locale":"en"
+               }
+            ]
+         }
+      ],
+      "issuer_config":{
+         "issuing_authority":"Test PID issuer",
+         "organization_id":"EUDI Wallet Reference Implementation",
+         "validity":90,
+         "organization_name":"Test PID issuer",
+         "doctype":"eu.europa.ec.eudi.pda1.1"
       }
-    },
-    "display": [
-      {
-        "name": "PDA1 (sd-jwt-vc)",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/pid.png",
-          "alt_text": "A square figure of a PID"
-        }
-      }
-    ],
-    "vct": "urn:eu.europa.ec.eudi:pda1:1",
-    "claims": {
-      "credential_holder": {
-        "mandatory": true,
-        "value_type":"credential_holder_attributes",
-        "source":"user",
-        "display": [
-          {
-            "name": "Credential Holder",
-            "locale": "en"            }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 0,
-            "max": 1
-            },
-          "credential_holder_attributes":{
-            "family_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "given_name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "birth_date": {
-              "mandatory": true,
-              "value_type": "full-date",
-              "source": "user"
-            }
-          }
-        }
-      },
-      "social_security_pin": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Social Security Pin",
-            "locale": "en"            }
-        ]
-      },
-      "employment_details": {
-        "mandatory": true,
-        "value_type":"employment_details_attributes",
-        "source":"user",
-        "display": [
-          {
-            "name": "Employment Details",
-            "locale": "en"            }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 1,
-            "max": "n"
-          },
-          "employment_details_attributes":{
-            "employment_type": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "name": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "employer_id": {
-              "mandatory": false,
-              "value_type": "string",
-              "source": "user"
-            },
-            "id_type": {
-              "mandatory": false,
-              "value_type": "string",
-              "source": "user"
-            },
-            "street": {
-              "mandatory": false,
-              "value_type": "string",
-              "source": "user"
-            },
-            "town": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "postal_code": {
-              "mandatory": false,
-              "value_type": "string",
-              "source": "user"
-            },
-            "country_code": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            }
-          }
-        }
-      },
-      "places_of_work": {
-        "mandatory": true,
-        "value_type":"places_of_work_attributes",
-        "source":"user",
-        "display": [
-          {
-            "name": "Places of Work",
-            "locale": "en"            }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 1,
-            "max": 1
-          },
-          "places_of_work_attributes":{
-            "place_of_work": {
-              "mandatory": false,
-              "value_type": "place_of_work_attributes",
-              "source": "user",
-              "issuer_conditions": {
-                "cardinality": {
-                  "min": 0,
-                  "max": "n"
-                },
-                "not_used_if": {
-                    "logic": "any",
-                    "attributes": ["no_fixed_place"]
-                },
-                "place_of_work_attributes":{
-                  "company": {
-                    "mandatory": true,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "flag_base_home_state": {
-                    "mandatory": false,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "company_id": {
-                    "mandatory": false,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "id_type": {
-                    "mandatory": false,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "street": {
-                    "mandatory": false,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "town": {
-                    "mandatory": true,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "postal_code": {
-                    "mandatory": false,
-                    "value_type": "string",
-                    "source": "user"
-                  },
-                  "country_code": {
-                    "mandatory": true,
-                    "value_type": "string",
-                    "source": "user"
-                  }
-                }
-              }
-            },
-            "no_fixed_place": {
-              "mandatory": false,
-              "value_type": "no_fixed_place_attributes",
-              "source": "user",
-              "issuer_conditions": {
-                "cardinality": {
-                  "min": 0,
-                  "max": "n"
-                },
-                "not_used_if": {
-                    "logic": "any",
-                    "attributes": ["place_of_work"]
-                },
-                "no_fixed_place_attributes":{
-                  "country_code": {
-                    "mandatory": true,
-                    "value_type": "string",
-                    "source": "user"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "legislation": {
-        "mandatory": true,
-        "value_type":"legislation_attributes",
-        "source":"user",
-        "display": [
-          {
-            "name": "Legislation",
-            "locale": "en"            }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 1,
-            "max": 1
-          },
-          "legislation_attributes":{
-            "member_state": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "transitional_rules": {
-              "mandatory": false,
-              "value_type": "boolean",
-              "source": "user"
-            },
-            "starting_date": {
-              "mandatory": true,
-              "value_type": "full-date",
-              "source": "user"
-            },
-            "ending_date": {
-              "mandatory": true,
-              "value_type": "full-date",
-              "source": "user"
-            }
-          }
-        }
-      },
-      "status_confirmation": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Status Confirmation",
-            "locale": "en"            }
-        ]
-      },
-      "document_id": {
-        "mandatory": true,
-        "value_type":"string",
-        "source":"user",
-        "display": [
-          {
-            "name": "Document ID",
-            "locale": "en"            }
-        ]
-      },
-      "competent_institution": {
-        "mandatory": true,
-        "value_type":"competent_institution_attributes",
-        "source":"user",
-        "display": [
-          {
-            "name": "Institution ID",
-            "locale": "en"            }
-        ],
-        "issuer_conditions": {
-          "cardinality": {
-            "min": 1,
-            "max": 1
-          },
-          "competent_institution_attributes":{
-            "institution_id": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            },
-            "institution_name": {
-              "mandatory": false,
-              "value_type": "boolean",
-              "source": "user"
-            },
-            "country_code": {
-              "mandatory": true,
-              "value_type": "string",
-              "source": "user"
-            }
-          }
-        }
-      },
-      "issuance_date": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuance Date",
-            "locale": "en"
-          }
-        ]
-      },
-      "expiry_date": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Expiry Date",
-            "locale": "en"
-          }
-        ]
-      },
-      "issuing_authority": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuance Authority",
-            "locale": "en"
-          }
-        ]
-      },
-      "issuing_country": {
-        "mandatory": true,
-        "source":"issuer",
-        "display": [
-          {
-            "name": "Issuing Country",
-            "locale": "en"
-          }
-        ]
-      }
-    }
-  }
+   }
 }

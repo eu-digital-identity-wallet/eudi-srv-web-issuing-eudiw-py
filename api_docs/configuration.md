@@ -50,7 +50,6 @@ Example:
 ```json
 "credential_issuer": "{base_url}",
 "credential_endpoint": "{base_url}/credential",
-"batch_credential_endpoint": "{base_url}/batch_credential",
 "notification_endpoint": "{base_url}/notification",
 "deferred_credential_endpoint": "{base_url}/deferred_credential",
 ```

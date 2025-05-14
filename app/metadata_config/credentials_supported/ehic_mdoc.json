@@ -1,234 +1,280 @@
 {
-"eu.europa.ec.eudi.ehic_mdoc": {
-    "format": "mso_mdoc",
-    "doctype": "eu.europa.ec.eudi.ehic.1",
-    "scope": "eu.europa.ec.eudi.ehic.1",
-    "policy": {
-        "batch_size": 50,
-        "one_time_use": true
-    },
-    "cryptographic_binding_methods_supported": [
-      "jwk", "cose_key"
-    ],
-    "credential_alg_values_supported": [
+  "eu.europa.ec.eudi.ehic_mdoc":{
+     "format":"mso_mdoc",
+     "doctype":"eu.europa.ec.eudi.ehic.1",
+     "scope":"eu.europa.ec.eudi.ehic_mdoc",
+     "policy":{
+        "batch_size":50,
+        "one_time_use":true
+     },
+     "cryptographic_binding_methods_supported":[
+        "jwk",
+        "cose_key"
+     ],
+     "credential_alg_values_supported":[
         -7
-      ],
-    "credential_crv_values_supported": [
-      1
-    ],
-    "credential_signing_alg_values_supported": [
-      "ES256"
-    ],
-    "proof_types_supported": {
-      "jwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ]
-      },
-      "cwt": {
-        "proof_signing_alg_values_supported": [
-          "ES256"
-        ],
-        "proof_alg_values_supported": [
-          -7
-        ],
-        "proof_crv_values_supported": [
-          1
-        ]
-      }
-    },
-    "display": [
-      {
-        "name": "EHIC",
-        "locale": "en",
-        "logo": {
-          "uri": "https://examplestate.com/public/pid.png",
-          "alt_text": "A square figure of a PID"
+     ],
+     "credential_crv_values_supported":[
+        1
+     ],
+     "credential_signing_alg_values_supported":[
+        "ES256"
+     ],
+     "proof_types_supported":{
+        "jwt":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ]
         }
-      }
-    ],
-    "claims": {
-      "eu.europa.ec.eudi.ehic.1": {
-        "credential_holder": {
-          "mandatory": true,
-          "value_type":"credential_holder_attributes",
-          "source":"user",
-          "display": [
-            {
-              "name": "Credential Holder",
-              "locale": "en"            }
-          ],
-          "issuer_conditions": {
-            "cardinality": {
-              "min": 0,
-              "max": 1
-              },
-            "credential_holder_attributes":{
-              "family_name": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              },
-              "given_name": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              },
-              "birth_date": {
-                "mandatory": true,
-                "value_type": "full-date",
-                "source": "user"
-              }
-            }
-          }
-        },
-        "subject": {
-          "mandatory": true,
-          "value_type":"subject_attributes",
-          "source":"user",
-          "display": [
-            {
-              "name": "Subject",
-              "locale": "en"            }
-          ],
-          "issuer_conditions": {
-            "cardinality": {
-              "min": 0,
-              "max": 1
-              },
-            "subject_attributes":{
-              "family_name": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              },
-              "given_name": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              },
-              "birth_date": {
-                "mandatory": true,
-                "value_type": "full-date",
-                "source": "user"
-              }
-            }
-          }
-        },
-        "social_security_pin": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Social Security Pin",
-              "locale": "en"            }
-          ]
-        },
-        "starting_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Starting Date",
-              "locale": "en"            }
-          ]
-        },
-        "ending_date": {
-          "mandatory": true,
-          "value_type":"full-date",
-          "source":"user",
-          "display": [
-            {
-              "name": "Ending Date",
-              "locale": "en"            }
-          ]
-        },
-        "document_id": {
-          "mandatory": true,
-          "value_type":"string",
-          "source":"user",
-          "display": [
-            {
-              "name": "Document ID",
-              "locale": "en"            }
-          ]
-        },
-        "competent_institution": {
-          "mandatory": true,
-          "value_type":"competent_institution_attributes",
-          "source":"user",
-          "display": [
-            {
-              "name": "Institution ID",
-              "locale": "en"            }
-          ],
-          "issuer_conditions": {
-            "cardinality": {
-              "min": 1,
-              "max": 1
-            },
-            "competent_institution_attributes":{
-              "institution_id": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              },
-              "institution_name": {
-                "mandatory": false,
-                "value_type": "boolean",
-                "source": "user"
-              },
-              "country_code": {
-                "mandatory": true,
-                "value_type": "string",
-                "source": "user"
-              }
-            }
-          }
-        },
-        "issuance_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuance Date",
-              "locale": "en"
-            }
-          ]
-        },
-        "expiry_date": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Expiry Date",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_authority": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuance Authority",
-              "locale": "en"
-            }
-          ]
-        },
-        "issuing_country": {
-          "mandatory": true,
-          "source":"issuer",
-          "display": [
-            {
-              "name": "Issuing Country",
-              "locale": "en"
-            }
-          ]
+     },
+     "display":[
+        {
+           "name":"EHIC",
+           "locale":"en",
+           "logo":{
+              "uri":"https://examplestate.com/public/pid.png",
+              "alt_text":"A square figure of a PID"
+           }
         }
-      }
-    }
+     ],
+     "claims":[
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "credential_holder"
+           ],
+           "mandatory":true,
+           "value_type":"credential_holder_attributes",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Credential Holder",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              },
+              "credential_holder_attributes":{
+                 "family_name":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "given_name":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "birth_date":{
+                    "mandatory":true,
+                    "value_type":"full-date",
+                    "source":"user"
+                 }
+              }
+           }
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "subject"
+           ],
+           "mandatory":true,
+           "value_type":"subject_attributes",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Subject",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":0,
+                 "max":1
+              },
+              "subject_attributes":{
+                 "family_name":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "given_name":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "birth_date":{
+                    "mandatory":true,
+                    "value_type":"full-date",
+                    "source":"user"
+                 }
+              }
+           }
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "social_security_pin"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Social Security Pin",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "starting_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Starting Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "ending_date"
+           ],
+           "mandatory":true,
+           "value_type":"full-date",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Ending Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "document_id"
+           ],
+           "mandatory":true,
+           "value_type":"string",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Document ID",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "competent_institution"
+           ],
+           "mandatory":true,
+           "value_type":"competent_institution_attributes",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Institution ID",
+                 "locale":"en"
+              }
+           ],
+           "issuer_conditions":{
+              "cardinality":{
+                 "min":1,
+                 "max":1
+              },
+              "competent_institution_attributes":{
+                 "institution_id":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "institution_name":{
+                    "mandatory":false,
+                    "value_type":"string",
+                    "source":"user"
+                 },
+                 "country_code":{
+                    "mandatory":true,
+                    "value_type":"string",
+                    "source":"user"
+                 }
+              }
+           }
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "issuance_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "expiry_date"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry Date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuance Authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "eu.europa.ec.eudi.ehic.1",
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Country",
+                 "locale":"en"
+              }
+           ]
+        }
+     ],
+     "issuer_config":{
+            "issuing_authority":"Test PID issuer",
+            "organization_id":"EUDI Wallet Reference Implementation",
+            "validity":90,
+            "organization_name":"Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.ehic.1"
+        }
   }
 }

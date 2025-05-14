@@ -59,6 +59,8 @@ from misc import (
     scope2details,
     calculate_age,
     validate_image,
+    vct2doctype,
+    vct2id,
     vct2scope,
 )
 from dynamic_func import dynamic_formatter
@@ -114,7 +116,7 @@ def Supported_Countries():
                 credentials_requested.append(cred["credential_configuration_id"])
         elif "vct" in cred:
             if cred["vct"] not in credentials_requested:
-                credentials_requested.append(cred["vct"])
+                credentials_requested.append(vct2id(cred["vct"]))
 
     session["credentials_requested"] = credentials_requested
 
@@ -128,6 +130,15 @@ def Supported_Countries():
             display_countries.update(
                 {str(country): str(cfgcountries.supported_countries[country]["name"])}
             )
+    
+    if len(display_countries) == 1:
+        country = next(iter(display_countries))
+
+        session["returnURL"] = cfgserv.OpenID_first_endpoint
+        session["country"] = country
+        cfgserv.app_logger.info(", Session ID: " + session["session_id"] + ", " + "Authorization selection, Type: " + country)
+        return dynamic_R1(session["country"])
+
 
     form_keys = request.form.keys()
     form_country = request.form.get("country")
@@ -195,89 +206,6 @@ def dynamic_R1(country):
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
-        """ attributesForm2 = {
-            "health_insurance_id": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "patient_id": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "tax_number": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "one_time_token": {
-                "type": "string",
-                "filled_value": None,
-                "cardinality": {"min": 1, "max": 1},
-                "mandatory": False,
-            },
-            "places_of_work": {
-                "type": "list",
-                "cardinality": {"min": 1, "max": 1},
-                "filled_value": None,
-                "mandatory": False,
-                "attributes": [
-                    {
-                        "attribute": "place_of_work",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["no_fixed_place"],
-                        },
-                        "street": {"type": "string", "filled_value": None, "mandatory": False},
-                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
-                    },
-                    {
-                        "attribute": "no_fixed_place",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "not_used_if": {
-                            "logic": "any",
-                            "attributes": ["place_of_work"],
-                        },
-                        "postal_code": {"type": "string", "filled_value": None, "mandatory": False},
-                    },
-                    {
-                        "attribute": "some_place",
-                        "cardinality": {"min": 0, "max": "n"},
-                        "random_item": {"type": "full-date", "filled_value": None, "mandatory": False},
-                    }
-                ],
-            },
-            "legislation": {
-                "type": "list",
-                "cardinality": {"min": 1, "max": 1},
-                "filled_value": None,
-                "mandatory": True,
-                "attributes": [
-                    {
-                        "member_state": {"type": "string", "filled_value": None, "mandatory": False},
-                        "starting_date": {"type": "full_date", "filled_value": None, "mandatory": False},
-                    },
-                ],
-            },
-            "at_least_one_of":[
-                "health_insurance_id",
-                "patient_id",
-                "tax_number",
-                "one_time_token"
-            ]
-            
-        } """
-
-        
-
-        print("\nAttributes form1: ", attributesForm)
-        print("\nAttributes form2: ", attributesForm2)
-
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,
@@ -319,8 +247,10 @@ def dynamic_R1(country):
         if isinstance(country_data["scope"], dict):
             scope_final = list()
             for request in credentials_requested:
-                scope = credentialsSupported[request]["scope"]
-
+                if credentialsSupported[request]["format"] == "mso_mdoc":
+                    scope = credentialsSupported[request]["doctype"]
+                elif credentialsSupported[request]["format"] == "dc+sd-jwt":
+                    scope = credentialsSupported[request]["issuer_config"]["doctype"]
                 if scope not in scope_final:
                     scope_final.append(scope)
 
@@ -433,15 +363,20 @@ def red():
 
         credential_requested = session["credentials_requested"]
         credentialsSupported = oidc_metadata["credential_configurations_supported"]
-            
+
         for id in credential_requested:
-            doctype= credentialsSupported[id]["doctype"]
-            portuguese_fields.update({doctype:cfgcountries.supported_countries[session["country"]]["oidc_auth"]["scope"][doctype]})
+            format = credentialsSupported[id]["format"]
+            if format == "mso_mdoc":
+                doctype= credentialsSupported[id]["doctype"]
+            elif format == "dc+sd-jwt":
+                doctype= credentialsSupported[id]["issuer_config"]["doctype"]
+            
+            portuguese_fields.update({doctype:{"config":cfgcountries.supported_countries["PT"]["oidc_auth"]["scope"][doctype],"format":format}})
 
         for doctype in portuguese_fields:
-            for fields in portuguese_fields[doctype]:
+            for fields in portuguese_fields[doctype]["config"]:
                 for item in data:
-                    if item["name"] == portuguese_fields[doctype][fields]:
+                    if item["name"] == portuguese_fields[doctype]["config"][fields]:
                         if item["state"] == "Pending":
                             value = "Pending"
                         else:
@@ -453,12 +388,13 @@ def red():
                             form_data[doctype].update({fields:value})
                         #form_data[doctype][fields] = item["value"]
                         break
-        
+    
         for doctype in portuguese_fields:
             if "birth_date" in form_data[doctype] and form_data[doctype]["birth_date"] != "Pending":
                 form_data[doctype]["birth_date"] = datetime.strptime(
                     form_data[doctype]["birth_date"], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
+
 
             if "driving_privileges" in form_data[doctype] and form_data[doctype]["driving_privileges"] != "Pending":
                 json_priv = json.loads(form_data[doctype]["driving_privileges"])
@@ -485,9 +421,14 @@ def red():
             if "credential_type" in doctype_config:
                 form_data[doctype].update({"credential_type":doctype_config["credential_type"] })
 
-            form_data[doctype]["nationality"] = ["PT"]
+            
 
-            form_data[doctype]["birth_place"] = "Lisboa"
+            if portuguese_fields[doctype]["format"] == "mso_mdoc":
+                form_data[doctype]["nationality"] = ["PT"]
+                form_data[doctype]["birth_place"] = "Lisboa"
+            elif portuguese_fields[doctype]["format"] == "dc+sd-jwt":
+                form_data[doctype]["place_of_birth"] = [{'locality': 'Lisboa'}]
+                form_data[doctype]["nationalities"] = ["PT"]
 
         user_id=session["country"] + "." + token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
 
@@ -576,13 +517,11 @@ def red():
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
 
-        #print("\ndynamic attributes form: ", attributesForm)
-
         for attribute in data.keys():
             if attribute in attributesForm:
                 presentation_data[credential][attribute]= data[attribute]
 
-        doctype_config=cfgserv.config_doctype[scope]
+        doctype_config=credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
@@ -644,11 +583,13 @@ def dynamic_R2():
 
     country, user_id = user.split(".", 1)
 
+
     credential_request = json_request["credential_requests"]
 
     session["country"] = country
     session["version"] = cfgserv.current_version
     session["route"] = "/dynamic/form_R2"
+
 
     data = dynamic_R2_data_collect(
         country=country, user_id=user_id
@@ -658,6 +599,7 @@ def dynamic_R2():
         return data
 
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
+
 
     credential_response = credentialCreation(
         credential_request=credential_request, data=data, country=country
@@ -709,6 +651,7 @@ def dynamic_R2_data_collect(country, user_id):
                     data.pop(custom_modifiers[modifier])
 
         data["nationality"] = [country]
+        data["nationalities"] = [country]
 
         birth_places = {
             "EU":"Brussels",
@@ -720,6 +663,7 @@ def dynamic_R2_data_collect(country, user_id):
 
         if country in birth_places:
             data["birth_place"] = birth_places[country]
+            data["place_of_birth"] = [{'locality': birth_places[country]}]
             
         return data
 
@@ -731,8 +675,10 @@ def dynamic_R2_data_collect(country, user_id):
         # headers = attribute_request["header"]
         try:
             r2 = requests.get(url)
-
+            print("\nr2", r2)
+            print("\nr2", r2.text)
             json_response = r2.json()
+            print("\njson_response", json_response)
             for attribute in json_response:
                 if attribute["state"] == "Pending":
                     return {"error": "Pending",
@@ -787,6 +733,7 @@ def dynamic_R2_data_collect(country, user_id):
                         data.pop(custom_modifiers[modifier])
 
             data["nationality"] = [country]
+            data["nationalities"] = [country]
 
             birth_places = {
                 "EE":"Tallinn",
@@ -797,8 +744,8 @@ def dynamic_R2_data_collect(country, user_id):
 
             if country in birth_places:
                 data["birth_place"] = birth_places[country]
+                data["place_of_birth"] = [{'locality': birth_places[country]}]
 
-            print("\nopenid data: ", data)
             return data
         except:
             credential_error_resp(
@@ -823,31 +770,46 @@ def credentialCreation(credential_request, data, country):
     credentials_supported = oidc_metadata["credential_configurations_supported"]
     document_mappings = cfgserv.document_mappings
 
-    credential_response = {"credential_responses": []}
-    for credential in credential_request:
+    credential_response = {"credentials": []}
 
-        if "credential_identifier" in credential:
-            doctype = credentials_supported[credential["credential_identifier"]][
+
+    for proof in credential_request["proofs"]:
+
+        if "credential_identifier" in credential_request:
+            doctype = credentials_supported[credential_request["credential_identifier"]][
                 "scope"
             ]
-            format = credentials_supported[credential["credential_identifier"]][
+            format = credentials_supported[credential_request["credential_identifier"]][
                 "format"
             ]
-        elif "vct" in credential and "format" in credential:
-            doctype = vct2scope(credential["vct"])
-            format = credential["format"]
 
-        elif "format" in credential and "doctype" in credential:
-            format = credential["format"]
-            doctype = credential["doctype"]
+        elif "credential_configuration_id" in credential_request:
 
+            if "vct" in credentials_supported[credential_request["credential_configuration_id"]]:
+                doctype = vct2doctype(credentials_supported[credential_request["credential_configuration_id"]]["vct"])
+            else:
+                doctype = credentials_supported[credential_request["credential_configuration_id"]]["doctype"]
+
+            format = credentials_supported[credential_request["credential_configuration_id"]]["format"]
+        
         else:
             return {
                 "error": "invalid_credential_request",
                 "error_description": "invalid request",
             }
 
-        device_publickey = credential["device_publickey"]
+        """ elif "vct" in credential and "format" in credential:
+            doctype = vct2scope(credential["vct"])
+            format = credential["format"]
+
+        elif "format" in credential and "doctype" in credential:
+            format = credential["format"]
+            doctype = credential["doctype"] """
+                
+        if "jwt" in proof:
+            device_publickey = proof["jwt"]
+
+        #device_publickey = credential["device_publickey"]
 
         # formatting_functions = document_mappings[doctype]["formatting_functions"]
 
@@ -887,8 +849,10 @@ def credentialCreation(credential_request, data, country):
                     ).decode("utf-8")
 
                 form_data["nationality"] = ["PT"]
+                form_data["nationalities"] = ["PT"]
 
                 form_data["birth_place"] = "Lisboa"
+                form_data["place_of_birth"] = [{'locality': "Lisboa"}]
 
             else:
 
@@ -935,7 +899,7 @@ def credentialCreation(credential_request, data, country):
 
         pdata = dynamic_formatter(format, doctype, form_data, device_publickey)
 
-        credential_response["credential_responses"].append({"credential": pdata})
+        credential_response["credentials"].append({"credential": pdata})
 
         """ formatting_function_data = formatting_functions.get(format)
 
@@ -982,7 +946,6 @@ def Dynamic_form():
     session["country"] = "FC"
     # if GET
     if request.method == "GET":
-        # print("/pid/form GET: " + str(request.args))
         if (
             session.get("country") is None or session.get("returnURL") is None
         ):  # someone is trying to connect directly to this endpoint
@@ -1004,8 +967,6 @@ def Dynamic_form():
 
     form_data = request.form.to_dict()
 
-    #print("\nForm Data: ", form_data)
-
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
@@ -1017,12 +978,10 @@ def Dynamic_form():
             continue
         if "option" in key and "on" in value:
             continue
-        #print("\nKey: ", key)
         if '[' not in key and ']' not in key:
             grouped.update({key:value})
         else:
             parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            #print("\nParts: ", parts)
             
             sub_key = ""
             if '-' in key:
@@ -1042,10 +1001,6 @@ def Dynamic_form():
                 base_key = parts[0]
                 index = int(parts[1])
                 sub_key = parts[2]
-
-            #print("\nBase Key: : ", base_key)
-            #print("\nSub Key: ", sub_key)
-            #print("\nIndex: ", index)
             
 
             if base_key not in grouped:
@@ -1054,60 +1009,21 @@ def Dynamic_form():
                 
 
             else:
-                #print("\n Index in?", index in grouped[base_key])
-                #print("\ntype",type(grouped[base_key]))
                 
                 if len(grouped[base_key]) > int(index):
-                    #print("\n at Index: ", grouped[base_key][index])
                     grouped[base_key][int(index)].update({sub_key:value})
                 else:
                     grouped[base_key].append({sub_key:value})
             
 
-        #print("\nGrouped: ", grouped)
-            
-
-
-    """ for key, value in form_data.items():
-        # Split the key into parts using the pattern '[index]' and '[key]' format
-        # We also account for cases where 'no_fixed_place[1]' exists
-        parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-
-        # The first part is the base group key (e.g. 'credential_holder[0]', 'employment_details[0]')
-        base_key = parts[0]
-
-        # Ensure that the base_key exists in the grouped dictionary
-        current_dict = grouped
-        if base_key not in current_dict:
-            current_dict[base_key] = {}
-
-        # Navigate through the base key and subkeys to add the value
-        for part in parts[1:]:
-            if part not in current_dict[base_key]:
-                current_dict[base_key][part] = {}
-            current_dict = current_dict[base_key][part]
-
-        # Set the value at the final part
-        if len(parts) > 1:
-            current_dict[parts[-1]] = value
-        else:
-            current_dict[base_key] = value
-
-    print("\n grouped:", grouped) """
-
     for item in grouped:
 
-        if item == "nationality":
-            #print("\nNationality")
-            #print("\nkey: ", item)
-            #print("\nvalue: ", grouped[item])
+        if item == "nationality" or item == "nationalities":
 
             if isinstance(grouped[item],list):
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
             else:
                 cleaned_data[item] = grouped[item]
-
-            #print("\n", cleaned_data[item])
             
         elif item == "portrait":
             if grouped[item] == "Port1":
@@ -1184,7 +1100,6 @@ def Dynamic_form():
     for credential_requested in session["credentials_requested"]:
         
         scope= credentialsSupported[credential_requested]["scope"]
-
         """ if scope in cfgserv.common_name:
             credential=cfgserv.common_name[scope]
 
@@ -1207,8 +1122,9 @@ def Dynamic_form():
             
             if attribute in attributesForm2:
                 presentation_data[credential][attribute]= cleaned_data[attribute]
-
-        doctype_config=cfgserv.config_doctype[scope]
+        
+        if "issuer_config" in credentialsSupported[credential_requested]:
+            doctype_config = credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
@@ -1242,7 +1158,6 @@ def Dynamic_form():
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
-    #print("\nPresentation_data: ", presentation_data)
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

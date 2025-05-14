@@ -43,18 +43,19 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 
-from misc import doctype2vct, urlsafe_b64encode_nopad
+
+from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
 
 
-def mdocFormatter(data, doctype, country, device_publickey):
+def mdocFormatter(data, credential_metadata, country, device_publickey):
     """Construct and sign the mdoc with the country private key
 
     Keyword arguments:
     + data -- doctype data "dictionary" with one or more "namespace": {"namespace data and fields"} tuples
-    + doctype -- mdoc doctype
+    + credential_metadata -- metadata
     + country -- Issuing country
     + device_publickey -- Holder's device public key
 
@@ -75,7 +76,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
     priv_d = private_key.private_numbers().private_value
     
     issuance_date = datetime.datetime.today()
-    expiry_date = issuance_date + datetime.timedelta(days=cfgservice.config_doctype[doctype]["validity"])
+    expiry_date = issuance_date + datetime.timedelta(days=credential_metadata["issuer_config"]["validity"])
 
     validity = {
         "issuance_date": issuance_date.strftime('%Y-%m-%d'),
@@ -114,7 +115,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
             "expiry_date": data[first_key]["expiry_date"],
         } """
     
-    namespace = cfgservice.config_doctype[doctype]["namespace"]
+    namespace = credential_metadata["issuer_config"]["namespace"]
 
     if "portrait" in data[namespace]:
         data[namespace]["portrait"] = base64.urlsafe_b64decode(
@@ -122,7 +123,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
         )
 
     if "user_pseudonym" in data[namespace]:
-        data[doctype]["user_pseudonym"] = data[doctype]["user_pseudonym"].encode('utf-8')
+        data[credential_metadata["doctype"]]["user_pseudonym"] = data[credential_metadata["doctype"]]["user_pseudonym"].encode('utf-8')
 
     # Construct the COSE private key
     cose_pkey = {
@@ -138,7 +139,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
 
     revocation_json = None
     if revocation_api_key:
-        payload = "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
+        payload = "doctype=" + credential_metadata["doctype"] + "&country=" + country + "&expiry_date=" + validity["expiry_date"]
         headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Api-Key': revocation_api_key
@@ -150,7 +151,7 @@ def mdocFormatter(data, doctype, country, device_publickey):
             revocation_json = response.json()
 
     mdoci.new(
-        doctype=doctype,
+        doctype=credential_metadata["doctype"],
         data=data,
         validity=validity,
         devicekeyinfo=device_publickey,
@@ -196,6 +197,64 @@ def cbor2elems(mdoc):
         d[n] = l
     return d
 
+def sdjwtNestedClaims(claims,vct):
+
+    nestedDict = {}
+
+    for claim, value in claims.items():
+        if isinstance(value, list) and claim != "nationalities" and len(value) > 1:
+            subClaims = []
+            for element in value:
+                if isinstance(element,dict):
+                    subClaimsElement = {}
+                    for attribute, value2 in element.items():
+                        subClaimsElement.update({SDObj(value=attribute):value2})
+
+                subClaims.append(subClaimsElement)
+
+            nestedDict.update({SDObj(value=claim):subClaims})
+
+        elif isinstance(value, list) and claim != "nationalities" and len(value) == 1:
+            subClaims = {}
+            for element in value:
+                if isinstance(element,dict):
+                    for attribute, value2 in element.items():
+                        subClaims.update({SDObj(value=attribute):value2})
+
+            nestedDict.update({SDObj(value=claim):subClaims})
+
+        elif isinstance(value, dict):
+            subClaims = {}
+            for attribute, value2 in value.items():
+                subClaims.update({SDObj(value=attribute):value2})
+
+            nestedDict.update({SDObj(value=claim):subClaims})
+
+        else:
+            nestedDict.update({SDObj(value=claim):value})
+
+    return nestedDict
+
+    """ for subClaim in subClaims:
+        if len(subClaim) == 1 and SDObj(value=subClaim[0]) not in nestedDict:
+            nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
+
+        elif  len(subClaim) == 2:
+            path1 = subClaim[0]
+            path2 = subClaim[1]
+
+            if SDObj(value=subClaim[0]) not in nestedDict:
+                nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
+
+            if isinstance(claims[subClaim[0]], list):
+                for element in claims[subClaim[0]]:
+
+
+
+        
+        elif  len(subClaim) == 3: """
+            
+
 
 def sdjwtFormatter(PID, country):
     """Construct sd-jwt with the country private key
@@ -206,18 +265,16 @@ def sdjwtFormatter(PID, country):
 
     Return: Returns the sd-jwt
     """
+
     hash_object = hashlib.sha256()
 
     seed = int(hash_object.hexdigest(), 16)
-    doctype = PID["doctype"]
-    if doctype == "org.iso.18013.5.1.mDL":
-        PID_Claims_data = PID["data"]["claims"]["org.iso.18013.5.1"]
-        iat = DatestringFormatter(PID_Claims_data["issue_date"])
-        PID_Claims_data.pop("issue_date")
-    else :
-        PID_Claims_data = PID["data"]["claims"][doctype]
-        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-        PID_Claims_data.pop("issuance_date")
+    #doctype = PID["credential_metadata"]["issuer_config"]["doctype"]
+
+    
+    PID_Claims_data = PID["data"]["claims"]
+    iat = DatestringFormatter(PID_Claims_data["issuance_date"])
+    PID_Claims_data.pop("issuance_date")
 
     exp = DatestringFormatter(PID_Claims_data["expiry_date"])
 
@@ -230,7 +287,9 @@ def sdjwtFormatter(PID, country):
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
 
-    vct = doctype2vct(doctype)
+    vct = PID["credential_metadata"]["vct"] #doctype2vct(doctype)
+
+    doctype = vct2doctype(vct)
 
     revocation_json = None
 
@@ -266,10 +325,19 @@ def sdjwtFormatter(PID, country):
 
     JWT_PID_DATA = {}
 
-    for x, value in enumerate(list(pid_data["claims"].keys())):
+    #for x, value in enumerate(list(pid_data["claims"].keys())):
+
+        #namespace = list(pid_data["claims"].keys())[x]
+    #PID_DATA = pid_data["claims"]
+    
+    #JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
+
+    """ for x, value in enumerate(list(pid_data["claims"].keys())):
         namespace = list(pid_data["claims"].keys())[x]
-        PID_DATA = pid_data["claims"].get(namespace, {})
-        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
+        PID_DATA = pid_data["claims"]
+        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA)) """
+
+    JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"],vct))
 
     datafinal.update(JWT_PID_DATA)
 
@@ -333,7 +401,7 @@ def sdjwtFormatter(PID, country):
 
     ### Produce SD-JWT and SVC for selected example
     SDJWTIssuer.unsafe_randomness = False
-    SDJWTIssuer.SD_JWT_HEADER="vc+sd-jwt"
+    SDJWTIssuer.SD_JWT_HEADER="dc+sd-jwt"
     sdjwt_at_issuer = SDJWTIssuer(
         claims,
         keys["issuer_key"],
@@ -386,6 +454,7 @@ def DATA_sd_jwt(PID):
     if age_equal_or_over:
             data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
             Data.update(data)
+
     if place_of_birth:
             data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
             Data.update(data)

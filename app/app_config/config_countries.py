@@ -43,7 +43,7 @@ class ConfCountries:
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
             "custom_modifiers": {
                 "family_name": "CurrentFamilyName",
@@ -65,7 +65,7 @@ class ConfCountries:
             "un_distinguishing_sign": "FC",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
@@ -85,6 +85,7 @@ class ConfCountries:
                 "eu.europa.ec.eudi.iban_sd_jwt_vc",
                 "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
                 "eu.europa.ec.eudi.ehic_mdoc",
+                "eu.europa.ec.eudi.cor_mdoc",
                 "eu.europa.ec.eudi.ehic_sd_jwt_vc",
                 "eu.europa.ec.eudi.pda1_sd_jwt_vc"
             ],
@@ -99,7 +100,7 @@ class ConfCountries:
             "un_distinguishing_sign": "P",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
             ],
@@ -146,7 +147,7 @@ class ConfCountries:
             "pid_mdoc_cert": "/etc/eudiw/pid-issuer/cert/PID-DS-0001_EE_cert.der",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
             "connection_type": "openid",
             "oidc_auth": {
@@ -183,7 +184,7 @@ class ConfCountries:
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
@@ -197,7 +198,7 @@ class ConfCountries:
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
             "connection_type": "eidasnode",
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
@@ -211,7 +212,7 @@ class ConfCountries:
             "loa": "http://eidas.europa.eu/LoA/high",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
-                "eu.europa.ec.eudi.pid_jwt_vc_json",
+                "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
             "custom_modifiers": {
                 "family_name": "CurrentFamilyName",

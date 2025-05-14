@@ -8,46 +8,35 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 
 ### Overview
 
-The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service, supporting the OpenId4VCI (draft 13) protocol.
+The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service This service is currently undergoing a transition from OpenId4VCI draft 13 to draft 15 of the specification. Check the table below to see which components support which draft version.
 
-The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for the following credentials:
-
-
-| Credential/Attestation | Format    |
-|------------------------|-----------|
-| PID                    | mso_mdoc  |
-| PID                    | SD-JWT-VC |
-| mDL                    | mso_mdoc  | 
-| mDL                    | SD-JWT-VC  | 
-| (Q)EAA age-over-18 pseudonym | mso_mdoc |
-| (Q)EAA loyalty card | mso_mdoc |
+The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for various credentials.
 
 For authenticating the user, it requires the use of eIDAS node, OAUTH2 server or a simple form (for testing purposes).
 
 
 ### OpenId4VCI coverage
 
-This version of the EUDIW Issuer supports the [OpenId for Verifiable Credential Issuance (draft 13)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
+This version of the EUDIW Issuer has partial support for the [OpenId for Verifiable Credential Issuance (draft 15)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
 
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope               |
-| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅                                                              |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
-| Dynamic Credential Request                                        | ✅                                                              |
+| [Authorization Code flow draft](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope, (draft 13)               |
+| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅ (draft 13)                                                       |
+| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`    (draft 13)          |
+| Dynamic Credential Request                                        | ✅ (draft 13)                                                             |
 | mso_mdoc format                                                   | ✅                                                              |
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
-| [Token Endpoint](api_docs/token.md)                               | ✅                                                              |
-| [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations                  |
-| Credential Issuer MetaData                                        | ✅ Unsigned metadata                                            | 
-| [Batch Endpoint](api_docs/batch_credential.md)                    | ✅                                                              | 
-| [Deferred Endpoint](api_docs/deferred.md)                         | ✅                                                              |
-| Proof                                                             | ✅ JWT, ✅ CWT                                                  |
-| Credential response encryption                                    | ❌                                                              |
+| [Token Endpoint](api_docs/token.md)                               | ✅ (draft 13)                                                             |
+| [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations, (draft 15)               |
+| Credential Issuer MetaData                                        | ✅ Unsigned metadata, (draft 15)                                            | 
+| [Nonce endpoint](api_docs/nonce_endpoint.md)                    | ✅ (draft 15)                                                             | 
+| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ (draft 15)                                                              |
+| Proof                                                             | ✅ JWT                                                 |
+| Credential response encryption                                    | ✅ (draft 15)                                                             |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
-| Nonce Endpoint                                                    | ❌ To be added in a future relase                               |
 | Pushed authorization request                                      | ✅                                                              |
 | Wallet authentication                                             | ✅ public client                                                |
 | Demonstrating Proof of Possession (DPoP)                          | ❌                                                              |
@@ -125,6 +114,10 @@ Yes. Please see how in [api_docs/pre-authorized.md](api_docs/pre-authorized.md).
 ### H. Can I run the issuer in a Docker container?
 
 Yes. Please see how in [Install Docker](install.md#6-docker).
+
+### I. Where can I find reference revocation service information.
+
+Information and guides on the revocation service can be found in the following [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-statuslist-py).
 
 ## How to contribute
 
