@@ -150,6 +150,9 @@ class ConfService:
         "resident_postal_code": "address.postal_code",
         "resident_street": "address.street_address",
         "resident_house_number": "address.house_number",
+        "portrait":"picture",
+        "mobile_phone_number":"phone_number",
+        "email_address":"email"
     }
     # route /pid/getpid response fields per API version
     getpid_or_mdl_response_field = {

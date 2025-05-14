@@ -55,6 +55,17 @@ def create_dict(dict, item):
             pass
     return d
 
+def urlsafe_b64encode_nopad(data: bytes) -> str:
+    """
+    Encodes bytes using URL-safe base64 and removes padding.
+    
+    Args:
+        data (bytes): The data to encode.
+
+    Returns:
+        str: Base64 URL-safe encoded string without padding.
+    """
+    return base64.urlsafe_b64encode(data).decode('utf-8').rstrip('=')
 
 def urlsafe_b64encode_nopad(data: bytes) -> str:
     """
