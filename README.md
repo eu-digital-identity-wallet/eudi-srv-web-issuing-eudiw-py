@@ -22,20 +22,20 @@ This version of the EUDIW Issuer has partial support for the [OpenId for Verifia
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow draft](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope, draft 13               |
-| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅ draft 13                                                       |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`    draft 13          |
-| Dynamic Credential Request                                        | ✅ draft 13                                                             |
+| [Authorization Code flow draft](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope, (draft 13)               |
+| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅ (draft 13)                                                       |
+| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`    (draft 13)          |
+| Dynamic Credential Request                                        | ✅ (draft 13)                                                             |
 | mso_mdoc format                                                   | ✅                                                              |
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
-| [Token Endpoint](api_docs/token.md)                               | ✅ draft 13                                                             |
-| [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations, draft 15               |
-| Credential Issuer MetaData                                        | ✅ Unsigned metadata, draft 15                                            | 
-| [Nonce endpoint](api_docs/nonce_endpoint.md)                    | ✅ draft 15                                                             | 
-| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ draft 15                                                              |
+| [Token Endpoint](api_docs/token.md)                               | ✅ (draft 13)                                                             |
+| [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations, (draft 15)               |
+| Credential Issuer MetaData                                        | ✅ Unsigned metadata, (draft 15)                                            | 
+| [Nonce endpoint](api_docs/nonce_endpoint.md)                    | ✅ (draft 15)                                                             | 
+| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ (draft 15)                                                              |
 | Proof                                                             | ✅ JWT                                                 |
-| Credential response encryption                                    | ✅ draft 15                                                             |
+| Credential response encryption                                    | ✅ (draft 15)                                                             |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
 | Pushed authorization request                                      | ✅                                                              |
 | Wallet authentication                                             | ✅ public client                                                |
