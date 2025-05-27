@@ -770,7 +770,6 @@ def token():
 
         response_json = json.loads(response.get_data())
 
-
         if "access_token" in response_json:
             session_id = str(uuid.uuid4())
             session_ids.update(
