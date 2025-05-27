@@ -231,6 +231,9 @@ def dynamic_R1(country):
         print("\nMandatory: ", attributesForm)
         print("\nOptional: ", attributesForm2)
 
+        print("\nMandatory: ", attributesForm)
+        print("\nOptional: ", attributesForm2)
+
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,
