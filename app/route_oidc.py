@@ -754,8 +754,25 @@ def token():
 
         return response_json
 
-    else:
+    elif req_args["grant_type"] == "refresh_token":
+
         response = service_endpoint(current_app.server.get_endpoint("token"))
+
+        response_json = json.loads(response.get_data())
+
+        if "access_token" in response_json:            
+            session_id = str(uuid.uuid4())
+            session_ids.update(
+                {session_id: {"expires": datetime.now() + timedelta(minutes=60)}}
+            )
+
+            print("\nAdding ", response_json["access_token"], "to ", session_id )
+
+            session_ids[session_id]["access_token"] = response_json["access_token"]
+
+    else:
+        
+
         cfgservice.app_logger.info(
             "Token response: " + str(json.loads(response.get_data()))
         )
@@ -850,13 +867,13 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    cfgservice.app_logger.info(
+    """ cfgservice.app_logger.info(
         ", Session ID: "
         + session_id
         + ", "
         + "Credential Request, Payload: "
         + str(payload)
-    )
+    ) """
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
@@ -866,13 +883,13 @@ def credential():
         else:
             response_str = str(json.loads(_response.get_data()))
 
-        cfgservice.app_logger.info(
+        """ cfgservice.app_logger.info(
             ", Session ID: "
             + session_id
             + ", "
             + "Credential response, Payload: "
             + response_str
-        )
+        ) """
         return _response
 
     """ if (
@@ -903,13 +920,13 @@ def credential():
 
         return make_response(jsonify(_response), 202) """
 
-    cfgservice.app_logger.info(
+    """ cfgservice.app_logger.info(
         ", Session ID: "
         + session_id
         + ", "
         + "Credential response, Payload: "
         + str(_response)
-    )
+    ) """
     return _response
 
 
@@ -1366,7 +1383,7 @@ def service_endpoint(endpoint):
         cfgservice.app_logger.error("request: {}".format(req_args))
         if isinstance(endpoint, Token):
             args = endpoint.process_request(
-                AccessTokenRequest(**req_args), http_info=http_info
+                AccessTokenRequest(**req_args), http_info=http_info, issue_refresh=True
             )
         else:
             args = endpoint.process_request(
