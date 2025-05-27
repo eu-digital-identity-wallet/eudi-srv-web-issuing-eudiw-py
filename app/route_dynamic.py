@@ -206,6 +206,9 @@ def dynamic_R1(country):
 
         attributesForm2 = getAttributesForm2(session["credentials_requested"])
 
+        print("\nMandatory: ", attributesForm)
+        print("\nOptional: ", attributesForm2)
+
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,
@@ -1024,7 +1027,13 @@ def Dynamic_form():
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
             else:
                 cleaned_data[item] = grouped[item]
-            
+        
+        elif item == "place_of_birth":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
         elif item == "portrait":
             if grouped[item] == "Port1":
                 cleaned_data["portrait"] = cfgserv.portrait1
