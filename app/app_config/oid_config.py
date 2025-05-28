@@ -56,28 +56,23 @@ CONFIG = {
       "authz": {
         "class": "idpyoidc.server.authz.AuthzHandling",
         "kwargs": {
-          "grant_config": {
-            "usage_rules": {
-              "authorization_code": {
-                "supports_minting": [
-                  "access_token",
-                  "refresh_token",
-                  "id_token"
-                ],
-                "max_usage": 1
-              },
-              "access_token": {},
-              "refresh_token": {
-                "supports_minting": [
-                  "access_token",
-                  "refresh_token"
-                ]
-              }
-            },
-            "expires_in": 43200
-          }
-        }
-      },
+            "grant_config": {
+                "usage_rules": {
+                    "authorization_code": {
+                        "supports_minting": ["access_token", "refresh_token"],
+                        "max_usage": 1,
+                        "expires_in": 3600,  # an hour
+                    },
+                    "access_token": {"expires_in": 3600},  # An hour
+                    "refresh_token": {
+                        "supports_minting": ["access_token", "refresh_token"],
+                        "expires_in": 86400,  # One day
+                    },
+                },
+                "expires_in": 2592000,  # a month, 30 days
+            }
+        },
+    },
       "authentication": {
         "user": {
           "acr": "urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword",
@@ -346,9 +341,11 @@ CONFIG = {
           }
         },
         "refresh": {
-          "kwargs": {
-            "lifetime": 86400
-          }
+            "class": "idpyoidc.server.token.jwt_token.JWTToken",
+            "kwargs": {
+                "lifetime": 3600,
+                "aud": ["https://example.org/appl"],
+            },
         },
         "id_token": {
           "class": "idpyoidc.server.token.id_token.IDToken",
