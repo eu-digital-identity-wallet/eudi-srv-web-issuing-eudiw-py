@@ -22,7 +22,7 @@ Its main goal is to issue the credentials in cbor/mdoc (ISO 18013-5 mdoc) and SD
 
 This route_dynamic.py file is the blueprint for the route /dynamic of the PID Issuer Web service.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from datetime import date
 from datetime import timedelta
 import io
@@ -975,6 +975,11 @@ def Dynamic_form():
     form_data.pop("proceed")
     cleaned_data = {}
 
+    if "effective_from_date" in form_data:
+        dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        rfc3339_string = dt.isoformat().replace('+00:00', 'Z')
+        form_data.update({"effective_from_date":rfc3339_string})
+
     grouped = {}
     for key, value in form_data.items():
         if not value:
@@ -1034,6 +1039,21 @@ def Dynamic_form():
                 for d in grouped[item]:
                     joined_places.update(d)
                 cleaned_data[item] = joined_places
+        
+        elif item == "address":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
+
+        elif item == "residence_address":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
+
         elif item == "portrait":
             if grouped[item] == "Port1":
                 cleaned_data["portrait"] = cfgserv.portrait1

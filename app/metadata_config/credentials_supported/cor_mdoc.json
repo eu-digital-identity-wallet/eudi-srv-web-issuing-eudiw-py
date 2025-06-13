@@ -4,7 +4,7 @@
        "doctype":"eu.europa.ec.eudi.cor.1",
        "scope":"eu.europa.ec.eudi.cor_mdoc",
        "policy":{
-          "batch_size":50,
+          "batch_size":15,
           "one_time_use":true
        },
        "cryptographic_binding_methods_supported":[
@@ -89,149 +89,67 @@
                 "residence_address"
              ],
              "mandatory":true,
-             "value_type":"string",
+             "value_type":"residence_address_attributes",
              "source":"user",
              "display":[
                 {
                    "name":"Resident Address",
                    "locale":"en"
                 }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "po_box"
              ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"PO Box",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "thoroughfare"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Thoroughfare",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "locator_designator"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Locator Designator",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "locator_name"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Locator Name",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "post_code"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Post Code",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "post_name"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Post Name",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "admin_unit_L1"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Admin Unit L1",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "admin_unit_L2"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Admin Unit L2",
-                   "locale":"en"
-                }
-             ]
-          },
-          {
-             "path":[
-                "eu.europa.ec.eudi.cor.1",
-                "full_address"
-             ],
-             "mandatory":false,
-             "value_type":"string",
-             "source":"user",
-             "display":[
-                {
-                   "name":"Full Address",
-                   "locale":"en"
-                }
-             ]
+             "issuer_conditions": {
+               "cardinality": {
+               "min": 1,
+               "max": 1
+               },
+               "residence_address_attributes":{
+               "po_box": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "thoroughfare": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "locator_designator": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "locator_name": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "post_code": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "post_name": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "admin_unit_L1": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "admin_unit_L2": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               },
+               "full_address": {
+                     "mandatory": false,
+                     "value_type": "string",
+                     "source": "user"
+               }
+               }
+            }
           },
           {
              "path":[

@@ -30,7 +30,7 @@ from flask import Blueprint, current_app, make_response, redirect, render_templa
 from flask_cors import CORS
 import requests
 import urllib.parse
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from redirect_func import url_get
 
 import segno
@@ -94,6 +94,11 @@ def preauthRed():
 def preauth_form():
     form_data = request.form.to_dict()
 
+    if "effective_from_date" in form_data:
+        dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        rfc3339_string = dt.isoformat().replace('+00:00', 'Z')
+        form_data.update({"effective_from_date":rfc3339_string})
+
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
@@ -139,8 +144,33 @@ def preauth_form():
 
     for item in grouped:
 
-        if item == "nationality":
-            cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+        if item == "nationality" or item == "nationalities":
+
+            if isinstance(grouped[item],list):
+                cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+            else:
+                cleaned_data[item] = grouped[item]
+
+        elif item == "place_of_birth":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
+        
+        elif item == "address":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
+
+        elif item == "residence_address":
+            if isinstance(grouped[item],list):
+                joined_places = {}
+                for d in grouped[item]:
+                    joined_places.update(d)
+                cleaned_data[item] = joined_places
             
         elif item == "portrait":
             if grouped[item] == "Port1":
