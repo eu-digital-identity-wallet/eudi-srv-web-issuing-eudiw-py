@@ -26,7 +26,7 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:pid:1",
+     "vct":"urn:eudi:pid:1",
      "claims":[
         {
            "path":[
