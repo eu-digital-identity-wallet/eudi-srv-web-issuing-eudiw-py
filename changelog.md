@@ -135,3 +135,14 @@ _05 May 2025_
 - Metadata oid4vci d15
 - Set scopes to credential id
 - Further separation of sd-jwt vc and mdoc formatters based on metadata
+
+## [0.8.1]
+
+_25 Jun 2025_
+
+### Changed
+- PID to new spec
+
+### Fixed
+- Refresh token rotation
+- CoR uri 
