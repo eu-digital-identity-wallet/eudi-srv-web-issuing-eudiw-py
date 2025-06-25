@@ -26,7 +26,7 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:pid:1",
+     "vct":"urn:eudi:pid:1",
      "claims":[
         {
            "path":[
@@ -75,7 +75,7 @@
               "place_of_birth"
            ],
            "mandatory":true,
-           "value_type":"string",
+           "value_type":"list",
            "source":"user",
            "display":[
               {
@@ -89,51 +89,6 @@
                  "max":1
               }
            }
-        },
-        {
-           "path":[
-              "place_of_birth",
-              "locality"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Birth locality",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "place_of_birth",
-              "region"
-           ],
-           "mandatory":false,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Birth Region",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "place_of_birth",
-              "country"
-           ],
-           "mandatory":false,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Birth Country",
-                 "locale":"en"
-              }
-           ]
         },
         {
            "path":[

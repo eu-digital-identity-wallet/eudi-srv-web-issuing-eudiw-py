@@ -184,6 +184,9 @@ def getMandatoryAttributes(claims, namespace):
                 if "cardinality" in claim["issuer_conditions"]:
                     attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
                 
+                if "at_least_one_of" in claim["issuer_conditions"]:
+                    attributes_form[attribute_name]["at_least_one_of"] = claim["issuer_conditions"]["at_least_one_of"]
+                
                 if claim["value_type"] in claim["issuer_conditions"]:
                     #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
                     nested_attributes = {}
@@ -250,11 +253,16 @@ def getMandatoryAttributesSDJWT(claims):
             attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
             attributes_form[attribute_name]["cardinality"] = {'min': 0,'max': 'n'}
             attributes_form[attribute_name]["attributes"] = [{'country_code': {'mandatory': True,'value_type': 'string','source': 'user'}}]
+        
+        if attribute_name == "place_of_birth":
+            attributes_form.update({attribute_name: {"type": "list","filled_value":None}})
+            attributes_form[attribute_name]["cardinality"] = {'min': 0,'max': 1}
+            attributes_form[attribute_name]["attributes"] = [{'country': {'mandatory': False,'value_type': 'string','source': 'user'}},{'region': {'mandatory': False,'value_type': 'string','source': 'user'}},{'locality': {'mandatory': False,'value_type': 'string','source': 'user'}}]
 
-        if "value_type" in claim and attribute_name != "nationalities":
+        if "value_type" in claim and attribute_name not in ("nationalities", "place_of_birth"):
             attributes_form.update({attribute_name: {"type": claim["value_type"],"filled_value":None}})
 
-        if "issuer_conditions" in claim and attribute_name != "nationalities":
+        if "issuer_conditions" in claim and attribute_name not in ("nationalities", "place_of_birth"):
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
 
@@ -484,6 +492,9 @@ def getOptionalAttributes(claims, namespace):
 
                 if "cardinality" in claim["issuer_conditions"]:
                     attributes_form[attribute_name]["cardinality"] = claim["issuer_conditions"]["cardinality"]
+                
+                if "at_least_one_of" in claim["issuer_conditions"]:
+                    attributes_form[attribute_name]["at_least_one_of"] = claim["issuer_conditions"]["at_least_one_of"]
                 
                 if claim["value_type"] in claim["issuer_conditions"]:
                     #attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]

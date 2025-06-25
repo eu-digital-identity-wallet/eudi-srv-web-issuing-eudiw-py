@@ -119,7 +119,7 @@ def setup_metadata():
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
     
-    oidc_metadata_clean["credential_configurations_supported"] = remove_keys(copy.deepcopy(credentials_supported),{"issuer_conditions", "issuer_config", "overall_issuer_conditions"})
+    oidc_metadata_clean["credential_configurations_supported"] = remove_keys(copy.deepcopy(credentials_supported),{"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source"})
 
 
 setup_metadata()

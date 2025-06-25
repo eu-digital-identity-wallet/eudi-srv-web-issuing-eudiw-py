@@ -32,7 +32,7 @@
              "name":"Certificate of Residence",
              "locale":"en",
              "logo":{
-                "url":"https://examplestate.com/public/cor.png",
+                "uri":"https://examplestate.com/public/cor.png",
                 "alt_text":"A square figure of a Certificate of Residence"
              }
           }
