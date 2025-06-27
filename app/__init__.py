@@ -132,7 +132,7 @@ def setup_metadata():
 
     oidc_metadata_clean["credential_configurations_supported"] = remove_keys(
         copy.deepcopy(credentials_supported),
-        {"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source"},
+        {"issuer_conditions", "issuer_config", "overall_issuer_conditions"},
     )
 
     old_domain = oidc_metadata["credential_issuer"]
@@ -143,7 +143,6 @@ def setup_metadata():
     oauth_metadata = replace_domain(oauth_metadata, old_domain, new_domain)
     oidc_metadata_clean = replace_domain(oidc_metadata_clean, old_domain, new_domain)
     oidc_metadata = replace_domain(oidc_metadata, old_domain, new_domain)
-
 
 
 setup_metadata()

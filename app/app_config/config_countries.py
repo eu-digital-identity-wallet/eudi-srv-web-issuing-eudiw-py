@@ -16,10 +16,10 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
-This config_countries.py contains configuration data related to the countries supported by the PID Issuer. 
+This config_countries.py contains configuration data related to the countries supported by the PID Issuer.
 
 NOTE: You should only change it if you understand what you're doing.
 """
@@ -115,10 +115,9 @@ class ConfCountries:
                         "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
                         "family_name": "http://interop.gov.pt/MDC/Cidadao/NomeApelido",
                         "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
-                        #"nationality": "http://interop.gov.pt/MDC/Cidadao/Nacionalidade",
-                        #"birth_place":"http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
-                        #"nif":"http://interop.gov.pt/MDC/Cidadao/NIF"
-                        
+                        # "nationality": "http://interop.gov.pt/MDC/Cidadao/Nacionalidade",
+                        # "birth_place":"http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
+                        # "nif":"http://interop.gov.pt/MDC/Cidadao/NIF"
                     },
                     "org.iso.18013.5.1.mDL": {
                         "nif": "http://interop.gov.pt/MDC/Cidadao/NIF",

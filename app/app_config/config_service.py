@@ -36,9 +36,7 @@ class ConfService:
     service_url = os.getenv("SERVICE_URL", "https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
 
-    wallet_test_url = os.getenv(
-        "WALLET_TEST_URL", "https://tester.issuer.eudiw.dev/"
-    )
+    wallet_test_url = os.getenv("WALLET_TEST_URL", "https://tester.issuer.eudiw.dev/")
 
     revocation_service_url = os.getenv(
         "REVOCATION_SERVICE_URL", "https://issuer.eudiw.dev/token_status_list/take"
