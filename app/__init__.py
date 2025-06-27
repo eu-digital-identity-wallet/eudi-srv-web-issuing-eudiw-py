@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
@@ -71,7 +71,19 @@ def remove_keys(obj, keys_to_remove):
         return new_list if new_list else None
     else:
         return obj
-    
+
+
+def replace_domain(obj, old, new):
+    if isinstance(obj, dict):
+        return {k: replace_domain(v, old, new) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_domain(i, old, new) for i in obj]
+    elif isinstance(obj, str):
+        return obj.replace(old, new)
+    else:
+        return obj
+
+
 def setup_metadata():
     global oidc_metadata
     global oidc_metadata_clean
@@ -118,11 +130,23 @@ def setup_metadata():
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
-    
-    oidc_metadata_clean["credential_configurations_supported"] = remove_keys(copy.deepcopy(credentials_supported),{"issuer_conditions", "issuer_config", "overall_issuer_conditions"})
+    oidc_metadata_clean["credential_configurations_supported"] = remove_keys(
+        copy.deepcopy(credentials_supported),
+        {"issuer_conditions", "issuer_config", "overall_issuer_conditions"},
+    )
+
+    old_domain = oidc_metadata["credential_issuer"]
+
+    new_domain = cfgserv.service_url[:-1]
+
+    openid_metadata = replace_domain(openid_metadata, old_domain, new_domain)
+    oauth_metadata = replace_domain(oauth_metadata, old_domain, new_domain)
+    oidc_metadata_clean = replace_domain(oidc_metadata_clean, old_domain, new_domain)
+    oidc_metadata = replace_domain(oidc_metadata, old_domain, new_domain)
 
 
 setup_metadata()
+
 
 def setup_trusted_CAs():
     global trusted_CAs
@@ -273,7 +297,7 @@ def create_app(test_config=None):
         route_dynamic,
         route_oid4vp,
         preauthorization,
-        revocation
+        revocation,
     )
 
     app.register_blueprint(route_eidasnode.eidasnode)
