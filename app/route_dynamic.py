@@ -994,8 +994,7 @@ def form_formatter(form_data: dict) -> dict:
 
     for item in grouped:
 
-        if item == "nationality":
-
+        if item == "nationality" or item == "nationalities":
             if isinstance(grouped[item],list):
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
                 cleaned_data["nationalities"] = cleaned_data[item]
@@ -1027,6 +1026,9 @@ def form_formatter(form_data: dict) -> dict:
         elif item == "birth_date":
             cleaned_data["birthdate"] = grouped[item]
             cleaned_data[item] = grouped[item]
+
+        elif item == "age_equal_or_over" and isinstance(grouped[item], list):
+            cleaned_data[item] = grouped[item][0]
 
         elif item == "portrait":
             if grouped[item] == "Port1":
