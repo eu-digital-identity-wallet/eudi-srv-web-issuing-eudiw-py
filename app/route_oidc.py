@@ -874,13 +874,13 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    """ cfgservice.app_logger.info(
+    cfgservice.app_logger.info(
         ", Session ID: "
         + session_id
         + ", "
         + "Credential Request, Payload: "
         + str(payload)
-    ) """
+    )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
