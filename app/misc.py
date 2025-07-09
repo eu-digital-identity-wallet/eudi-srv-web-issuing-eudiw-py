@@ -154,6 +154,9 @@ def getAttributesForm(credentials_requested):
         if "birth_date" in attributes and "birthdate" in attributes:
             attributes.pop("birthdate")
 
+        if "nationality" in attributes and "nationalities" in attributes:
+            attributes.pop("nationalities")
+
     return attributes
 
 

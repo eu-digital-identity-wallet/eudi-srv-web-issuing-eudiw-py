@@ -36,6 +36,7 @@ from redirect_func import url_get
 import segno
 
 from app.route_oidc import service_endpoint
+from app.route_dynamic import form_formatter, presentation_formatter
 from .app_config.config_service import ConfService as cfgservice
 from app.misc import authentication_error_redirect, calculate_age, generate_unique_id, getAttributesForm, getAttributesForm2, validate_image
 
@@ -92,6 +93,7 @@ def preauthRed():
 
 @preauth.route("/preauth_form", methods=["GET", "POST"])
 def preauth_form():
+    session["country"] = "FC"
     form_data = request.form.to_dict()
 
     if "effective_from_date" in form_data:
@@ -102,201 +104,18 @@ def preauth_form():
     user_id = generate_unique_id()
 
     form_data.pop("proceed")
-    cleaned_data = {}
 
-    grouped = {}
-    for key, value in form_data.items():
-        if not value:
-            continue
-        if "option" in key and "on" in value:
-            continue
-        if '[' not in key and ']' not in key:
-            grouped.update({key:value})
-        else:
-            parts = key.replace('][', '/').replace('[', '/').replace(']', '').split('/')
-            
-            sub_key = ""
-            if '-' in key:
-                hyphen_parts = key.split('-')
-                base_key = hyphen_parts[0]
-                #sub_key = hyphen_parts[1]
-                if len(parts) == 3:
-                    sub_key = parts[2]
-                    index = parts[1]
-                else:
-                    sub_key = parts[1]
-                    index = 0
+    cleaned_data = form_formatter(form_data)
 
-            else:
-
-                base_key = parts[0]
-                index = int(parts[1])
-                sub_key = parts[2]
-            
-            if base_key not in grouped:
-                grouped.update({base_key:[{sub_key:value}]})
-            
-            else:
-                if index in grouped[base_key]:
-                    grouped[base_key][index].update({sub_key:value})
-                else:
-                    grouped[base_key].append({sub_key:value})
-
-    for item in grouped:
-
-        if item == "nationality" or item == "nationalities":
-
-            if isinstance(grouped[item],list):
-                cleaned_data[item] = [item['country_code'] for item in grouped[item]]
-            else:
-                cleaned_data[item] = grouped[item]
-
-        elif item == "place_of_birth":
-            if isinstance(grouped[item],list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-        
-        elif item == "address":
-            if isinstance(grouped[item],list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-
-        elif item == "residence_address":
-            if isinstance(grouped[item],list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-            
-        elif item == "portrait":
-            if grouped[item] == "Port1":
-                cleaned_data["portrait"] = cfgservice.portrait1
-            elif grouped[item] == "Port2":
-                cleaned_data["portrait"] = cfgservice.portrait2
-            elif grouped[item] == "Port3":
-                portrait= request.files["Image"]
-
-                img = Image.open(portrait)
-                #imgbytes = img.tobytes()
-                bio = io.BytesIO()
-                img.save(bio, format="JPEG")
-                del img
-
-                response,error_msg = validate_image(portrait)
-
-                if response==False:
-                    return authentication_error_redirect(
-                        jws_token=session["jws_token"],
-                        error="Invalid Image",
-                        error_description=error_msg,
-                    )
-                else :
-                    imgurlbase64=base64.urlsafe_b64encode(bio.getvalue()).decode('utf-8')
-                    cleaned_data["portrait"]=imgurlbase64
-
-        elif item == "Category1":
-            DrivingPrivileges = []
-            i = 1
-            for i in range(int(grouped["NumberCategories"])):
-                f = str(i + 1)
-                drivP = {
-                    "vehicle_category_code": grouped["Category" + f],
-                    "issue_date": grouped["IssueDate" + f],
-                    "expiry_date": grouped["ExpiryDate" + f],
-                }
-                DrivingPrivileges.append(drivP)
-
-            cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
-        
-        elif grouped[item] == "true":
-            cleaned_data[item] = True
-
-        elif grouped[item] == "false":
-            cleaned_data[item] = False
-
-
-        else:
-            if grouped[item] != "" and grouped[item] != "unset":
-             cleaned_data[item] = grouped[item]
-
-    cleaned_data.update(
-        {
-            "version": cfgservice.current_version,
-            "issuing_country": "FC",
-        }
-    )
+    print("\nCleaned Data: ", cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)})
+    print("\nform_dynamic_data: ", form_dynamic_data[user_id])
 
-    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    presentation_data = presentation_formatter(cleaned_data=cleaned_data)
 
-    presentation_data=dict()
-
-    for credential_requested in session["credentials_requested"]:
-        
-        scope= credentialsSupported[credential_requested]["scope"]
-
-        """ if scope in cfgservice.common_name:
-            credential=cfgservice.common_name[scope]
-
-        else:
-            credential = scope """
-        
-        credential = credentialsSupported[credential_requested]["display"][0]["name"]
-
-        presentation_data.update({credential:{}})
-
-        credential_atributes_form=list()
-        credential_atributes_form.append(credential_requested)
-        attributesForm = getAttributesForm(credential_atributes_form).keys()
-        attributesForm2 = getAttributesForm2(credential_atributes_form).keys()
-
-        for attribute in cleaned_data.keys():
-
-            if attribute in attributesForm:
-                presentation_data[credential][attribute]= cleaned_data[attribute]
-            
-            if attribute in attributesForm2:
-                presentation_data[credential][attribute]= cleaned_data[attribute]
-
-        doctype_config=credentialsSupported[credential_requested]["issuer_config"]
-
-        today = date.today()
-        expiry = today + timedelta(days=doctype_config["validity"])
-    
-        presentation_data[credential].update({"estimated_issuance_date":today.strftime("%Y-%m-%d")})
-        presentation_data[credential].update({"estimated_expiry_date":expiry.strftime("%Y-%m-%d")})
-        presentation_data[credential].update({"issuing_country": "FC"}),
-        presentation_data[credential].update({"issuing_authority": doctype_config["issuing_authority"]})
-        
-        if "credential_type" in doctype_config:
-                presentation_data[credential].update({"credential_type":doctype_config["credential_type"] })
-        
-        if "birth_date" in presentation_data[credential] and "age_over_18" in presentation_data[credential]:
-            presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
-
-        if scope == "eu.europa.ec.eudi.pid.1" or scope == "org.iso.18013.5.1.mDL":
-            if "birth_date" in presentation_data[credential]:
-                presentation_data[credential].update({"age_over_18": True if calculate_age(presentation_data[credential]["birth_date"]) >= 18 else False})
-
-        if "driving_privileges" in presentation_data[credential]:
-            json_priv = json.loads(presentation_data[credential]["driving_privileges"])
-            presentation_data[credential].update({"driving_privileges":json_priv})
-        
-        if "portrait" in presentation_data[credential]:
-            presentation_data[credential].update({"portrait":base64.b64encode(base64.urlsafe_b64decode(presentation_data[credential]["portrait"])).decode("utf-8")})
-        
-        if "NumberCategories" in presentation_data[credential]:
-            for i in range(int(presentation_data[credential]["NumberCategories"])):
-                    f = str(i + 1)
-                    presentation_data[credential].pop("IssueDate" + f)
-                    presentation_data[credential].pop("ExpiryDate" + f)
-            presentation_data[credential].pop("NumberCategories")
+    print("\nPresentation Data: ", presentation_data)
 
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id=user_id, redirect_url=cfgservice.service_url + "/form_authorize_generate" )
 

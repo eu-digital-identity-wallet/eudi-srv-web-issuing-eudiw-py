@@ -939,40 +939,8 @@ def auth():
     elif choice == "link2":
         return redirect(cfgserv.service_url + "dynamic/")
 
-@dynamic.route("/form", methods=["GET", "POST"])
-def Dynamic_form():
-    """Form PID page.
-    Form page where the user can enter its PID data.
-    """
-    session["route"] = "/dynamic/form"
-    session["version"] = "0.5"
-    session["country"] = "FC"
-    # if GET
-    if request.method == "GET":
-        if (
-            session.get("country") is None or session.get("returnURL") is None
-        ):  # someone is trying to connect directly to this endpoint
-            return (
-                "Error 101: " + cfgserv.error_list["101"] + "\n",
-                status.HTTP_400_BAD_REQUEST,
-            )
 
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template('misc/auth_method.html')
-
-    # if submitted form is valid
-    """  v = validate_params_getpid_or_mdl(
-        request.form,
-        ["version", "country", "certificate", "returnURL", "device_publickey"],
-    )
-    if not isinstance(v, bool):  # getpid params were not correctly validated
-        return v """
-
-    form_data = request.form.to_dict()
-
-    user_id = generate_unique_id()
-
-    form_data.pop("proceed")
+def form_formatter(form_data: dict) -> dict:
     cleaned_data = {}
 
     if "effective_from_date" in form_data:
@@ -1026,12 +994,14 @@ def Dynamic_form():
 
     for item in grouped:
 
-        if item == "nationality" or item == "nationalities":
+        if item == "nationality":
 
             if isinstance(grouped[item],list):
                 cleaned_data[item] = [item['country_code'] for item in grouped[item]]
+                cleaned_data["nationalities"] = cleaned_data[item]
             else:
                 cleaned_data[item] = grouped[item]
+                cleaned_data["nationalities"] = cleaned_data[item]
         
         elif item == "place_of_birth":
             if isinstance(grouped[item],list):
@@ -1053,6 +1023,10 @@ def Dynamic_form():
                 for d in grouped[item]:
                     joined_places.update(d)
                 cleaned_data[item] = joined_places
+                
+        elif item == "birth_date":
+            cleaned_data["birthdate"] = grouped[item]
+            cleaned_data[item] = grouped[item]
 
         elif item == "portrait":
             if grouped[item] == "Port1":
@@ -1107,19 +1081,16 @@ def Dynamic_form():
 
     cleaned_data.update(
         {
-            "version": session["version"],
             "issuing_country": session["country"],
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
 
-    print("\nCleaned Data: ", cleaned_data)
+    return cleaned_data
 
-    form_dynamic_data[user_id] = cleaned_data.copy()
-    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
 
-    if "jws_token" not in session or "authorization_params" in session:
-        session["jws_token"] = session["authorization_params"]["token"]
+def presentation_formatter(cleaned_data: dict) -> dict:
+
     session["returnURL"] = cfgserv.OpenID_first_endpoint
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -1186,6 +1157,58 @@ def Dynamic_form():
                     presentation_data[credential].pop("IssueDate" + f)
                     presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
+
+    return presentation_data
+
+
+@dynamic.route("/form", methods=["GET", "POST"])
+def Dynamic_form():
+    """Form PID page.
+    Form page where the user can enter its PID data.
+    """
+    session["route"] = "/dynamic/form"
+    session["country"] = "FC"
+    if "jws_token" not in session or "authorization_params" in session:
+        session["jws_token"] = session["authorization_params"]["token"]
+
+    # if GET
+    if request.method == "GET":
+        if (
+            session.get("country") is None or session.get("returnURL") is None
+        ):  # someone is trying to connect directly to this endpoint
+            return (
+                "Error 101: " + cfgserv.error_list["101"] + "\n",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+    if "Cancelled" in request.form.keys():  # Form request Cancelled
+        return render_template('misc/auth_method.html')
+
+    # if submitted form is valid
+    """  v = validate_params_getpid_or_mdl(
+        request.form,
+        ["version", "country", "certificate", "returnURL", "device_publickey"],
+    )
+    if not isinstance(v, bool):  # getpid params were not correctly validated
+        return v """
+
+    user_id = generate_unique_id()
+
+    form_data = request.form.to_dict()
+
+    form_data.pop("proceed")
+
+    cleaned_data = form_formatter(form_data)
+    print("\nCleaned Data: ", cleaned_data)
+
+    form_dynamic_data[user_id] = cleaned_data.copy()
+    form_dynamic_data[user_id].update({"expires":datetime.now() + timedelta(minutes=cfgserv.form_expiry)})
+
+    print("\nform_dynamic_data: ", form_dynamic_data[user_id])
+
+    presentation_data = presentation_formatter(cleaned_data=cleaned_data)
+    
+    print("\nPresentation Data: ", presentation_data)
 
     return render_template("dynamic/form_authorize.html", presentation_data=presentation_data, user_id="FC." + user_id, redirect_url=cfgserv.service_url + "dynamic/redirect_wallet" )
 

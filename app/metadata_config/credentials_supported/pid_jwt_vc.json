@@ -58,7 +58,7 @@
         },
         {
            "path":[
-              "birth_date"
+              "birthdate"
            ],
            "mandatory":true,
            "value_type":"full-date",
