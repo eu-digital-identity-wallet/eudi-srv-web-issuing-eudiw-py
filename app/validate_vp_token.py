@@ -56,8 +56,6 @@ def validate_vp_token(response_json, credentials_requested):
         ],
     }
 
-    
-
     if (
         response_json["presentation_submission"]["definition_id"]
         != auth_request_values["definition_id"]
@@ -116,8 +114,8 @@ def validate_vp_token(response_json, credentials_requested):
                 for namespace in cfgservice.dynamic_issuing[id][doctype]:
                     for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
                         attributes_requested.append(attribute)
-        
-        #attributes_requested = auth_request_values["input_descriptor"]
+
+        # attributes_requested = auth_request_values["input_descriptor"]
         attributes_received = []
 
         for n in namespaces.keys():

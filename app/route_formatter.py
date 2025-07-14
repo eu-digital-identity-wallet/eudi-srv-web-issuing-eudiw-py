@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -27,13 +27,7 @@ import logging
 
 from flask import (
     Blueprint,
-    flash,
-    g,
-    redirect,
-    render_template,
     request,
-    session,
-    url_for,
     jsonify,
 )
 
@@ -89,7 +83,8 @@ def cborformatter():
     """
 
     (b, l) = validate_mandatory_args(
-        request.json, ["version", "country", "credential_metadata", "device_publickey", "data"]
+        request.json,
+        ["version", "country", "credential_metadata", "device_publickey", "data"],
     )
     if not b:  # nota all mandatory args are present
         return jsonify(
@@ -99,12 +94,12 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-    
+
     if request.json["version"] not in cfgservice.getpid_or_mdl_response_field:
         return jsonify(
             {"error_code": 13, "error_message": cfgservice.error_list["13"], "mdoc": ""}
         )
-    
+
     if request.json["country"] not in cfcountries.supported_countries:
         return jsonify(
             {
@@ -169,7 +164,7 @@ def cborformatter():
                 "mdoc": "",
             }
         )
-    
+
     base64_mdoc = mdocFormatter(
         request.json["data"],
         request.json["credential_metadata"],

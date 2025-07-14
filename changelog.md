@@ -146,3 +146,17 @@ _25 Jun 2025_
 ### Fixed
 - Refresh token rotation
 - CoR uri 
+
+## [0.8.2]
+
+_14 Jul 2025_
+
+### Changed
+- Preauth form and main generated the same.
+
+### Fixed
+- Bug where PID and PID sd-jwt cannot be issued at the same time with deeplink 
+- Cannot add PID due to bracket error
+- SD-JWT VC PID contains improperly disclosed elements in nationalities
+- Unable to issue PoR Credential through wallet tester
+
