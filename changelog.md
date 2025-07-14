@@ -135,3 +135,28 @@ _05 May 2025_
 - Metadata oid4vci d15
 - Set scopes to credential id
 - Further separation of sd-jwt vc and mdoc formatters based on metadata
+
+
+# [0.8.1]
+
+_25 Jun 2025_
+
+### Changed
+- PID to new spec
+
+### Fixed
+- Refresh token rotation
+- CoR uri 
+
+# [0.8.2]
+
+_14 Jul 2025_
+
+### Changed
+- Preauth form and main generated the same.
+
+### Fixed
+- Bug where PID and PID sd-jwt cannot be issued at the same time with deeplink 
+- Cannot add PID due to bracket error
+- SD-JWT VC PID contains improperly disclosed elements in nationalities
+- Unable to issue PoR Credential through wallet tester
