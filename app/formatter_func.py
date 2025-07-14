@@ -252,13 +252,6 @@ def sdjwtNestedClaims(claims, vct):
 
             nestedDict.update({SDObj(value=claim): nationalitiesArray})
 
-        elif isinstance(value, list) and claim == "nationalities":
-            nationalitiesArray = []
-            for nationality in value:
-                nationalitiesArray.append(SDObj(value=nationality))
-                
-            nestedDict.update({SDObj(value=claim): nationalitiesArray})
-
         else:
             nestedDict.update({SDObj(value=claim): value})
 
