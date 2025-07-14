@@ -33,19 +33,19 @@ import os
 class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
-    service_url = os.getenv("SERVICE_URL", "https://dev.issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL", "https://issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
 
     wallet_test_url = os.getenv(
-        "WALLET_TEST_URL", "https://dev.tester.issuer.eudiw.dev/"
+        "WALLET_TEST_URL", "https://tester.issuer.eudiw.dev/"
     )
 
     revocation_service_url = os.getenv(
-        "REVOCATION_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/take"
+        "REVOCATION_SERVICE_URL", "https://issuer.eudiw.dev/token_status_list/take"
     )
 
     revoke_service_url = os.getenv(
-        "REVOKE_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/set"
+        "REVOKE_SERVICE_URL", "https://issuer.eudiw.dev/token_status_list/set"
     )
 
     # ---------------------------------------------------------------------------
