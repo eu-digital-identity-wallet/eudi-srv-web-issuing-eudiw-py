@@ -159,3 +159,4 @@ _14 Jul 2025_
 - Cannot add PID due to bracket error
 - SD-JWT VC PID contains improperly disclosed elements in nationalities
 - Unable to issue PoR Credential through wallet tester
+

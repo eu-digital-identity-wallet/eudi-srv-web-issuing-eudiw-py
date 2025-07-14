@@ -1104,6 +1104,7 @@ def form_formatter(form_data: dict) -> dict:
 
         elif item == "place_of_birth":
             if isinstance(grouped[item], list):
+
                 joined_places = {}
                 for d in grouped[item]:
                     joined_places.update(d)
