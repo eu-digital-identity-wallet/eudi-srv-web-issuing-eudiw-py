@@ -136,8 +136,7 @@ _05 May 2025_
 - Set scopes to credential id
 - Further separation of sd-jwt vc and mdoc formatters based on metadata
 
-
-# [0.8.1]
+## [0.8.1]
 
 _25 Jun 2025_
 
@@ -148,7 +147,7 @@ _25 Jun 2025_
 - Refresh token rotation
 - CoR uri 
 
-# [0.8.2]
+## [0.8.2]
 
 _14 Jul 2025_
 
