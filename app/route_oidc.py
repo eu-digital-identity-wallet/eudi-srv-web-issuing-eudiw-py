@@ -337,7 +337,7 @@ def authorizationv2(
     code_challenge_method=None,
     code_challenge=None,
     authorization_details=None,
-    state = None
+    state=None,
 ):
 
     client_secret = str(uuid.uuid4())
@@ -365,7 +365,7 @@ def authorizationv2(
 
     if code_challenge and code_challenge_method:
         url = f"{url}&code_challenge={code_challenge}&code_challenge_method={code_challenge_method}"
-    
+
     if state:
         url = f"{url}&state={state}"
 
@@ -447,7 +447,7 @@ def authorizationV3():
             code_challenge_method,
             code_challenge,
             authorization_details,
-            state
+            state,
         )
 
     try:

@@ -20,7 +20,18 @@ import json
 from flask import session
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries
-from misc import calculate_age, doctype2credential, doctype2credentialSDJWT, getIssuerFilledAttributes, getIssuerFilledAttributesSDJWT, getMandatoryAttributes, getMandatoryAttributesSDJWT, getNamespaces, getOptionalAttributes, getOptionalAttributesSDJWT
+from misc import (
+    calculate_age,
+    doctype2credential,
+    doctype2credentialSDJWT,
+    getIssuerFilledAttributes,
+    getIssuerFilledAttributesSDJWT,
+    getMandatoryAttributes,
+    getMandatoryAttributesSDJWT,
+    getNamespaces,
+    getOptionalAttributes,
+    getOptionalAttributesSDJWT,
+)
 from redirect_func import json_post
 import base64
 from flask import session
@@ -39,8 +50,10 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     else:
         un_distinguishing_sign = ""
 
-    data, requested_credential = formatter(dict(form_data), un_distinguishing_sign, doctype, format)
-    
+    data, requested_credential = formatter(
+        dict(form_data), un_distinguishing_sign, doctype, format
+    )
+
     if format == "mso_mdoc":
         url = cfgserv.service_url + "formatter/cbor"
 
@@ -76,7 +89,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
     if format == "mso_mdoc":
         requested_credential = doctype2credential(doctype, format)
-        
+
         doctype_config = requested_credential["issuer_config"]
 
         expiry = today + datetime.timedelta(days=doctype_config["validity"])
@@ -91,7 +104,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 requested_credential["claims"], namescape
             )
 
-            issuer_claims = getIssuerFilledAttributes(requested_credential["claims"],namescape)                    
+            issuer_claims = getIssuerFilledAttributes(
+                requested_credential["claims"], namescape
+            )
 
             pdata = {namescape: {}}
 
@@ -101,15 +116,13 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         doctype_config = requested_credential["issuer_config"]
 
         expiry = today + datetime.timedelta(days=doctype_config["validity"])
-        
+
         pdata = {
             "evidence": [
                 {
                     "type": doctype,
                     "source": {
-                        "organization_name": doctype_config[
-                            "organization_name"
-                        ],
+                        "organization_name": doctype_config["organization_name"],
                         "organization_id": doctype_config["organization_id"],
                         "country_code": data["issuing_country"],
                     },
@@ -118,14 +131,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             "claims": {},
         }
 
-        
-        attributes_req = getMandatoryAttributesSDJWT(
-            requested_credential["claims"]
-        )
+        attributes_req = getMandatoryAttributesSDJWT(requested_credential["claims"])
 
-        attributes_req2 = getOptionalAttributesSDJWT(
-            requested_credential["claims"]
-        )
+        attributes_req2 = getOptionalAttributesSDJWT(requested_credential["claims"])
 
         issuer_claims = getIssuerFilledAttributesSDJWT(requested_credential["claims"])
 
@@ -145,16 +153,15 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         )
 
     if "age_over_18" in data:
-        attributes_req2.update({"age_over_18":data["age_over_18"]})
+        attributes_req2.update({"age_over_18": data["age_over_18"]})
 
-    
     if "un_distinguishing_sign" in issuer_claims:
         data.update({"un_distinguishing_sign": un_distinguishing_sign})
 
     if "issuance_date" in issuer_claims:
         data.update({"issuance_date": today.strftime("%Y-%m-%d")})
 
-    if "issue_date" in issuer_claims: 
+    if "issue_date" in issuer_claims:
         data.update({"issue_date": today.strftime("%Y-%m-%d")})
     if "expiry_date" in issuer_claims:
         data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
@@ -166,9 +173,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         data.update({"issuing_authority_unicode": doctype_config["issuing_authority"]})
 
     if "credential_type" in issuer_claims:
-        data.update({"credential_type":doctype_config["credential_type"] })
-        attributes_req.update({"credential_type":""})
-    
+        data.update({"credential_type": doctype_config["credential_type"]})
+        attributes_req.update({"credential_type": ""})
+
     """ attributes_req.update({
         "expiry_date":"",
         "issuing_authority":"",
@@ -191,56 +198,71 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "driving_privileges" in attributes_req:
         json_priv = json.loads(data["driving_privileges"])
         data.update({"driving_privileges": json_priv})
-    
-    if "places_of_work" in attributes_req and not isinstance(data["places_of_work"],list):
+
+    if "places_of_work" in attributes_req and not isinstance(
+        data["places_of_work"], list
+    ):
         json_priv = json.loads(data["places_of_work"])
         data.update({"places_of_work": json_priv})
-    
-    if "legislation" in attributes_req and not isinstance(data["legislation"],list):
+
+    if "legislation" in attributes_req and not isinstance(data["legislation"], list):
         json_priv = json.loads(data["legislation"])
         data.update({"legislation": json_priv})
-    
-    if "employment_details" in attributes_req and not isinstance(data["employment_details"],list):
+
+    if "employment_details" in attributes_req and not isinstance(
+        data["employment_details"], list
+    ):
         json_priv = json.loads(data["employment_details"])
         data.update({"employment_details": json_priv})
 
-    
-    if "competent_institution" in attributes_req and not isinstance(data["competent_institution"],list):
+    if "competent_institution" in attributes_req and not isinstance(
+        data["competent_institution"], list
+    ):
         json_priv = json.loads(data["competent_institution"])
         data.update({"competent_institution": json_priv})
 
-    if "credential_holder" in attributes_req and isinstance(data["credential_holder"],list):
+    if "credential_holder" in attributes_req and isinstance(
+        data["credential_holder"], list
+    ):
         data.update({"credential_holder": data["credential_holder"][0]})
 
-    if "credential_holder" in attributes_req2 and isinstance(data["credential_holder"],list):
+    if "credential_holder" in attributes_req2 and isinstance(
+        data["credential_holder"], list
+    ):
         data.update({"credential_holder": data["credential_holder"][0]})
 
-    if "subject" in attributes_req and isinstance(data["subject"],list):
+    if "subject" in attributes_req and isinstance(data["subject"], list):
         data.update({"subject": data["subject"][0]})
 
-    if "subject" in attributes_req2 and isinstance(data["subject"],list):
+    if "subject" in attributes_req2 and isinstance(data["subject"], list):
         data.update({"subject": data["subject"][0]})
 
-    if "competent_institution" in attributes_req and isinstance(data["competent_institution"],list):
+    if "competent_institution" in attributes_req and isinstance(
+        data["competent_institution"], list
+    ):
         data.update({"competent_institution": data["competent_institution"][0]})
 
-    if "competent_institution" in attributes_req2 and isinstance(data["competent_institution"],list):
+    if "competent_institution" in attributes_req2 and isinstance(
+        data["competent_institution"], list
+    ):
         data.update({"competent_institution": data["competent_institution"][0]})
 
-    if "legislation" in attributes_req and isinstance(data["legislation"],list):
+    if "legislation" in attributes_req and isinstance(data["legislation"], list):
         data.update({"legislation": data["legislation"][0]})
 
-    if "legislation" in attributes_req2 and isinstance(data["legislation"],list):
+    if "legislation" in attributes_req2 and isinstance(data["legislation"], list):
         data.update({"legislation": data["legislation"][0]})
 
     if "at_least_one_of" in attributes_req2:
-                attributes_req2.pop("at_least_one_of")
-                
-    if "credential_holder" in attributes_req2 and not isinstance(data["credential_holder"],list):
+        attributes_req2.pop("at_least_one_of")
+
+    if "credential_holder" in attributes_req2 and not isinstance(
+        data["credential_holder"], list
+    ):
         json_priv = json.loads(data["credential_holder"])
         data.update({"credential_holder": json_priv})
 
-    if "subject" in attributes_req2 and not isinstance(data["subject"],list):
+    if "subject" in attributes_req2 and not isinstance(data["subject"], list):
         json_priv = json.loads(data["subject"])
         data.update({"subject": json_priv})
 
@@ -249,8 +271,8 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
     if "age_birth_year" in data and isinstance(data["age_birth_year"], str):
         data.update({"age_birth_year": int(data["age_birth_year"])})
-    
-    if "residence_address" in data and isinstance(data["residence_address"],list):
+
+    if "residence_address" in data and isinstance(data["residence_address"], list):
         data.update({"residence_address": data["residence_address"][0]})
 
     if format == "mso_mdoc":
@@ -264,12 +286,11 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         for attribute in issuer_claims:
             if attribute in data:
                 pdata[namescape].update({attribute: data[attribute]})
-                
 
     elif format == "dc+sd-jwt":
         for attribute in attributes_req:
             pdata["claims"].update({attribute: data[attribute]})
-        
+
         for attribute in attributes_req2:
             if attribute in data:
                 pdata["claims"].update({attribute: data[attribute]})
@@ -277,6 +298,5 @@ def formatter(data, un_distinguishing_sign, doctype, format):
         for attribute in issuer_claims:
             if attribute in data:
                 pdata["claims"].update({attribute: data[attribute]})
-
 
     return pdata, requested_credential
