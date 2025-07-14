@@ -5,6 +5,7 @@ app/certs/PID-DS-0001_EE.pem
 app/certs/PID-DS-0001_EU.pem
 app/certs/PID-DS-0001_PT.pem
 app/certs/PID-DS-0001_UT.pem
+app/app_config/config_secrets.py
 flask_session/
 nohup.out
 
