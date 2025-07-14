@@ -16,7 +16,7 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -63,7 +63,12 @@ import werkzeug
 
 from idpyoidc.server.exception import FailedAuthentication, ClientAuthenticationError
 from idpyoidc.server.oidc.token import Token
-from app.misc import auth_error_redirect, authentication_error_redirect, scope2details, vct2id
+from app.misc import (
+    auth_error_redirect,
+    authentication_error_redirect,
+    scope2details,
+    vct2id,
+)
 
 from datetime import datetime, timedelta
 
@@ -87,7 +92,7 @@ from app.data_management import (
     session_ids,
     getSessionId_requestUri,
     getSessionId_authCode,
-    credential_offer_references
+    credential_offer_references,
 )
 
 
@@ -252,9 +257,9 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
-    elif service == 'oauth-authorization-server':
+    elif service == "oauth-authorization-server":
         info = {
-            "response": oauth_metadata,
+            "response": openid_metadata,
             "http_headers": [
                 ("Content-type", "application/json; charset=utf-8"),
                 ("Pragma", "no-cache"),
@@ -269,7 +274,7 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
-    
+
     elif service == "openid-configuration":
         # _endpoint = current_app.server.get_endpoint("provider_config")
         info = {
@@ -332,6 +337,7 @@ def authorizationv2(
     code_challenge_method=None,
     code_challenge=None,
     authorization_details=None,
+    state=None,
 ):
 
     client_secret = str(uuid.uuid4())
@@ -358,10 +364,10 @@ def authorizationv2(
         url = url + "&authorization_details=" + authorization_details
 
     if code_challenge and code_challenge_method:
-        url = url + "&code_challenge="
-        +code_challenge
-        +"&code_challenge_method="
-        +code_challenge_method
+        url = f"{url}&code_challenge={code_challenge}&code_challenge_method={code_challenge_method}"
+
+    if state:
+        url = f"{url}&state={state}"
 
     payload = {}
     headers = {}
@@ -430,6 +436,7 @@ def authorizationV3():
             code_challenge_method = request.args.get("code_challenge_method")
             code_challenge = request.args.get("code_challenge")
             authorization_details = request.args.get("authorization_details")
+            state = request.args.get("state")
         except:
             return make_response("Authorization v2 error", 400)
         return authorizationv2(
@@ -440,6 +447,7 @@ def authorizationV3():
             code_challenge_method,
             code_challenge,
             authorization_details,
+            state,
         )
 
     try:
@@ -596,8 +604,11 @@ def auth_choice():
             and cred in supported_credencials["country_selection"]
         ):
             pid_auth = False
-        
-        elif cred not in supported_credencials["PID_login"] and cred not in supported_credencials["country_selection"]:
+
+        elif (
+            cred not in supported_credencials["PID_login"]
+            and cred not in supported_credencials["country_selection"]
+        ):
             country_selection = False
             pid_auth = False
 
@@ -605,7 +616,6 @@ def auth_choice():
         return redirect(cfgservice.service_url + "oid4vp")
     elif country_selection == True and pid_auth == False:
         return redirect(cfgservice.service_url + "dynamic/")
-
 
     error = ""
     if pid_auth == False and country_selection == False:
@@ -760,18 +770,15 @@ def token():
 
         response_json = json.loads(response.get_data())
 
-        if "access_token" in response_json:            
+        if "access_token" in response_json:
             session_id = str(uuid.uuid4())
             session_ids.update(
                 {session_id: {"expires": datetime.now() + timedelta(minutes=60)}}
             )
 
-            print("\nAdding ", response_json["access_token"], "to ", session_id )
-
             session_ids[session_id]["access_token"] = response_json["access_token"]
 
     else:
-        
 
         cfgservice.app_logger.info(
             "Token response: " + str(json.loads(response.get_data()))
@@ -867,13 +874,13 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    """ cfgservice.app_logger.info(
+    cfgservice.app_logger.info(
         ", Session ID: "
         + session_id
         + ", "
         + "Credential Request, Payload: "
         + str(payload)
-    ) """
+    )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 
@@ -972,22 +979,17 @@ def notification():
 
     return _resp
 
+
 @oidc.route("/nonce", methods=["POST"])
 def nonce():
 
     _resp = service_endpoint(current_app.server.get_endpoint("nonce"))
 
     if isinstance(_resp, Response):
-        cfgservice.app_logger.info(
-            "Nonce response, Payload: "
-            + str(_resp)
-        )
+        cfgservice.app_logger.info("Nonce response, Payload: " + str(_resp))
         return _resp
 
-    cfgservice.app_logger.info(
-        "Nonce response, Payload: "
-        + str(_resp)
-    )
+    cfgservice.app_logger.info("Nonce response, Payload: " + str(_resp))
 
     return _resp
 
@@ -1143,7 +1145,15 @@ def credentialOffer():
                 }
 
                 reference_id = str(uuid.uuid4())
-                credential_offer_references.update({reference_id:{"credential_offer":credential_offer, "expires":datetime.now() + timedelta(minutes=cfgservice.form_expiry)}})
+                credential_offer_references.update(
+                    {
+                        reference_id: {
+                            "credential_offer": credential_offer,
+                            "expires": datetime.now()
+                            + timedelta(minutes=cfgservice.form_expiry),
+                        }
+                    }
+                )
 
                 # create URI
                 json_string = json.dumps(credential_offer)
@@ -1188,9 +1198,11 @@ def credentialOffer():
     else:
         return redirect(cfgservice.service_url + "credential_offer_choice")
 
+
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])
 def offer_reference(reference_id):
     return credential_offer_references[reference_id]["credential_offer"]
+
 
 """ @oidc.route("/testgetauth", methods=["GET"])
 def testget():
@@ -1277,7 +1289,7 @@ def service_endpoint(endpoint):
             )
 
         return _resp
-    
+
     if endpoint.name == "nonce":
         try:
             req_args = {}
@@ -1315,12 +1327,12 @@ def service_endpoint(endpoint):
                         {"Content-Type": "application/json"},
                     )
                 response = args["response_args"]
-            
+
             elif "encrypted_response" in args:
                 response = make_response(args["encrypted_response"])
                 response.headers["Content-Type"] = "application/jwt"
                 return response
-            
+
             else:
                 if isinstance(args, ResponseMessage) and "error" in args:
                     cfgservice.app_logger.error("Error response: {}".format(args))

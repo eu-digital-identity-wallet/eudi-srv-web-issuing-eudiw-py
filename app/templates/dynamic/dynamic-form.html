@@ -692,7 +692,7 @@
     function submitValidation(){
 
         let optionalAttributes = JSON.parse('{{ optional_attributes | tojson | safe }}');
-        console.log("optionalAttributes: ", optionalAttributes);
+        
         let at_least_one_of= optionalAttributes["at_least_one_of"];
 
         if (!at_least_one_of || at_least_one_of.length === 0) {
@@ -700,7 +700,6 @@
         }
 
         let input = document.querySelector('input[name="given_name"]');
-        console.log("Given Name: ", input);
 
         input = document.querySelector('input[name="health_insurance_id"]');
         console.log("Health_ID: ", input);
@@ -752,13 +751,11 @@
 
     const firstToggle = document.querySelector(".toggle-option");
     if (firstToggle) {
-        console.log("firstToggle: ", firstToggle);
         firstToggle.dispatchEvent(new Event("click")); // Simulate a click on the first button
     }
 
 
     document.addEventListener("DOMContentLoaded", function() {
-        console.log("DOM fully loaded");
         
         var isValid= false
 
@@ -814,8 +811,6 @@
             button.addEventListener("click", function () {
                 let containerId = this.getAttribute("data-target") + "-container";
 
-                console.log(containerId);
-
                 // Enable all buttons before disabling the selected one
                 document.querySelectorAll(".toggle-option").forEach(btn => {
                     btn.removeAttribute("disabled");
@@ -856,24 +851,8 @@
                     }
                 }
 
-                // Hide all sub-containers
-                //Why is this removing the legislation one too? is it in sub-containers?
-                /* document.querySelectorAll(" .sub-container").forEach(container => {
-                    console.log("\nContainer1: ", container)
-                    if (container.id.includes(containerId.split("-")[0])) {
-                        console.log("\nContainer2: ", container)
-                        console.log(container);
-                        container.classList.add("hidden");
-                    }
-                }); */
-
                 // Show the container related to the clicked toggle option
                 const selectedContainer = document.getElementById(containerId);
-
-                console.log(selectedContainer.innerHTML);
-                console.log(this.getAttribute("data-attributes"));
-
-                //console.log(selectedContainer.innerHTML);
 
                 selectedContainer.classList.remove("hidden");
 
@@ -885,7 +864,6 @@
 
                 // Remove any existing list items inside the selected container
                 selectedContainer.querySelectorAll(".list-item").forEach(item => {
-                    console.log("\nItems:", item)
                     item.remove();
                 });
 
@@ -895,9 +873,7 @@
                 // Start building the inner HTML
 
                 let innerHTML = "";
-                Object.keys(selectedOption).forEach(subName => {
-                    console.log("\nSubname:", subName)
-                    
+                Object.keys(selectedOption).forEach(subName => {                    
                     if (subName != "attribute" && subName != "cardinality" && subName != "not_used_if") {
                     
                 
@@ -910,8 +886,6 @@
                                     name="${containerId}[${subName}]" value="${subAttr.filled_value || ''}" ${subAttr.mandatory ? 'required' : ''}>
                             </div>
                         `;
-                        console.log("\nSelected Container:", selectedContainer)
-                        console.log("\nNew Item:", newItem)
 
                     }
                 
@@ -935,7 +909,6 @@
                     addButton.type = "button";
                     addButton.classList.add("btn", "btn-primary", "add-item");
                     addButton.dataset.target = containerId;
-                    console.log("\nTarger: ", containerId)
                     addButton.dataset.name = selectedOption.attribute;
                     addButton.dataset.attributes = JSON.stringify(selectedOption);
                     
@@ -958,12 +931,8 @@
 
         document.addEventListener("click", function (event) {
             if (event.target && event.target.classList.contains("add-item")) {
-                //event.target.remove();
-                console.log("Add item clicked");
 
                 const containerId = event.target.getAttribute("data-target");
-                console.log("\nContainer ID: ", containerId)
-
                 const container = document.getElementById(containerId);
                 if (!container) {
                     console.error(`Container with ID "${containerId}" not found.`);
@@ -973,14 +942,8 @@
                 const fieldName = event.target.getAttribute("data-name");
                 const attributesData = event.target.getAttribute("data-attributes");
 
-                console.log("\nfieldName: ", fieldName)
-
-                console.log("\attributesData: ", attributesData)
-
                 try {
                     const attributes = JSON.parse(attributesData);
-                    console.log("\nParsed attributes:", attributes);
-                    console.log("type: ", typeof attributes);
 
                     const maxCardinality = event.target.getAttribute("data-max") === "n" ? Infinity : parseInt(event.target.getAttribute("data-max"), 10);
                     const index = container.children.length;
@@ -997,12 +960,9 @@
 
                     // Check if the parsed attributes is an array
                     if (Array.isArray(attributes)) {
-                        console.log("isArray")
                         // Iterate through each object in the array
                         attributes.forEach(attrSet => {
                             for (const [attrKey, attrValue] of Object.entries(attrSet)) {
-                                console.log("\nAttribute: ", attrKey);
-                                console.log("\nAttributeValue: ", attrValue);
 
                                 if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
 
@@ -1011,9 +971,6 @@
                                 const isMandatory = attrValue.mandatory ? "required" : "";
                                 const value = attrValue.filled_value ? attrValue.filled_value : "";
                                 const inputType = attrValue.type === "full-date" ? "date" : "text";
-                                console.log("\nisMandatory : ", isMandatory);
-                                console.log("\nvalue : ", value);
-                                console.log("\ninputType : ", inputType);
 
                                 innerHTML += `
                                     <div class="col-md-12">
@@ -1026,8 +983,6 @@
                     } else if (typeof attributes === 'object') {
                         // Iterate through the object directly (existing behavior)
                         for (const [attrKey, attrValue] of Object.entries(attributes)) {
-                            console.log("\nAttribute: ", attrKey);
-                            console.log("\nAttributeValue: ", attrValue);
 
                             if (["attribute", "not_used_if", "cardinality"].includes(attrKey)) continue;
 
@@ -1036,9 +991,6 @@
                             const isMandatory = attrValue.mandatory ? "required" : "";
                             const value = attrValue.filled_value ? attrValue.filled_value : "";
                             const inputType = attrValue.type === "full-date" ? "date" : "text";
-                            console.log("\nisMandatory : ", isMandatory);
-                            console.log("\nvalue : ", value);
-                            console.log("\ninputType : ", inputType);
 
                             innerHTML += `
                                 <div class="col-md-12">
@@ -1066,7 +1018,6 @@
             }
 
             if (event.target && event.target.classList.contains("remove-item")) {
-                console.log("Remove item clicked");
                 const listItem = event.target.closest(".list-item");
                 if (listItem) {
                     listItem.remove();
@@ -1100,8 +1051,6 @@
                     alert('No file selected.');
                     return false; 
                 }
-
-                console.log(file)
 
                 // Check file type
                 if (file.type !== 'image/jpeg') {

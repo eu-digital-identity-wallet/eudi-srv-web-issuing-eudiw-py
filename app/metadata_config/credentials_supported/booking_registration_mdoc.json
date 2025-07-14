@@ -4,7 +4,7 @@
      "doctype":"org.iso.18013.5.1.reservation",
      "scope":"org.iso.18013.5.1.reservation_mdoc",
      "policy":{
-        "batch_size":50,
+        "batch_size":15,
         "one_time_use":true
      },
      "cryptographic_binding_methods_supported":[

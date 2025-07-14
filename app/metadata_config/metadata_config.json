@@ -5,7 +5,7 @@
   "deferred_credential_endpoint": "https://issuer.eudiw.dev/deferred_credential",
   "nonce_endpoint":"https://issuer.eudiw.dev/nonce",
   "batch_credential_issuance": {
-      "batch_size": 15
+      "batch_size": 100
     },
   "credential_response_encryption": {
     "alg_values_supported": [

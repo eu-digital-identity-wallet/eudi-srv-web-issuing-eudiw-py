@@ -24,6 +24,7 @@ import uuid
 import cbor2
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 import urllib
+from urllib.parse import quote_plus
 from formatter_func import cbor2elems
 import requests
 import segno
@@ -32,6 +33,11 @@ from app.misc import auth_error_redirect, authentication_error_redirect, scope2d
 from app.validate_vp_token import validate_vp_token
 from . import oidc_metadata, openid_metadata, oauth_metadata, oidc_metadata_clean
 from datetime import datetime, timedelta
+from pymdoccbor.mdoc.verifier import MdocCbor
+from pymdoccbor.mso.verifier import MsoVerifier
+from app_config.config_secrets import revocation_api_key
+import binascii
+import cbor2
 from app.data_management import (
     getSessionId_accessToken,
     parRequests,
@@ -47,11 +53,11 @@ from app.data_management import (
 revocation = Blueprint("revocation", __name__, url_prefix="/revocation")
 
 #TODO finish revocation pages.
-""" @revocation.route("revocation_choice", methods=["GET"])
+@revocation.route("revocation_choice", methods=["GET"])
 def revocation_choice():
-    Page for selecting credentials
+    """ Page for selecting credentials
 
-    Loads credentials supported by EUDIW Issuer
+    Loads credentials supported by EUDIW Issuer """
    
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     
@@ -136,7 +142,7 @@ def oid4vp_call():
                     
         elif credential["format"] == "dc+sd-jwt":
             format = {
-                "vc+sd-jwt": {
+                "dc+sd-jwt": {
                     "sd-jwt_alg_values": [
                     "ES256",
                     "ES384",
@@ -273,40 +279,37 @@ def b64url_decode(data):
     padding = '=' * (-len(data) % 4)
     return base64.urlsafe_b64decode(data + padding)
 
-def decode_sd_jwt(sd_jwt: str):
-    # Split SD-JWT into its parts
-    parts = sd_jwt.split('~')
-    jwt = parts[0]
-    disclosures = parts[1:]
+from sd_jwt.holder import SDJWTHolder
+import jwt
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
-    # JWT parts: header, payload, signature
-    header_b64, payload_b64, signature_b64 = jwt.split('.')
+def get_status_sdjwt(sd_jwt: str):
+     
+    sdjwt_holder = SDJWTHolder(
+        sd_jwt,
+    )
+
+    unverified_header = jwt.get_unverified_header(sdjwt_holder._unverified_input_sd_jwt)
+
+    x5c_chain = unverified_header.get("x5c")
+    if not x5c_chain:
+        raise ValueError("x5c header not found in JWT")
+        
     
-    header = json.loads(b64url_decode(header_b64))
-    payload = json.loads(b64url_decode(payload_b64))
-    # signature = b64url_decode(signature_b64)  # only if verifying
+    x5c_cert_der = base64.b64decode(x5c_chain[0])
+    x509_cert = x509.load_der_x509_certificate(x5c_cert_der, default_backend())
 
-    print("\nheader: ", header)
-    print("\npayload: ", payload)
-    print("\ndisclosures: ", disclosures)
-    # Decode disclosures
+    public_key = x509_cert.public_key()
 
-    decoded_disclosures = []
+    decoded = jwt.decode(
+    sdjwt_holder._unverified_input_sd_jwt,
+    key=public_key,
+    algorithms=[unverified_header["alg"]],
+)
 
-    for disclosure in disclosures:
-        decoded_disclosure = base64.urlsafe_b64decode(disclosure + "==")
-        print("\ndecoded_disclosure", decoded_disclosure)
-        if "." in disclosure:
-            continue
+    return decoded["status"]
 
-        decoded_disclosures.append(json.loads(decoded_disclosure))
-
-
-    return {
-        "header": header,
-        "payload": payload,
-        "disclosures": decoded_disclosures
-    }
 
 @revocation.route("getoid4vp", methods=["GET", "POST"])
 def oid4vp_get():
@@ -347,25 +350,34 @@ def oid4vp_get():
 
     credentials = {"dc+sd-jwt":[],
                    "mso_mdoc": []}
+    
     resp = {"dc+sd-jwt":[],
             "mso_mdoc": []}
     
-    for desc in response_json['presentation_submission']['descriptor_map']:
-        format = desc['format']
-        path = desc['path']
-        index_str = path[path.find('[') + 1:path.find(']')]
-        index = int(index_str)
-
-        print("\nformat", format)
-        print("\nindex", index)
-        print("\ncredential", response_json["vp_token"][index])
-
+    if len(response_json["vp_token"]) == 1:
+        format = response_json['presentation_submission']['descriptor_map']['format']
         if format == "mso_mdoc":
-            credentials["mso_mdoc"].append(response_json["vp_token"][index])
-        elif format == "vc+sd-jwt":
-            credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
+                credentials["mso_mdoc"].append(response_json["vp_token"][0])
+        elif format == "dc+sd-jwt":
+            credentials["dc+sd-jwt"].append(response_json["vp_token"][0])
 
+    else:
+        for desc in response_json['presentation_submission']['descriptor_map']:
+            format = desc['format']
+            path = desc['path']
+            index_str = path[path.find('[') + 1:path.find(']')]
+            index = int(index_str)
 
+            print("\nformat", format)
+            print("\nindex", index)
+            print("\ncredential", response_json["vp_token"][index])
+
+            if format == "mso_mdoc":
+                credentials["mso_mdoc"].append(response_json["vp_token"][index])
+            elif format == "dc+sd-jwt":
+                credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
+
+    print("\ncredentials: ", credentials)
     for credential in credentials["mso_mdoc"]:
         mdoc_ver = None
 
@@ -375,23 +387,52 @@ def oid4vp_get():
         except:
             mdoc_ver = base64.urlsafe_b64decode(credential + "==")
 
-        mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
+        mdoc = cbor2.loads(mdoc_ver)
 
-        #print("\nDocuments: ", cbor2.loads(mdoc_cbor["documents"]))
+        status = cbor2.loads(cbor2.loads(mdoc['documents'][0]['issuerSigned']['issuerAuth'][2]).value)["status"]
 
-        status = cbor2.loads(mdoc_cbor["documents"][0]["issuerSigned"]["issuerAuth"][2])
-
-        status2 = cbor2.loads(status.value)["status"]
-
-        print("\nstatus2: ", status2)
-        #cbor_elements = cbor2elems(credential)
-
-        resp["mso_mdoc"].append(credential)
+        resp["mso_mdoc"].append(status)
 
     for credential in credentials["dc+sd-jwt"]:
-        resp["dc+sd-jwt"].append(decode_sd_jwt(credential)["disclosures"])
+        resp["dc+sd-jwt"].append(get_status_sdjwt(credential))
     
-    print("\nresp: ", resp)
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Api-Key': revocation_api_key
+    }
+    for _format in resp:
+        for _status in resp[_format]:
+            if "identifier_list" in _status:
+                id = _status["identifier_list"]["id"]
+                uri = _status["identifier_list"]["uri"]
+
+                payload = f"uri={quote_plus(uri)}&id={id}&status=1"
+                
+                try:
+                    response = requests.post(cfgservice.revoke_service_url, headers=headers, data=payload)
+                    if response.status_code == 200:
+                        print(f"[OK] {uri} id={id}")
+                    else:
+                        print(f"[FAIL] {uri} id={id} -> {response.status_code} {response.text}")
+
+                except Exception as e:
+                    print(f"[ERROR] {uri} id={id} -> {e}")
+
+            if "status_list" in _status:
+                idx = _status["status_list"]["idx"]
+                uri = _status["status_list"]["uri"]
+
+                payload = f"uri={quote_plus(uri)}&idx={idx}&status=1"
+
+                try:
+                    response = requests.post(cfgservice.revoke_service_url, headers=headers, data=payload)
+                    if response.status_code == 200:
+                        print(f"[OK] {uri} idx={idx}")
+                    else:
+                        print(f"[FAIL] {uri} idx={idx} -> {response.status_code} {response.text}")
+
+                except Exception as e:
+                    print(f"[ERROR] {uri} idx={idx} -> {e}")
 
     return resp
- """

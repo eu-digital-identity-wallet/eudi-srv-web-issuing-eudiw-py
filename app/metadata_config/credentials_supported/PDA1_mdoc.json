@@ -4,7 +4,7 @@
      "doctype":"eu.europa.ec.eudi.pda1.1",
      "scope":"eu.europa.ec.eudi.pda1_mdoc",
      "policy":{
-        "batch_size":50,
+        "batch_size":15,
         "one_time_use":true
      },
      "cryptographic_binding_methods_supported":[
