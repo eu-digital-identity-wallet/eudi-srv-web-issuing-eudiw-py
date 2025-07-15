@@ -301,21 +301,21 @@ def extract_public_key_from_x5c(
     return x509_cert.public_key(), unverified_header["alg"]
 
 
-def get_status_sdjwt(sd_jwt: str) -> dict:
+def verify_and_decode_sdjwt(sd_jwt: str) -> dict:
     """
-    Verifies a base64url-encoded SD-JWT and extracts the 'status' claim.
+    Verify the signature of a base64url-encoded SD-JWT using its embedded x5c certificate
+    and decode its payload.
 
     Args:
-        sd_jwt (str): A base64url-encoded SD-JWT in compact serialization format.
+        sd_jwt (str): The SD-JWT encoded with base64url.
 
     Raises:
-        ValueError: If the JWT is invalid, the x5c certificate is missing or malformed,
-                    or the public key type is unsupported.
+        ValueError: If the x5c certificate is missing or malformed, the public key type is unsupported,
+                    or the JWT signature verification fails.
 
     Returns:
-        dict: The value of the 'status' claim from the decoded JWT payload.
+        dict: The decoded payload of the SD-JWT as a dictionary.
     """
-
     sdjwt_holder = SDJWTHolder(
         sd_jwt,
     )
@@ -332,13 +332,33 @@ def get_status_sdjwt(sd_jwt: str) -> dict:
             ed448.Ed448PublicKey,
         ),
     ):
-        decoded = jwt.decode(
+        decoded_jwt = jwt.decode(
             sdjwt_holder._unverified_input_sd_jwt,
             key=public_key,
             algorithms=[alg],
         )
     else:
         raise ValueError(f"Unsupported key type: {type(public_key)}")
+
+    return decoded_jwt
+
+
+def get_status_sdjwt(sd_jwt: str) -> dict:
+    """
+    Verifies a base64url-encoded SD-JWT and extracts the 'status' claim.
+
+    Args:
+        sd_jwt (str): A base64url-encoded SD-JWT in compact serialization format.
+
+    Raises:
+        ValueError: If the JWT is invalid, the x5c certificate is missing or malformed,
+                    or the public key type is unsupported.
+
+    Returns:
+        dict: The value of the 'status' claim from the decoded JWT payload.
+    """
+
+    decoded = verify_and_decode_sdjwt(sd_jwt)
 
     return decoded["status"]
 
