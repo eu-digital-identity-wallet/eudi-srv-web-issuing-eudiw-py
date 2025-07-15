@@ -29,7 +29,7 @@ from flask import (
     request,
     session,
 )
-from typing import Union
+from typing import Tuple, Union
 from urllib.parse import quote_plus
 import requests
 import segno
@@ -42,6 +42,11 @@ import cbor2
 from app.data_management import (
     oid4vp_requests,
 )
+from sd_jwt.holder import SDJWTHolder
+import jwt
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.types import CertificatePublicKeyTypes
 
 revocation = Blueprint("revocation", __name__, url_prefix="/revocation")
 
@@ -265,28 +270,55 @@ def b64url_decode(data):
         raise ValueError(f"Invalid base64 data: {e}")
 
 
-from sd_jwt.holder import SDJWTHolder
-import jwt
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
+def extract_public_key_from_x5c(
+    jwt_token: str,
+) -> Tuple[CertificatePublicKeyTypes, str]:
+    """
+    Extracts the public key and algorithm from the x5c header in a JWT.
+    The token is NOT trusted at this point; we only use the header
+    to extract the public key for subsequent signature verification.
 
+    Args:
+        jwt_token (str): The raw JWT as a string.
 
-def get_status_sdjwt(sd_jwt: str) -> dict:
+    Raises:
+        ValueError: If the x5c header is missing or the key type is unsupported.
 
-    sdjwt_holder = SDJWTHolder(
-        sd_jwt,
-    )
-
-    unverified_header = jwt.get_unverified_header(sdjwt_holder._unverified_input_sd_jwt)
+    Returns:
+        Tuple[CertificatePublicKeyTypes, str]: A tuple containing the public key
+        extracted from the x5c certificate and the algorithm from the JWT header.
+    """
+    unverified_header = jwt.get_unverified_header(jwt_token)
 
     x5c_chain = unverified_header.get("x5c")
     if not x5c_chain:
         raise ValueError("x5c header not found in JWT")
 
-    x5c_cert_der = base64.b64decode(x5c_chain[0])
+    x5c_cert_der = b64url_decode(x5c_chain[0])
     x509_cert = x509.load_der_x509_certificate(x5c_cert_der, default_backend())
+    return x509_cert.public_key(), unverified_header["alg"]
 
-    public_key = x509_cert.public_key()
+
+def get_status_sdjwt(sd_jwt: str) -> dict:
+    """
+    Verifies a base64url-encoded SD-JWT and extracts the 'status' claim.
+
+    Args:
+        sd_jwt (str): A base64url-encoded SD-JWT in compact serialization format.
+
+    Raises:
+        ValueError: If the JWT is invalid, the x5c certificate is missing or malformed,
+                    or the public key type is unsupported.
+
+    Returns:
+        dict: The value of the 'status' claim from the decoded JWT payload.
+    """
+
+    sdjwt_holder = SDJWTHolder(
+        sd_jwt,
+    )
+
+    public_key, alg = extract_public_key_from_x5c(sdjwt_holder._unverified_input_sd_jwt)
 
     # Check if the key type is supported by PyJWT
     if isinstance(
@@ -301,7 +333,7 @@ def get_status_sdjwt(sd_jwt: str) -> dict:
         decoded = jwt.decode(
             sdjwt_holder._unverified_input_sd_jwt,
             key=public_key,
-            algorithms=[unverified_header["alg"]],
+            algorithms=[alg],
         )
     else:
         raise ValueError(f"Unsupported key type: {type(public_key)}")
@@ -310,6 +342,17 @@ def get_status_sdjwt(sd_jwt: str) -> dict:
 
 
 def get_status_mdoc(mdoc_credential: str) -> Union[list, dict]:
+    """
+    Decodes a base64url-encoded mdoc credential and extracts the status information.
+
+    Args:
+        mdoc_credential (str): A base64url-encoded mdoc credential string.
+
+    Returns:
+        Union[list, dict]: The 'status' field(s) extracted from the document(s).
+            Returns a dict if only one document is present,
+            or a list of dicts if multiple documents are present.
+    """
 
     mdoc_bytes = b64url_decode(mdoc_credential)
 
