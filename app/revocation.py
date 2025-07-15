@@ -271,7 +271,7 @@ def b64url_decode(data):
 
 
 def extract_public_key_from_x5c(
-    jwt_token: str,
+    jwt_raw: str,
 ) -> Tuple[CertificatePublicKeyTypes, str]:
     """
     Extracts the public key and algorithm from the x5c header in a JWT.
@@ -279,7 +279,7 @@ def extract_public_key_from_x5c(
     to extract the public key for subsequent signature verification.
 
     Args:
-        jwt_token (str): The raw JWT as a string.
+        jwt_raw (str): The raw JWT as a string.
 
     Raises:
         ValueError: If the x5c header is missing or the key type is unsupported.
@@ -288,7 +288,7 @@ def extract_public_key_from_x5c(
         Tuple[CertificatePublicKeyTypes, str]: A tuple containing the public key
         extracted from the x5c certificate and the algorithm from the JWT header.
     """
-    unverified_header = jwt.get_unverified_header(jwt_token)
+    unverified_header = jwt.get_unverified_header(jwt_raw)
 
     x5c_chain = unverified_header.get("x5c")
     if not x5c_chain:
