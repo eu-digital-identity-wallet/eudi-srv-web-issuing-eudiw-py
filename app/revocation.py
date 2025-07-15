@@ -19,6 +19,7 @@
 import base64
 import io
 import json
+import re
 from urllib.parse import urlparse
 import uuid
 import cbor2
@@ -395,6 +396,11 @@ def oid4vp_get():
         presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
             "transaction_id"
         ]
+
+        # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
+        if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
+            raise ValueError("Invalid presentation_id")
+
         url = (
             cfgservice.dynamic_presentation_url
             + presentation_id
@@ -405,6 +411,11 @@ def oid4vp_get():
 
     elif "presentation_id" in request.args:
         presentation_id = request.args["presentation_id"]
+        print("\npresentation_id", presentation_id)
+
+        # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
+        if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
+            raise ValueError("Invalid presentation_id")
 
         url = (
             cfgservice.dynamic_presentation_url
