@@ -29,7 +29,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -39,22 +39,25 @@ from idpyoidc.configure import create_from_config_file
 from idpyoidc.server.configure import OPConfiguration
 from idpyoidc.server import Server
 from urllib.parse import urlparse
-from pycose.keys import EC2Key
+from pycose.keys.ec2 import EC2Key
+from typing import Dict, Any, List, Union, cast
 
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import (
+    ec,
+)
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
 
 
 # Log
-from .app_config.config_service import ConfService as log
 
 
-oidc_metadata = {}
-oidc_metadata_clean = {}
-openid_metadata = {}
-oauth_metadata = {}
-trusted_CAs = {}
+oidc_metadata: Dict[str, Any] = {}
+oidc_metadata_clean: Dict[str, Any] = {}
+openid_metadata: Dict[str, Any] = {}
+oauth_metadata: Dict[str, Any] = {}
+trusted_CAs: Dict[str, Any] = {}
 
 
 def remove_keys(obj, keys_to_remove):
@@ -73,7 +76,9 @@ def remove_keys(obj, keys_to_remove):
         return obj
 
 
-def replace_domain(obj, old, new):
+def replace_domain(
+    obj: Union[Dict[str, Any], List[Any], str, Any], old: str, new: str
+) -> Union[Dict[str, Any], List[Any], str, Any]:
     if isinstance(obj, dict):
         return {k: replace_domain(v, old, new) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -90,19 +95,16 @@ def setup_metadata():
     global openid_metadata
     global oauth_metadata
 
+    credentials_supported: Dict[str, Any] = {}
+
     try:
-        credentials_supported = {}
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        with open(
-            dir_path + "/metadata_config/openid-configuration.json"
-        ) as openid_metadata:
-            openid_metadata = json.load(openid_metadata)
+        with open(dir_path + "/metadata_config/openid-configuration.json") as f:
+            openid_metadata = json.load(f)
 
-        with open(
-            dir_path + "/metadata_config/oauth-authorization-server.json"
-        ) as oauth_metadata:
-            oauth_metadata = json.load(oauth_metadata)
+        with open(dir_path + "/metadata_config/oauth-authorization-server.json") as f:
+            oauth_metadata = json.load(f)
 
         with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
             oidc_metadata = json.load(metadata)
@@ -119,14 +121,17 @@ def setup_metadata():
 
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"Metadata Error: file not found. \n{e}")
+        raise
     except json.JSONDecodeError as e:
         cfgserv.app_logger.exception(
             f"Metadata Error: Metadata Unable to decode JSON. \n{e}"
         )
+        raise
     except Exception as e:
         cfgserv.app_logger.exception(
             f"Metadata Error: An unexpected error occurred. \n{e}"
         )
+        raise
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
@@ -139,11 +144,18 @@ def setup_metadata():
 
     new_domain = cfgserv.service_url[:-1]
 
-    openid_metadata = replace_domain(openid_metadata, old_domain, new_domain)
-    oauth_metadata = replace_domain(oauth_metadata, old_domain, new_domain)
-    oidc_metadata_clean = replace_domain(oidc_metadata_clean, old_domain, new_domain)
-    oidc_metadata = replace_domain(oidc_metadata, old_domain, new_domain)
-
+    openid_metadata = cast(
+        Dict[str, Any], replace_domain(openid_metadata, old_domain, new_domain)
+    )
+    oauth_metadata = cast(
+        Dict[str, Any], replace_domain(oauth_metadata, old_domain, new_domain)
+    )
+    oidc_metadata_clean = cast(
+        Dict[str, Any], replace_domain(oidc_metadata_clean, old_domain, new_domain)
+    )
+    oidc_metadata = cast(
+        Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain)
+    )
 
 
 setup_metadata()
@@ -176,17 +188,21 @@ def setup_trusted_CAs():
 
                     not_valid_after = certificate.not_valid_after
 
-                    x = public_key.public_numbers().x.to_bytes(
-                        (public_key.public_numbers().x.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        public_numbers = public_key.public_numbers()
+                        x = public_numbers.x.to_bytes(
+                            (public_numbers.x.bit_length() + 7) // 8,
+                            "big",
+                        )
+                        y = public_numbers.y.to_bytes(
+                            (public_numbers.y.bit_length() + 7) // 8,
+                            "big",
+                        )
 
-                    y = public_key.public_numbers().y.to_bytes(
-                        (public_key.public_numbers().y.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                    else:
+                        raise ValueError(
+                            "Only elliptic curve keys supported for EC2Key"
+                        )
 
                     ec_key = EC2Key(
                         x=x, y=y, crv=1
@@ -206,14 +222,17 @@ def setup_trusted_CAs():
 
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
+        raise
     except json.JSONDecodeError as e:
         cfgserv.app_logger.exception(
             f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
         )
+        raise
     except Exception as e:
         cfgserv.app_logger.exception(
             f"TrustedCA Error: An unexpected error occurred.\n {e}"
         )
+        raise
 
     trusted_CAs = ec_keys
 
@@ -249,9 +268,17 @@ def page_not_found(e):
     )
 
 
+from typing import Optional
+
+
+class FlaskIssuer(Flask):
+    srv_config: Optional[OPConfiguration] = None
+    server: Optional[Server] = None
+
+
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = FlaskIssuer(__name__, instance_relative_config=True)
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
@@ -334,7 +361,10 @@ def create_app(test_config=None):
 
     app.srv_config = config.op
 
-    server = Server(config.op, cwd=dir_path)
+    if config.op is not None:
+        server = Server(config.op, cwd=dir_path)
+    else:
+        raise ValueError("config.op is None — cannot initialize Server.")
 
     for endp in server.endpoint.values():
         p = urlparse(endp.endpoint_path)
