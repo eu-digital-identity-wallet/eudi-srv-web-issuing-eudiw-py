@@ -275,9 +275,10 @@ def extract_public_key_from_x5c(
     jwt_raw: str,
 ) -> Tuple[CertificatePublicKeyTypes, str]:
     """
-    Extracts the public key and algorithm from the x5c header in a JWT.
-    The token is NOT trusted at this point; we only use the header
-    to extract the public key for subsequent signature verification.
+    Extract the public key and algorithm from the x5c header in a JWT.
+
+    This function does NOT trust the JWT; it only extracts the public key
+    to be used later for signature verification.
 
     Args:
         jwt_raw (str): The raw JWT as a string.
