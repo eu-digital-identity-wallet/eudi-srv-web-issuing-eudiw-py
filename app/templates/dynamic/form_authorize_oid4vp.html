@@ -168,7 +168,6 @@
         var objTo = document.getElementById('AddCategory')
         var divtest = document.createElement("div");
         divtest.setAttribute("class", "form-group removeclass"+room);
-        var rdiv = 'removeclass'+room;
         divtest.innerHTML = '<label>Category </label><select class="form-control" name="Category'+ room +'"><option>AM</option><option>A1</option><option>A2</option><option>A</option><option>B1</option><option>B</option><option>C1</option><option>C</option><option>D1</option><option>D</option><option>BE</option><option>C1E</option><option>CE</option><option>D1E</option><option>DE</option></select><div class="col">Issue Date:<input type="date" class="form-control" placeholder="Issue Date" aria-label="Issue Date" name="IssueDate'+ room +'" required></div><div class="col">Expiry Date:<input type="date" class="form-control" placeholder="Expiry Date" aria-label="Expiry Date" name="ExpiryDate'+ room +'" required></div><button class="btn btn-danger" type="button" onclick="remove_education_fields('+ room +');">Delete</button>';
         
         objTo.appendChild(divtest)
