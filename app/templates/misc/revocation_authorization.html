@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport"
+         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" />
+      <meta name="Title" content="Revoke Credentials" />
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" />
+      <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+      <title>Revoke Credentials - Authorization</title>
+   </head>
+   <body class="font-pf">
+      <!-- Main Layout Container -->
+      <div class="mx-auto w-full max-w-screen-md flex flex-col min-h-screen">
+         <!-- Header -->
+         <header class="p-6">
+            <p class="text-xs uppercase tracking-wide text-gray-500 font-semibold">Test Issuer</p>
+            <h1 class="font-pf text-4xl text-gray-800">Revoke Credentials</h1>
+            <h3 class="font-bold text-gray-800">The following credentials are about to be revoked. Do you authorize?</h3>
+         </header>
+         <!-- Authorization Form -->
+         <form id="revocationAuthorizationForm" method="post" action="{{ redirect_url }}" class="flex-grow flex flex-col">
+            <main class="flex-grow p-6 space-y-6">
+               <!-- Display credentials grouped by type -->
+               {% for credential_type, items in display_list.items() %}
+               {% if items %}
+               <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-2">{{ credential_type }}</h4>
+                  <ul class="space-y-2 pl-4 list-disc text-sm text-gray-700">
+                     {% for item in items %}
+                     <li>
+                        <strong>Doctype:</strong> {{ item.doctype }}<br>
+                        <strong>Status List ID:</strong> {{ item.status_list_identifier }}
+                     </li>
+                     {% endfor %}
+                  </ul>
+               </div>
+               {% endif %}
+               {% endfor %}
+               <!-- Hidden input for revocation identifier -->
+               <input type="hidden" name="revocation_identifier" value="{{ revocation_identifier }}">
+            </main>
+            <!-- Footer Actions -->
+            <div class="p-6 border-t border-gray-200 bg-white">
+               <div class="flex flex-col gap-2 items-center">
+                  <button type="submit" name="authorize"
+                     class="w-full bg-blue-900 text-white font-semibold py-3 rounded-lg shadow-md hover:bg-blue-800 transition-colors duration-200">
+                  Authorize Revocation
+                  </button>
+                  <button type="button" name="cancel" class="w-full text-gray-500 font-semibold py-2"
+                     onclick="window.location.href='{{ revocation_choice_url }}';">
+                  Cancel
+                  </button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </body>
+</html>

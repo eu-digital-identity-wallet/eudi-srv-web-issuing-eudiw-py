@@ -35,6 +35,7 @@ oid4vp_requests = {}
 form_dynamic_data = {}
 session_ids = {}
 credential_offer_references = {}
+revocation_requests = {}
 
 
 def getSessionId_requestUri(target_request_uri):
@@ -156,6 +157,11 @@ def clear_par():
         if datetime.now() > credential_offer_references[id]["expires"]:
             cfgservice.app_logger.info("Removing credential reference id: " + str(id))
             credential_offer_references.pop(id)
+
+    for id in revocation_requests.copy():
+        if datetime.now() > revocation_requests[id]["expires"]:
+            cfgservice.app_logger.info("Removing revpcatopm reference id: " + str(id))
+            revocation_requests.pop(id)
 
 
 def run_scheduler():

@@ -25,6 +25,7 @@ import uuid
 import cbor2
 from flask import (
     Blueprint,
+    abort,
     jsonify,
     render_template,
     request,
@@ -36,8 +37,10 @@ import requests
 import segno
 from .app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
+from app.data_management import revocation_requests
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519, ed448
 from . import oidc_metadata
+from misc import generate_unique_id
 from datetime import datetime, timedelta
 import cbor2
 from app.data_management import (
@@ -190,7 +193,7 @@ def oid4vp_call():
                 "input_descriptors": input_descriptors,
             },
             "wallet_response_redirect_uri_template": cfgservice.service_url
-            + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
+            + "revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id="
             + session_id,
         }
     )
@@ -506,14 +509,67 @@ def oid4vp_get():
     for credential in credentials["dc+sd-jwt"]:
         resp["dc+sd-jwt"].append(get_status_sdjwt(credential))
 
+    display_list = {"dc+sd-jwt": [], "mso_mdoc": []}
+
+    for _format in resp:
+        for _status in resp[_format]:
+            if "status_list" in _status:
+                parsed_url = urlparse(_status["status_list"]["uri"])
+                path = parsed_url.path
+                path_parts = path.strip("/").split("/")
+                doctype = path_parts[2]
+                status_list_identifier = path_parts[3]
+                display_list[_format].append(
+                    {
+                        "doctype": doctype,
+                        "status_list_identifier": status_list_identifier,
+                    }
+                )
+
+    print(display_list)
+
+    revocation_id = generate_unique_id()
+
+    revocation_requests.update(
+        {
+            revocation_id: {
+                "status_lists": resp,
+                "expires": datetime.now()
+                + timedelta(minutes=cfgservice.revocation_code_expiry),
+            }
+        }
+    )
+
+    return render_template(
+        "misc/revocation_authorization.html",
+        display_list=display_list,
+        revocation_identifier=revocation_id,
+        redirect_url=cfgservice.service_url + "revocation/revoke",
+        revocation_choice_url=cfgservice.service_url + "revocation/revocation_choice",
+    )
+
+
+@revocation.route("revoke", methods=["GET", "POST"])
+def revoke():
+
+    revocation_identifier = request.form.get("revocation_identifier")
+
+    if not revocation_identifier:
+        abort(400, description="Missing revocation identifier")
+
+    if revocation_identifier not in revocation_requests:
+        abort(404, description="Invalid or expired revocation identifier")
+
+    status_lists = revocation_requests[revocation_identifier]["status_lists"]
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "X-Api-Key": revocation_api_key,
     }
 
-    print("\nresp: ", resp)
-    for _format in resp:
-        for _status in resp[_format]:
+    print("\nresp: ", status_lists)
+    for _format in status_lists:
+        for _status in status_lists[_format]:
             if "identifier_list" in _status:
                 id = _status["identifier_list"]["id"]
                 uri = _status["identifier_list"]["uri"]
@@ -554,4 +610,9 @@ def oid4vp_get():
                 except Exception as e:
                     print(f"[ERROR] {uri} idx={idx} -> {e}")
 
-    return resp
+    revocation_requests.pop(revocation_identifier)
+
+    return render_template(
+        "misc/revocation_success.html",
+        redirect_url=cfgservice.service_url,
+    )

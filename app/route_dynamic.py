@@ -82,7 +82,6 @@ CORS(dynamic)  # enable CORS on the blue print
 # secrets
 from app_config.config_secrets import flask_secret_key
 
-app = Flask(__name__)
 # app.config["SECRET_KEY"] = flask_secret_key
 # app.config["dynamic"] = {}
 

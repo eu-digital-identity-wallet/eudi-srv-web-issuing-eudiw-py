@@ -91,6 +91,9 @@ class ConfService:
     # transaction code expiry time (minutes)
     tx_code_expiry = 60
 
+    # transaction code expiry time (minutes)
+    revocation_code_expiry = 60
+
     # Form data expiry time (minutes)
     form_expiry = 1440
 
@@ -610,7 +613,8 @@ class ConfService:
         backupCount=backup_count,
     )
 
-    log_handler_info.setFormatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+    formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+    log_handler_info.setFormatter(formatter)
 
     app_logger = logging.getLogger("app_logger")
     app_logger.addHandler(log_handler_info)
