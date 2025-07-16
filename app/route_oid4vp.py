@@ -25,6 +25,7 @@ import base64
 from datetime import date, timedelta, datetime
 import io
 import json
+import re
 from urllib.parse import urlparse
 from uuid import uuid4
 from flask import Blueprint, Flask, jsonify, render_template, request, session
@@ -230,7 +231,14 @@ def getpidoid4vp():
             + ", "
             + "oid4vp flow: cross_device"
         )
+
         presentation_id = request.args.get("presentation_id")
+
+        if not presentation_id:
+            raise ValueError("Presentation id is required")
+
+        if not re.match(r"^[A-Za-z0-9_-]+$", presentation_id):
+            raise ValueError("Invalid Presentation id format")
 
         url = (
             cfgservice.dynamic_presentation_url

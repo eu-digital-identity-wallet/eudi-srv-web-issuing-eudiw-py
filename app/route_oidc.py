@@ -536,6 +536,12 @@ def pid_authorization_get():
 
     presentation_id = request.args.get("presentation_id")
 
+    if not presentation_id:
+        raise ValueError("Presentation id is required")
+
+    if not re.match(r"^[A-Za-z0-9_-]+$", presentation_id):
+        raise ValueError("Invalid Presentation id format")
+
     url = (
         cfgservice.dynamic_presentation_url
         + presentation_id

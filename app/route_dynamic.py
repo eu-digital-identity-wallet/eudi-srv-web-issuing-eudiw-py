@@ -28,6 +28,7 @@ from datetime import timedelta
 import io
 import json
 import base64
+import re
 from formatter_func import cbor2elems
 import threading
 import schedule
@@ -354,6 +355,13 @@ def red():
             )
 
         token = request.args.get("access_token")
+
+        if not token:
+            raise ValueError("Access token is required")
+
+        if not re.match(r"^[A-Za-z0-9_-]+$", token):
+            raise ValueError("Invalid token format")
+
         r1 = requests.post(
             "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
             json={"token": token},
