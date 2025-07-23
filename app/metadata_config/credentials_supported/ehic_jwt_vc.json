@@ -37,148 +37,146 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:ehic:1",
+     "vct":"urn:eudi:ehic:1",
      "claims":[
         {
            "path":[
-              "credential_holder"
+              "personal_administrative_number"
            ],
            "mandatory":true,
-           "value_type":"credential_holder_attributes",
+           "value_type":"string",
            "source":"user",
            "display":[
               {
-                 "name":"Credential Holder",
+                 "name":"Personal Administrative Number",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_authority"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Authority",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_authority", "id"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Authority ID",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_authority", "name"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Authority Name",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "issuing_country"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issuing Country",
+                 "locale":"en"
+              }
+           ]
+        },
+         {
+           "path":[
+              "date_of_expiry"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Expiry date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "date_of_issuance"
+           ],
+           "mandatory":true,
+           "source":"issuer",
+           "display":[
+              {
+                 "name":"Issue date",
+                 "locale":"en"
+              }
+           ]
+        },
+        {
+           "path":[
+              "authentic_source"
+           ],
+           "mandatory":true,
+           "value_type":"authentic_source_attributes",
+           "source":"user",
+           "display":[
+              {
+                 "name":"Authentic Source",
                  "locale":"en"
               }
            ],
            "issuer_conditions":{
               "cardinality":{
-                 "min":0,
+                 "min":1,
                  "max":1
               }
            }
         },
         {
            "path":[
-              "credential_holder",
-              "family_name"
+              "authentic_source",
+              "id"
            ],
            "mandatory":true,
            "value_type":"string",
            "source":"user",
            "display":[
               {
-                 "name":"Family Name",
+                 "name":"Authentic Source ID",
                  "locale":"en"
               }
            ]
         },
         {
            "path":[
-              "credential_holder",
-              "given_name"
+              "authentic_source",
+              "name"
            ],
            "mandatory":true,
            "value_type":"string",
            "source":"user",
            "display":[
               {
-                 "name":"Given Name",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "credential_holder",
-              "birth_date"
-           ],
-           "mandatory":true,
-           "value_type":"full-date",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Birth Date",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "subject"
-           ],
-           "mandatory":true,
-           "value_type":"subject_attributes",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Subject",
-                 "locale":"en"
-              }
-           ],
-           "issuer_conditions":{
-              "cardinality":{
-                 "min":0,
-                 "max":1
-              }
-           }
-        },
-        {
-           "path":[
-              "subject",
-              "family_name"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Family Name",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "subject",
-              "given_name"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Given Name",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "subject",
-              "birth_date"
-           ],
-           "mandatory":true,
-           "value_type":"full-date",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Birth Date",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "social_security_pin"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Social Security Pin",
+                 "name":"Authentic Source Name",
                  "locale":"en"
               }
            ]
@@ -210,141 +208,11 @@
                  "locale":"en"
               }
            ]
-        },
-        {
-           "path":[
-              "document_id"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Document ID",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "competent_institution"
-           ],
-           "mandatory":true,
-           "value_type":"competent_institution_attributes",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Institution ID",
-                 "locale":"en"
-              }
-           ],
-           "issuer_conditions":{
-              "cardinality":{
-                 "min":1,
-                 "max":1
-              }
-           }
-        },
-        {
-           "path":[
-              "competent_institution",
-              "institution_id"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Institution ID",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "competent_institution",
-              "institution_name"
-           ],
-           "mandatory":false,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Institution Name",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "competent_institution",
-              "country_code"
-           ],
-           "mandatory":true,
-           "value_type":"string",
-           "source":"user",
-           "display":[
-              {
-                 "name":"Country Code",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "issuance_date"
-           ],
-           "mandatory":true,
-           "source":"issuer",
-           "display":[
-              {
-                 "name":"Issuance Date",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "expiry_date"
-           ],
-           "mandatory":true,
-           "source":"issuer",
-           "display":[
-              {
-                 "name":"Expiry Date",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "issuing_authority"
-           ],
-           "mandatory":true,
-           "source":"issuer",
-           "display":[
-              {
-                 "name":"Issuance Authority",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "issuing_country"
-           ],
-           "mandatory":true,
-           "source":"issuer",
-           "display":[
-              {
-                 "name":"Issuing Country",
-                 "locale":"en"
-              }
-           ]
         }
      ],
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
+        "issuing_authority_id":"issuer12345",
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
         "organization_name":"Test PID issuer",

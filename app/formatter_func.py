@@ -293,14 +293,20 @@ def sdjwtFormatter(PID, country):
     # doctype = PID["credential_metadata"]["issuer_config"]["doctype"]
 
     PID_Claims_data = PID["data"]["claims"]
-    iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-    PID_Claims_data.pop("issuance_date")
 
-    exp = DatestringFormatter(PID_Claims_data["expiry_date"])
+    if "date_of_issuance" in PID_Claims_data:
+        iat = DatestringFormatter(PID_Claims_data["date_of_issuance"])
+    else:
+        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
+        PID_Claims_data.pop("issuance_date")
 
-    validity = PID_Claims_data["expiry_date"]
-
-    PID_Claims_data.pop("expiry_date")
+    if "date_of_expiry" in PID_Claims_data:
+        exp = DatestringFormatter(PID_Claims_data["date_of_expiry"])
+        validity = PID_Claims_data["date_of_expiry"]
+    else:
+        exp = DatestringFormatter(PID_Claims_data["expiry_date"])
+        validity = PID_Claims_data["expiry_date"]
+        PID_Claims_data.pop("expiry_date")
 
     # jti = str(uuid4())
 

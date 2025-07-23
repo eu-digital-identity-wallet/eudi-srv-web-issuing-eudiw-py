@@ -613,9 +613,20 @@ def red():
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
         presentation_data[credential].update({"issuing_country": session["country"]}),
-        presentation_data[credential].update(
-            {"issuing_authority": doctype_config["issuing_authority"]}
-        )
+
+        if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
+            presentation_data[credential].update(
+                {
+                    "issuing_authority": {
+                        "id": doctype_config["issuing_authority_id"],
+                        "name": doctype_config["issuing_authority"],
+                    }
+                }
+            )
+        else:
+            presentation_data[credential].update(
+                {"issuing_authority": doctype_config["issuing_authority"]}
+            )
 
         if "credential_type" in doctype_config:
             presentation_data[doctype].update(
@@ -1108,6 +1119,10 @@ def form_formatter(form_data: dict) -> dict:
                 cleaned_data[item] = grouped[item]
                 cleaned_data["nationalities"] = cleaned_data[item]
 
+        elif item == "authentic_source":
+            if isinstance(grouped[item], list):
+                cleaned_data[item] = grouped[item][0]
+
         elif item == "place_of_birth":
             if isinstance(grouped[item], list):
                 joined_places = {}
@@ -1245,9 +1260,20 @@ def presentation_formatter(cleaned_data: dict) -> dict:
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
         presentation_data[credential].update({"issuing_country": session["country"]}),
-        presentation_data[credential].update(
-            {"issuing_authority": doctype_config["issuing_authority"]}
-        )
+
+        if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
+            presentation_data[credential].update(
+                {
+                    "issuing_authority": {
+                        "id": doctype_config["issuing_authority_id"],
+                        "name": doctype_config["issuing_authority"],
+                    }
+                }
+            )
+        else:
+            presentation_data[credential].update(
+                {"issuing_authority": doctype_config["issuing_authority"]}
+            )
 
         if "credential_type" in doctype_config:
             presentation_data[credential].update(

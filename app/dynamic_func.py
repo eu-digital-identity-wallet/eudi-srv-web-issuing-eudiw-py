@@ -161,12 +161,32 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "issuance_date" in issuer_claims:
         data.update({"issuance_date": today.strftime("%Y-%m-%d")})
 
+    if "date_of_issuance" in issuer_claims:
+        data.update({"date_of_issuance": today.strftime("%Y-%m-%d")})
+
     if "issue_date" in issuer_claims:
         data.update({"issue_date": today.strftime("%Y-%m-%d")})
+
     if "expiry_date" in issuer_claims:
         data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
 
-    if "issuing_authority" in issuer_claims:
+    if "date_of_expiry" in issuer_claims:
+        data.update({"date_of_expiry": expiry.strftime("%Y-%m-%d")})
+
+    if (
+        "issuing_authority" in issuer_claims
+        and requested_credential["scope"] == "eu.europa.ec.eudi.ehic_sd_jwt_vc"
+    ):
+        data.update(
+            {
+                "issuing_authority": {
+                    "id": doctype_config["issuing_authority_id"],
+                    "name": doctype_config["issuing_authority"],
+                }
+            }
+        )
+
+    elif "issuing_authority" in issuer_claims:
         data.update({"issuing_authority": doctype_config["issuing_authority"]})
 
     if "issuing_authority_unicode" in issuer_claims:
