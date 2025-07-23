@@ -660,21 +660,13 @@ def token():
         session_id = getSessionId_authCode(req_args["code"])
 
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Authorization Token Request, Payload: "
-            + str(request.form.to_dict())
+            f", Session ID: {session_id}, Token Request, Payload: {request.form.to_dict()}"
         )
 
         response = service_endpoint(current_app.server.get_endpoint("token"))
 
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Authorization Token Response, Payload: "
-            + str(json.loads(response.get_data()))
+            f", Session ID: {session_id}, Token Response, Payload: {json.loads(response.get_data())}"
         )
 
         response_json = json.loads(response.get_data())
@@ -753,11 +745,7 @@ def token():
         transaction_codes.pop(code)
 
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Pre-Authorized Token Response, Payload: "
-            + str(response.json())
+            f", Session ID: {session_id}, Pre-Authorized Token Response, Payload: {response.json()}"
         )
 
         response_json = response.json()
@@ -881,11 +869,7 @@ def credential():
     session_id = getSessionId_accessToken(access_token)
 
     cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Credential Request, Payload: "
-        + str(payload)
+        f", Session ID: {session_id}, Credential Request, Payload: {payload}"
     )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
@@ -893,16 +877,13 @@ def credential():
     if isinstance(_response, Response):
         if _response.content_type == "application/jwt":
             response_str = str(_response.get_data())
+
         else:
             response_str = str(json.loads(_response.get_data()))
 
-        """ cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Credential response, Payload: "
-            + response_str
-        ) """
+        cfgservice.app_logger.info(
+            f", Session ID: {session_id}, Credential response, Payload: {response_str}"
+        )
         return _response
 
     """ if (
@@ -933,13 +914,9 @@ def credential():
 
         return make_response(jsonify(_response), 202) """
 
-    """ cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Credential response, Payload: "
-        + str(_response)
-    ) """
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential response, Payload: {_response}"
+    )
     return _response
 
 
@@ -956,31 +933,19 @@ def notification():
     session_id = getSessionId_accessToken(access_token)
 
     cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Notification Request, Payload: "
-        + str(payload)
+        f", Session ID: {session_id}, Notification Request, Payload: {payload}"
     )
 
     _resp = service_endpoint(current_app.server.get_endpoint("notification"))
 
     if isinstance(_resp, Response):
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Notification response, Payload: "
-            + str(_resp)
+            f", Session ID: {session_id}, Notification response, Payload: {_resp}"
         )
         return _resp
 
     cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Notification response, Payload: "
-        + str(_resp)
+        f", Session ID: {session_id}, Notification response, Payload: {_resp}"
     )
 
     return _resp
@@ -1012,11 +977,7 @@ def deferred_credential():
     session_id = getSessionId_accessToken(access_token)
 
     cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Deferred Credential Request, Payload:, Payload: "
-        + str(payload)
+        f", Session ID: {session_id}, Deferred Credential Request, Payload:, Payload: {payload}"
     )
 
     current_app.server.get_endpoint("credential").process_deferred()
@@ -1030,20 +991,12 @@ def deferred_credential():
             response_str = str(json.loads(_resp.get_data()))
 
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "Credential response, Payload: "
-            + response_str
+            f", Session ID: {session_id}, Credential response, Payload: {response_str}"
         )
         return _resp
 
     cfgservice.app_logger.info(
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Deferred response, Payload: "
-        + str(_resp)
+        f", Session ID: {session_id}, Deferred response, Payload: {_resp}"
     )
 
     return _resp

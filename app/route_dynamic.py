@@ -1054,9 +1054,8 @@ def form_formatter(form_data: dict) -> dict:
     cleaned_data = {}
 
     if "effective_from_date" in form_data:
-        dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(
-            tzinfo=timezone.utc
-        )
+        date_part = form_data["effective_from_date"].split("T")[0]
+        dt = datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         rfc3339_string = dt.isoformat().replace("+00:00", "Z")
         form_data.update({"effective_from_date": rfc3339_string})
 
