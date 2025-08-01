@@ -48,11 +48,11 @@ from cryptography.hazmat.primitives.asymmetric import (
 )
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
-
+from data_management import SessionManager
 
 # Log
 
-
+session_manager = SessionManager(default_expiry_minutes=3600)
 oidc_metadata: Dict[str, Any] = {}
 oidc_metadata_clean: Dict[str, Any] = {}
 openid_metadata: Dict[str, Any] = {}

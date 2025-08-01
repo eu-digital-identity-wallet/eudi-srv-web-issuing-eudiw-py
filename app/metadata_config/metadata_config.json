@@ -1,9 +1,7 @@
 {
-  "credential_issuer": "https://issuer.eudiw.dev",
-  "credential_endpoint": "https://issuer.eudiw.dev/credential",
-  "notification_endpoint": "https://issuer.eudiw.dev/notification",
-  "deferred_credential_endpoint": "https://issuer.eudiw.dev/deferred_credential",
-  "nonce_endpoint":"https://issuer.eudiw.dev/nonce",
+  "authorization_servers": [
+    "https://dev.issuer.eudiw.dev/oidc"
+  ],
   "batch_credential_issuance": {
       "batch_size": 100
     },

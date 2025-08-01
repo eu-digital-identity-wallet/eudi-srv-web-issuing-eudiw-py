@@ -75,6 +75,7 @@ from misc import (
 )
 from dynamic_func import dynamic_formatter
 from . import oidc_metadata
+from . import session_manager
 
 # /pid blueprint
 dynamic = Blueprint("dynamic", __name__, url_prefix="/dynamic")
@@ -100,21 +101,51 @@ def Supported_Countries():
             "misc/auth_method.html", redirect_url=cfgserv.service_url
         )
 
-    authorization_params = session["authorization_params"]
+    token = request.args.get("token")
+    session_id = request.args.get("session_id")
+    scope = request.args.get("scope")
+    authorization_details_str = request.args.get("authorization_details")
+
+    print("\nscope: ", scope)
+    session["session_id"] = session_id
+
+    # Parse the JSON string back into a Python dictionary
+    authorization_details = None
+    authorization_details_request = None
+    if authorization_details_str:
+        try:
+            decoded_string = urllib.parse.unquote(authorization_details_str)
+            authorization_details = json.loads(decoded_string)
+            authorization_details_request = authorization_details
+        except json.JSONDecodeError as e:
+            print(f"Error parsing authorization_details JSON: {e}")
+            return jsonify({"error": "Invalid authorization_details parameter"}), 400
+
+    # authorization_params = session["authorization_params"]
     authorization_details = []
-    if "authorization_details" in authorization_params:
+    if authorization_details:  # "authorization_details" in authorization_params:
+        print("\n1")
         authorization_details.extend(
-            json.loads(authorization_params["authorization_details"])
+            json.loads(
+                authorization_details
+            )  # authorization_params["authorization_details"]
         )
-    if "scope" in authorization_params:
-        authorization_details.extend(scope2details(authorization_params["scope"]))
+
+    print("\nscope: ", scope)
+    if scope:  # "scope" in authorization_params:
+        scope_elements = scope.split()
+        authorization_details.extend(
+            scope2details(scope_elements)
+        )  # authorization_params["scope"]
 
     if not authorization_details:
         return authentication_error_redirect(
-            jws_token=authorization_params["token"],
+            jws_token=token,  # authorization_params["token"],
             error="invalid authentication",
             error_description="No authorization details or scope found in dynamic route.",
         )
+
+    print("\nauthorization_details: ", authorization_details)
 
     session["authorization_details"] = authorization_details
 
@@ -139,6 +170,16 @@ def Supported_Countries():
             display_countries.update(
                 {str(country): str(cfgcountries.supported_countries[country]["name"])}
             )
+
+    session["jws_token"] = token
+    print("\nsession token: ", session)
+
+    session_manager.add_session(
+        session_id=session_id,
+        jws_token=token,
+        scope=scope,
+        authorization_details=authorization_details_request,
+    )
 
     if len(display_countries) == 1:
         country = next(iter(display_countries))
@@ -190,7 +231,11 @@ def Supported_Countries():
 
     # render page where user can select pid_countries
 
-    session["jws_token"] = authorization_params["token"]
+    session["authorization_params"] = {"token": token}
+
+    print("\nsession token: ", session)
+
+    session["jws_token"] = token  # authorization_params["token"]
 
     return render_template(
         "dynamic/dynamic-countries.html",
@@ -246,7 +291,8 @@ def dynamic_R1(country):
             {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
         )
 
-        if "jws_token" not in session or "authorization_params" in session:
+        if "jws_token" not in session and "authorization_params" in session:
+            print("\n1")
             session["jws_token"] = session["authorization_params"]["token"]
 
         session["returnURL"] = cfgserv.OpenID_first_endpoint
@@ -1342,7 +1388,8 @@ def Dynamic_form():
     """
     session["route"] = "/dynamic/form"
     session["country"] = "FC"
-    if "jws_token" not in session or "authorization_params" in session:
+    if "jws_token" not in session and "authorization_params" in session:
+        print("\n2")
         session["jws_token"] = session["authorization_params"]["token"]
 
     # if GET
@@ -1398,8 +1445,32 @@ def Dynamic_form():
 def redirect_wallet():
 
     form_data = request.form.to_dict()
+    user_id = form_data["user_id"]
+
+    print("\nuser_id: ", user_id)
+    print("\ntoken: ", session["jws_token"])
+    print("\nsession_id: ", session["session_id"])
+    return redirect(
+        url_get(
+            cfgserv.OpenID_first_endpoint,
+            {
+                "token": session["jws_token"],
+                "username": session["session_id"],
+            },
+        )
+    )
+
+
+""" @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
+def redirect_wallet():
+
+    form_data = request.form.to_dict()
 
     user_id = form_data["user_id"]
+
+    print("\nuser_id: ", user_id)
+    print("\ntoken: ", session["authorization_params"]["token"])
+
     return redirect(
         url_get(
             cfgserv.OpenID_first_endpoint,
@@ -1408,4 +1479,4 @@ def redirect_wallet():
                 "username": user_id,
             },
         )
-    )
+    ) """

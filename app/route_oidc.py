@@ -238,6 +238,26 @@ def verify_user():
         return render_template("misc/500.html", error=str(exc))
 
 
+@oidc.route("/.well-known/oauth-authorization-server/oidc")
+def well_known2():
+    info = {
+        "response": openid_metadata,
+        "http_headers": [
+            ("Content-type", "application/json; charset=utf-8"),
+            ("Pragma", "no-cache"),
+            ("Cache-Control", "no-store"),
+        ],
+    }
+
+    _http_response_code = info.get("response_code", 200)
+    resp = make_response(info["response"], _http_response_code)
+
+    for key, value in info["http_headers"]:
+        resp.headers[key] = value
+
+    return resp
+
+
 @oidc.route("/.well-known/<service>")
 def well_known(service):
     if service == "openid-credential-issuer":
@@ -650,7 +670,6 @@ def token_service():
 
 @oidc.route("/token", methods=["POST"])
 def token():
-
     req_args = dict([(k, v) for k, v in request.form.items()])
 
     response = None
@@ -858,6 +877,14 @@ def par_endpointv2():
 
 @oidc.route("/credential", methods=["POST"])
 def credential():
+    credential_request = request.get_json()
+
+    print("\ncredential_request: ", credential_request)
+    return "TBD"
+
+
+""" @oidc.route("/credential", methods=["POST"])
+def credential():
 
     headers = dict(request.headers)
     payload = json.loads(request.data)
@@ -886,7 +913,7 @@ def credential():
         )
         return _response
 
-    """ if (
+     if (
         "transaction_id" in _response
         and _response["transaction_id"] not in deferredRequests
     ):
@@ -912,12 +939,12 @@ def credential():
             + str(_response)
         )
 
-        return make_response(jsonify(_response), 202) """
+        return make_response(jsonify(_response), 202) 
 
     cfgservice.app_logger.info(
         f", Session ID: {session_id}, Credential response, Payload: {_response}"
     )
-    return _response
+    return _response """
 
 
 @oidc.route("/notification", methods=["POST"])
