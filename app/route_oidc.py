@@ -582,41 +582,72 @@ def pid_authorization_get():
 
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
+    print("\nAuth_choice")
+
     token = request.args.get("token")
+    session_id = request.args.get("session_id")
+    scope = request.args.get("scope")
+    authorization_details_str = request.args.get("authorization_details")
+
+    session["session_id"] = session_id
 
     supported_credencials = cfgservice.auth_method_supported_credencials
     pid_auth = True
     country_selection = True
 
-    if "authorization_params" not in session:
-        cfgservice.app_logger.info(
-            "Authorization Params didn't exist in Authentication Choice"
-        )
-        return render_template(
-            "misc/500.html",
-            error="Invalid Authentication. No authorization details or scope found.",
-        )
 
-    authorization_params = session["authorization_params"]
 
+    authorization_details = None
+    authorization_details_request = None
+    if authorization_details_str:
+        try:
+            decoded_string = urllib.parse.unquote(authorization_details_str)
+            authorization_details = json.loads(decoded_string)
+            authorization_details_request = authorization_details
+        except json.JSONDecodeError as e:
+            print(f"Error parsing authorization_details JSON: {e}")
+            return jsonify({"error": "Invalid authorization_details parameter"}), 400
+
+    # authorization_params = session["authorization_params"]
     authorization_details = []
-    if "authorization_details" in authorization_params:
+    if authorization_details:  # "authorization_details" in authorization_params:
         authorization_details.extend(
-            json.loads(authorization_params["authorization_details"])
+            json.loads(
+                authorization_details
+            )  # authorization_params["authorization_details"]
         )
-    if "scope" in authorization_params:
-        authorization_details.extend(scope2details(authorization_params["scope"]))
 
+    if scope:  # "scope" in authorization_params:
+        scope_elements = scope.split()
+        authorization_details.extend(
+            scope2details(scope_elements)
+        )  # authorization_params["scope"]
+
+    if not authorization_details:
+        return authentication_error_redirect(
+            jws_token=token,  # authorization_params["token"],
+            error="invalid authentication",
+            error_description="No authorization details or scope found in dynamic route.",
+        )
+    
     credentials_requested = []
     for cred in authorization_details:
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
-
         elif "vct" in cred:
-            cred_id = vct2id(cred["vct"])
-            if cred_id not in credentials_requested:
-                credentials_requested.append(cred_id)
+            if cred["vct"] not in credentials_requested:
+                credentials_requested.append(vct2id(cred["vct"]))
+    
+    credential_configuration_id = scope.replace("openid", "").strip()
+
+    session_manager.add_session(
+        session_id=session_id,
+        jws_token=token,
+        scope=credential_configuration_id,
+        authorization_details=authorization_details,
+        credentials_requested=credentials_requested
+    )
 
     for cred in credentials_requested:
         if (

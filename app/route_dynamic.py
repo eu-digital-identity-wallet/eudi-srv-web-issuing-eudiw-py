@@ -101,94 +101,28 @@ def Supported_Countries():
             "misc/auth_method.html", redirect_url=cfgserv.service_url
         )
 
-    token = request.args.get("token")
-    session_id = request.args.get("session_id")
-    scope = request.args.get("scope")
-    authorization_details_str = request.args.get("authorization_details")
-
-    print("\nscope: ", scope)
-    session["session_id"] = session_id
-
-    # Parse the JSON string back into a Python dictionary
-    authorization_details = None
-    authorization_details_request = None
-    if authorization_details_str:
-        try:
-            decoded_string = urllib.parse.unquote(authorization_details_str)
-            authorization_details = json.loads(decoded_string)
-            authorization_details_request = authorization_details
-        except json.JSONDecodeError as e:
-            print(f"Error parsing authorization_details JSON: {e}")
-            return jsonify({"error": "Invalid authorization_details parameter"}), 400
-
-    # authorization_params = session["authorization_params"]
-    authorization_details = []
-    if authorization_details:  # "authorization_details" in authorization_params:
-        authorization_details.extend(
-            json.loads(
-                authorization_details
-            )  # authorization_params["authorization_details"]
-        )
-
-    print("\nscope: ", scope)
-    if scope:  # "scope" in authorization_params:
-        scope_elements = scope.split()
-        authorization_details.extend(
-            scope2details(scope_elements)
-        )  # authorization_params["scope"]
-
-    if not authorization_details:
-        return authentication_error_redirect(
-            jws_token=token,  # authorization_params["token"],
-            error="invalid authentication",
-            error_description="No authorization details or scope found in dynamic route.",
-        )
-
-    print("\nauthorization_details: ", authorization_details)
-
-    session["authorization_details"] = authorization_details
-
-    credentials_requested = []
-    for cred in authorization_details:
-        if "credential_configuration_id" in cred:
-            if cred["credential_configuration_id"] not in credentials_requested:
-                credentials_requested.append(cred["credential_configuration_id"])
-        elif "vct" in cred:
-            if cred["vct"] not in credentials_requested:
-                credentials_requested.append(vct2id(cred["vct"]))
-
-    print("\ncredentials_requested", credentials_requested)
-
-    session["credentials_requested"] = credentials_requested
+    session_id = session["session_id"]
+    
+    current_session = session_manager.get_session(session_id=session_id)
+    #session["credentials_requested"] = credentials_requested
 
     display_countries = {}
     for country in cfgcountries.supported_countries:
         res = all(
             ele in cfgcountries.supported_countries[country]["supported_credentials"]
-            for ele in credentials_requested
+            for ele in current_session.credentials_requested
         )
         if res:
             display_countries.update(
                 {str(country): str(cfgcountries.supported_countries[country]["name"])}
             )
 
-    session["jws_token"] = token
-    print("\nsession token: ", session)
-
-    credential_configuration_id = scope.replace("openid", "").strip()
-
-    session_manager.add_session(
-        session_id=session_id,
-        jws_token=token,
-        scope=credential_configuration_id,
-        authorization_details=authorization_details_request,
-    )
-
     if len(display_countries) == 1:
         country = next(iter(display_countries))
 
-        session["returnURL"] = cfgserv.OpenID_first_endpoint
-        session["country"] = country
+        #session["returnURL"] = cfgserv.OpenID_first_endpoint
+        #session["country"] = country
+
         cfgserv.app_logger.info(
             ", Session ID: "
             + session["session_id"]
@@ -196,20 +130,20 @@ def Supported_Countries():
             + "Authorization selection, Type: "
             + country
         )
-        return dynamic_R1(session["country"])
+        return dynamic_R1(country)
 
     # render page where user can select pid_countries
 
-    session["authorization_params"] = {"token": token}
+    #session["authorization_params"] = {"token": token}
 
-    print("\nsession token: ", session)
+    #print("\nsession token: ", session)
 
-    session["jws_token"] = token  # authorization_params["token"]
+    #session["jws_token"] = token  # authorization_params["token"]
 
     return render_template(
         "dynamic/dynamic-countries.html",
         countries=display_countries,
-        authorization_details=json.dumps(authorization_details),
+        authorization_details=json.dumps(current_session.authorization_details),
         redirect_url=cfgserv.service_url,
     )
 
@@ -219,9 +153,14 @@ def country_selected():
     # form_keys = request.form.keys()
     form_country = request.form.get("country")
 
-    session["returnURL"] = cfgserv.OpenID_first_endpoint
-    session["country"] = form_country
+    #session["returnURL"] = cfgserv.OpenID_first_endpoint
+    #session["country"] = form_country
 
+    if "Cancelled" in request.form.keys():  # Form request Cancelled
+        return render_template(
+            "misc/auth_method.html", redirect_url=cfgserv.service_url
+        )
+    
     cfgserv.app_logger.info(
         ", Session ID: "
         + session["session_id"]
@@ -230,7 +169,7 @@ def country_selected():
         + form_country
     )
 
-    return dynamic_R1(session["country"])
+    return dynamic_R1(form_country)
 
 
 def dynamic_R1(country):
@@ -241,11 +180,14 @@ def dynamic_R1(country):
     country -- Country selected by user
     """
 
+    session_id = session["session_id"]
     session_manager.update_country(
-        session_id=session["session_id"], country=session["country"]
+        session_id=session_id, country=country
     )
 
-    credentials_requested = session["credentials_requested"]
+    current_session = session_manager.get_session(session_id=session_id)
+
+    credentials_requested = current_session.credentials_requested
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     """ log.logger_info.info(
@@ -257,13 +199,13 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
-        attributesForm = getAttributesForm(session["credentials_requested"])
+        attributesForm = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in attributesForm:
             attributesForm.update(
                 {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
             )
 
-        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+        attributesForm2 = getAttributesForm2(current_session.credentials_requested)
 
         print("\nMandatory: ", attributesForm)
         print("\nOptional: ", attributesForm2)
@@ -276,25 +218,22 @@ def dynamic_R1(country):
         )
 
     elif country == "sample":
-        user_id = session["session_id"]
+        
+        session_manager.update_user_data(session_id=session_id, user_data=cfgserv.sample_data.copy())
 
-        form_dynamic_data[user_id] = cfgserv.sample_data.copy()
+        """ form_dynamic_data[user_id] = cfgserv.sample_data.copy()
         form_dynamic_data[user_id].update(
             {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
-        )
+        ) """
 
-        if "jws_token" not in session and "authorization_params" in session:
-            print("\n1")
-            session["jws_token"] = session["authorization_params"]["token"]
-
-        session["returnURL"] = cfgserv.OpenID_first_endpoint
+        #session["returnURL"] = cfgserv.OpenID_first_endpoint
 
         return redirect(
             url_get(
-                session["returnURL"],
+                cfgserv.OpenID_first_endpoint,
                 {
-                    "jws_token": session["jws_token"],
-                    "username": "sample." + user_id,
+                    "token": current_session.jws_token,
+                    "username": session_id,
                 },
             )
         )
@@ -351,7 +290,7 @@ def dynamic_R1(country):
         url = authorization_endpoint + "?redirect_uri=" + country_data["redirect_uri"]
 
         if country == "EE":
-            country_data["state"] = country + "." + session["jws_token"]
+            country_data["state"] = country + "." + current_session.jws_token
 
         for url_part in country_data:
             if (
@@ -377,9 +316,12 @@ def red():
 
     Return: Redirect answer to returnURL.
     """
-    session["route"] = "/dynamic/redirect"
+    #session["route"] = "/dynamic/redirect"
 
-    if session["country"] == "PT":
+    session_id = session["session_id"]
+    current_session = session_manager.get_session(session_id=session_id)
+    
+    if current_session.country == "PT":
 
         if not request.args:  # if args is empty
             return render_template("/dynamic/pt_url.html")
@@ -387,7 +329,7 @@ def red():
         (v, l) = validate_mandatory_args(request.args, ["access_token"])
         if not v:  # if not all arguments are available
             return authentication_error_redirect(
-                jws_token=session["jws_token"],
+                jws_token=current_session.jws_token,
                 error="Missing mandatory args-PT",
                 error_description="Missing mandatory PT-IdP fields",
             )
@@ -407,16 +349,16 @@ def red():
 
         cfgserv.app_logger.info(
             " - INFO - "
-            + session["route"]
+            + "dynamic/redirect"
             + " - Version:"
             + cfgserv.current_version
             + " - Country: "
-            + session["country"]
+            + current_session.country
             + " -  entered the route"
         )
 
         data = dynamic_R2_data_collect(
-            country=session["country"],
+            country=current_session.country,
             user_id=token
             + "&authenticationContextId="
             + r1.json()["authenticationContextId"],
@@ -436,7 +378,7 @@ def red():
         portuguese_fields = dict()
         form_data = {}
 
-        credential_requested = session["credentials_requested"]
+        credential_requested = current_session.credentials_requested
         credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
         for id in credential_requested:
@@ -519,7 +461,7 @@ def red():
             form_data[doctype].update(
                 {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
             )
-            form_data[doctype].update({"issuing_country": session["country"]})
+            form_data[doctype].update({"issuing_country": current_session.country})
             form_data[doctype].update(
                 {"issuing_authority": doctype_config["issuing_authority"]}
             )
@@ -536,7 +478,7 @@ def red():
                 form_data[doctype]["nationalities"] = ["PT"]
 
         user_id = (
-            session["country"]
+            current_session.country
             + "."
             + token
             + "&authenticationContextId="
@@ -550,29 +492,33 @@ def red():
             redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
         )
 
-    elif session["country"] is None:
+    elif current_session.country is None:
 
         country, jws_token = request.args.get("state").split(".")
-        session["jws_token"] = jws_token
-        session["country"] = country
+
+        session_manager.update_country(session_id=session_id, country= country)
+
+        session_manager.update_jws_token(session_id=session_id, jws_token=jws_token)
+        #session["jws_token"] = jws_token
+        #session["country"] = country
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
     if not v:  # if not all arguments are available
         return authentication_error_redirect(
-            jws_token=session["jws_token"],
+            jws_token=current_session.jws_token,
             error="Missing fields",
             error_description="Missing mandatory IdP fields",
         )
 
     metadata_url = (
-        cfgcountries.supported_countries[session["country"]]["oidc_auth"]["base_url"]
+        cfgcountries.supported_countries[current_session.country]["oidc_auth"]["base_url"]
         + "/.well-known/openid-configuration"
     )
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
 
-    redirect_data = cfgcountries.supported_countries[session["country"]][
+    redirect_data = cfgcountries.supported_countries[current_session.country][
         "oidc_redirect"
     ]
 
@@ -599,25 +545,25 @@ def red():
 
     cfgserv.app_logger.info(
         " - INFO - "
-        + session["route"]
+        + "/dynamic/redicret"
         + " - Version:"
         + cfgserv.current_version
         + " - Country: "
-        + session["country"]
+        + current_session.country
         + "- Code: "
         + request.args.get("code")
         + " -  entered the route"
     )
 
     data = dynamic_R2_data_collect(
-        country=session["country"], user_id=session["access_token"]
+        country=current_session.country, user_id=session["access_token"]
     )
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     presentation_data = dict()
 
-    for credential_requested in session["credentials_requested"]:
+    for credential_requested in current_session.credentials_requested:
 
         scope = credentialsSupported[credential_requested]["scope"]
 
@@ -650,7 +596,7 @@ def red():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": session["country"]}),
+        presentation_data[credential].update({"issuing_country": current_session.country}),
 
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
             presentation_data[credential].update(
@@ -705,7 +651,7 @@ def red():
                 presentation_data[credential].pop("ExpiryDate" + f)
             presentation_data[credential].pop("NumberCategories")
 
-    user_id = session["country"] + "." + session["access_token"]
+    user_id = current_session.country + "." + session["access_token"]
 
     return render_template(
         "dynamic/form_authorize.html",
@@ -744,9 +690,9 @@ def dynamic_R2():
 
     credential_request = json_request["credential_requests"]
 
-    session["country"] = country
-    session["version"] = cfgserv.current_version
-    session["route"] = "/dynamic/form_R2"
+    #session["country"] = country
+    #session["version"] = cfgserv.current_version
+    #session["route"] = "/dynamic/form_R2"
 
     data = dynamic_R2_data_collect(country=country, user_id=user_id)
 
@@ -756,7 +702,7 @@ def dynamic_R2():
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
 
     credential_response = credentialCreation(
-        credential_request=credential_request, data=data, country=country
+        credential_request=credential_request, data=data, country=country, session_id=user_id
     )
 
     return credential_response
@@ -770,6 +716,7 @@ def dynamic_R2_data_collect(country, user_id):
     user_id -- user identifier needed to get respective attributes
     country -- credential issuing country that user selected
     """
+    
     if country == "FC":
 
         current_session = session_manager.get_session(session_id=user_id)
@@ -781,19 +728,25 @@ def dynamic_R2_data_collect(country, user_id):
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
 
-        session["version"] = cfgserv.current_version
-        session["country"] = data["issuing_country"]
+        #session["version"] = cfgserv.current_version
+        #session["country"] = data["issuing_country"]
 
         return data
 
     if country == "sample":
-        data = form_dynamic_data.get(user_id, "Data not found")
+        #data = form_dynamic_data.get(user_id, "Data not found")
+        
+        """ if data == "Data not found":
+            return {"error": "error", "error_description": "Data not found"} """
 
-        if data == "Data not found":
-            return {"error": "error", "error_description": "Data not found"}
+        #session["version"] = cfgserv.current_version
+        #session["country"] = data["issuing_country"]
 
-        session["version"] = cfgserv.current_version
-        session["country"] = data["issuing_country"]
+        current_session = session_manager.get_session(session_id=user_id)
+
+        data = (
+            current_session.user_data
+        )
 
         return data
 
@@ -913,7 +866,7 @@ def dynamic_R2_data_collect(country, user_id):
         credential_error_resp("invalid_credential_request", "Not supported")
 
 
-def credentialCreation(credential_request, data, country):
+def credentialCreation(credential_request, data, country, session_id):
     """
     Function to create credentials requested by user
 
@@ -1062,13 +1015,12 @@ def credentialCreation(credential_request, data, country):
 
         form_data.update(
             {
-                "version": session["version"],
-                "issuing_country": session["country"],
+                "issuing_country": country,
             }
         )
 
-        pdata = dynamic_formatter(format, doctype, form_data, device_publickey)
-
+        pdata = dynamic_formatter(format, doctype, form_data, device_publickey, session_id)
+        
         credential_response["credentials"].append({"credential": pdata})
 
         """ formatting_function_data = formatting_functions.get(format)
@@ -1090,10 +1042,12 @@ def credentialCreation(credential_request, data, country):
 @dynamic.route("/auth_method", methods=["GET", "POST"])
 def auth():
 
-    authorization_params = session["authorization_params"]
+    session_id = session["session_id"]
+    current_session = session_manager.get_session(session_id=session_id)
+
     if "Cancelled" in request.form.keys():  # Form request Cancelled
         return authentication_error_redirect(
-            jws_token=authorization_params["token"],
+            jws_token=current_session.jws_token,
             error="Process Canceled",
             error_description="User canceled authentication",
         )
@@ -1250,7 +1204,7 @@ def form_formatter(form_data: dict) -> dict:
 
     cleaned_data.update(
         {
-            "issuing_country": session["country"],
+            "issuing_country": session_manager.get_session(session["session_id"]).country,
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
@@ -1260,13 +1214,16 @@ def form_formatter(form_data: dict) -> dict:
 
 def presentation_formatter(cleaned_data: dict) -> dict:
 
-    session["returnURL"] = cfgserv.OpenID_first_endpoint
-
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     presentation_data = dict()
 
-    for credential_requested in session["credentials_requested"]:
+    session_id = session["session_id"]
+
+    current_session = session_manager.get_session(session_id=session_id)
+    credentials_requested = current_session.credentials_requested
+
+    for credential_requested in credentials_requested:
 
         scope = credentialsSupported[credential_requested]["scope"]
         """ if scope in cfgserv.common_name:
@@ -1304,7 +1261,7 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": session["country"]}),
+        presentation_data[credential].update({"issuing_country": current_session.country}),
 
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
             presentation_data[credential].update(
@@ -1385,11 +1342,12 @@ def Dynamic_form():
     """Form PID page.
     Form page where the user can enter its PID data.
     """
-    session["route"] = "/dynamic/form"
-    session["country"] = "FC"
-    if "jws_token" not in session and "authorization_params" in session:
-        print("\n2")
-        session["jws_token"] = session["authorization_params"]["token"]
+    #session["route"] = "/dynamic/form"
+    #session["country"] = "FC"
+
+    session_id = session["session_id"]
+
+    current_session = session_manager.get_session(session_id=session_id)
 
     # if GET
     if request.method == "GET":
@@ -1412,7 +1370,7 @@ def Dynamic_form():
     if not isinstance(v, bool):  # getpid params were not correctly validated
         return v """
 
-    user_id = session["session_id"]
+    user_id = session_id
 
     form_data = request.form.to_dict()
 
@@ -1422,7 +1380,7 @@ def Dynamic_form():
     print("\nCleaned Data: ", cleaned_data)
 
     session_manager.update_user_data(
-        session_id=session["session_id"], user_data=cleaned_data
+        session_id=session_id, user_data=cleaned_data
     )
 
     form_dynamic_data[user_id] = cleaned_data.copy()
@@ -1449,16 +1407,20 @@ def redirect_wallet():
 
     form_data = request.form.to_dict()
     user_id = form_data["user_id"]
+    
+    session_id = session["session_id"]
 
-    print("\nuser_id: ", user_id)
-    print("\ntoken: ", session["jws_token"])
-    print("\nsession_id: ", session["session_id"])
+    current_session = session_manager.get_session(session_id=session_id)
+
+    print("\ntoken: ", current_session.jws_token)
+    print("\nsession_id: ", session_id)
+
     return redirect(
         url_get(
             cfgserv.OpenID_first_endpoint,
             {
-                "token": session["jws_token"],
-                "username": session["session_id"],
+                "token": current_session.jws_token,
+                "username": session_id,
             },
         )
     )

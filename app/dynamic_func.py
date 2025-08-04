@@ -39,12 +39,14 @@ from app_config.config_service import ConfService as cfgserv
 from misc import calculate_age
 from redirect_func import json_post
 from app import oidc_metadata
+from app import session_manager
 
-
-def dynamic_formatter(format, doctype, form_data, device_publickey):
+def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
+    
+    current_session = session_manager.get_session(session_id=session_id)
 
     if doctype == "org.iso.18013.5.1.mDL":
-        un_distinguishing_sign = cfgcountries.supported_countries[session["country"]][
+        un_distinguishing_sign = cfgcountries.supported_countries[current_session.country][
             "un_distinguishing_sign"
         ]
     else:
@@ -63,8 +65,7 @@ def dynamic_formatter(format, doctype, form_data, device_publickey):
     r = json_post(
         url,
         {
-            "version": session["version"],
-            "country": session["country"],
+            "country": current_session.country,
             "credential_metadata": requested_credential,
             "device_publickey": device_publickey,
             "data": data,

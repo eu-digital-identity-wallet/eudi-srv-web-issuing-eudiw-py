@@ -43,6 +43,7 @@ from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
 from .app_config.config_service import ConfService as cfgservice
+from . import session_manager
 
 oid4vp = Blueprint("oid4vp", __name__, url_prefix="/")
 CORS(oid4vp)  # enable CORS on the blue print
@@ -54,16 +55,19 @@ from app.data_management import oid4vp_requests, form_dynamic_data
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
 
-    if "session_id" in session:
-        cfgservice.app_logger.info(
-            ", Session ID: "
-            + session["session_id"]
-            + ", "
-            + "Authorization selection, Type: "
-            + "oid4vp"
-        )
+    session_id = session["session_id"]
 
-    authorization_params = session["authorization_params"]
+    current_request = session_manager.get_session(session_id=session_id)
+
+    cfgservice.app_logger.info(
+        ", Session ID: "
+        + session_id
+        + ", "
+        + "Authorization selection, Type: "
+        + "oid4vp"
+    )
+
+    """ authorization_params = session["authorization_params"]
     authorization_details = []
 
     if "authorization_details" in authorization_params:
@@ -79,11 +83,12 @@ def openid4vp():
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
 
-    session["oid4vp_cred_requested"] = credentials_requested
+    session["oid4vp_cred_requested"] = credentials_requested """
+    
 
     input_descriptors = []
 
-    for id in credentials_requested:
+    for id in current_request.credentials_requested:
         for doctype in cfgservice.dynamic_issuing[id]:
             fields = []
             input_descriptors.append(
@@ -128,7 +133,7 @@ def openid4vp():
             },
             "wallet_response_redirect_uri_template": cfgservice.service_url
             + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
-            + session["session_id"],
+            + session_id,
         }
     )
 
@@ -146,7 +151,7 @@ def openid4vp():
 
     oid4vp_requests.update(
         {
-            session["session_id"]: {
+            session_id: {
                 "response": response_same,
                 "expires": datetime.now()
                 + timedelta(minutes=cfgservice.deffered_expiry),
@@ -255,20 +260,23 @@ def getpidoid4vp():
         error_msg = str(response.status_code)
         return jsonify({"error": error_msg}), 400
 
+    session_id = session["session_id"]
+
+    current_session = session_manager.get_session(session_id=session_id)
     error, error_msg = validate_vp_token(
-        response.json(), session["oid4vp_cred_requested"]
+        response.json(), current_session.credentials_requested
     )
 
     if error == True:
         cfgservice.app_logger.error(
             ", Session ID: "
-            + session["session_id"]
+            + session_id
             + ", "
             + "OID4VP error: "
             + error_msg
         )
         return authentication_error_redirect(
-            jws_token=session["authorization_params"]["token"],
+            jws_token=current_session.jws_token,
             error="invalid_request",
             error_description=error_msg,
         )
@@ -278,45 +286,36 @@ def getpidoid4vp():
     attributesForm = {}
 
     if (
-        "authorization_params" in session
-        and "authorization_details" in session["authorization_params"]
+        current_session.authorization_details
     ):
-        cred_request_json = json.loads(
-            session["authorization_params"]["authorization_details"]
-        )
+        print("\nauthorization_details: ", current_session.authorization_details)
 
-        for cred_request in cred_request_json:
-            if "credential_configuration_id" in cred_request:
-                if (
-                    cred_request["credential_configuration_id"]
-                    == "eu.europa.ec.eudi.pseudonym_over18_mdoc"
-                    or cred_request["credential_configuration_id"]
-                    == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
-                ):
-                    is_ageOver18 = True
-                    attributesForm.update(
-                        {
-                            "user_pseudonym": {
-                                "type": "string",
-                                "filled_value": str(uuid4()),
-                            }
-                        }
-                    )
-            elif "vct" in cred_request:
-                if cred_request["vct"] == "eu.europa.ec.eudi.pseudonym_jwt_vc_json":
-                    attributesForm.update(
-                        {
-                            "user_pseudonym": {
-                                "type": "string",
-                                "filled_value": str(uuid4()),
-                            }
-                        }
-                    )
+        print("\n")
+        
+        for credential_id in current_session.authorization_details:
+            if isinstance(credential_id, dict):
+                if "credential_configuration_id" in credential_id:
+                    if (
+                        credential_id["credential_configuration_id"]
+                        == "eu.europa.ec.eudi.pseudonym_over18_mdoc"
+                        or credential_id["credential_configuration_id"]
+                        == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
+                    ):
+                        is_ageOver18 = True
+                        attributesForm.update(
+                {"user_pseudonym": str(uuid4())}
+            )
+                elif "vct" in credential_id:
+                    if credential_id["vct"] == "urn:eu.europa.ec.eudi:pseudonym_age_over_18:1":
+                        attributesForm.update(
+                {"user_pseudonym": str(uuid4())}
+            )
+                        
 
     elif (
-        "authorization_params" in session and "scope" in session["authorization_params"]
+        current_session.scope
     ):
-        cred_scopes = session["authorization_params"]["scope"]
+        cred_scopes = current_session.scope
         if (
             "eu.europa.ec.eudi.pseudonym.age_over_18.1" in cred_scopes
             or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
@@ -324,7 +323,7 @@ def getpidoid4vp():
         ):
             is_ageOver18 = True
             attributesForm.update(
-                {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
+                {"user_pseudonym": str(uuid4())}
             )
 
     if is_ageOver18 == True:
@@ -346,12 +345,15 @@ def getpidoid4vp():
                 {"credential_type": doctype_config["credential_type"]}
             )
 
-        user_id = generate_unique_id()
+        """ user_id = generate_unique_id()
         form_dynamic_data[user_id] = attributesForm.copy()
 
         form_dynamic_data[user_id].update(
             {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
-        )
+        ) """
+
+        session_manager.update_user_data(session_id=session_id, user_data=attributesForm)
+        session_manager.update_country(session_id=session_id, country="FC")
 
         presentation_data = attributesForm.copy()
 
@@ -363,49 +365,21 @@ def getpidoid4vp():
         )
         presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
 
-        if "jws_token" not in session and "authorization_params" in session:
-            session["jws_token"] = session["authorization_params"]["token"]
-
         return render_template(
             "dynamic/form_authorize_oid4vp.html",
             attributes=presentation_data,
-            user_id="FC." + user_id,
+            user_id=session_id,
             redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
         )
     else:
-        authorization_params = session["authorization_params"]
-        authorization_details = []
-        if "authorization_details" in authorization_params:
-            authorization_details.extend(
-                json.loads(authorization_params["authorization_details"])
-            )
-        if "scope" in authorization_params:
-            authorization_details.extend(scope2details(authorization_params["scope"]))
 
-        if not authorization_details:
-            return authentication_error_redirect(
-                jws_token=authorization_params["token"],
-                error="invalid authentication",
-                error_description="No authorization details or scope found in dynamic route.",
-            )
-        credentials_requested = []
-        for cred in authorization_details:
-            if "credential_configuration_id" in cred:
-                if cred["credential_configuration_id"] not in credentials_requested:
-                    credentials_requested.append(cred["credential_configuration_id"])
-            elif "vct" in cred:
-                if cred["vct"] not in credentials_requested:
-                    credentials_requested.append(cred["vct"])
-
-        session["credentials_requested"] = credentials_requested
-
-        attributesForm = getAttributesForm(credentials_requested)
+        attributesForm = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in attributesForm:
             attributesForm.update(
                 {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
             )
 
-        attributesForm2 = getAttributesForm2(session["credentials_requested"])
+        attributesForm2 = getAttributesForm2(current_session.credentials_requested)
 
         for doctype in mdoc_json:
             for attribute, value in mdoc_json[doctype]:
@@ -414,6 +388,8 @@ def getpidoid4vp():
                 elif attribute in attributesForm2:
                     attributesForm2[attribute]["filled_value"] = value
 
+        session_manager.update_country(session_id=session_id, country="FC")
+        
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,

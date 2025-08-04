@@ -63,6 +63,8 @@ from app.data_management import (
 )
 from app.data_management import form_dynamic_data
 from . import oidc_metadata
+from . import session_manager
+
 
 from idpyoidc.message.oidc import AuthorizationRequest
 from idpyoidc.message.oauth2 import ResponseMessage
@@ -77,6 +79,14 @@ def preauthRed():
 
     credentials_id = request.args.get("credentials_id")
     credential_list = json.loads(credentials_id)
+    
+    scope = " ".join(credential_list)
+    print("\ncredential_list: ", scope)
+
+    session_id = request_preauth_token(scope=scope)
+
+    session["session_id"] = session_id
+    print("\nsession_id")
 
     authorization_details = []
 
@@ -85,7 +95,11 @@ def preauthRed():
             {"type": "openid_credential", "credential_configuration_id": credential}
         )
 
-    session["authorization_details"] = authorization_details
+    print("\nauthorization_details: ", authorization_details)
+
+    session_manager.update_authorization_details(session_id=session_id, authorization_details=authorization_details)
+
+    #session["authorization_details"] = authorization_details
 
     credentials_requested = []
     for cred in authorization_details:
@@ -96,11 +110,15 @@ def preauthRed():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
 
-    session["credentials_requested"] = credentials_requested
+    session_manager.update_credentials_requested(session_id=session_id, credentials_requested=credentials_requested)
 
-    attributesForm = getAttributesForm(session["credentials_requested"])
+    print("\ncredentials_requested", credentials_requested)
 
-    attributesForm2 = getAttributesForm2(session["credentials_requested"])
+    #session["credentials_requested"] = credentials_requested
+
+    attributesForm = getAttributesForm(credentials_requested)
+
+    attributesForm2 = getAttributesForm2(credentials_requested)
 
     return render_template(
         "dynamic/dynamic-form.html",
@@ -112,7 +130,8 @@ def preauthRed():
 
 @preauth.route("/preauth_form", methods=["GET", "POST"])
 def preauth_form():
-    session["country"] = "FC"
+    #session["country"] = "FC"
+
     form_data = request.form.to_dict()
 
     if "effective_from_date" in form_data:
@@ -122,7 +141,7 @@ def preauth_form():
         rfc3339_string = dt.isoformat().replace("+00:00", "Z")
         form_data.update({"effective_from_date": rfc3339_string})
 
-    user_id = generate_unique_id()
+    session_id = session["session_id"]
 
     form_data.pop("proceed")
 
@@ -130,11 +149,13 @@ def preauth_form():
 
     print("\nCleaned Data: ", cleaned_data)
 
-    form_dynamic_data[user_id] = cleaned_data.copy()
+    """ form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(
         {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
     )
-    print("\nform_dynamic_data: ", form_dynamic_data[user_id])
+    print("\nform_dynamic_data: ", form_dynamic_data[user_id]) """
+
+    session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
 
@@ -143,7 +164,7 @@ def preauth_form():
     return render_template(
         "dynamic/form_authorize.html",
         presentation_data=presentation_data,
-        user_id=user_id,
+        user_id=session_id,
         redirect_url=cfgservice.service_url + "/form_authorize_generate",
     )
 
@@ -154,19 +175,33 @@ def form_authorize_generate():
     form_data = request.form.to_dict()
 
     user_id = form_data["user_id"]
-    data = form_dynamic_data[user_id]
+    #data = form_dynamic_data[user_id]
+
+    current_session = session_manager.get_session(user_id)
+    data = current_session.user_data
 
     return generate_offer(data)
 
 
 def generate_offer(data):
 
-    pre_auth_code = generate_preauth_token(
+    session_id = session["session_id"]
+
+    current_session = session_manager.get_session(session_id=session_id)
+
+    """ pre_auth_code = generate_preauth_token(
         data=data, authorization_details=session["authorization_details"]
     )
 
-    tx_code = random.randint(10000, 99999)
+    tx_code = random.randint(10000, 99999) """
+
+    pre_auth_code = current_session.pre_authorized_code
+
+    tx_code = current_session.tx_code
+
     transaction_id = generate_unique_id()
+
+    print("\npre_auth_code: ", pre_auth_code)
 
     transaction_codes.update(
         {
@@ -181,10 +216,10 @@ def generate_offer(data):
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],
-        "credential_configuration_ids": session["credentials_id"],
+        "credential_configuration_ids": current_session.credentials_requested,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
-                "pre-authorized_code": transaction_id,
+                "pre-authorized_code": pre_auth_code,
                 "tx_code": {
                     "length": 5,
                     "input_mode": "numeric",
@@ -258,13 +293,13 @@ def credentialOfferReq2():
 
     data = json_payload["credentials"][0]["data"]
 
-    pre_auth_code = generate_preauth_token(
+    """ pre_auth_code = generate_preauth_token(
         data=data, authorization_details=authorization_details
     )
 
-    tx_code = random.randint(10000, 99999)
+    tx_code = random.randint(10000, 99999) """
 
-    transaction_id = generate_unique_id()
+    """ transaction_id = generate_unique_id()
 
     transaction_codes.update(
         {
@@ -275,14 +310,14 @@ def credentialOfferReq2():
                 + timedelta(minutes=cfgservice.tx_code_expiry),
             }
         }
-    )
+    ) """
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],
         "credential_configuration_ids": credential_ids,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
-                "pre-authorized_code": transaction_id,
+                "pre-authorized_code": pre_auth_code,
                 "tx_code": {
                     "length": 5,
                     "input_mode": "numeric",
@@ -303,142 +338,25 @@ def credentialOfferReq2():
     return credential_offer  # {"credential_offer": credential_offer,"uri": uri}
 
 
-def generate_preauth_token(data, authorization_details):
-    user_id = generate_unique_id()
+def request_preauth_token(scope):
+    url = "http://127.0.0.1:6005/preauth_generate"
 
-    data.update({"issuing_country": "FC"})
-
-    form_dynamic_data[user_id] = data.copy()
-
-    form_dynamic_data[user_id].update(
-        {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
-    )
-
-    user_id = "FC." + user_id
-
-    url = cfgservice.service_url + "pushed_authorizationv2"
-
-    authorization_details = urllib.parse.quote_plus(json.dumps(authorization_details))
-
-    redirect_url = (
-        "preauth"  # urllib.parse.quote(cfgservice.service_url) + "preauth-codeReq"
-    )
-
-    payload = (
-        "response_type=code&state=af0ifjsldkj&client_id=ID&redirect_uri="
-        + redirect_url
-        + "&code_challenge=-ciaVij0VMswVfqm3_GK758-_dAI0E9i97hu1SAOiFQ&code_challenge_method=S256&authorization_details="
-        + authorization_details
-    )
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    payload = f"scope={scope}"
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+    }
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    if response.status_code != 201:
-        return make_response("invalid_request", 400)
+    _response = response.json()
 
-    par_response = response.json()
+    preauth_code = _response.get("preauth_code")
 
-    request_uri = par_response["request_uri"]
+    session_id = _response.get("session_id")
 
-    if not request_uri in parRequests:  # unknow request_uri => return error
-        # needs to be changed to an appropriate error message, and need to be logged
-        return service_endpoint(current_app.server.get_endpoint("authorization"))
+    tx_code = _response.get("tx_code")
 
-    session_id = getSessionId_requestUri(request_uri)
+    session_manager.add_session(session_id=session_id, pre_authorized_code=preauth_code, tx_code=tx_code, country="FC")
 
-    if session_id == None:
-        cfgservice.app_logger.error("Authorization request_uri not found.")
-        return make_response("Request_uri not found", 400)
+    return  session_id
 
-    par_args = parRequests[request_uri]["req_args"]
-
-    if "scope" not in par_args:
-        par_args["scope"] = "openid"
-
-    url = (
-        cfgservice.service_url
-        + "authorization?redirect_uri="
-        + par_args["redirect_uri"]
-        + "&response_type="
-        + par_args["response_type"]
-        + "&scope="
-        + par_args["scope"]
-        + "&client_id="
-        + par_args["client_id"]
-        + "&request_uri="
-        + request_uri
-    )
-
-    payload = {}
-    headers = {}
-    response = requests.request("GET", url, headers=headers, data=payload)
-
-    if response.status_code != 200:
-        return make_response("invalid_request", 400)
-
-    response = response.json()
-    args = {}
-    if "authorization_details" in response:
-        args.update({"authorization_details": response["authorization_details"]})
-    if "scope" in response:
-        args.update({"scope": response["scope"]})
-    if not args:
-        return authentication_error_redirect(
-            jws_token=response["token"],
-            error=response["error"],
-            error_description=response["error_description"],
-        )
-
-    params = {"token": response["token"]}
-
-    params.update(args)
-
-    try:
-        authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
-            "user"
-        )
-        username = authn_method.verify(username=user_id)
-
-        auth_args = authn_method.unpack_token(params["token"])
-    except:
-        cfgservice.app_logger.error(
-            "Authorization verification: username or jws_token not found"
-        )
-        return render_template(
-            "misc/500.html", error="Authentication verification Error"
-        )
-
-    authz_request = AuthorizationRequest().from_urlencoded(auth_args["query"])
-
-    endpoint = current_app.server.get_endpoint("authorization")
-
-    _session_id = endpoint.create_session(
-        authz_request,
-        username,
-        auth_args["authn_class_ref"],
-        auth_args["iat"],
-        authn_method,
-    )
-
-    args = endpoint.authz_part2(request=authz_request, session_id=_session_id)
-
-    if isinstance(args, ResponseMessage) and "error" in args:
-        return make_response(args.to_json(), 400)
-
-    session_ids[session_id]["auth_code"] = args["response_args"]["code"]
-
-    logText = (
-        ", Session ID: "
-        + session_id
-        + ", "
-        + "Authorization Response, Code: "
-        + args["response_args"]["code"]
-    )
-
-    if "state" in args["response_args"]:
-
-        logText = logText + ", State: " + args["response_args"]["state"]
-
-    cfgservice.app_logger.info(logText)
-    return args["response_args"]["code"]

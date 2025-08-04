@@ -178,7 +178,7 @@ run_scheduler()
 # This class is a simple data container, holding the state for a single session.
 # It does not perform any multi-threaded operations and therefore does not need any locks.
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import threading
 
 
@@ -195,8 +195,10 @@ class Session:
         pre_authorized_code_ref (Optional[str]): A reference for the pre-authorized code.
         jws_token (Optional[str]): A JWS token for the session.
         scope (Optional[str]): A string representing the requested scope.
-        authorization_details (Optional[Dict]): A dictionary of authorization details.
+        authorization_details (Optional[List[Dict]]): A list of dictionaries of authorization details.
+        credentials_requested (Optional[List[Dict]]): A list of dictionaries representing the credentials requested.
         user_data (Optional[Dict]): A dictionary for storing user-specific data.
+        tx_code (Optional[int]): A numeric code for the session.
     """
 
     def __init__(
@@ -208,8 +210,10 @@ class Session:
         pre_authorized_code_ref: Optional[str] = None,
         jws_token: Optional[str] = None,
         scope: Optional[str] = None,
-        authorization_details: Optional[Dict] = None,
+        authorization_details: Optional[List[Dict]] = None,
+        credentials_requested: Optional[List[Dict]] = None,
         user_data: Optional[Dict] = None,
+        tx_code: Optional[int] = None,
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -220,7 +224,9 @@ class Session:
         self.jws_token = jws_token
         self.scope = scope
         self.authorization_details = authorization_details
+        self.credentials_requested = credentials_requested
         self.user_data = user_data
+        self.tx_code = tx_code
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
@@ -241,8 +247,12 @@ class Session:
             data["scope"] = self.scope
         if self.authorization_details is not None:
             data["authorization_details"] = self.authorization_details
+        if self.credentials_requested is not None:
+            data["credentials_requested"] = self.credentials_requested
         if self.user_data is not None:
             data["user_data"] = self.user_data
+        if self.tx_code is not None:
+            data["tx_code"] = self.tx_code
         return data
 
     def __repr__(self):
@@ -264,8 +274,14 @@ class Session:
             optional_parts.append(
                 f"authorization_details='{self.authorization_details}'"
             )
+        if self.credentials_requested:
+            optional_parts.append(
+                f"credentials_requested='{self.credentials_requested}'"
+            )
         if self.user_data:
             optional_parts.append(f"user_data='{self.user_data}'")
+        if self.tx_code:
+            optional_parts.append(f"tx_code='{self.tx_code}'")
 
         return (
             f"Session(session_id='{self.session_id}', "
@@ -307,8 +323,10 @@ class SessionManager:
         pre_authorized_code_ref: Optional[str] = None,
         jws_token: Optional[str] = None,
         scope: Optional[str] = None,
-        authorization_details: Optional[Dict] = None,
+        authorization_details: Optional[List[Dict]] = None,
+        credentials_requested: Optional[List[Dict]] = None,
         user_data: Optional[Dict] = None,
+        tx_code: Optional[int] = None,
     ) -> Session:
         """
         Creates and stores a new Session object.
@@ -320,8 +338,10 @@ class SessionManager:
             pre_authorized_code_ref (Optional[str]): A reference for the pre-authorized code.
             jws_token (Optional[str]): A JWS token for the session.
             scope (Optional[str]): A string representing the requested scope.
-            authorization_details (Optional[Dict]): A dictionary of authorization details.
+            authorization_details (Optional[List[Dict]]): A list of authorization details.
+            credentials_requested (Optional[List[Dict]]): A list of credentials requested.
             user_data (Optional[Dict]): A dictionary for storing user-specific data.
+            tx_code (Optional[int]): A numeric code for the session.
 
         Returns:
             Session: The newly created Session object.
@@ -339,7 +359,9 @@ class SessionManager:
             jws_token=jws_token,
             scope=scope,
             authorization_details=authorization_details,
+            credentials_requested=credentials_requested,
             user_data=user_data,
+            tx_code=tx_code,
         )
 
         # Acquire lock only for the primary _sessions dictionary.
@@ -378,6 +400,40 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update user_data for non-existent session_id: {session_id}"
+                )
+
+    def update_authorization_details(
+        self, session_id: str, authorization_details: List[Dict]
+    ):
+        """
+        Updates the 'authorization_details' list of a session.
+        Only the primary dictionary needs to be locked.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.authorization_details = authorization_details
+                print(f"Updated authorization_details for session_id {session_id}")
+            else:
+                print(
+                    f"Warning: Attempted to update authorization_details for non-existent session_id: {session_id}"
+                )
+
+    def update_credentials_requested(
+        self, session_id: str, credentials_requested: List[Dict]
+    ):
+        """
+        Updates the 'credentials_requested' list of a session.
+        Only the primary dictionary needs to be locked.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.credentials_requested = credentials_requested
+                print(f"Updated credentials_requested for session_id {session_id}")
+            else:
+                print(
+                    f"Warning: Attempted to update credentials_requested for non-existent session_id: {session_id}"
                 )
 
     def update_pre_authorized_code(self, session_id: str, pre_authorized_code: str):
@@ -451,6 +507,21 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update jws_token for non-existent session_id: {session_id}"
+                )
+
+    def update_tx_code(self, session_id: str, tx_code: int):
+        """
+        Updates the 'tx_code' attribute of a session.
+        Only the primary dictionary needs to be locked.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.tx_code = tx_code
+                print(f"Updated tx_code for session_id {session_id} to: {tx_code}")
+            else:
+                print(
+                    f"Warning: Attempted to update tx_code for non-existent session_id: {session_id}"
                 )
 
     def get_session(self, session_id: str) -> Optional[Session]:
