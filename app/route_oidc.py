@@ -875,12 +875,316 @@ def par_endpointv2():
     return response
 
 
+def verify_introspection(bearer_token):
+    introspection_url = "http://127.0.0.1:6005/introspection"
+
+    payload = f"token={bearer_token}"
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    try:
+        response = requests.request(
+            "POST", introspection_url, headers=headers, data=payload
+        )
+        response.raise_for_status()  # Raises an HTTPError for 4xx/5xx status codes
+
+        introspection_data = response.json()
+
+    except requests.exceptions.RequestException as e:
+        # Error 4: Network or HTTP-level error during introspection call
+        print(f"An error occurred during introspection request: {e}")
+        return (
+            jsonify({"error": "Failed to validate token with the issuer."}),
+            502,
+        )  # 502 Bad Gateway is appropriate here
+    except json.JSONDecodeError:
+        # Error 5: Malformed JSON from the introspection endpoint
+        print("Failed to decode JSON from introspection response.")
+        return (
+            jsonify({"error": "Invalid response from the introspection endpoint."}),
+            502,
+        )
+
+    # --- 3. Verify Introspection Data ---
+    is_active = introspection_data.get("active", False)
+    username = introspection_data.get("username")
+
+    if not is_active:
+        # Error 6: Inactive token
+        print("Token is inactive.")
+        return jsonify({"error": "Provided token is inactive."}), 401
+
+    if not username:
+        # Error 7: Missing username in introspection response
+        print("Token is active but missing username.")
+        return (
+            jsonify(
+                {"error": "Token is active but does not contain a username claim."}
+            ),
+            401,
+        )
+
+    return username
+
+
+from . import session_manager
+
+
+def verify_credential_request(credential_request):
+
+    if "credential_indentifier" in credential_request:
+        return jsonify({"error": "credential_identifier currently not supported."}), 401
+
+    if (
+        "credential_identifier" not in credential_request
+        and "credential_configuration_id" not in credential_request
+    ):
+        return (
+            jsonify(
+                {
+                    "error": "Missing credential_identifier or credential_configuration_id"
+                }
+            ),
+            401,
+        )
+
+    if "proof" not in credential_request and "proofs" not in credential_request:
+        return jsonify({"error": "Credential Issuer requires key proof."}), 401
+
+    elif "proof" in credential_request:
+        if "proof_type" not in credential_request["proof"]:
+            return jsonify({"error": "Credential Issuer requires key proof."}), 401
+
+        if (
+            credential_request["proof"]["proof_type"] == "jwt"
+            and "jwt" not in credential_request["proof"]
+        ):
+            return jsonify({"error": "Missing jwt field."}), 401
+
+    return credential_request
+
+
+import jwt
+from jwt.algorithms import get_default_algorithms
+
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+
+
+# gets the public key from a JWK
+def pKfromJWK(jwt_encoded):
+    jwt_decoded = jwt.get_unverified_header(jwt_encoded)
+    jwk = jwt_decoded["jwk"]
+
+    if "crv" not in jwk or jwk["crv"] != "P-256":
+        _resp = {
+            "error": "invalid_proof",
+            "error_description": "Credential Issuer only supports P-256 curves",
+        }
+        return _resp  # {"response_args": _resp, "client_id": client_id}
+
+    x = jwk["x"]
+    y = jwk["y"]
+
+    # Convert string coordinates to bytes
+    x_bytes = base64.urlsafe_b64decode(x + "=" * (4 - len(x) % 4))
+    y_bytes = base64.urlsafe_b64decode(y + "=" * (4 - len(y) % 4))
+
+    # Create a public key from the bytes
+    public_numbers = ec.EllipticCurvePublicNumbers(
+        x=int.from_bytes(x_bytes, "big"),
+        y=int.from_bytes(y_bytes, "big"),
+        curve=ec.SECP256R1(),
+    )
+
+    public_key = public_numbers.public_key()
+
+    # Serialize the public key to PEM format
+    public_key_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+
+    # Encode the public key in base64url format
+
+    device_key = base64.urlsafe_b64encode(public_key_pem).decode("utf-8")
+
+    return device_key
+
+
+from authlib.jose import JsonWebEncryption
+from authlib.jose import JsonWebKey
+
+
+def generate_credentials(credential_request, session_id):
+    formatter_request = {}
+
+    formatter_request.update(
+        {
+            "credential_configuration_id": credential_request[
+                "credential_configuration_id"
+            ]
+        }
+    )
+
+    if (
+        "proof" in credential_request
+        and credential_request["proof"]["proof_type"] == "jwt"
+    ):
+        try:
+            jwt_encoded = credential_request["proof"]["jwt"]
+            device_key = pKfromJWK(jwt_encoded)
+            formatter_request.update({"proofs": [{"jwt": device_key}]})
+
+        except Exception as e:
+            return ""
+
+    pubKeys = []
+    if "proofs" in credential_request:
+        for alg, key_list in credential_request["proofs"].items():
+            if alg != "jwt":
+                return {"error": "proof currently not supported"}
+            else:
+                for jwt_ in key_list:
+                    try:
+                        device_key = pKfromJWK(jwt_)
+                        pubKeys.append({alg: device_key})
+                    except Exception as e:
+                        _resp = {
+                            "error": "invalid_proof",
+                            "error_description": str(e),
+                        }
+                        return _resp
+
+        formatter_request.update({"proofs": pubKeys})
+
+    redirect_uri = cfgservice.service_url + "dynamic/dynamic_R2"
+
+    data = {
+        "credential_requests": formatter_request,
+        "user_id": session_id,
+    }
+
+    json_data = json.dumps(data)
+    headers = {"Content-Type": "application/json"}
+    _msg = requests.post(redirect_uri, data=json_data, headers=headers).json()
+
+    return _msg
+
+
+def encrypt_response(credential_request, credential_response):
+    encryption_config = credential_request.get("credential_response_encryption", {})
+
+    if not all(k in encryption_config for k in ["jwk", "alg", "enc"]):
+        return (
+            jsonify(
+                {
+                    "error": "invalid_credential_response_encryption",
+                    "error_description": "Missing required fields in credential_response_encryption.",
+                }
+            ),
+            400,
+        )
+
+    protected_header = {
+        "alg": encryption_config["alg"],
+        "enc": encryption_config["enc"],
+    }
+
+    try:
+        public_key = JsonWebKey.import_key(encryption_config["jwk"])
+        jwe = JsonWebEncryption()
+        jwe_token = jwe.serialize_compact(
+            protected_header, json.dumps(credential_response), public_key
+        )
+    except:
+        return (
+            jsonify(
+                {
+                    "error": "invalid_credential_response_encryption",
+                    "error_description": "Failed to encrypt with the provided key.",
+                }
+            ),
+            400,
+        )
+
+    _response = make_response(jwe_token)
+
+    _response.headers["Content-Type"] = "application/jwt"
+
+    return _response
+
+
 @oidc.route("/credential", methods=["POST"])
 def credential():
+
     credential_request = request.get_json()
 
-    print("\ncredential_request: ", credential_request)
-    return "TBD"
+    cfgservice.app_logger.info(
+        f", Started Credential Request, Payload: {credential_request}"
+    )
+
+    # Get the Authorization header from the request
+    auth_header = request.headers.get("Authorization")
+
+    bearer_token = None
+
+    if not auth_header:
+        return jsonify({"error": "Authorization header is missing"}), 401
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Authorization header must be a Bearer token"}), 401
+
+    try:
+        bearer_token = auth_header.split(" ")[1]
+    except IndexError:
+        return jsonify({"error": "Invalid Authorization header format"}), 401
+
+    verification_result_introspection = verify_introspection(bearer_token=bearer_token)
+
+    # Check if the result is an error response (a tuple)
+    if isinstance(verification_result_introspection, tuple):
+        # If it's a tuple, it's a Flask error response. Return it immediately.
+        return verification_result_introspection
+
+    # If the result is not a tuple, it's the username string
+    session_id = verification_result_introspection
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential Request, Payload: {credential_request}"
+    )
+
+    verification_result_request = verify_credential_request(credential_request)
+
+    if isinstance(verification_result_request, tuple):
+        # If it's a tuple, it's an error response. Return it immediately.
+        return verification_result_request
+
+    # If the check passes, the result is the validated request dictionary.
+    validated_credential_request = verification_result_request
+
+    current_session = session_manager.get_session(session_id=session_id)
+
+    _response = generate_credentials(
+        credential_request=validated_credential_request, session_id=session_id
+    )
+
+    if "credential_response_encryption" in validated_credential_request:
+        _response = encrypt_response(
+            credential_request=validated_credential_request,
+            credential_response=_response,
+        )
+
+        cfgservice.app_logger.info(
+            f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
+        )
+        return _response
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential response, Payload: {_response}"
+    )
+
+    return _response
 
 
 """ @oidc.route("/credential", methods=["POST"])

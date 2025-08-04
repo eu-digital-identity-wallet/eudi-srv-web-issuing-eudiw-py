@@ -81,7 +81,7 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # OpenID endpoints
 
-    OpenID_first_endpoint = service_url + "verify/user"
+    OpenID_first_endpoint = service_url + "oidc/verify/user"
     # OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev:4443/verify/user"
     # OpenID_first_endpoint = "https://127.0.0.1:5000/verify/user"
 

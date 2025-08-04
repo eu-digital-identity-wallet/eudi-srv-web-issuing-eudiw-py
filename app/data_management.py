@@ -177,6 +177,11 @@ run_scheduler()
 # --- Session: The data model for a single request session ---
 # This class is a simple data container, holding the state for a single session.
 # It does not perform any multi-threaded operations and therefore does not need any locks.
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Optional
+import threading
+
+
 class Session:
     """
     A simplified class to represent a request session.
@@ -191,6 +196,7 @@ class Session:
         jws_token (Optional[str]): A JWS token for the session.
         scope (Optional[str]): A string representing the requested scope.
         authorization_details (Optional[Dict]): A dictionary of authorization details.
+        user_data (Optional[Dict]): A dictionary for storing user-specific data.
     """
 
     def __init__(
@@ -203,6 +209,7 @@ class Session:
         jws_token: Optional[str] = None,
         scope: Optional[str] = None,
         authorization_details: Optional[Dict] = None,
+        user_data: Optional[Dict] = None,
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -213,6 +220,7 @@ class Session:
         self.jws_token = jws_token
         self.scope = scope
         self.authorization_details = authorization_details
+        self.user_data = user_data
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
@@ -233,6 +241,8 @@ class Session:
             data["scope"] = self.scope
         if self.authorization_details is not None:
             data["authorization_details"] = self.authorization_details
+        if self.user_data is not None:
+            data["user_data"] = self.user_data
         return data
 
     def __repr__(self):
@@ -254,6 +264,8 @@ class Session:
             optional_parts.append(
                 f"authorization_details='{self.authorization_details}'"
             )
+        if self.user_data:
+            optional_parts.append(f"user_data='{self.user_data}'")
 
         return (
             f"Session(session_id='{self.session_id}', "
@@ -296,6 +308,7 @@ class SessionManager:
         jws_token: Optional[str] = None,
         scope: Optional[str] = None,
         authorization_details: Optional[Dict] = None,
+        user_data: Optional[Dict] = None,
     ) -> Session:
         """
         Creates and stores a new Session object.
@@ -308,6 +321,7 @@ class SessionManager:
             jws_token (Optional[str]): A JWS token for the session.
             scope (Optional[str]): A string representing the requested scope.
             authorization_details (Optional[Dict]): A dictionary of authorization details.
+            user_data (Optional[Dict]): A dictionary for storing user-specific data.
 
         Returns:
             Session: The newly created Session object.
@@ -325,6 +339,7 @@ class SessionManager:
             jws_token=jws_token,
             scope=scope,
             authorization_details=authorization_details,
+            user_data=user_data,
         )
 
         # Acquire lock only for the primary _sessions dictionary.
@@ -348,6 +363,21 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update country for non-existent session_id: {session_id}"
+                )
+
+    def update_user_data(self, session_id: str, user_data: Dict):
+        """
+        Updates the 'user_data' dictionary of a session.
+        Only the primary dictionary needs to be locked.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.user_data = user_data
+                print(f"Updated user_data for session_id {session_id}")
+            else:
+                print(
+                    f"Warning: Attempted to update user_data for non-existent session_id: {session_id}"
                 )
 
     def update_pre_authorized_code(self, session_id: str, pre_authorized_code: str):

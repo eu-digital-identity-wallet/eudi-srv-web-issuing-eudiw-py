@@ -124,7 +124,6 @@ def Supported_Countries():
     # authorization_params = session["authorization_params"]
     authorization_details = []
     if authorization_details:  # "authorization_details" in authorization_params:
-        print("\n1")
         authorization_details.extend(
             json.loads(
                 authorization_details
@@ -158,6 +157,8 @@ def Supported_Countries():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(vct2id(cred["vct"]))
 
+    print("\ncredentials_requested", credentials_requested)
+
     session["credentials_requested"] = credentials_requested
 
     display_countries = {}
@@ -174,10 +175,12 @@ def Supported_Countries():
     session["jws_token"] = token
     print("\nsession token: ", session)
 
+    credential_configuration_id = scope.replace("openid", "").strip()
+
     session_manager.add_session(
         session_id=session_id,
         jws_token=token,
-        scope=scope,
+        scope=credential_configuration_id,
         authorization_details=authorization_details_request,
     )
 
@@ -193,40 +196,6 @@ def Supported_Countries():
             + "Authorization selection, Type: "
             + country
         )
-        return dynamic_R1(session["country"])
-
-    form_keys = request.form.keys()
-    form_country = request.form.get("country")
-
-    # if country was selected
-    if (
-        "country" in form_keys
-        and "proceed" in form_keys
-        and form_country in display_countries.keys()
-    ):
-        session["returnURL"] = cfgserv.OpenID_first_endpoint
-        session["country"] = form_country
-
-        cfgserv.app_logger.info(
-            ", Session ID: "
-            + session["session_id"]
-            + ", "
-            + "Authorization selection, Type: "
-            + form_country
-        )
-
-        """ log.logger_info.info(
-            " - INFO - "
-            + session["route"]
-            + " - Version:"
-            + cfgserv.current_version
-            + " - Country: "
-            + session["country"]
-            + "- Credentials requested: "
-            + session["credentials_requested"]
-            + " -  entered the route"
-        ) """
-
         return dynamic_R1(session["country"])
 
     # render page where user can select pid_countries
@@ -245,6 +214,25 @@ def Supported_Countries():
     )
 
 
+@dynamic.route("/country_selected", methods=["GET", "POST"])
+def country_selected():
+    # form_keys = request.form.keys()
+    form_country = request.form.get("country")
+
+    session["returnURL"] = cfgserv.OpenID_first_endpoint
+    session["country"] = form_country
+
+    cfgserv.app_logger.info(
+        ", Session ID: "
+        + session["session_id"]
+        + ", "
+        + "Authorization selection, Type: "
+        + form_country
+    )
+
+    return dynamic_R1(session["country"])
+
+
 def dynamic_R1(country):
     """
     Function to create url to redirect to the selected credential issuer country
@@ -252,6 +240,10 @@ def dynamic_R1(country):
     Keyword arguments:
     country -- Country selected by user
     """
+
+    session_manager.update_country(
+        session_id=session["session_id"], country=session["country"]
+    )
 
     credentials_requested = session["credentials_requested"]
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -284,7 +276,7 @@ def dynamic_R1(country):
         )
 
     elif country == "sample":
-        user_id = generate_unique_id()
+        user_id = session["session_id"]
 
         form_dynamic_data[user_id] = cfgserv.sample_data.copy()
         form_dynamic_data[user_id].update(
@@ -744,9 +736,11 @@ def dynamic_R2():
             "error_description": "missing fields in json",
         }
 
-    user = json_request["user_id"]
+    user_id = json_request["user_id"]
 
-    country, user_id = user.split(".", 1)
+    current_session = session_manager.get_session(session_id=user_id)
+
+    country = current_session.country
 
     credential_request = json_request["credential_requests"]
 
@@ -777,7 +771,12 @@ def dynamic_R2_data_collect(country, user_id):
     country -- credential issuing country that user selected
     """
     if country == "FC":
-        data = form_dynamic_data.get(user_id, "Data not found")
+
+        current_session = session_manager.get_session(session_id=user_id)
+
+        data = (
+            current_session.user_data
+        )  # form_dynamic_data.get(user_id, "Data not found")
 
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
@@ -1413,7 +1412,7 @@ def Dynamic_form():
     if not isinstance(v, bool):  # getpid params were not correctly validated
         return v """
 
-    user_id = generate_unique_id()
+    user_id = session["session_id"]
 
     form_data = request.form.to_dict()
 
@@ -1421,6 +1420,10 @@ def Dynamic_form():
 
     cleaned_data = form_formatter(form_data)
     print("\nCleaned Data: ", cleaned_data)
+
+    session_manager.update_user_data(
+        session_id=session["session_id"], user_data=cleaned_data
+    )
 
     form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(
@@ -1436,7 +1439,7 @@ def Dynamic_form():
     return render_template(
         "dynamic/form_authorize.html",
         presentation_data=presentation_data,
-        user_id="FC." + user_id,
+        user_id=user_id,
         redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
     )
 
