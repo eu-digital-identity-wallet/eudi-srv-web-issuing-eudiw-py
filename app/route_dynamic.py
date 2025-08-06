@@ -199,21 +199,26 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
-        attributesForm = getAttributesForm(current_session.credentials_requested)
-        if "user_pseudonym" in attributesForm:
-            attributesForm.update(
+        
+        mandatory_attributes = getAttributesForm(current_session.credentials_requested)
+        if "user_pseudonym" in mandatory_attributes:
+            mandatory_attributes.update(
                 {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
             )
 
-        attributesForm2 = getAttributesForm2(current_session.credentials_requested)
+        optional_attributes_raw = getAttributesForm2(current_session.credentials_requested)
 
-        print("\nMandatory: ", attributesForm)
-        print("\nOptional: ", attributesForm2)
+        print("\nMandatory: ", mandatory_attributes)
+        print("\nOptional: ", optional_attributes_raw)
 
+        optional_attributes_filtered = {
+            key: value for key, value in optional_attributes_raw.items() if key not in mandatory_attributes
+        }
+        
         return render_template(
             "dynamic/dynamic-form.html",
-            mandatory_attributes=attributesForm,
-            optional_attributes=attributesForm2,
+            mandatory_attributes=mandatory_attributes,
+            optional_attributes=optional_attributes_filtered,
             redirect_url=cfgserv.service_url + "dynamic/form",
         )
 
@@ -1120,7 +1125,7 @@ def form_formatter(form_data: dict) -> dict:
 
         elif item == "capacities":
             if isinstance(grouped[item], list):
-                cleaned_data[item] = [item["capacity"] for item in grouped[item]]
+                cleaned_data[item] = [item["capacity_code"] for item in grouped[item]]
                 cleaned_data["capacities"] = cleaned_data[item]
             else:
                 cleaned_data[item] = grouped[item]
@@ -1463,6 +1468,7 @@ def Dynamic_form():
     )
 
     form_dynamic_data[user_id] = cleaned_data.copy()
+
     form_dynamic_data[user_id].update(
         {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
     )

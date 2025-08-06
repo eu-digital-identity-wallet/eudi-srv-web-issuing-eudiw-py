@@ -116,14 +116,18 @@ def preauthRed():
 
     #session["credentials_requested"] = credentials_requested
 
-    attributesForm = getAttributesForm(credentials_requested)
+    mandatory_attributes = getAttributesForm(credentials_requested)
 
-    attributesForm2 = getAttributesForm2(credentials_requested)
+    optional_attributes_raw = getAttributesForm2(credentials_requested)
+
+    optional_attributes_filtered = {
+        key: value for key, value in optional_attributes_raw.items() if key not in mandatory_attributes
+    }
 
     return render_template(
         "dynamic/dynamic-form.html",
-        mandatory_attributes=attributesForm,
-        optional_attributes=attributesForm2,
+        mandatory_attributes=mandatory_attributes,
+        optional_attributes=optional_attributes_filtered,
         redirect_url=cfgservice.service_url + "preauth_form",
     )
 

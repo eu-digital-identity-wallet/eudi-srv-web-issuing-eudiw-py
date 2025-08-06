@@ -233,28 +233,13 @@
                   "max":"n"
                },
                "capacities":{
-                  "capacity":{
+                  "capacity_code":{
                      "mandatory":true,
                      "value_type":"string",
                      "source":"user"
                   }
                }
             }
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.seafarer.1",
-               "capacity_code"
-            ],
-            "mandatory":true,
-            "source":"user",
-            "value_type":"string",
-            "display":[
-               {
-                  "name":"Capacity Code",
-                  "locale":"en"
-               }
-            ]
          },
          {
             "path":[
@@ -283,21 +268,6 @@
                   }
                }
             }
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.seafarer.1",
-               "code"
-            ],
-            "mandatory":true,
-            "source":"user",
-            "value_type":"string",
-            "display":[
-               {
-                  "name":"Code",
-                  "locale":"en"
-               }
-            ]
          },
          {
             "path":[

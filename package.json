@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py#readme",
   "devDependencies": {
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6"
   },
   "dependencies": {}
 }
