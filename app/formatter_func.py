@@ -119,9 +119,24 @@ def mdocFormatter(data, credential_metadata, country, device_publickey):
 
     namespace = credential_metadata["issuer_config"]["namespace"]
 
+    if "image" in data[namespace]:
+        data[namespace]["image"] = base64.urlsafe_b64decode(
+            data[namespace]["image"]
+        )
+
     if "portrait" in data[namespace]:
         data[namespace]["portrait"] = base64.urlsafe_b64decode(
             data[namespace]["portrait"]
+        )
+        
+    if "issuing_authority_logo" in data[namespace]:
+        data[namespace]["issuing_authority_logo"] = base64.urlsafe_b64decode(
+            data[namespace]["issuing_authority_logo"]
+        )
+    
+    if "signature_usual_mark_issuing_officer" in data[namespace]:
+        data[namespace]["signature_usual_mark_issuing_officer"] = base64.urlsafe_b64decode(
+            data[namespace]["signature_usual_mark_issuing_officer"]
         )
 
     if "user_pseudonym" in data[namespace]:
@@ -294,19 +309,26 @@ def sdjwtFormatter(PID, country):
 
     PID_Claims_data = PID["data"]["claims"]
 
-    if "date_of_issuance" in PID_Claims_data:
+    """ if "date_of_issuance" in PID_Claims_data:
         iat = DatestringFormatter(PID_Claims_data["date_of_issuance"])
     else:
-        iat = DatestringFormatter(PID_Claims_data["issuance_date"])
-        PID_Claims_data.pop("issuance_date")
+        iat = DatestringFormatter(today.strftime("%Y-%m-%d"))
+        PID_Claims_data.pop("issuance_date") """
 
-    if "date_of_expiry" in PID_Claims_data:
+    today = datetime.date.today()
+
+    iat = DatestringFormatter(today.strftime("%Y-%m-%d"))
+
+    """ if "date_of_expiry" in PID_Claims_data:
         exp = DatestringFormatter(PID_Claims_data["date_of_expiry"])
         validity = PID_Claims_data["date_of_expiry"]
     else:
         exp = DatestringFormatter(PID_Claims_data["expiry_date"])
         validity = PID_Claims_data["expiry_date"]
-        PID_Claims_data.pop("expiry_date")
+        PID_Claims_data.pop("expiry_date") """
+    
+    validity = (today + datetime.timedelta(PID["credential_metadata"]["issuer_config"]["validity"])).strftime("%Y-%m-%d")
+    exp = DatestringFormatter(validity)
 
     # jti = str(uuid4())
 

@@ -1200,6 +1200,10 @@ def credential():
         credential_request=validated_credential_request, session_id=session_id
     )
 
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential response, Payload: {_response}"
+    )
+
     if "credential_response_encryption" in validated_credential_request:
         _response = encrypt_response(
             credential_request=validated_credential_request,
@@ -1211,9 +1215,6 @@ def credential():
         )
         return _response
 
-    cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential response, Payload: {_response}"
-    )
 
     return _response
 

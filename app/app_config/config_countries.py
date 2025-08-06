@@ -89,7 +89,13 @@ class ConfCountries:
                 "eu.europa.ec.eudi.ehic_sd_jwt_vc",
                 "eu.europa.ec.eudi.pda1_sd_jwt_vc",
                 "org.iso.18013.5.1.reservation_mdoc",
+                "eu.europa.ec.eudi.seafarer_mdoc",
+                "eu.europa.ec.eudi.diploma_vc_sd_jwt",
+                "eu.europa.ec.eudi.tax_residency_vc_sd_jwt",
+                "eu.europa.ec.eudi.employee_mdoc"
             ],
+            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
+        },
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },

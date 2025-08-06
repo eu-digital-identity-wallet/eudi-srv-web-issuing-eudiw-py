@@ -1118,6 +1118,22 @@ def form_formatter(form_data: dict) -> dict:
                 cleaned_data[item] = grouped[item]
                 cleaned_data["nationalities"] = cleaned_data[item]
 
+        elif item == "capacities":
+            if isinstance(grouped[item], list):
+                cleaned_data[item] = [item["capacity"] for item in grouped[item]]
+                cleaned_data["capacities"] = cleaned_data[item]
+            else:
+                cleaned_data[item] = grouped[item]
+                cleaned_data["capacities"] = cleaned_data[item]
+
+        elif item == "codes":
+            if isinstance(grouped[item], list):
+                cleaned_data[item] = [item["code"] for item in grouped[item]]
+                cleaned_data["codes"] = cleaned_data[item]
+            else:
+                cleaned_data[item] = grouped[item]
+                cleaned_data["codes"] = cleaned_data[item]
+
         elif item == "authentic_source":
             if isinstance(grouped[item], list):
                 cleaned_data[item] = grouped[item][0]
@@ -1135,6 +1151,9 @@ def form_formatter(form_data: dict) -> dict:
                 for d in grouped[item]:
                     joined_places.update(d)
                 cleaned_data[item] = joined_places
+            else:
+                if grouped[item] != "" and grouped[item] != "unset":
+                    cleaned_data[item] = grouped[item]
 
         elif item == "residence_address":
             if isinstance(grouped[item], list):
@@ -1177,6 +1196,34 @@ def form_formatter(form_data: dict) -> dict:
                         "utf-8"
                     )
                     cleaned_data["portrait"] = imgurlbase64
+        
+        elif item == "image":
+            if grouped[item] == "Port1":
+                cleaned_data["image"] = cfgserv.portrait1
+            elif grouped[item] == "Port2":
+                cleaned_data["image"] = cfgserv.portrait2
+            elif grouped[item] == "Port3":
+                portrait = request.files["Image"]
+
+                img = Image.open(portrait)
+                # imgbytes = img.tobytes()
+                bio = io.BytesIO()
+                img.save(bio, format="JPEG")
+                del img
+
+                response, error_msg = validate_image(portrait)
+
+                if response == False:
+                    return authentication_error_redirect(
+                        jws_token=session["jws_token"],
+                        error="Invalid Image",
+                        error_description=error_msg,
+                    )
+                else:
+                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
+                        "utf-8"
+                    )
+                    cleaned_data["image"] = imgurlbase64
 
         elif item == "Category1":
             DrivingPrivileges = []
@@ -1263,6 +1310,27 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         )
         presentation_data[credential].update({"issuing_country": current_session.country}),
 
+        if credential_requested == "eu.europa.ec.eudi.seafarer_mdoc":
+            presentation_data[credential].update(
+                {
+                    "issuing_authority_logo": base64.b64encode(
+                        base64.urlsafe_b64decode(
+                            cfgserv.issuing_authority_logo
+                        )
+                    ).decode("utf-8")
+                }
+            )
+
+            presentation_data[credential].update(
+                {
+                    "signature_usual_mark_issuing_officer": base64.b64encode(
+                        base64.urlsafe_b64decode(
+                            cfgserv.signature_usual_mark_issuing_officer
+                        )
+                    ).decode("utf-8")
+                }
+            )
+
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
             presentation_data[credential].update(
                 {
@@ -1322,6 +1390,17 @@ def presentation_formatter(cleaned_data: dict) -> dict:
                     "portrait": base64.b64encode(
                         base64.urlsafe_b64decode(
                             presentation_data[credential]["portrait"]
+                        )
+                    ).decode("utf-8")
+                }
+            )
+
+        if "image" in presentation_data[credential]:
+            presentation_data[credential].update(
+                {
+                    "image": base64.b64encode(
+                        base64.urlsafe_b64decode(
+                            presentation_data[credential]["image"]
                         )
                     ).decode("utf-8")
                 }

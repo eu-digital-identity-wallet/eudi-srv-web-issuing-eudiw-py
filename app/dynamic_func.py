@@ -296,6 +296,12 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "residence_address" in data and isinstance(data["residence_address"], list):
         data.update({"residence_address": data["residence_address"][0]})
 
+    if "issuing_authority_logo" in issuer_claims:
+        data.update({"issuing_authority_logo": cfgserv.issuing_authority_logo})
+
+    if "signature_usual_mark_issuing_officer" in issuer_claims:
+        data.update({"signature_usual_mark_issuing_officer": cfgserv.signature_usual_mark_issuing_officer})
+
     if format == "mso_mdoc":
         for attribute in attributes_req:
             pdata[namescape].update({attribute: data[attribute]})
