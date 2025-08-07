@@ -1282,8 +1282,47 @@ def credential():
     )
     return _response """
 
-
 @oidc.route("/notification", methods=["POST"])
+def notification():
+    notification_request = request.get_json()
+
+    cfgservice.app_logger.info(
+        f", Started Notification Request, Payload: {notification_request}"
+    )
+
+    # Get the Authorization header from the request
+    auth_header = request.headers.get("Authorization")
+
+    bearer_token = None
+
+    if not auth_header:
+        return jsonify({"error": "Authorization header is missing"}), 401
+
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Authorization header must be a Bearer token"}), 401
+
+    try:
+        bearer_token = auth_header.split(" ")[1]
+    except IndexError:
+        return jsonify({"error": "Invalid Authorization header format"}), 401
+
+    verification_result_introspection = verify_introspection(bearer_token=bearer_token)
+
+    # Check if the result is an error response (a tuple)
+    if isinstance(verification_result_introspection, tuple):
+        # If it's a tuple, it's a Flask error response. Return it immediately.
+        return verification_result_introspection
+
+    # If the result is not a tuple, it's the username string
+    session_id = verification_result_introspection
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Notification Request, Payload: {notification_request}"
+    )
+
+    return make_response("", 204)
+
+""" @oidc.route("/notification", methods=["POST"])
 def notification():
 
     headers = dict(request.headers)
@@ -1311,10 +1350,38 @@ def notification():
         f", Session ID: {session_id}, Notification response, Payload: {_resp}"
     )
 
-    return _resp
-
+    return _resp """
 
 @oidc.route("/nonce", methods=["POST"])
+def nonce():
+    protected = {"type": "cnonce+jwt", "alg": "RSA-OAEP", "enc": "A256GCM"}
+    with open(cfgservice.nonce_key, "rb") as f:
+        key = f.read()
+
+    current_time = int(time.time())
+
+    payload = {
+        "iss": cfgservice.service_url[:-1],
+        "iat": current_time,
+        "exp": current_time + 3600,
+        "source_endpoint": cfgservice.service_url + "nonce",
+        "aud": [cfgservice.service_url + "credential"],
+    }
+
+    jwe = JsonWebEncryption()
+
+    payload_json = json.dumps(payload)
+
+    encrypted_jwt = jwe.serialize_compact(protected, payload_json, key)
+
+    data = jwe.deserialize_compact(encrypted_jwt, key)
+    jwe_payload = data["payload"]
+
+    response = {"c_nonce": encrypted_jwt.decode("utf-8")}
+
+    return make_response(response, 200)
+
+""" @oidc.route("/nonce", methods=["POST"])
 def nonce():
 
     _resp = service_endpoint(current_app.server.get_endpoint("nonce"))
@@ -1325,7 +1392,7 @@ def nonce():
 
     cfgservice.app_logger.info("Nonce response, Payload: " + str(_resp))
 
-    return _resp
+    return _resp """
 
 
 @oidc.route("/deferred_credential", methods=["POST"])
