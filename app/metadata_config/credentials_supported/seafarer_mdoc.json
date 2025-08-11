@@ -219,8 +219,8 @@
                "capacities"
             ],
             "mandatory":true,
+            "value_type":"capacities_attributes",
             "source":"user",
-            "value_type":"capacities",
             "display":[
                {
                   "name":"Capacities",
@@ -232,57 +232,37 @@
                   "min":1,
                   "max":"n"
                },
-               "capacities":{
+               "capacities_attributes":{
                   "capacity_code":{
                      "mandatory":true,
                      "value_type":"string",
                      "source":"user"
-                  }
-               }
-            }
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.seafarer.1",
-               "codes"
-            ],
-            "mandatory":true,
-            "source":"user",
-            "value_type":"codes",
-            "display":[
-               {
-                  "name":"Codes",
-                  "locale":"en"
-               }
-            ],
-            "issuer_conditions":{
-               "cardinality":{
-                  "min":1,
-                  "max":"n"
-               },
-               "codes":{
-                  "code":{
+                  },
+                  "codes":{
                      "mandatory":true,
-                     "value_type":"string",
-                     "source":"user"
+                     "value_type":"codes_attributes",
+                     "source":"user",
+                     "issuer_conditions":{
+                        "cardinality":{
+                           "min":1,
+                           "max":"n"
+                        },
+                        "codes_attributes":{
+                           "code":{
+                              "mandatory":true,
+                              "value_type":"string",
+                              "source":"user"
+                           },
+                           "remarks":{
+                              "mandatory":true,
+                              "value_type":"string",
+                              "source":"user"
+                           }
+                        }
+                     }
                   }
                }
             }
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.seafarer.1",
-               "remarks"
-            ],
-            "mandatory":true,
-            "source":"user",
-            "value_type":"string",
-            "display":[
-               {
-                  "name":"remarks",
-                  "locale":"en"
-               }
-            ]
          },
          {
             "path":[
