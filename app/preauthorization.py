@@ -24,13 +24,8 @@ This route generates a client registration capable of using a pre-authorization 
 import base64
 import io
 import json
-import random
-from PIL import Image
 from flask import (
     Blueprint,
-    current_app,
-    make_response,
-    redirect,
     render_template,
     request,
     session,
@@ -38,36 +33,22 @@ from flask import (
 from flask_cors import CORS
 import requests
 import urllib.parse
-from datetime import date, datetime, timedelta, timezone
-from redirect_func import url_get
+from datetime import datetime, timedelta, timezone
 
 import segno
 
-from app.route_oidc import service_endpoint
 from app.route_dynamic import form_formatter, presentation_formatter
 from .app_config.config_service import ConfService as cfgservice
 from app.misc import (
-    authentication_error_redirect,
-    calculate_age,
     generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
-    validate_image,
 )
 
 from app.data_management import (
-    parRequests,
     transaction_codes,
-    getSessionId_requestUri,
-    session_ids,
 )
-from app.data_management import form_dynamic_data
-from . import oidc_metadata
 from . import session_manager
-
-
-from idpyoidc.message.oidc import AuthorizationRequest
-from idpyoidc.message.oauth2 import ResponseMessage
 
 
 preauth = Blueprint("preauth", __name__, url_prefix="/")
@@ -79,7 +60,7 @@ def preauthRed():
 
     credentials_id = request.args.get("credentials_id")
     credential_list = json.loads(credentials_id)
-    
+
     scope = " ".join(credential_list)
     print("\ncredential_list: ", scope)
 
@@ -97,9 +78,11 @@ def preauthRed():
 
     print("\nauthorization_details: ", authorization_details)
 
-    session_manager.update_authorization_details(session_id=session_id, authorization_details=authorization_details)
+    session_manager.update_authorization_details(
+        session_id=session_id, authorization_details=authorization_details
+    )
 
-    #session["authorization_details"] = authorization_details
+    # session["authorization_details"] = authorization_details
 
     credentials_requested = []
     for cred in authorization_details:
@@ -110,18 +93,22 @@ def preauthRed():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(cred["vct"])
 
-    session_manager.update_credentials_requested(session_id=session_id, credentials_requested=credentials_requested)
+    session_manager.update_credentials_requested(
+        session_id=session_id, credentials_requested=credentials_requested
+    )
 
     print("\ncredentials_requested", credentials_requested)
 
-    #session["credentials_requested"] = credentials_requested
+    # session["credentials_requested"] = credentials_requested
 
     mandatory_attributes = getAttributesForm(credentials_requested)
 
     optional_attributes_raw = getAttributesForm2(credentials_requested)
 
     optional_attributes_filtered = {
-        key: value for key, value in optional_attributes_raw.items() if key not in mandatory_attributes
+        key: value
+        for key, value in optional_attributes_raw.items()
+        if key not in mandatory_attributes
     }
 
     return render_template(
@@ -134,7 +121,7 @@ def preauthRed():
 
 @preauth.route("/preauth_form", methods=["GET", "POST"])
 def preauth_form():
-    #session["country"] = "FC"
+    # session["country"] = "FC"
 
     form_data = request.form.to_dict()
 
@@ -179,7 +166,7 @@ def form_authorize_generate():
     form_data = request.form.to_dict()
 
     user_id = form_data["user_id"]
-    #data = form_dynamic_data[user_id]
+    # data = form_dynamic_data[user_id]
 
     current_session = session_manager.get_session(user_id)
     data = current_session.user_data
@@ -207,7 +194,7 @@ def generate_offer(data):
 
     print("\npre_auth_code: ", pre_auth_code)
 
-    transaction_codes.update(
+    """ transaction_codes.update(
         {
             transaction_id: {
                 "pre_auth_code": pre_auth_code,
@@ -216,7 +203,7 @@ def generate_offer(data):
                 + timedelta(minutes=cfgservice.tx_code_expiry),
             }
         }
-    )
+    ) """
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],
@@ -346,9 +333,7 @@ def request_preauth_token(scope):
     url = "http://127.0.0.1:6005/preauth_generate"
 
     payload = f"scope={scope}"
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
@@ -360,7 +345,11 @@ def request_preauth_token(scope):
 
     tx_code = _response.get("tx_code")
 
-    session_manager.add_session(session_id=session_id, pre_authorized_code=preauth_code, tx_code=tx_code, country="FC")
+    session_manager.add_session(
+        session_id=session_id,
+        pre_authorized_code=preauth_code,
+        tx_code=tx_code,
+        country="FC",
+    )
 
-    return  session_id
-
+    return session_id

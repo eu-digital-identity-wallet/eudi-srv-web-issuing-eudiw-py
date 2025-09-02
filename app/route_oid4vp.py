@@ -84,7 +84,6 @@ def openid4vp():
                 credentials_requested.append(cred["credential_configuration_id"])
 
     session["oid4vp_cred_requested"] = credentials_requested """
-    
 
     input_descriptors = []
 
@@ -148,6 +147,9 @@ def openid4vp():
     response_same = requests.request(
         "POST", url[:-1], headers=headers, data=payload_same_device
     ).json()
+
+    print("\nresponse_cross: ", response_cross)
+    print("\nresponse_same: ", response_same)
 
     oid4vp_requests.update(
         {
@@ -269,11 +271,7 @@ def getpidoid4vp():
 
     if error == True:
         cfgservice.app_logger.error(
-            ", Session ID: "
-            + session_id
-            + ", "
-            + "OID4VP error: "
-            + error_msg
+            ", Session ID: " + session_id + ", " + "OID4VP error: " + error_msg
         )
         return authentication_error_redirect(
             jws_token=current_session.jws_token,
@@ -285,13 +283,11 @@ def getpidoid4vp():
     is_ageOver18 = False
     attributesForm = {}
 
-    if (
-        current_session.authorization_details
-    ):
+    if current_session.authorization_details:
         print("\nauthorization_details: ", current_session.authorization_details)
 
         print("\n")
-        
+
         for credential_id in current_session.authorization_details:
             if isinstance(credential_id, dict):
                 if "credential_configuration_id" in credential_id:
@@ -302,19 +298,15 @@ def getpidoid4vp():
                         == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
                     ):
                         is_ageOver18 = True
-                        attributesForm.update(
-                {"user_pseudonym": str(uuid4())}
-            )
+                        attributesForm.update({"user_pseudonym": str(uuid4())})
                 elif "vct" in credential_id:
-                    if credential_id["vct"] == "urn:eu.europa.ec.eudi:pseudonym_age_over_18:1":
-                        attributesForm.update(
-                {"user_pseudonym": str(uuid4())}
-            )
-                        
+                    if (
+                        credential_id["vct"]
+                        == "urn:eu.europa.ec.eudi:pseudonym_age_over_18:1"
+                    ):
+                        attributesForm.update({"user_pseudonym": str(uuid4())})
 
-    elif (
-        current_session.scope
-    ):
+    elif current_session.scope:
         cred_scopes = current_session.scope
         if (
             "eu.europa.ec.eudi.pseudonym.age_over_18.1" in cred_scopes
@@ -322,9 +314,7 @@ def getpidoid4vp():
             in cred_scopes
         ):
             is_ageOver18 = True
-            attributesForm.update(
-                {"user_pseudonym": str(uuid4())}
-            )
+            attributesForm.update({"user_pseudonym": str(uuid4())})
 
     if is_ageOver18 == True:
         for doctype in mdoc_json:
@@ -352,7 +342,9 @@ def getpidoid4vp():
             {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
         ) """
 
-        session_manager.update_user_data(session_id=session_id, user_data=attributesForm)
+        session_manager.update_user_data(
+            session_id=session_id, user_data=attributesForm
+        )
         session_manager.update_country(session_id=session_id, country="FC")
 
         presentation_data = attributesForm.copy()
@@ -389,7 +381,7 @@ def getpidoid4vp():
                     attributesForm2[attribute]["filled_value"] = value
 
         session_manager.update_country(session_id=session_id, country="FC")
-        
+
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=attributesForm,

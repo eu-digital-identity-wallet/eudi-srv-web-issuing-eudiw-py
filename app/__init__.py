@@ -29,6 +29,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
+from app.session_manager import SessionManager
 from flask import Flask, render_template, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
@@ -48,7 +49,6 @@ from cryptography.hazmat.primitives.asymmetric import (
 )
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
-from data_management import SessionManager
 
 # Log
 
