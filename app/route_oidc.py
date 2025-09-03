@@ -166,7 +166,7 @@ def auth_choice():
     pid_auth = True
     country_selection = True
 
-    authorization_details = None
+    authorization_details = []
 
     if authorization_details_str:
         try:
