@@ -154,7 +154,6 @@ def well_known(service):
 
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
-    print("\nAuth_choice")
 
     token = request.args.get("token")
     session_id = request.args.get("session_id")
@@ -168,30 +167,24 @@ def auth_choice():
     country_selection = True
 
     authorization_details = None
-    authorization_details_request = None
+
     if authorization_details_str:
         try:
             decoded_string = urllib.parse.unquote(authorization_details_str)
-            authorization_details = json.loads(decoded_string)
-            authorization_details_request = authorization_details
+
+            authorization_details = json.loads(json.loads(decoded_string))
         except json.JSONDecodeError as e:
             print(f"Error parsing authorization_details JSON: {e}")
             return jsonify({"error": "Invalid authorization_details parameter"}), 400
 
-    # authorization_params = session["authorization_params"]
-    authorization_details = []
-    if authorization_details:  # "authorization_details" in authorization_params:
-        authorization_details.extend(
-            json.loads(
-                authorization_details
-            )  # authorization_params["authorization_details"]
-        )
-
+    credential_configuration_id = None
     if scope:  # "scope" in authorization_params:
         scope_elements = scope.split()
         authorization_details.extend(
             scope2details(scope_elements)
         )  # authorization_params["scope"]
+
+        credential_configuration_id = scope.replace("openid", "").strip()
 
     if not authorization_details:
         return authentication_error_redirect(
@@ -201,15 +194,15 @@ def auth_choice():
         )
 
     credentials_requested = []
+
     for cred in authorization_details:
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
                 credentials_requested.append(cred["credential_configuration_id"])
+
         elif "vct" in cred:
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(vct2id(cred["vct"]))
-
-    credential_configuration_id = scope.replace("openid", "").strip()
 
     session_manager.add_session(
         session_id=session_id,
