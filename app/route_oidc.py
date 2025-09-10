@@ -461,6 +461,8 @@ def generate_credentials(credential_request, session_id):
                         }
                         return _resp
 
+                session_manager.update_is_batch_credential(session_id = session_id, is_batch_credential=True)
+
         formatter_request.update({"proofs": pubKeys})
 
     redirect_uri = cfgservice.service_url + "dynamic/dynamic_R2"

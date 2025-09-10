@@ -29,10 +29,12 @@ import io
 import json
 import base64
 import re
+import secrets
 from formatter_func import cbor2elems
 import threading
 import schedule
 import time
+from urllib.parse import urlencode
 from uuid import uuid4
 from PIL import Image
 from flask import (
@@ -44,11 +46,11 @@ from flask import (
     request,
     session,
     jsonify,
+    url_for
 )
 from flask_api import status
 from flask_cors import CORS
 import requests
-import urllib.parse
 from app.lighttoken import handle_response
 from app.validate_vp_token import validate_vp_token
 
@@ -244,7 +246,8 @@ def dynamic_R1(country):
         )
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
-        return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
+        return redirect(generate_connector_authorization_url(country=country, credentials_requested=credentials_requested))
+        #return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
         country_data = cfgcountries.supported_countries[country]["oidc_auth"].copy()
@@ -644,6 +647,17 @@ def red():
                     "portrait": base64.b64encode(
                         base64.urlsafe_b64decode(
                             presentation_data[credential]["portrait"]
+                        )
+                    ).decode("utf-8")
+                }
+            )
+
+        if "picture" in presentation_data[credential]:
+            presentation_data[credential].update(
+                {
+                    "picture": base64.b64encode(
+                        base64.urlsafe_b64decode(
+                            presentation_data[credential]["picture"]
                         )
                     ).decode("utf-8")
                 }
@@ -1230,6 +1244,34 @@ def form_formatter(form_data: dict) -> dict:
                     )
                     cleaned_data["image"] = imgurlbase64
 
+        elif item == "picture":
+            if grouped[item] == "Port1":
+                cleaned_data["picture"] = cfgserv.portrait1
+            elif grouped[item] == "Port2":
+                cleaned_data["picture"] = cfgserv.portrait2
+            elif grouped[item] == "Port3":
+                portrait = request.files["Picture"]
+
+                img = Image.open(portrait)
+                # imgbytes = img.tobytes()
+                bio = io.BytesIO()
+                img.save(bio, format="JPEG")
+                del img
+
+                response, error_msg = validate_image(portrait)
+
+                if response == False:
+                    return authentication_error_redirect(
+                        jws_token=session["jws_token"],
+                        error="Invalid Image",
+                        error_description=error_msg,
+                    )
+                else:
+                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
+                        "utf-8"
+                    )
+                    cleaned_data["picture"] = imgurlbase64
+
         elif item == "Category1":
             DrivingPrivileges = []
             i = 1
@@ -1389,27 +1431,16 @@ def presentation_formatter(cleaned_data: dict) -> dict:
             json_priv = json.loads(presentation_data[credential]["driving_privileges"])
             presentation_data[credential].update({"driving_privileges": json_priv})
 
-        if "portrait" in presentation_data[credential]:
-            presentation_data[credential].update(
-                {
-                    "portrait": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            presentation_data[credential]["portrait"]
-                        )
-                    ).decode("utf-8")
-                }
-            )
+        image_keys = ["portrait", "image", "picture"]
 
-        if "image" in presentation_data[credential]:
-            presentation_data[credential].update(
-                {
-                    "image": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            presentation_data[credential]["image"]
-                        )
-                    ).decode("utf-8")
-                }
-            )
+        for key in image_keys:
+            if key in presentation_data[credential]:
+                encoded_image = base64.b64encode(
+                    base64.urlsafe_b64decode(
+                        presentation_data[credential][key]
+                    )
+                ).decode("utf-8")
+                presentation_data[credential].update({key: encoded_image})
 
         if "NumberCategories" in presentation_data[credential]:
             for i in range(int(presentation_data[credential]["NumberCategories"])):
@@ -1459,6 +1490,9 @@ def Dynamic_form():
     form_data = request.form.to_dict()
 
     form_data.pop("proceed")
+
+    print("\nform_data: ", form_data)
+
 
     cleaned_data = form_formatter(form_data)
     print("\nCleaned Data: ", cleaned_data)
@@ -1530,3 +1564,66 @@ def redirect_wallet():
             },
         )
     ) """
+
+def generate_connector_authorization_url(country:str, credentials_requested:list):
+    authorize_url = "https://eidas.projj.eu//authorize"
+    state = str(uuid4())
+    session['oauth_state'] = state
+
+    params = {
+        "client_id": "",
+        "redirect_uri": f"{cfgserv.service_url}dynamic/connector_callback",
+        "response_type": "code",
+        "scope": "profile",
+        "state": state,
+        "country": country,
+        "credentials_requested":credentials_requested,
+        "metadata_url":f"{cfgserv.service_url}.well-known/openid-credential-issuer"
+    }
+
+    full_url = f"{authorize_url}?{urlencode(params)}"
+
+    return full_url
+
+
+@dynamic.route("/connector_callback", methods=["GET", "POST"])
+def connector_callback():
+
+    state = request.args.get('state')
+    if state != session.get('oauth_state'):
+        return "State mismatch error", 400
+    
+    auth_code = request.args.get('code')
+
+    if not auth_code:
+        return "Authorization code missing", 400
+    
+    token_endpoint = "https://eidas.projj.eu//token"
+
+    params = {
+        'grant_type': 'authorization_code',
+        'code': auth_code,
+        'redirect_uri': f"{cfgserv.service_url}dynamic/connector_callback",
+    }
+
+    try:
+        # Make the POST request with Basic Authentication
+        response = requests.post(
+            token_endpoint,
+            data=params,
+            auth=("client_id", "client_secret")
+        )
+
+        # Raise an exception for bad status codes (4xx or 5xx)
+        response.raise_for_status()
+
+        # The token is in the JSON response
+        token_data = response.json()
+
+        # Print the token information
+        print("Access Token:", token_data.get("access_token"))
+
+        access_token = token_data.get("access_token")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+

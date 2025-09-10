@@ -72,7 +72,7 @@
                         <!-- Loop through each individual attribute inside the category -->
                         {% for name, value in attributes.items() %}
 
-                        {% if name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image"] %}
+                        {% if name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image", "picture"] %}
     <div class="attribute-block">
         <label class="block text-base font-bold text-custom-gray">{{ name | title }}</label>
         <img class="mt-1 rounded-lg shadow-md w-32 h-32 object-cover"

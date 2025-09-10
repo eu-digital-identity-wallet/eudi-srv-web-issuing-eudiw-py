@@ -40,6 +40,7 @@ from misc import calculate_age
 from redirect_func import json_post
 from app import oidc_metadata
 from app import session_manager
+from formatter_func import mdocFormatter, sdjwtFormatter
 
 def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
     
@@ -56,28 +57,31 @@ def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
         dict(form_data), un_distinguishing_sign, doctype, format
     )
 
+    r = {}
+
     if format == "mso_mdoc":
-        url = cfgserv.service_url + "formatter/cbor"
+        base64_mdoc = mdocFormatter(data=data, credential_metadata=requested_credential, country=current_session.country, device_publickey=device_publickey, session_id=session_id)
+        #url = cfgserv.service_url + "formatter/cbor"
 
     elif format == "dc+sd-jwt":
         url = cfgserv.service_url + "formatter/sd-jwt"
 
-    r = json_post(
-        url,
-        {
-            "country": current_session.country,
-            "credential_metadata": requested_credential,
-            "device_publickey": device_publickey,
-            "data": data,
-        },
-    ).json()
+        r = json_post(
+            url,
+            {
+                "country": current_session.country,
+                "credential_metadata": requested_credential,
+                "device_publickey": device_publickey,
+                "data": data,
+            },
+        ).json()
 
-    if not r["error_code"] == 0:
-        return "Error"
+        if not r["error_code"] == 0:
+            return "Error"
 
     if format == "mso_mdoc":
-        mdoc = bytes(r["mdoc"], "utf-8")
-        credential = mdoc.decode("utf-8")
+        credential = base64_mdoc
+
     elif format == "dc+sd-jwt":
         credential = r["sd-jwt"]
 
@@ -315,6 +319,7 @@ def formatter(data, un_distinguishing_sign, doctype, format):
                 pdata[namescape].update({attribute: data[attribute]})
 
     elif format == "dc+sd-jwt":
+        print("\nattributes_req", attributes_req)
         for attribute in attributes_req:
             pdata["claims"].update({attribute: data[attribute]})
 

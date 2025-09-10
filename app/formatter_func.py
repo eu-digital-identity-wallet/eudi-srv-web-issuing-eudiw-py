@@ -49,8 +49,9 @@ from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
 from app_config.config_secrets import revocation_api_key
 
+from app import session_manager
 
-def mdocFormatter(data, credential_metadata, country, device_publickey):
+def mdocFormatter(data:dict, credential_metadata:dict, country:str, device_publickey:str, session_id:str):
     """Construct and sign the mdoc with the country private key
 
     Keyword arguments:
@@ -61,6 +62,9 @@ def mdocFormatter(data, credential_metadata, country, device_publickey):
 
     Return: Returns the base64 urlsafe mdoc
     """
+
+    current_session = session_manager.get_session(session_id=session_id)
+
     # Load the private key
     with open(
         cfgcountries.supported_countries[country]["pid_mdoc_privkey"], "rb"
@@ -75,69 +79,35 @@ def mdocFormatter(data, credential_metadata, country, device_publickey):
     # Extract the key parameters
     priv_d = private_key.private_numbers().private_value
 
-    issuance_date = datetime.datetime.today()
+    if current_session.is_batch_credential:
+        issuance_date = datetime.datetime.now(datetime.timezone.utc).replace(
+        hour=0, minute=0, second=0
+    )
+    else:
+        issuance_date = datetime.datetime.now(datetime.timezone.utc)
+
     expiry_date = issuance_date + datetime.timedelta(
         days=credential_metadata["issuer_config"]["validity"]
     )
 
     validity = {
-        "issuance_date": issuance_date.strftime("%Y-%m-%d"),
-        "expiry_date": expiry_date.strftime("%Y-%m-%d"),
+        "issuance_date": issuance_date,
+        "expiry_date": expiry_date,
     }
-
-    """ if doctype == "org.iso.18013.5.1.mDL":
-
-        # data["org.iso.18013.5.1"]["signature_usual_mark"] = base64.urlsafe_b64decode(
-        # data["org.iso.18013.5.1"]["signature_usual_mark"]
-        # )
-
-        if "issuance_date" in data["org.iso.18013.5.1"]:
-            issuance_date = data["org.iso.18013.5.1"]["issuance_date"]
-        elif "issue_date" in data["org.iso.18013.5.1"]:
-            issuance_date = data["org.iso.18013.5.1"]["issue_date"]
-
-        validity = {
-            "issuance_date": issuance_date,
-            "expiry_date": data["org.iso.18013.5.1"]["expiry_date"],
-        }
-    elif doctype == "eu.europa.ec.eudi.pid.1":
-        validity = {
-            "issuance_date": data["eu.europa.ec.eudi.pid.1"]["issuance_date"],
-            "expiry_date": data["eu.europa.ec.eudi.pid.1"]["expiry_date"],
-        }
-    elif doctype == "eu.europa.ec.eudiw.qeaa.1":
-        validity = {
-            "issuance_date": data["eu.europa.ec.eudiw.qeaa.1"]["issuance_date"],
-            "expiry_date": data["eu.europa.ec.eudiw.qeaa.1"]["expiry_date"],
-        }
-    else:
-        first_key = list(data.keys())[0]
-        validity = {
-            "issuance_date": data[first_key]["issuance_date"],
-            "expiry_date": data[first_key]["expiry_date"],
-        } """
 
     namespace = credential_metadata["issuer_config"]["namespace"]
 
-    if "image" in data[namespace]:
-        data[namespace]["image"] = base64.urlsafe_b64decode(
-            data[namespace]["image"]
-        )
+    images_to_decode = [
+        "image",
+        "portrait",
+        "issuing_authority_logo",
+        "signature_usual_mark_issuing_officer",
+        "picture",
+    ]
 
-    if "portrait" in data[namespace]:
-        data[namespace]["portrait"] = base64.urlsafe_b64decode(
-            data[namespace]["portrait"]
-        )
-        
-    if "issuing_authority_logo" in data[namespace]:
-        data[namespace]["issuing_authority_logo"] = base64.urlsafe_b64decode(
-            data[namespace]["issuing_authority_logo"]
-        )
-    
-    if "signature_usual_mark_issuing_officer" in data[namespace]:
-        data[namespace]["signature_usual_mark_issuing_officer"] = base64.urlsafe_b64decode(
-            data[namespace]["signature_usual_mark_issuing_officer"]
-        )
+    for image in images_to_decode:
+        if image in data[namespace]:
+            data[namespace][image] = base64.urlsafe_b64decode(data[namespace][image])
 
     if "user_pseudonym" in data[namespace]:
         data[credential_metadata["doctype"]]["user_pseudonym"] = data[
@@ -164,7 +134,7 @@ def mdocFormatter(data, credential_metadata, country, device_publickey):
             + "&country="
             + country
             + "&expiry_date="
-            + validity["expiry_date"]
+            + validity["expiry_date"].strftime("%Y-%m-%d")
         )
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",

@@ -258,7 +258,7 @@
         },
         {
            "path":[
-              "portrait"
+              "picture"
            ],
            "mandatory":false,
            "value_type":"jpeg",
@@ -386,21 +386,6 @@
            "display":[
               {
                  "name":"Age Over 18",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_equal_or_over",
-              "65"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 65",
                  "locale":"en"
               }
            ]

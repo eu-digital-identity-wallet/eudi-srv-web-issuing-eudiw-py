@@ -42,6 +42,7 @@ class Session:
         tx_code (Optional[int]): A numeric code for the session.
         transaction_id (Optional[Dict[str, Dict]]): A dictionary of transaction IDs for deferred issuance.
         notification_ids (List[str]): A list of notification IDs for the session.
+        is_batch_credential (bool): A flag indicating if the session is for a batch credential.
     """
 
     def __init__(
@@ -57,8 +58,9 @@ class Session:
         credentials_requested: Optional[List[Dict]] = None,
         user_data: Optional[Dict] = None,
         tx_code: Optional[int] = None,
-        transaction_id: Optional[Dict[str, Dict]] = None,  # Made Optional
+        transaction_id: Optional[Dict[str, Dict]] = None,
         notification_ids: Optional[List[str]] = None,
+        is_batch_credential: bool = False,  # Changed to be non-optional with a default value
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -72,16 +74,16 @@ class Session:
         self.credentials_requested = credentials_requested
         self.user_data = user_data
         self.tx_code = tx_code
-        self.transaction_id = (
-            transaction_id if transaction_id is not None else {}
-        )  # Initialize to empty dict if not provided
+        self.transaction_id = transaction_id if transaction_id is not None else {}
         self.notification_ids = notification_ids if notification_ids is not None else []
+        self.is_batch_credential = is_batch_credential
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
         data = {
             "session_id": self.session_id,
             "expiry_time": self.expiry_time.isoformat(),
+            "is_batch_credential": self.is_batch_credential,  # Always include this attribute
         }
         # Add optional attributes if they exist
         if self.country is not None:
@@ -142,8 +144,9 @@ class Session:
 
         return (
             f"Session(session_id='{self.session_id}', "
-            f"{', '.join(optional_parts)}, "
-            f"expiry_time='{self.expiry_time.isoformat()}')"
+            f"is_batch_credential={self.is_batch_credential}, "  # Always include this attribute
+            f"expiry_time='{self.expiry_time.isoformat()}'"
+            f"{', ' + ', '.join(optional_parts) if optional_parts else ''})"
         )
 
 
@@ -185,6 +188,7 @@ class SessionManager:
         credentials_requested: Optional[List[Dict]] = None,
         user_data: Optional[Dict] = None,
         tx_code: Optional[int] = None,
+        is_batch_credential: bool = False,  # Changed to be non-optional with a default value
     ) -> Session:
         """
         Creates and stores a new Session object.
@@ -205,6 +209,7 @@ class SessionManager:
             credentials_requested=credentials_requested,
             user_data=user_data,
             tx_code=tx_code,
+            is_batch_credential=is_batch_credential,
         )
 
         with self._sessions_lock:
@@ -354,6 +359,22 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update tx_code for non-existent session_id: {session_id}"
+                )
+
+    def update_is_batch_credential(self, session_id: str, is_batch_credential: bool):
+        """
+        Updates the 'is_batch_credential' attribute of a session.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.is_batch_credential = is_batch_credential
+                print(
+                    f"Updated is_batch_credential for session_id {session_id} to: {is_batch_credential}"
+                )
+            else:
+                print(
+                    f"Warning: Attempted to update is_batch_credential for non-existent session_id: {session_id}"
                 )
 
     def add_transaction_id(
