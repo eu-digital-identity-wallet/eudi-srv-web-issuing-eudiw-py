@@ -107,6 +107,23 @@ def well_known(service):
             resp.headers[key] = value
 
         return resp
+    if service == "openid-credential-issuer2":
+        info = {
+            "response": oidc_metadata,
+            "http_headers": [
+                ("Content-type", "application/json; charset=utf-8"),
+                ("Pragma", "no-cache"),
+                ("Cache-Control", "no-store"),
+            ],
+        }
+
+        _http_response_code = info.get("response_code", 200)
+        resp = make_response(info["response"], _http_response_code)
+
+        for key, value in info["http_headers"]:
+            resp.headers[key] = value
+
+        return resp
     elif service == "oauth-authorization-server":
         info = {
             "response": openid_metadata,
@@ -461,7 +478,9 @@ def generate_credentials(credential_request, session_id):
                         }
                         return _resp
 
-                session_manager.update_is_batch_credential(session_id = session_id, is_batch_credential=True)
+                session_manager.update_is_batch_credential(
+                    session_id=session_id, is_batch_credential=True
+                )
 
         formatter_request.update({"proofs": pubKeys})
 
