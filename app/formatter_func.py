@@ -51,7 +51,14 @@ from app_config.config_secrets import revocation_api_key
 
 from app import session_manager
 
-def mdocFormatter(data:dict, credential_metadata:dict, country:str, device_publickey:str, session_id:str):
+
+def mdocFormatter(
+    data: dict,
+    credential_metadata: dict,
+    country: str,
+    device_publickey: str,
+    session_id: str,
+):
     """Construct and sign the mdoc with the country private key
 
     Keyword arguments:
@@ -81,8 +88,8 @@ def mdocFormatter(data:dict, credential_metadata:dict, country:str, device_publi
 
     if current_session.is_batch_credential:
         issuance_date = datetime.datetime.now(datetime.timezone.utc).replace(
-        hour=0, minute=0, second=0
-    )
+            hour=0, minute=0, second=0
+        )
     else:
         issuance_date = datetime.datetime.now(datetime.timezone.utc)
 
@@ -103,6 +110,7 @@ def mdocFormatter(data:dict, credential_metadata:dict, country:str, device_publi
         "issuing_authority_logo",
         "signature_usual_mark_issuing_officer",
         "picture",
+        "signature_usual_mark",
     ]
 
     for image in images_to_decode:
@@ -296,8 +304,11 @@ def sdjwtFormatter(PID, country):
         exp = DatestringFormatter(PID_Claims_data["expiry_date"])
         validity = PID_Claims_data["expiry_date"]
         PID_Claims_data.pop("expiry_date") """
-    
-    validity = (today + datetime.timedelta(PID["credential_metadata"]["issuer_config"]["validity"])).strftime("%Y-%m-%d")
+
+    validity = (
+        today
+        + datetime.timedelta(PID["credential_metadata"]["issuer_config"]["validity"])
+    ).strftime("%Y-%m-%d")
     exp = DatestringFormatter(validity)
 
     # jti = str(uuid4())

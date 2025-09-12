@@ -42,14 +42,15 @@ from app import oidc_metadata
 from app import session_manager
 from formatter_func import mdocFormatter, sdjwtFormatter
 
+
 def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
-    
+
     current_session = session_manager.get_session(session_id=session_id)
 
     if doctype == "org.iso.18013.5.1.mDL":
-        un_distinguishing_sign = cfgcountries.supported_countries[current_session.country][
-            "un_distinguishing_sign"
-        ]
+        un_distinguishing_sign = cfgcountries.supported_countries[
+            current_session.country
+        ]["un_distinguishing_sign"]
     else:
         un_distinguishing_sign = ""
 
@@ -60,8 +61,14 @@ def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
     r = {}
 
     if format == "mso_mdoc":
-        base64_mdoc = mdocFormatter(data=data, credential_metadata=requested_credential, country=current_session.country, device_publickey=device_publickey, session_id=session_id)
-        #url = cfgserv.service_url + "formatter/cbor"
+        base64_mdoc = mdocFormatter(
+            data=data,
+            credential_metadata=requested_credential,
+            country=current_session.country,
+            device_publickey=device_publickey,
+            session_id=session_id,
+        )
+        # url = cfgserv.service_url + "formatter/cbor"
 
     elif format == "dc+sd-jwt":
         url = cfgserv.service_url + "formatter/sd-jwt"
@@ -220,7 +227,9 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "at_least_one_of" in attributes_req:
         attributes_req.pop("at_least_one_of")
 
-    if "driving_privileges" in attributes_req:
+    if "driving_privileges" in attributes_req and not isinstance(
+        data.get("driving_privileges"), list
+    ):
         json_priv = json.loads(data["driving_privileges"])
         data.update({"driving_privileges": json_priv})
 
@@ -302,9 +311,6 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
     if "issuing_authority_logo" in issuer_claims:
         data.update({"issuing_authority_logo": cfgserv.issuing_authority_logo})
-
-    if "signature_usual_mark_issuing_officer" in issuer_claims:
-        data.update({"signature_usual_mark_issuing_officer": cfgserv.signature_usual_mark_issuing_officer})
 
     if format == "mso_mdoc":
         for attribute in attributes_req:

@@ -182,18 +182,14 @@
                      "source":"user"
                   },
                   "region":{
-                     "country_code":{
-                        "mandatory":false,
-                        "value_type":"string",
-                        "source":"user"
-                     }
+                     "mandatory":false,
+                     "value_type":"string",
+                     "source":"user"
                   },
                   "locality":{
-                     "country_code":{
-                        "mandatory":false,
-                        "value_type":"string",
-                        "source":"user"
-                     }
+                     "mandatory":false,
+                     "value_type":"string",
+                     "source":"user"
                   }
                },
                "at_least_one_of":[

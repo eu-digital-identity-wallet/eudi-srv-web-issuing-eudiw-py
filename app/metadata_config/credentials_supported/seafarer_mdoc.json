@@ -300,7 +300,8 @@
                "signature_usual_mark_issuing_officer"
             ],
             "mandatory":true,
-            "source":"issuer",
+            "source":"user",
+            "value_type":"jpeg",
             "display":[
                {
                   "name":"Issuing Officer Signature",

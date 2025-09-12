@@ -46,7 +46,7 @@ from flask import (
     request,
     session,
     jsonify,
-    url_for
+    url_for,
 )
 from flask_api import status
 from flask_cors import CORS
@@ -104,9 +104,9 @@ def Supported_Countries():
         )
 
     session_id = session["session_id"]
-    
+
     current_session = session_manager.get_session(session_id=session_id)
-    #session["credentials_requested"] = credentials_requested
+    # session["credentials_requested"] = credentials_requested
 
     display_countries = {}
     for country in cfgcountries.supported_countries:
@@ -122,8 +122,8 @@ def Supported_Countries():
     if len(display_countries) == 1:
         country = next(iter(display_countries))
 
-        #session["returnURL"] = cfgserv.OpenID_first_endpoint
-        #session["country"] = country
+        # session["returnURL"] = cfgserv.OpenID_first_endpoint
+        # session["country"] = country
 
         cfgserv.app_logger.info(
             ", Session ID: "
@@ -136,11 +136,11 @@ def Supported_Countries():
 
     # render page where user can select pid_countries
 
-    #session["authorization_params"] = {"token": token}
+    # session["authorization_params"] = {"token": token}
 
-    #print("\nsession token: ", session)
+    # print("\nsession token: ", session)
 
-    #session["jws_token"] = token  # authorization_params["token"]
+    # session["jws_token"] = token  # authorization_params["token"]
 
     return render_template(
         "dynamic/dynamic-countries.html",
@@ -155,14 +155,14 @@ def country_selected():
     # form_keys = request.form.keys()
     form_country = request.form.get("country")
 
-    #session["returnURL"] = cfgserv.OpenID_first_endpoint
-    #session["country"] = form_country
+    # session["returnURL"] = cfgserv.OpenID_first_endpoint
+    # session["country"] = form_country
 
     if "Cancelled" in request.form.keys():  # Form request Cancelled
         return render_template(
             "misc/auth_method.html", redirect_url=cfgserv.service_url
         )
-    
+
     cfgserv.app_logger.info(
         ", Session ID: "
         + session["session_id"]
@@ -183,9 +183,7 @@ def dynamic_R1(country):
     """
 
     session_id = session["session_id"]
-    session_manager.update_country(
-        session_id=session_id, country=country
-    )
+    session_manager.update_country(session_id=session_id, country=country)
 
     current_session = session_manager.get_session(session_id=session_id)
 
@@ -201,22 +199,26 @@ def dynamic_R1(country):
     ) """
 
     if country == "FC":
-        
+
         mandatory_attributes = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in mandatory_attributes:
             mandatory_attributes.update(
                 {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
             )
 
-        optional_attributes_raw = getAttributesForm2(current_session.credentials_requested)
+        optional_attributes_raw = getAttributesForm2(
+            current_session.credentials_requested
+        )
 
         print("\nMandatory: ", mandatory_attributes)
         print("\nOptional: ", optional_attributes_raw)
 
         optional_attributes_filtered = {
-            key: value for key, value in optional_attributes_raw.items() if key not in mandatory_attributes
+            key: value
+            for key, value in optional_attributes_raw.items()
+            if key not in mandatory_attributes
         }
-        
+
         return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=mandatory_attributes,
@@ -225,15 +227,17 @@ def dynamic_R1(country):
         )
 
     elif country == "sample":
-        
-        session_manager.update_user_data(session_id=session_id, user_data=cfgserv.sample_data.copy())
+
+        session_manager.update_user_data(
+            session_id=session_id, user_data=cfgserv.sample_data.copy()
+        )
 
         """ form_dynamic_data[user_id] = cfgserv.sample_data.copy()
         form_dynamic_data[user_id].update(
             {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
         ) """
 
-        #session["returnURL"] = cfgserv.OpenID_first_endpoint
+        # session["returnURL"] = cfgserv.OpenID_first_endpoint
 
         return redirect(
             url_get(
@@ -246,8 +250,12 @@ def dynamic_R1(country):
         )
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
-        return redirect(generate_connector_authorization_url(country=country, credentials_requested=credentials_requested))
-        #return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
+        return redirect(
+            generate_connector_authorization_url(
+                country=country, credentials_requested=credentials_requested
+            )
+        )
+        # return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
         country_data = cfgcountries.supported_countries[country]["oidc_auth"].copy()
@@ -324,11 +332,11 @@ def red():
 
     Return: Redirect answer to returnURL.
     """
-    #session["route"] = "/dynamic/redirect"
+    # session["route"] = "/dynamic/redirect"
 
     session_id = session["session_id"]
     current_session = session_manager.get_session(session_id=session_id)
-    
+
     if current_session.country == "PT":
 
         if not request.args:  # if args is empty
@@ -504,11 +512,11 @@ def red():
 
         country, jws_token = request.args.get("state").split(".")
 
-        session_manager.update_country(session_id=session_id, country= country)
+        session_manager.update_country(session_id=session_id, country=country)
 
         session_manager.update_jws_token(session_id=session_id, jws_token=jws_token)
-        #session["jws_token"] = jws_token
-        #session["country"] = country
+        # session["jws_token"] = jws_token
+        # session["country"] = country
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
     if not v:  # if not all arguments are available
@@ -519,7 +527,9 @@ def red():
         )
 
     metadata_url = (
-        cfgcountries.supported_countries[current_session.country]["oidc_auth"]["base_url"]
+        cfgcountries.supported_countries[current_session.country]["oidc_auth"][
+            "base_url"
+        ]
         + "/.well-known/openid-configuration"
     )
     metadata_json = requests.get(metadata_url).json()
@@ -604,7 +614,9 @@ def red():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": current_session.country}),
+        presentation_data[credential].update(
+            {"issuing_country": current_session.country}
+        ),
 
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
             presentation_data[credential].update(
@@ -637,31 +649,29 @@ def red():
                 }
             )
 
-        if "driving_privileges" in presentation_data[credential]:
+        if "driving_privileges" in presentation_data[credential] and isinstance(
+            presentation_data[credential]["driving_privileges"], str
+        ):
             json_priv = json.loads(presentation_data[credential]["driving_privileges"])
             presentation_data[credential].update({"driving_privileges": json_priv})
 
-        if "portrait" in presentation_data[credential]:
-            presentation_data[credential].update(
-                {
-                    "portrait": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            presentation_data[credential]["portrait"]
-                        )
-                    ).decode("utf-8")
-                }
-            )
+        fields_to_decode = [
+            "portrait",
+            "image",
+            "signature_usual_mark",
+        ]  # Add any other fields here
 
-        if "picture" in presentation_data[credential]:
-            presentation_data[credential].update(
-                {
-                    "picture": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            presentation_data[credential]["picture"]
-                        )
-                    ).decode("utf-8")
-                }
-            )
+        for field in fields_to_decode:
+            if field in presentation_data[credential]:
+                presentation_data[credential].update(
+                    {
+                        field: base64.b64encode(
+                            base64.urlsafe_b64decode(
+                                presentation_data[credential][field]
+                            )
+                        ).decode("utf-8")
+                    }
+                )
 
         if "NumberCategories" in presentation_data[credential]:
             for i in range(int(presentation_data[credential]["NumberCategories"])):
@@ -709,9 +719,9 @@ def dynamic_R2():
 
     credential_request = json_request["credential_requests"]
 
-    #session["country"] = country
-    #session["version"] = cfgserv.current_version
-    #session["route"] = "/dynamic/form_R2"
+    # session["country"] = country
+    # session["version"] = cfgserv.current_version
+    # session["route"] = "/dynamic/form_R2"
 
     data = dynamic_R2_data_collect(country=country, user_id=user_id)
 
@@ -721,7 +731,10 @@ def dynamic_R2():
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
 
     credential_response = credentialCreation(
-        credential_request=credential_request, data=data, country=country, session_id=user_id
+        credential_request=credential_request,
+        data=data,
+        country=country,
+        session_id=user_id,
     )
 
     return credential_response
@@ -735,7 +748,7 @@ def dynamic_R2_data_collect(country, user_id):
     user_id -- user identifier needed to get respective attributes
     country -- credential issuing country that user selected
     """
-    
+
     if country == "FC":
 
         current_session = session_manager.get_session(session_id=user_id)
@@ -747,25 +760,23 @@ def dynamic_R2_data_collect(country, user_id):
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
 
-        #session["version"] = cfgserv.current_version
-        #session["country"] = data["issuing_country"]
+        # session["version"] = cfgserv.current_version
+        # session["country"] = data["issuing_country"]
 
         return data
 
     if country == "sample":
-        #data = form_dynamic_data.get(user_id, "Data not found")
-        
-        """ if data == "Data not found":
-            return {"error": "error", "error_description": "Data not found"} """
+        # data = form_dynamic_data.get(user_id, "Data not found")
 
-        #session["version"] = cfgserv.current_version
-        #session["country"] = data["issuing_country"]
+        """if data == "Data not found":
+        return {"error": "error", "error_description": "Data not found"}"""
+
+        # session["version"] = cfgserv.current_version
+        # session["country"] = data["issuing_country"]
 
         current_session = session_manager.get_session(session_id=user_id)
 
-        data = (
-            current_session.user_data
-        )
+        data = current_session.user_data
 
         return data
 
@@ -1038,8 +1049,10 @@ def credentialCreation(credential_request, data, country, session_id):
             }
         )
 
-        pdata = dynamic_formatter(format, doctype, form_data, device_publickey, session_id)
-        
+        pdata = dynamic_formatter(
+            format, doctype, form_data, device_publickey, session_id
+        )
+
         credential_response["credentials"].append({"credential": pdata})
 
         """ formatting_function_data = formatting_functions.get(format)
@@ -1082,228 +1095,124 @@ def auth():
 def form_formatter(form_data: dict) -> dict:
     cleaned_data = {}
 
+    # Handle date formatting first, as it's a simple key-value replacement
     if "effective_from_date" in form_data:
         date_part = form_data["effective_from_date"].split("T")[0]
         dt = datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         rfc3339_string = dt.isoformat().replace("+00:00", "Z")
         form_data.update({"effective_from_date": rfc3339_string})
 
-    grouped = {}
-    for key, value in form_data.items():
-        if not value:
+    # Regex to parse keys like 'capacities[0][codes][1][code]' into a list of parts
+    key_pattern = re.compile(r"([^\[\]]+)")
+
+    # Sort keys to ensure parent structures (e.g., capacities[0]) are processed before children (e.g., capacities[0][codes][0])
+    for key in sorted(form_data.keys()):
+        value = form_data[key]
+
+        # Skip empty values and form control buttons
+        if not value or key in ["proceed", "Cancelled", "NumberCategories"]:
             continue
         if "option" in key and "on" in value:
             continue
-        if "[" not in key and "]" not in key:
-            grouped.update({key: value})
+
+        parts = key_pattern.findall(key)
+
+        current_level = cleaned_data
+        for i, part in enumerate(parts[:-1]):
+            is_numeric_index = part.isdigit()
+
+            if is_numeric_index:
+                idx = int(part)
+                # Ensure the list is long enough to accommodate the index
+                while len(current_level) <= idx:
+                    current_level.append({})
+                current_level = current_level[idx]
+            else:  # It's a dictionary key (e.g., 'capacities', 'codes')
+                is_next_part_index = (i + 1 < len(parts)) and parts[i + 1].isdigit()
+
+                if is_next_part_index:
+                    # If the next part is an index, this key must point to a list
+                    current_level = current_level.setdefault(part, [])
+                else:
+                    # Otherwise, it points to a dictionary
+                    current_level = current_level.setdefault(part, {})
+
+        # Set the final value at the correct location
+        final_key = parts[-1]
+        if final_key.isdigit() and isinstance(current_level, list):
+            idx = int(final_key)
+            while len(current_level) <= idx:
+                current_level.append(None)
+            current_level[idx] = value
         else:
-            parts = key.replace("][", "/").replace("[", "/").replace("]", "").split("/")
+            current_level[final_key] = value
 
-            sub_key = ""
-            if "-" in key:
-                hyphen_parts = key.split("-")
-                base_key = hyphen_parts[0]
-                # sub_key = hyphen_parts[1]
-                if len(parts) == 3:
-                    sub_key = parts[2]
-                    index = parts[1]
-                else:
-                    sub_key = parts[1]
-                    index = 0
+    # Perform any final data transformations if necessary
+    if "portrait" in cleaned_data:
+        if cleaned_data["portrait"] == "Port1":
+            cleaned_data["portrait"] = cfgserv.portrait1
+        elif cleaned_data["portrait"] == "Port2":
+            cleaned_data["portrait"] = cfgserv.portrait2
+        # Note: File upload logic for Port3 remains in the main route function
 
-            else:
+    if "image" in cleaned_data:
+        if cleaned_data["image"] == "Port1":
+            cleaned_data["image"] = cfgserv.portrait1
+        elif cleaned_data["image"] == "Port2":
+            cleaned_data["image"] = cfgserv.portrait2
 
-                base_key = parts[0]
-                index = int(parts[1])
-                sub_key = parts[2]
+    if "signature_usual_mark" in cleaned_data:
+        if cleaned_data["signature_usual_mark"] == "Sig1":
+            cleaned_data["signature_usual_mark"] = (
+                cfgserv.signature_usual_mark_issuing_officer
+            )
 
-            if base_key not in grouped:
-                grouped.update({base_key: [{sub_key: value}]})
+    if "signature_usual_mark_issuing_officer" in cleaned_data:
+        if cleaned_data["signature_usual_mark_issuing_officer"] == "Sig1":
+            cleaned_data["signature_usual_mark_issuing_officer"] = (
+                cfgserv.signature_usual_mark_issuing_officer
+            )
 
-            else:
-
-                if len(grouped[base_key]) > int(index):
-                    grouped[base_key][int(index)].update({sub_key: value})
-                else:
-                    grouped[base_key].append({sub_key: value})
-
-    for item in grouped:
-
-        if item == "nationality" or item == "nationalities":
-            if isinstance(grouped[item], list):
-                cleaned_data[item] = [item["country_code"] for item in grouped[item]]
-                cleaned_data["nationalities"] = cleaned_data[item]
-            else:
-                cleaned_data[item] = grouped[item]
-                cleaned_data["nationalities"] = cleaned_data[item]
-
-        elif item == "capacities":
-            if isinstance(grouped[item], list):
-                cleaned_data[item] = [item["capacity_code"] for item in grouped[item]]
-                cleaned_data["capacities"] = cleaned_data[item]
-            else:
-                cleaned_data[item] = grouped[item]
-                cleaned_data["capacities"] = cleaned_data[item]
-
-        elif item == "codes":
-            if isinstance(grouped[item], list):
-                cleaned_data[item] = [item["code"] for item in grouped[item]]
-                cleaned_data["codes"] = cleaned_data[item]
-            else:
-                cleaned_data[item] = grouped[item]
-                cleaned_data["codes"] = cleaned_data[item]
-
-        elif item == "authentic_source":
-            if isinstance(grouped[item], list):
-                cleaned_data[item] = grouped[item][0]
-
-        elif item == "place_of_birth":
-            if isinstance(grouped[item], list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-
-        elif item == "address":
-            if isinstance(grouped[item], list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-            else:
-                if grouped[item] != "" and grouped[item] != "unset":
-                    cleaned_data[item] = grouped[item]
-
-        elif item == "residence_address":
-            if isinstance(grouped[item], list):
-                joined_places = {}
-                for d in grouped[item]:
-                    joined_places.update(d)
-                cleaned_data[item] = joined_places
-
-        elif item == "birth_date":
-            cleaned_data["birthdate"] = grouped[item]
-            cleaned_data[item] = grouped[item]
-
-        elif item == "age_equal_or_over" and isinstance(grouped[item], list):
-            cleaned_data[item] = grouped[item][0]
-
-        elif item == "portrait":
-            if grouped[item] == "Port1":
-                cleaned_data["portrait"] = cfgserv.portrait1
-            elif grouped[item] == "Port2":
-                cleaned_data["portrait"] = cfgserv.portrait2
-            elif grouped[item] == "Port3":
-                portrait = request.files["Image"]
-
-                img = Image.open(portrait)
-                # imgbytes = img.tobytes()
-                bio = io.BytesIO()
-                img.save(bio, format="JPEG")
-                del img
-
-                response, error_msg = validate_image(portrait)
-
-                if response == False:
-                    return authentication_error_redirect(
-                        jws_token=session["jws_token"],
-                        error="Invalid Image",
-                        error_description=error_msg,
-                    )
-                else:
-                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
-                        "utf-8"
-                    )
-                    cleaned_data["portrait"] = imgurlbase64
-        
-        elif item == "image":
-            if grouped[item] == "Port1":
-                cleaned_data["image"] = cfgserv.portrait1
-            elif grouped[item] == "Port2":
-                cleaned_data["image"] = cfgserv.portrait2
-            elif grouped[item] == "Port3":
-                portrait = request.files["Image"]
-
-                img = Image.open(portrait)
-                # imgbytes = img.tobytes()
-                bio = io.BytesIO()
-                img.save(bio, format="JPEG")
-                del img
-
-                response, error_msg = validate_image(portrait)
-
-                if response == False:
-                    return authentication_error_redirect(
-                        jws_token=session["jws_token"],
-                        error="Invalid Image",
-                        error_description=error_msg,
-                    )
-                else:
-                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
-                        "utf-8"
-                    )
-                    cleaned_data["image"] = imgurlbase64
-
-        elif item == "picture":
-            if grouped[item] == "Port1":
-                cleaned_data["picture"] = cfgserv.portrait1
-            elif grouped[item] == "Port2":
-                cleaned_data["picture"] = cfgserv.portrait2
-            elif grouped[item] == "Port3":
-                portrait = request.files["Picture"]
-
-                img = Image.open(portrait)
-                # imgbytes = img.tobytes()
-                bio = io.BytesIO()
-                img.save(bio, format="JPEG")
-                del img
-
-                response, error_msg = validate_image(portrait)
-
-                if response == False:
-                    return authentication_error_redirect(
-                        jws_token=session["jws_token"],
-                        error="Invalid Image",
-                        error_description=error_msg,
-                    )
-                else:
-                    imgurlbase64 = base64.urlsafe_b64encode(bio.getvalue()).decode(
-                        "utf-8"
-                    )
-                    cleaned_data["picture"] = imgurlbase64
-
-        elif item == "Category1":
-            DrivingPrivileges = []
-            i = 1
-            for i in range(int(grouped["NumberCategories"])):
-                f = str(i + 1)
-                drivP = {
-                    "vehicle_category_code": grouped["Category" + f],
-                    "issue_date": grouped["IssueDate" + f],
-                    "expiry_date": grouped["ExpiryDate" + f],
-                }
-                DrivingPrivileges.append(drivP)
-
-            cleaned_data["driving_privileges"] = json.dumps(DrivingPrivileges)
-
-        elif grouped[item] == "true":
-            cleaned_data[item] = True
-
-        elif grouped[item] == "false":
-            cleaned_data[item] = False
-
-        else:
-            if grouped[item] != "" and grouped[item] != "unset":
-                cleaned_data[item] = grouped[item]
-
+    # Add issuer-filled data
     cleaned_data.update(
         {
-            "issuing_country": session_manager.get_session(session["session_id"]).country,
+            "issuing_country": session_manager.get_session(
+                session["session_id"]
+            ).country,
             "issuing_authority": cfgserv.mdl_issuing_authority,
         }
     )
 
-    return cleaned_data
+    final_data = {}
+    for item, value in cleaned_data.items():
+        if item in [
+            "portrait",
+            "image",
+            "picture",
+            "signature_usual_mark",
+            "signature_usual_mark_issuing_officer",
+        ]:
+            if value == "Port1":
+                final_data[item] = cfgserv.portrait1
+            elif value == "Port2":
+                final_data[item] = cfgserv.portrait2
+            else:
+                # If it's not Port1 or Port2, it's the base64url string from the route handler.
+                final_data[item] = value
+        else:
+            final_data[item] = value
+
+    # Add issuer-filled data
+    final_data.update(
+        {
+            "issuing_country": session_manager.get_session(
+                session["session_id"]
+            ).country,
+            "issuing_authority": cfgserv.mdl_issuing_authority,
+        }
+    )
+
+    return final_data
 
 
 def presentation_formatter(cleaned_data: dict) -> dict:
@@ -1355,25 +1264,15 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
-        presentation_data[credential].update({"issuing_country": current_session.country}),
+        presentation_data[credential].update(
+            {"issuing_country": current_session.country}
+        ),
 
         if credential_requested == "eu.europa.ec.eudi.seafarer_mdoc":
             presentation_data[credential].update(
                 {
                     "issuing_authority_logo": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            cfgserv.issuing_authority_logo
-                        )
-                    ).decode("utf-8")
-                }
-            )
-
-            presentation_data[credential].update(
-                {
-                    "signature_usual_mark_issuing_officer": base64.b64encode(
-                        base64.urlsafe_b64decode(
-                            cfgserv.signature_usual_mark_issuing_officer
-                        )
+                        base64.urlsafe_b64decode(cfgserv.issuing_authority_logo)
                     ).decode("utf-8")
                 }
             )
@@ -1427,20 +1326,31 @@ def presentation_formatter(cleaned_data: dict) -> dict:
                     }
                 )
 
-        if "driving_privileges" in presentation_data[credential]:
+        if "driving_privileges" in presentation_data[credential] and isinstance(
+            presentation_data[credential]["driving_privileges"], str
+        ):
             json_priv = json.loads(presentation_data[credential]["driving_privileges"])
             presentation_data[credential].update({"driving_privileges": json_priv})
 
-        image_keys = ["portrait", "image", "picture"]
+        fields_to_decode = [
+            "portrait",
+            "image",
+            "signature_usual_mark",
+            "signature_usual_mark_issuing_officer",
+            "picture",
+        ]
 
-        for key in image_keys:
-            if key in presentation_data[credential]:
-                encoded_image = base64.b64encode(
-                    base64.urlsafe_b64decode(
-                        presentation_data[credential][key]
-                    )
-                ).decode("utf-8")
-                presentation_data[credential].update({key: encoded_image})
+        for field in fields_to_decode:
+            if field in presentation_data[credential]:
+                presentation_data[credential].update(
+                    {
+                        field: base64.b64encode(
+                            base64.urlsafe_b64decode(
+                                presentation_data[credential][field]
+                            )
+                        ).decode("utf-8")
+                    }
+                )
 
         if "NumberCategories" in presentation_data[credential]:
             for i in range(int(presentation_data[credential]["NumberCategories"])):
@@ -1457,8 +1367,8 @@ def Dynamic_form():
     """Form PID page.
     Form page where the user can enter its PID data.
     """
-    #session["route"] = "/dynamic/form"
-    #session["country"] = "FC"
+    # session["route"] = "/dynamic/form"
+    # session["country"] = "FC"
 
     session_id = session["session_id"]
 
@@ -1493,13 +1403,10 @@ def Dynamic_form():
 
     print("\nform_data: ", form_data)
 
-
     cleaned_data = form_formatter(form_data)
     print("\nCleaned Data: ", cleaned_data)
 
-    session_manager.update_user_data(
-        session_id=session_id, user_data=cleaned_data
-    )
+    session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
     form_dynamic_data[user_id] = cleaned_data.copy()
 
@@ -1526,7 +1433,7 @@ def redirect_wallet():
 
     form_data = request.form.to_dict()
     user_id = form_data["user_id"]
-    
+
     session_id = session["session_id"]
 
     current_session = session_manager.get_session(session_id=session_id)
@@ -1565,20 +1472,21 @@ def redirect_wallet():
         )
     ) """
 
-def generate_connector_authorization_url(country:str, credentials_requested:list):
-    authorize_url = "https://eidas.projj.eu//authorize"
+
+def generate_connector_authorization_url(country: str, credentials_requested: list):
+    authorize_url = "https://eidas.projj.eu/authorize"
     state = str(uuid4())
-    session['oauth_state'] = state
+    session["oauth_state"] = state
 
     params = {
-        "client_id": "",
+        "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
         "redirect_uri": f"{cfgserv.service_url}dynamic/connector_callback",
         "response_type": "code",
         "scope": "profile",
         "state": state,
         "country": country,
-        "credentials_requested":credentials_requested,
-        "metadata_url":f"{cfgserv.service_url}.well-known/openid-credential-issuer"
+        "credentials_requested": credentials_requested[0],
+        "metadata_url": f"{cfgserv.service_url}.well-known/openid-credential-issuer",
     }
 
     full_url = f"{authorize_url}?{urlencode(params)}"
@@ -1589,41 +1497,94 @@ def generate_connector_authorization_url(country:str, credentials_requested:list
 @dynamic.route("/connector_callback", methods=["GET", "POST"])
 def connector_callback():
 
-    state = request.args.get('state')
-    if state != session.get('oauth_state'):
+    state = request.args.get("state")
+    if state != session.get("oauth_state"):
         return "State mismatch error", 400
-    
-    auth_code = request.args.get('code')
+
+    auth_code = request.args.get("code")
 
     if not auth_code:
         return "Authorization code missing", 400
-    
-    token_endpoint = "https://eidas.projj.eu//token"
+
+    token_endpoint = "https://eidas.projj.eu/token"
+
+    user_info_endpoint = "https://eidas.projj.eu/api/me"
 
     params = {
-        'grant_type': 'authorization_code',
-        'code': auth_code,
-        'redirect_uri': f"{cfgserv.service_url}dynamic/connector_callback",
+        "grant_type": "authorization_code",
+        "code": auth_code,
+        "redirect_uri": f"{cfgserv.service_url}dynamic/connector_callback",
     }
 
     try:
-        # Make the POST request with Basic Authentication
         response = requests.post(
             token_endpoint,
             data=params,
-            auth=("client_id", "client_secret")
+            auth=(
+                "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            ),
         )
 
-        # Raise an exception for bad status codes (4xx or 5xx)
         response.raise_for_status()
-
-        # The token is in the JSON response
         token_data = response.json()
-
-        # Print the token information
         print("Access Token:", token_data.get("access_token"))
 
         access_token = token_data.get("access_token")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    try:
+        response = requests.get(user_info_endpoint, headers=headers)
+
+        response.raise_for_status()
+
+        user_data = response.json()
+
+        print("\nuser_data: ", user_data)
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred while fetching user data: {e}")
+        if response:
+            print("Response Body:", response.text)
+
+    print("\nsession_id", session["session_id"])
+
+    return ""
+
+
+# To test with seafarer
+def build_nested_structure(flat_dict):
+    result = {}
+
+    for compound_key, value in flat_dict.items():
+        # split keys like capacities[0][codes][1][remarks]
+        parts = re.findall(r"[^\[\]]+", compound_key)
+        current = result
+
+        for i, part in enumerate(parts):
+            is_last = i == len(parts) - 1
+            if part.isdigit():  # numeric → list index
+                idx = int(part)
+                if not isinstance(current, list):
+                    current_key = parts[i - 1]
+                    current[current_key] = []
+                    current = current[current_key]
+                while len(current) <= idx:
+                    current.append({})
+                current = current[idx]
+            else:
+                if is_last:
+                    current[part] = value
+                else:
+                    if part not in current:
+                        # if next part is digit, make it a list, else dict
+                        if parts[i + 1].isdigit():
+                            current[part] = []
+                        else:
+                            current[part] = {}
+                    current = current[part]
+
+    return result

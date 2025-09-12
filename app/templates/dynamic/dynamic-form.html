@@ -19,99 +19,33 @@
     <link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
     <title>Form for your EUDI Wallet</title>
 
-    <style>
-        .list-item {
-            list-style-type: none;
-        }
-    </style>
 </head>
 
-{% macro render_attribute(name, attr, is_optional=false) %}
+{# =================================================================================== #}
+{# RECURSIVE MACRO TO RENDER FORM ATTRIBUTES #}
+{# =================================================================================== #}
+{% macro render_attribute(name, attr, is_optional=false, name_prefix='') %}
 <div class="dynamic-attribute-row" data-attr-name="{{ name }}">
-    {% if attr.type == 'string' or attr.type == 'full-date' or attr.type == 'uint' or name == 'user_pseudonym' %}
+    {% set current_name = name_prefix + ('[{}]'.format(name) if name_prefix else name) %}
+
+    {# Simple Input Types (string, date, number) #}
+    {% if attr.type in ['string', 'full-date', 'uint'] or name == 'user_pseudonym' %}
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-1">{{ name | replace('_', ' ') | title }}</label>
         <input type="{{ 'date' if attr.type == 'full-date' else 'number' if attr.type == 'uint' else 'text' }}"
             class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500"
-            name="{{ name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" {% if
+            name="{{ current_name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" {% if
             attr.filled_value or name=='user_pseudonym' %}readonly{% endif %} {% if not is_optional %}required{% endif
             %} {% if attr.type=='uint' %}min="0" {% endif %}>
     </div>
 
-    {% elif attr.type == 'list' %}
-    <div class="p-4 border border-gray-200 rounded-md space-y-4 mb-4 list-container">
-        <h3 class="text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</h3>
-
-        {% if attr.attributes | length > 1 and attr.attributes[0].get('not_used_if') %}
-        <div class="flex flex-wrap gap-2 toggle-group">
-            {% for option in attr.attributes %}
-            {% if option.get('not_used_if') %}
-            <label class="toggle-option cursor-pointer">
-                <input type="radio" name="{{ name }}_option" class="sr-only peer"
-                    data-target-container="{{ name }}-{{ option.attribute }}-container">
-                <div
-                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50">
-                    {{ option.attribute | replace('_', ' ') | title }}
-                </div>
-            </label>
-            {% endif %}
-            {% endfor %}
-        </div>
-
-        {% for option in attr.attributes %}
-        <div id="{{ name }}-{{ option.attribute }}-container" class="sub-container hidden space-y-4">
-            {% if option.get('issuer_conditions', {}).get('cardinality', {}).get('max') != 1 %}
-            <button type="button" class="add-item text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-                data-parent-name="{{ name }}" data-option-name="{{ option.attribute }}"
-                data-attributes='{{ option | tojson | safe }}'>
-                + Add {{ option.attribute | replace('_', ' ') }}
-            </button>
-            {% endif %}
-
-            {# This wrapper is now correctly rendered EMPTY. The JS will add items to it. #}
-            <div class="list-items-wrapper space-y-3">
-            </div>
-
-        </div>
-        {% endfor %}
-
-        {% else %}
-        {% set option = attr.attributes[0] %}
-        {% if attr.get('cardinality', {}).get('max') != 1 %}
-        <button type="button" class="add-item text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-            data-parent-name="{{ name }}" data-attributes='{{ option | tojson | safe }}'>
-            + Add {{ name | replace('_', ' ') }}
-        </button>
-        {% endif %}
-        <div class="list-items-wrapper space-y-3">
-            <div class="list-item space-y-3 p-3 bg-gray-50 rounded-md border">
-                {% for sub_name, sub_attr in option.items() %}
-                {% if sub_attr is mapping and sub_attr.get('value_type') %}
-                <div class="space-y-1">
-                    <label class="block text-xs font-medium text-gray-600">{{ sub_name | replace('_', ' ') | title
-                        }}</label>
-                    <input type="{{ 'date' if sub_attr.value_type == 'full-date' else 'text' }}"
-                        class="w-full p-2 border border-gray-300 rounded-md" name="{{ name }}[0][{{ sub_name }}]" {% if
-                        sub_attr.get('mandatory') and not is_optional %}required{% endif %}>
-                </div>
-                {% endif %}
-                {% endfor %}
-                {% if is_optional %}
-                <button type="button"
-                    class="remove-item-list text-xs text-red-600 hover:text-red-800 pt-2">Remove</button>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
+    {# Boolean (Toggle Switch) #}
     {% elif attr.type == 'bool' %}
     <div class="mb-6 flex items-center justify-between">
         <label class="font-pf text-lg font-bold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
-        <input type="hidden" id="{{ name }}_hidden" name="{{ name }}" value="false">
+        <input type="hidden" name="{{ current_name }}" value="false">
         <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="{{ name }}" value="true" class="sr-only peer toggle-input" {% if not is_optional
-                %}required{% endif %}>
+            <input type="checkbox" value="true" class="sr-only peer toggle-input">
             <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-indigo-600"></div>
             <div
                 class="absolute top-0.5 left-[2px] w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-full">
@@ -119,77 +53,146 @@
         </label>
     </div>
 
-    {% elif attr.type == 'jpeg' %}
-    <div class="mb-4">
-        <label class="block text-lg font-semibold text-gray-800">Portrait</label>
-        <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
-        <div class="mt-2 space-y-4">
-            <div class="flex items-center gap-4">
-                <label>
-                    <input type="radio" name="{{ name }}" value="Port1" class="sr-only peer/port1" {% if not is_optional
-                        %}checked{% endif %}>
-                    <img src="{{ url_for('static', filename='image.jpeg') }}"
-                        class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port1:opacity-100">
-                </label>
-                <label>
-                    <input type="radio" name="{{ name }}" value="Port2" class="sr-only peer/port2">
-                    <img src="{{ url_for('static', filename='image2.jpeg') }}"
-                        class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port2:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port2:opacity-100">
-                </label>
+    {# List Type (Recursive & Conditional Logic) #}
+    {% elif attr.type == 'list' %}
+    <div class="p-4 border border-gray-200 rounded-md space-y-4 mb-4 list-container" data-list-name="{{ name }}">
+        <h3 class="text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</h3>
+
+        <div class="list-items-wrapper space-y-4">
+
+            {# UNTOUCHED: Special handling for Seafarer 'capacities' (mdoc only). #}
+            {% if name == 'capacities' %}
+            <div class="list-item p-4 border rounded-md bg-gray-50 shadow-sm relative">
+                {{ render_attribute('capacity_code', attr.attributes.capacity_code, is_optional,
+                name_prefix=current_name + '[0]') }}
+                {{ render_attribute('codes', attr.attributes.codes, is_optional, name_prefix=current_name + '[0]') }}
             </div>
-            <div>
-                <label for="fileInputTrigger" class="cursor-pointer">
-                    <input type="radio" name="{{ name }}" value="Port3" id="Option3" class="sr-only peer/port3">
-                    <div
-                        class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/port3:border-indigo-600">
-                        <input type="file" name="{{ name }}" id="fileInput" class="hidden" accept="image/jpeg" capture>
-                        <span>Upload a file</span>
-                        <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x433</p>
-                    </div>
-                </label>
-                <div id="preview" class="mt-2"></div>
+
+            {# Logic for all other list types #}
+            {% else %}
+            <div class="list-item border-l-4 border-gray-300 pl-4">
+
+                {% if name == 'places_of_work' %}
+                {# Prepare a unified 'options' list from either dict (mdoc) or list (sd-jwt) structure #}
+                {% if attr.attributes is mapping %}
+                {% set options = attr.attributes.items() %}
+                {% else %}
+                {% set options = [] %}
+                {% for item in attr.attributes %}{% for key, value in item.items() %}{% set _ = options.append((key,
+                value)) %}{% endfor %}{% endfor %}
+                {% endif %}
+
+                <div class="flex flex-wrap gap-2 toggle-group mb-4">
+                    {% for option_name, option_attr in options %}
+                    <label class="toggle-option cursor-pointer">
+                        <input type="radio" name="{{ current_name }}_option" value="{{option_name}}"
+                            class="sr-only peer" data-option-name="{{option_name}}" {% if loop.first %}checked{% endif
+                            %}>
+                        <div
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50">
+                            {{ option_name | replace('_', ' ') | title }}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for option_name, option_attr in options %}
+                <div class="sub-container {% if not loop.first %}hidden{% endif %}" data-option-name="{{option_name}}">
+                    {{ render_attribute(option_name, option_attr, is_optional, name_prefix=current_name + '[0]') }}
+                </div>
+                {% endfor %}
+                {% else %}
+                {# Fallback for other non-choice lists. This handles both structures. #}
+                {% if attr.attributes is mapping %}
+                {% for sub_name, sub_attr in attr.attributes.items() %}
+                {{ render_attribute(sub_name, sub_attr, is_optional, name_prefix=current_name + '[0]') }}
+                {% endfor %}
+                {% elif attr.attributes is sequence %}
+                {% for item in attr.attributes %}
+                {% for sub_name, sub_attr in item.items() %}
+                {{ render_attribute(sub_name, sub_attr, is_optional, name_prefix=current_name + '[0]') }}
+                {% endfor %}
+                {% endfor %}
+                {% endif %}
+                {% endif %}
             </div>
+            {% endif %}
         </div>
+
+        {# Add Item Button #}
+        {% if attr.get('cardinality', {}).get('max') != 1 %}
+        <button type="button" class="add-item text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+            data-parent-name="{{ name }}" data-name-prefix="{{ current_name }}"
+            data-attributes='{{ attr.attributes | tojson | safe }}'>
+            + Add {{ name | replace('_', ' ') | title }}
+        </button>
+        {% endif %}
     </div>
 
-    {% elif attr.type == 'driving_privileges' %}
-    <div class="p-4 border border-gray-200 rounded-md space-y-4 mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Driving Privileges</h3>
-        <div id="AddCategory">
-            <div class="form-group removeclass1 space-y-2">
-                <label>Category</label>
-                <select name="Category1" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option>AM</option>
-                    <option>A1</option>
-                    <option>A2</option>
-                    <option>A</option>
-                    <option>B1</option>
-                    <option>B</option>
-                    <option>C1</option>
-                    <option>C</option>
-                    <option>D1</option>
-                    <option>D</option>
-                    <option>BE</option>
-                    <option>C1E</option>
-                    <option>CE</option>
-                    <option>D1E</option>
-                    <option>DE</option>
-                </select>
-                <div>Issue Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md"
-                        name="IssueDate1" {% if not is_optional %}required{% endif %}></div>
-                <div>Expiry Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md"
-                        name="ExpiryDate1" {% if not is_optional %}required{% endif %}></div>
+    {# Image Upload #}
+    {% elif attr.type == 'jpeg' %}
+    {% if name == 'signature_usual_mark' or name == 'signature_usual_mark_issuing_officer' %}
+        <div class="mb-4">
+            <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
+            <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
+            <div class="mt-2 space-y-4">
+                <div class="flex items-center gap-4">
+                    <label>
+                        <input type="radio" name="{{ name }}" value="Sig1" class="sr-only peer/sig1" {% if not is_optional %}checked{% endif %}>
+                        <img src="{{ url_for('static', filename='signature1.jpg') }}"
+                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/sig1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/sig1:opacity-100">
+                    </label>
+                </div>
+                <div>
+                    <label for="fileInput-{{name}}" class="cursor-pointer">
+                        <input type="radio" name="{{ name }}" value="SigUpload" id="OptionSigUpload-{{name}}"
+                            class="sr-only peer/sigupload">
+                        <div
+                            class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/sigupload:border-indigo-600">
+                            <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
+                                accept="image/jpeg" capture>
+                            <span>Upload a signature file</span>
+                            <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x100</p>
+                        </div>
+                    </label>
+                    <div id="preview-{{name}}" class="mt-2"></div>
+                </div>
             </div>
         </div>
-        <button type="button" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-            onclick="addDrivingCategory();">+ Add Category</button>
-        <div id="hidden_elems">
-            {% for elem, value in hidden_elems %}
-            <input type="hidden" value="{{ value }}" name="{{ elem }}">
-            {% endfor %}
+    {% else %}
+        <div class="mb-4">
+            <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
+            <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
+            <div class="mt-2 space-y-4">
+                <div class="flex items-center gap-4">
+                    <label>
+                        <input type="radio" name="{{ name }}" value="Port1" class="sr-only peer/port1" {% if not is_optional %}checked{% endif %}>
+                        <img src="{{ url_for('static', filename='image.jpeg') }}"
+                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port1:opacity-100">
+                    </label>
+                    <label>
+                        <input type="radio" name="{{ name }}" value="Port2" class="sr-only peer/port2">
+                        <img src="{{ url_for('static', filename='image2.jpeg') }}"
+                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port2:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port2:opacity-100">
+                    </label>
+                </div>
+                <div>
+                    <label for="fileInput-{{name}}" class="cursor-pointer">
+                        <input type="radio" name="{{ name }}" value="PortUpload" id="OptionPortUpload-{{name}}"
+                            class="sr-only peer/portupload">
+                        <div
+                            class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/portupload:border-indigo-600">
+                            <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
+                                accept="image/jpeg" capture>
+                            <span>Upload a file</span>
+                            <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x433</p>
+                        </div>
+                    </label>
+                    <div id="preview-{{name}}" class="mt-2"></div>
+                </div>
+            </div>
         </div>
-    </div>
     {% endif %}
+{% endif %}
 </div>
 {% endmacro %}
 
@@ -208,8 +211,6 @@
 
             <form id="selectCountryForm" method="post" class="flex flex-col h-full" action="{{redirect_url}}"
                 onsubmit="return submitValidation()" enctype="multipart/form-data">
-                <p class="font-pf font-bold">Define the attribute(s) status:</p>
-
                 <div class="mt-10">
                     <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-6">Mandatory Information</h2>
                     {% for name, attr in mandatory_attributes.items() %}
@@ -217,9 +218,7 @@
                     {% endfor %}
                 </div>
 
-                <div id="visible-optional-attributes" class="mt-4">
-                    {# Optional attributes will be moved here by JS when added #}
-                </div>
+                <div id="visible-optional-attributes" class="mt-4"></div>
 
                 <div id="add-attributes-button-container" class="my-6">
                     <button type="button" id="add-optional-btn"
@@ -230,7 +229,7 @@
 
                 <div class="mt-auto py-10">
                     <div class="flex flex-col gap-1 items-center">
-                        <button type="submit" onclick="addNumberCategories()" name="proceed"
+                        <button type="submit" name="proceed"
                             class="w-full bg-blue-900 text-white font-semibold py-3 rounded-lg shadow-md hover:bg-blue-800 transition-colors duration-200">
                             Confirm
                         </button>
@@ -254,22 +253,116 @@
     <div id="attributes-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col" style="max-height: 90vh;">
             <div class="p-6 border-b flex justify-between items-center">
-                <h2 class="text-2xl font-pf font-bold text-gray-800">Additional Attributes</h2>
-                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl">×</button>
+                <h2 class="text-2xl font-pf font-bold text-gray-800">Additional Attributes</h2><button
+                    id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
             <div class="p-6 flex-grow overflow-y-auto space-y-4" id="modal-checkbox-list"></div>
             <div class="p-6 border-t bg-gray-50 rounded-b-lg">
-                <div class="flex flex-col gap-2">
-                    <button id="modal-add-btn" class="w-full bg-blue-900 text-white font-semibold py-3 rounded-lg">Add
-                        Attributes</button>
-                    <button id="modal-cancel-btn" class="w-full text-gray-600 font-semibold py-2">Cancel</button>
-                </div>
+                <div class="flex flex-col gap-2"><button id="modal-add-btn"
+                        class="w-full bg-blue-900 text-white font-semibold py-3 rounded-lg">Add
+                        Attributes</button><button id="modal-cancel-btn"
+                        class="w-full text-gray-600 font-semibold py-2">Cancel</button></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Helper function to generate HTML for a new list item recursively.
+        // It clones the first item from a hidden template, updates indices, and returns it.
+        function cloneAndPrepareListItem(templateNode, newIndex, namePrefix) {
+            const clone = templateNode.cloneNode(true);
+            clone.querySelectorAll('input, select').forEach(input => {
+                const oldName = input.getAttribute('name');
+                if (oldName) {
+                    // This regex replaces the first number in brackets e.g., name[0] -> name[1]
+                    const newName = oldName.replace(/\[\d+\]/, `[${newIndex}]`);
+                    input.setAttribute('name', newName);
+                }
+                // Reset values for the new item
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+            return clone;
+        }
+
+
         document.addEventListener('DOMContentLoaded', function () {
+            // =======================================================
+            // Main delegated event listener for all dynamic actions
+            // =======================================================
+            document.addEventListener('click', function (event) {
+
+                // --- Handle Adding a new item to a list ---
+                if (event.target.classList.contains('add-item')) {
+                    const button = event.target;
+                    const listContainer = button.closest('.list-container');
+                    const wrapper = listContainer.querySelector('.list-items-wrapper');
+                    const newIndex = wrapper.querySelectorAll(':scope > .list-item').length;
+
+                    const templateItem = wrapper.querySelector('.list-item');
+                    if (!templateItem) return;
+
+                    const newItem = cloneAndPrepareListItem(templateItem, newIndex, button.dataset.namePrefix);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    if (listContainer.dataset.listName === 'capacities') {
+                        removeBtn.className = 'remove-list-item text-xs text-red-500 hover:text-red-700 font-semibold absolute top-2 right-2';
+                        removeBtn.innerHTML = '&times; Remove Capacity';
+                    } else {
+                        removeBtn.className = 'remove-list-item text-xs text-red-500 hover:text-red-700 mt-2 font-semibold';
+                        removeBtn.textContent = 'Remove';
+                    }
+
+                    newItem.appendChild(removeBtn);
+
+                    wrapper.appendChild(newItem);
+                }
+
+                // --- Handle Removing an item from a list ---
+                if (event.target.classList.contains('remove-list-item')) {
+                    event.target.closest('.list-item').remove();
+                }
+
+                // --- Handle toggling choices like 'place_of_work' ---
+                const toggleOption = event.target.closest('.toggle-option input[type="radio"]');
+                if (toggleOption) {
+                    const container = toggleOption.closest('.list-item');
+                    const optionName = toggleOption.dataset.optionName;
+
+                    container.querySelectorAll('.sub-container').forEach(sc => {
+                        const isSelected = sc.dataset.optionName === optionName;
+                        // Toggle visibility
+                        sc.classList.toggle('hidden', !isSelected);
+                        // Enable/disable inputs to ensure only selected data is submitted
+                        sc.querySelectorAll('input, select, button').forEach(el => el.disabled = !isSelected);
+                    });
+                }
+
+                const toggleInput = event.target.closest('.toggle-input');
+                if (toggleInput) {
+                    // This finds the hidden input that came just before the label for the toggle.
+                    const hiddenInput = toggleInput.closest('label').previousElementSibling;
+                    if (hiddenInput && hiddenInput.type === 'hidden') {
+                        hiddenInput.value = toggleInput.checked ? 'true' : 'false';
+                    }
+                }
+            });
+
+            // Initialize choice-based sections on page load
+            document.querySelectorAll('.toggle-group').forEach(group => {
+                const checkedRadio = group.querySelector('input[type="radio"]:checked');
+                if (checkedRadio) {
+                    checkedRadio.dispatchEvent(new Event('click', { bubbles: true }));
+                }
+            });
+
+            // =======================================================
+            // Optional Attributes Modal Logic
+            // =======================================================
             const modal = document.getElementById('attributes-modal');
             const openModalBtn = document.getElementById('add-optional-btn');
             const closeModalBtn = document.getElementById('modal-close-btn');
@@ -279,197 +372,142 @@
             const hiddenStorage = document.getElementById('hidden-attributes-storage');
             const insertionPoint = document.getElementById('visible-optional-attributes');
 
-            openModalBtn.addEventListener('click', function () {
-                checkboxListContainer.innerHTML = '';
-                hiddenStorage.querySelectorAll('.dynamic-attribute-row').forEach(block => {
-                    const name = block.dataset.attrName;
-                    if (name) {
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', function () {
+                    checkboxListContainer.innerHTML = '';
+                    hiddenStorage.querySelectorAll('.dynamic-attribute-row').forEach(block => {
+                        const name = block.dataset.attrName;
+                        if (!name) return;
                         const labelText = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                         const label = document.createElement('label');
                         label.className = 'flex items-center cursor-pointer p-2 rounded-md hover:bg-gray-100';
                         label.innerHTML = `<input type="checkbox" class="h-5 w-5 text-indigo-600 border-gray-400 rounded" value="${name}"><span class="ml-3 text-lg text-gray-800">${labelText}</span>`;
                         checkboxListContainer.appendChild(label);
-                    }
+                    });
+                    modal.classList.remove('hidden');
                 });
-                modal.classList.remove('hidden');
-            });
+            }
 
-            function closeModal() { modal.classList.add('hidden'); }
-            closeModalBtn.addEventListener('click', closeModal);
-            cancelModalBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            const closeModal = () => modal.classList.add('hidden');
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+            if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
+            if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-            addAttributesBtn.addEventListener('click', function () {
-                checkboxListContainer.querySelectorAll('input:checked').forEach(checkbox => {
-                    const name = checkbox.value;
-                    const blockToMove = hiddenStorage.querySelector(`[data-attr-name="${name}"]`);
-                    if (blockToMove) {
-                        const removeBtn = document.createElement('button');
-                        removeBtn.type = 'button';
-                        removeBtn.className = 'remove-btn text-xs text-red-500 hover:text-red-700 mt-2';
-                        removeBtn.textContent = 'Remove';
-                        blockToMove.appendChild(removeBtn);
-                        insertionPoint.appendChild(blockToMove);
-                    }
+            if (addAttributesBtn) {
+                addAttributesBtn.addEventListener('click', function () {
+                    checkboxListContainer.querySelectorAll('input:checked').forEach(checkbox => {
+                        const name = checkbox.value;
+                        const blockToMove = hiddenStorage.querySelector(`[data-attr-name="${name}"]`);
+                        if (blockToMove) {
+                            const removeBtn = document.createElement('button');
+                            removeBtn.type = 'button';
+                            removeBtn.className = 'remove-optional-btn text-xs text-red-500 hover:text-red-700 mt-2 font-semibold';
+                            removeBtn.textContent = 'Remove Attribute';
+                            blockToMove.appendChild(removeBtn);
+                            insertionPoint.appendChild(blockToMove);
+                        }
+                    });
+                    closeModal();
                 });
-                closeModal();
-            });
+            }
 
-            document.addEventListener("click", function (event) {
-                if (event.target.classList.contains('remove-btn')) {
+            // --- Handle removing an optional attribute block ---
+            document.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-optional-btn')) {
                     const row = event.target.closest('.dynamic-attribute-row');
                     if (row) {
-                        row.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-                        row.querySelectorAll('input:not([type="checkbox"])').forEach(i => i.value = '');
-                        row.querySelectorAll('input[type="hidden"]').forEach(h => h.value = 'false');
+                        row.querySelectorAll('input, select').forEach(input => {
+                            if (input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+                            else input.value = '';
+                        });
                         hiddenStorage.appendChild(row);
                         event.target.remove();
                     }
                 }
-
-                if (event.target.classList.contains("add-item")) {
-                    const button = event.target;
-                    const attributes = JSON.parse(button.dataset.attributes);
-                    const parentName = button.dataset.parentName;
-                    const optionName = button.dataset.optionName;
-                    let wrapper = button.closest('.sub-container, .list-container').querySelector('.list-items-wrapper');
-                    if (!wrapper) return;
-                    const currentIndex = wrapper.querySelectorAll('.list-item').length;
-
-                    if (currentIndex > 0) {
-                        const separator = document.createElement('hr');
-                        separator.className = 'my-4 border-t border-gray-200';
-                        wrapper.appendChild(separator);
-                    }
-
-                    const newItem = document.createElement("div");
-                    newItem.className = "list-item space-y-3 p-3 bg-gray-50 rounded-md border";
-                    let innerHTML = '';
-                    let fieldsToRender = attributes;
-
-                    if (attributes.issuer_conditions) {
-                        const nestedKey = Object.keys(attributes.issuer_conditions).find(k => k.endsWith('_attributes'));
-                        if (nestedKey) fieldsToRender = attributes.issuer_conditions[nestedKey];
-                    } else if (attributes.attributes && attributes.attributes[0]) {
-                        fieldsToRender = attributes.attributes[0];
-                    }
-
-                    for (const [key, val] of Object.entries(fieldsToRender)) {
-                        if (typeof val !== 'object' || !val.value_type) continue;
-                        const inputType = val.value_type === "full-date" ? "date" : "text";
-                        const inputName = optionName ? `${parentName}[${optionName}][${currentIndex}][${key}]` : `${parentName}[${currentIndex}][${key}]`;
-                        const labelText = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                        innerHTML += `<div class="space-y-1"><label class="block text-xs font-medium text-gray-600">${labelText}</label><input type="${inputType}" class="w-full p-2 border border-gray-300 rounded-md" name="${inputName}" ${val.mandatory ? 'required' : ''}></div>`;
-                    }
-                    innerHTML += `<button type="button" class="remove-item-list text-xs text-red-600 hover:text-red-800 pt-2">Remove</button>`;
-                    newItem.innerHTML = innerHTML;
-                    wrapper.appendChild(newItem);
-                }
-
-                if (event.target.classList.contains("remove-item-list")) {
-                    const listItem = event.target.closest(".list-item");
-                    if (listItem) {
-                        const previousSibling = listItem.previousElementSibling;
-                        if (previousSibling && previousSibling.tagName === 'HR') {
-                            previousSibling.remove();
-                        }
-                        listItem.remove();
-                    }
-                }
-
-                if (event.target.closest('.toggle-option')) {
-                    const button = event.target.closest('.toggle-option');
-                    const listContainer = button.closest('.list-container');
-                    if (!listContainer) return;
-                    const targetContainerId = button.querySelector('input').dataset.targetContainer;
-                    listContainer.querySelectorAll('.sub-container').forEach(sc => sc.classList.add('hidden'));
-                    const targetContainer = document.getElementById(targetContainerId);
-                    if (targetContainer) targetContainer.classList.remove('hidden');
-                }
-
-                if (event.target.closest('label[for="fileInputTrigger"]')) {
-                    document.getElementById('fileInput').click();
-                }
-
-                const toggleInput = event.target.closest('.toggle-input');
-                if (toggleInput) {
-                    const hiddenInput = toggleInput.closest('.dynamic-attribute-row').querySelector('input[type="hidden"]');
-                    if (hiddenInput) hiddenInput.value = toggleInput.checked ? 'true' : 'false';
-                }
             });
 
-            document.querySelectorAll(".toggle-group").forEach(group => {
-                const firstToggle = group.querySelector(".toggle-option input");
-                if (firstToggle) {
-                    firstToggle.checked = true;
-                    firstToggle.closest('label').dispatchEvent(new Event('click', { bubbles: true }));
+            // =======================================================
+            // Image Upload and Preview Logic
+            // =======================================================
+            document.body.addEventListener('change', function (event) {
+                if (event.target.classList.contains('file-input')) {
+                    const fileInput = event.target;
+                    const file = fileInput.files[0];
+                    const container = fileInput.closest('.dynamic-attribute-row');
+                    
+                    // Find the radio button associated with the file upload for this specific field.
+                    // The id of the radio button is "OptionPortUpload-{{name}}" or "OptionSigUpload-{{name}}".
+                    // We can find it by looking for a radio button with the same "name" attribute as the file input.
+                    const uploadRadio = container.querySelector(`input[type="radio"][name="${fileInput.name}"][value$="Upload"]`);
+
+                    const previewContainer = container.querySelector('[id^="preview-"]');
+
+                    if (file && uploadRadio) {
+                        uploadRadio.checked = true;
+                        if (previewContainer) {
+                            previewContainer.innerHTML = '';
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'w-24 h-auto rounded-lg mt-2 object-cover';
+                                previewContainer.appendChild(img);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    } else if (previewContainer) {
+                        previewContainer.innerHTML = '';
+                    }
                 }
             });
         });
 
-        let categoryCount = 1;
+        // =======================================================
+        // Special Case: Driving Privileges (Legacy JS)
+        // =======================================================
         function addDrivingCategory() {
-            categoryCount++;
             const container = document.getElementById('AddCategory');
+            const newIndex = container.children.length;
             const newCategoryDiv = document.createElement("div");
-            newCategoryDiv.className = `form-group removeclass${categoryCount} space-y-2 mt-4`;
+            newCategoryDiv.className = `removeclass${newIndex + 1} space-y-2 mt-4 border p-3 rounded-md bg-gray-50`;
             newCategoryDiv.innerHTML = `
-                <label>Category</label>
-                <select name="Category${categoryCount}" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option>AM</option><option>A1</option><option>A2</option><option>A</option><option>B1</option><option>B</option>
-                    <option>C1</option><option>C</option><option>D1</option><option>D</option><option>BE</option><option>C1E</option>
-                    <option>CE</option><option>D1E</option><option>DE</option>
-                </select>
-                <div>Issue Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="IssueDate${categoryCount}" required></div>
-                <div>Expiry Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="ExpiryDate${categoryCount}" required></div>
-                <button type="button" class="text-xs text-red-600 hover:text-red-800" onclick="this.parentElement.remove();">Remove Category</button>
-            `;
+            <label>Category</label>
+            <select name="driving_privileges[${newIndex}][vehicle_category_code]" class="w-full p-2 border border-gray-300 rounded-md">
+                <option>AM</option><option>A1</option><option>A2</option><option>A</option><option>B1</option><option>B</option><option>C1</option><option>C</option><option>D1</option><option>D</option><option>BE</option><option>C1E</option><option>CE</option><option>D1E</option><option>DE</option>
+            </select>
+            <div>Issue Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="driving_privileges[${newIndex}][issue_date]" required></div>
+            <div>Expiry Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="driving_privileges[${newIndex}][expiry_date]" required></div>
+            <button type="button" class="text-xs text-red-600 hover:text-red-800 font-semibold" onclick="this.parentElement.remove();">Remove Category</button>
+        `;
             container.appendChild(newCategoryDiv);
         }
 
-        function addNumberCategories() {
-            const container = document.getElementById('hidden_elems');
-            if (!container) return;
-            const existingCount = container.querySelector('input[name="NumberCategories"]');
-            if (existingCount) { existingCount.parentElement.remove(); }
-            const div = document.createElement("div");
-            div.innerHTML = `<input type="hidden" value="${categoryCount}" name="NumberCategories">`;
-            container.appendChild(div);
-        }
-
+        // =======================================================
+        // Form Submission Validation
+        // =======================================================
         function submitValidation() {
-            const optionalAttributes = JSON.parse('{{ optional_attributes | tojson | safe }}');
-            if (!optionalAttributes || !optionalAttributes.at_least_one_of) { return validateImage(); }
-            const at_least_one_of = optionalAttributes["at_least_one_of"];
-            if (at_least_one_of && at_least_one_of.length > 0) {
-                const isAnyFieldFilled = at_least_one_of.some(field => {
-                    let input = document.querySelector(`input[name="${field}"]`);
-                    return input && input.value.trim() !== "";
-                });
-                if (!isAnyFieldFilled) {
-                    let missingFieldsMessage = at_least_one_of.map(field => field.replace(/_/g, " ").replace(/\b\w/g, char => char.toUpperCase())).join(", ");
-                    alert("At least one of the following fields must be filled: " + missingFieldsMessage);
-                    return false;
-                }
-            }
-            return validateImage();
-        }
+            const fileInputs = document.querySelectorAll('.file-input');
+            for (const fileInput of fileInputs) {
+                const container = fileInput.closest('.dynamic-attribute-row');
+                
+                // Find the radio button associated with this file input.
+                // It must have the same 'name' as the file input and a value ending in 'Upload'.
+                const radio = container.querySelector(`input[type="radio"][name="${fileInput.name}"][value$="Upload"]`);
 
-        function validateImage() {
-            const radioUpload = document.getElementById('Option3');
-            if (!radioUpload || !radioUpload.checked) return true;
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please select a file to upload or choose another portrait option.');
-                return false;
-            }
-            if (file.type !== 'image/jpeg') {
-                alert('Uploaded file must be a JPEG image.');
-                return false;
+                if (radio && radio.checked) {
+                    if (!fileInput.files[0]) {
+                        const fieldName = fileInput.name.replace('_', ' ').toLowerCase();
+                        alert(`Please select a file to upload or choose another option for ${fieldName}.`);
+                        return false;
+                    }
+                }
             }
             return true;
         }
+
+        // Make functions globally accessible for inline event handlers
+        window.addDrivingCategory = addDrivingCategory;
+        window.submitValidation = submitValidation;
     </script>
 </body>
 

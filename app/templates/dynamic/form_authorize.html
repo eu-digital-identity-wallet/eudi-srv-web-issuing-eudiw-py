@@ -22,34 +22,60 @@
 
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/promiz/promiz-1.0.6.js') }}"
         charset="UTF-8"></script>
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/sha3/sha3_en_9.7.1.20.1679559965505.js" integrity="sha256-CtgtQUShEl8dHOb+FeLo3tfArvxek4PGiS6UGczk5OY= sha384-DUt2v30t+xTbxAyvcy9BpswNEUrWJT8Fl1P1Fc+ScGgcUzrwtm2idVOj35m6NisW sha512-HrljBBDmVHa8MfWcgNifCVutUrKi/3eutVkadMdDUAP3dcraj6n1u2mx5J+UkkRFwYnEoCpFabG46Jxp8EdDnQ==" charset="UTF-8"></script>
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/static-validator/static-validator_en_9.7.1.20.1679559965505.js" integrity="sha256-hBVKKp1NO+Jxso6WVWYJzYcEyGudrlIJwUpEDp1Zf5E= sha384-my8RgF2Pk8SwCkcpI3HRVX8PX5QyMv+tlmLwVhekljHUBgLVcNe8PxqjYnn9lhUw sha512-VvLFAJWMDPOVXf6HAWnhROxaXLFB0LZWzeglGtlliYHLLEQzrV3N9ixrCfPg3LOrfxtyifR4xdI9+QL2QxRoKw==" charset="UTF-8"></script>
--->
 
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/screen/screen_en_9.7.1.20.1679559965505.js" integrity="sha256-Bt/KIz2P8ILyeohGr85rPLuC6V7lURI5hYwMKIDc2zw= sha384-Mm+L2nENQ0OpPq7RNoEtQVUpvJPZF+lp01OK3yDSCZBHNQFEMT+buBppzOCO2FVk sha512-OdapdrhB9SEwj64seVqqRD2sJWGAC02OvoKuc8nev/DYqy10gviD21XH+wsZcwKI5yVUpcUa215v7PBkJUJ40g==" charset="UTF-8" defer="true"></script>
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/contrast/contrast_en_9.7.1.20.1679559965505.js" integrity="sha256-s379ROUOzGyyK1H8neCEIRKo3wQnabmtXqp1Moh0Vo8= sha384-O7XOTZyM/toKPrGBJBI379zpo4nUxnJT3eUq1dgPwDkuzeJ3N8alAprhuAD3UKhT sha512-nsaRCL+FvdZ0S0dy8btbepr17GnX//XjBpJfr/UYDKpwS2tRUaYs4u8vh8RikLSgKudgRt39EeBuKvkWaCoGPA==" charset="UTF-8" defer="true"></script>
-    -->
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/html5shiv/html5shiv-3.7.3.js') }}"
         charset="UTF-8"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='scripts/respond/respond-1.4.2.js') }}"
         charset="UTF-8"></script>
     <meta name="referrer" content="no-referrer">
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/framekiller/framekiller_en_9.7.1.20.1679559965505.js" integrity="sha256-4eAcfcjcYggBc15lar0Ti3diGjQ2qnhfNeAQo2n7f+g= sha384-OOLLE3ikdVyR66gGCHsB/hGYstmmpUtONQOe/U8tP/PRXocqpI43ariFDGzKFcIG sha512-/7sPyYaEFDxkPyGQzkLKHSi/RSXBAbR5BjZLgUtkaRx8Qk4SROLIH96d+7bbkpU61osJDdB9gyjtilpPIFnF6w==" charset="UTF-8"></script>
-    -->
-    <!--
-    <script type="text/javascript" src="https://webgate.ec.europa.eu/cas/scripts/locval/locval_en_9.7.1.20.1679559965505.js" integrity="sha256-fGdBvjTPjOPZBmgDo8xMKgZUwmXXCzYZ+BbHErfhc/Q= sha384-Y9eAdYjT/TZ0VPUxw3Ex/TVSZZzPsV1mRoKD0BTkrQn0L615z24j26O2CZdT1Xl+ sha512-T9HoOOy1OkJ0l1GWqvT2RAR9frKd4zImDm1uyHxjmB/nxNBhmdjEhR9MckiWiNv2/UrFrMZJwSMB4Po/ExbFOw==" charset="UTF-8"></script>
--->
 
     <title>Confirm data from your EUDI Wallet</title>
 </head>
 
+{# ===================================================================== #}
+{# recursive macro for nested attributes #}
+{# ===================================================================== #}
+{% macro render_attribute_display(name, value) %}
+{# It's a list of items (like capacities, codes, driving_privileges) #}
+{% if value is sequence and value is not string %}
+<div class="attribute-block">
+    <label class="font-pf block font-bold text-custom-gray">{{ name | replace('_', ' ') | title }}</label>
+    <div class="mt-2 pl-4 border-l-2 border-gray-400 space-y-3">
+        {% for item in value %}
+        {# For each item in the list, create a slightly indented block #}
+        <div class="bg-white/60 p-3 rounded-md">
+            {% for sub_name, sub_value in item.items() %}
+            {# Recursively call the macro to display the item's contents #}
+            {{ render_attribute_display(sub_name, sub_value) }}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{# It's an image #}
+{% elif name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image","signature_usual_mark", "picture"] %}
+<div class="attribute-block">
+    <label class="block text-base font-bold text-custom-gray">{{ name | title }}</label>
+    {% if "signature" in name %}
+        <img class="mt-1 rounded-lg shadow-md w-48 h-auto object-cover" src="data:image/jpeg;base64,{{ value }}">
+    {% else %}
+        <img class="mt-1 rounded-lg shadow-md w-32 h-32 object-cover" src="data:image/jpeg;base64,{{ value }}">
+    {% endif %}
+</div>
+{# It's a simple value (string, number, etc.) #}
+{% else %}
+<div class="attribute-block">
+    <label class="font-pf block font-bold text-custom-gray">{{ name | replace('_', ' ') | title }}</label>
+    <p class="font-pf text-base text-custom-gray mt-1">{{ value }}</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+
 <body class="bg-white">
     <div role="main" class="mx-auto w-full max-w-screen-md p-6 flex flex-col min-h-screen">
 
-        <!-- Header Section -->
+        <!-- Header Section  -->
         <div class="space-y-2 mb-8">
             <p class="text-sm font-semibold uppercase tracking-wider text-gray-500">Test Issuer</p>
             <h1 class="font-pf text-4xl font-bold text-gray-800">Review & Send</h1>
@@ -61,42 +87,22 @@
         <!-- The Form -->
         <form id="authForm" method="post" action="{{redirect_url}}" class="flex-grow flex flex-col">
 
-            <!-- This div grows to push the buttons down -->
             <div class="flex-grow">
                 <!-- The Inset Data Card -->
                 <div class="bg-gray-200 rounded-xl p-6">
                     <div class="space-y-5">
 
-                        <!-- Loop through the main categories of data -->
+                        {# ===================================================================== #}
+                        {# It now uses the macro to correctly render all data structures. #}
+                        {# ===================================================================== #}
                         {% for category_name, attributes in presentation_data.items() %}
-                        <!-- Loop through each individual attribute inside the category -->
+                        {# Display a title for each credential type #}
+                        <h2 class="text-2xl font-pf font-bold text-gray-900 pb-2 mb-3 border-b border-gray-400/50">
+                            {{ category_name }}
+                        </h2>
+                        {# Loop through attributes and let the macro handle the display logic #}
                         {% for name, value in attributes.items() %}
-
-                        {% if name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image", "picture"] %}
-    <div class="attribute-block">
-        <label class="block text-base font-bold text-custom-gray">{{ name | title }}</label>
-        <img class="mt-1 rounded-lg shadow-md w-32 h-32 object-cover"
-            src="data:image/jpeg;base64,{{ value }}">
-    </div>
-                        {%elif name == "driving_privileges" %}
-                                                    <h5 >{{name}}</h5>
-                                                    <div class="form-group" >
-                                                        {% for i_value in value %}
-                                                            <div class="col-md-12 col-xs-12" style="display:inline; background-color: rgb(213, 213, 213); margin-bottom: 5%; outline: auto;">
-                                                                {% for name , value in i_value.items() %} 
-                                                                    <label class="control-label" for="inputError1">{{name}}</label>
-                                                                    <input type="text" class="form-control" placeholder="{{ value }}" aria-label="{{ name }}" name="{{ name }}" value="{{value}}" readonly  >
-                                                                {% endfor %}
-                                                            </div>
-                                                        {% endfor %}
-                                                    </div> 
-                        {% else %}
-                        <div class="attribute-block">
-                            <label class="font-pf block font-bold text-custom-gray">{{ name | replace('_', ' ') | title
-                                }}</label>
-                            <p class="font-pf text-base text-custom-gray mt-1">{{ value }}</p>
-                        </div>
-                        {% endif %}
+                        {{ render_attribute_display(name, value) }}
                         {% endfor %}
                         {% endfor %}
 
@@ -104,10 +110,10 @@
                 </div>
             </div>
 
-            <!-- Hidden user_id input, must be inside the form -->
+            <!-- Hidden user_id input-->
             <input type="hidden" value="{{ user_id }}" name="user_id">
 
-            <!-- Action Buttons (pushed to the bottom) -->
+            <!-- Action Buttons -->
             <div class="mt-auto pt-8">
                 <div class="flex flex-col gap-2 items-center">
                     <button type="submit" name="proceed"

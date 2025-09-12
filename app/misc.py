@@ -56,6 +56,66 @@ def create_dict(dict, item):
     return d
 
 
+def _process_nested_attributes(conditions, parent_value_type=None):
+    # Recursively processes nested attribute definitions.
+    # It now uses the parent's value_type to find the correct sub-attribute dictionary.
+
+    processed_attrs = {}
+
+    # dynamically looks for a key that matches the parent's value_type (e.g., 'places', 'nationalities')
+    # or falls back to searching for a key ending in '_attributes'.
+    attr_key = (
+        parent_value_type
+        if parent_value_type in conditions
+        else next((k for k in conditions if k.endswith("_attributes")), None)
+    )
+
+    if not attr_key:
+        return {}
+
+    attributes_to_process = conditions.get(attr_key, {})
+
+    if isinstance(attributes_to_process, list):
+        # This handles structures like PDA1's places_of_work
+        processed_list = []
+        for item in attributes_to_process:
+            if "attribute" in item:
+                item_attrs = {k: v for k, v in item.items() if k != "attribute"}
+                processed_list.append(
+                    {
+                        "attribute": item["attribute"],
+                        "attributes": _process_nested_attributes(
+                            item_attrs, item.get("value_type")
+                        ),
+                    }
+                )
+        return processed_list
+
+    # This handles structures like pid_mdoc's place_of_birth and nationality
+    for key, value in attributes_to_process.items():
+        if isinstance(value, dict) and "value_type" in value:
+            processed_attrs[key] = {
+                "type": value["value_type"],
+                "mandatory": value.get("mandatory", False),
+                "source": value.get("source"),
+                "filled_value": None,
+            }
+            if "issuer_conditions" in value:
+                processed_attrs[key]["type"] = "list"
+                processed_attrs[key]["cardinality"] = value["issuer_conditions"].get(
+                    "cardinality"
+                )
+                # Recursive step for the next level of nesting
+                processed_attrs[key]["attributes"] = _process_nested_attributes(
+                    value["issuer_conditions"], value["value_type"]
+                )
+                if "not_used_if" in value["issuer_conditions"]:
+                    processed_attrs[key]["not_used_if"] = value["issuer_conditions"][
+                        "not_used_if"
+                    ]
+    return processed_attrs
+
+
 def urlsafe_b64encode_nopad(data: bytes) -> str:
     """
     Encodes bytes using URL-safe base64 and removes padding.
@@ -142,8 +202,10 @@ def getAttributesForm(credentials_requested):
         if format == "mso_mdoc":
             namescapes = getNamespaces(credentialsSupported[request]["claims"])
             for namescape in namescapes:
-                attributes_req = getMandatoryAttributes(
-                    credentialsSupported[request]["claims"], namescape
+                attributes_req.update(
+                    getMandatoryAttributes(
+                        credentialsSupported[request]["claims"], namescape
+                    )
                 )
 
         elif format == "dc+sd-jwt":
@@ -166,84 +228,42 @@ def getAttributesForm(credentials_requested):
 
 def getMandatoryAttributes(claims, namespace):
     """
-    Function to get mandatory attributes from credential
+    Function to get mandatory attributes from credential.
+    Now passes the claim's value_type to the helper function.
     """
-
     attributes_form = {}
 
-    # for x, value in enumerate(list(attributes.keys())):
-
     for claim in claims:
-        if "overall_issuer_conditions" in claim:
+        if claim.get("source") == "issuer":
+            continue
+
+        elif "overall_issuer_conditions" in claim:
             for key, value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key: value})
 
-        elif claim["mandatory"] == True and claim["path"][0] == namespace:
-
+        elif claim.get("mandatory") and claim.get("path", [None])[0] == namespace:
             attribute_name = claim["path"][1]
-
-            if "value_type" in claim:
-                attributes_form.update(
-                    {
-                        attribute_name: {
-                            "type": claim["value_type"],
-                            "filled_value": None,
-                        }
-                    }
-                )
+            attributes_form[attribute_name] = {
+                "type": claim.get("value_type", "string"),
+                "filled_value": None,
+            }
 
             if "issuer_conditions" in claim:
                 attributes_form[attribute_name]["type"] = "list"
-
-                if "cardinality" in claim["issuer_conditions"]:
-                    attributes_form[attribute_name]["cardinality"] = claim[
-                        "issuer_conditions"
-                    ]["cardinality"]
-
+                attributes_form[attribute_name]["cardinality"] = claim[
+                    "issuer_conditions"
+                ].get("cardinality")
                 if "at_least_one_of" in claim["issuer_conditions"]:
                     attributes_form[attribute_name]["at_least_one_of"] = claim[
                         "issuer_conditions"
                     ]["at_least_one_of"]
 
-                if claim["value_type"] in claim["issuer_conditions"]:
-                    # attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
-                    nested_attributes = {}
-                    nested_attributes_list = []
-
-                    for key, value in claim["issuer_conditions"][
-                        claim["value_type"]
-                    ].items():
-
-                        if "issuer_conditions" not in value:
-                            nested_attributes[key] = value
-
-                        else:
-
-                            attributes_append = {
-                                "attribute": key,
-                                "cardinality": value["issuer_conditions"][
-                                    "cardinality"
-                                ],
-                            }
-                            # attributes.append[{"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}]
-
-                            for key2, value2 in value["issuer_conditions"][
-                                value["value_type"]
-                            ].items():
-                                attributes_append[key2] = value2
-
-                            if "not_used_if" in value["issuer_conditions"]:
-                                attributes_append["not_used_if"] = value[
-                                    "issuer_conditions"
-                                ]["not_used_if"]
-
-                            nested_attributes_list.append(attributes_append)
-
-                    nested_attributes_list.append(nested_attributes)
-
-                    attributes_form[attribute_name][
-                        "attributes"
-                    ] = nested_attributes_list
+                # Pass the value_type to the helper
+                attributes_form[attribute_name]["attributes"] = (
+                    _process_nested_attributes(
+                        claim["issuer_conditions"], claim.get("value_type")
+                    )
+                )
 
     return attributes_form
 
@@ -287,7 +307,7 @@ def getMandatoryAttributesSDJWT(claims):
                 {
                     "country_code": {
                         "mandatory": True,
-                        "value_type": "string",
+                        "type": "string",
                         "source": "user",
                     }
                 }
@@ -302,21 +322,21 @@ def getMandatoryAttributesSDJWT(claims):
                 {
                     "country": {
                         "mandatory": False,
-                        "value_type": "string",
+                        "type": "string",
                         "source": "user",
                     }
                 },
                 {
                     "region": {
                         "mandatory": False,
-                        "value_type": "string",
+                        "type": "string",
                         "source": "user",
                     }
                 },
                 {
                     "locality": {
                         "mandatory": False,
-                        "value_type": "string",
+                        "type": "string",
                         "source": "user",
                     }
                 },
@@ -339,74 +359,65 @@ def getMandatoryAttributesSDJWT(claims):
                     "issuer_conditions"
                 ]["cardinality"]
 
+            if claim.get("value_type") and claim.get("value_type").endswith(
+                "_attributes"
+            ):
+                attributes_form[attribute_name]["type"] = "list"
+                attributes_form[attribute_name]["attributes"] = []
+
     for claim in level2_claims:
-        attributes = {}
         attribute_name = claim["path"][0]
 
         if attribute_name not in attributes_form:
             continue
 
-        attributes_form[attribute_name]["type"] = "list"
+        if "attributes" not in attributes_form[attribute_name]:
+            attributes_form[attribute_name]["type"] = "list"
+            attributes_form[attribute_name]["attributes"] = []
 
         level2_name = claim["path"][1]
-        attributes[level2_name] = {
+        attribute_details = {
             "mandatory": claim["mandatory"],
-            "value_type": claim["value_type"],
+            "type": claim["value_type"],
             "source": claim["source"],
         }
 
         if "issuer_conditions" in claim:
             if "cardinality" in claim["issuer_conditions"]:
-                attributes["cardinality"] = claim["issuer_conditions"]["cardinality"]
+                attribute_details["cardinality"] = claim["issuer_conditions"][
+                    "cardinality"
+                ]
             if "not_used_if" in claim["issuer_conditions"]:
-                attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
+                attribute_details["not_used_if"] = claim["issuer_conditions"][
+                    "not_used_if"
+                ]
 
-        if "attributes" in attributes_form[attribute_name]:
-            if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
-                attributes_form[attribute_name]["attributes"].append(attributes)
-            else:
-                attributes_form[attribute_name]["attributes"][0].update(attributes)
-        else:
-            attributes_form[attribute_name]["attributes"] = [attributes]
+        attributes_form[attribute_name]["attributes"].append(
+            {level2_name: attribute_details}
+        )
 
     for claim in level3_claims:
-
         attribute_name = claim["path"][0]
-
         if attribute_name not in attributes_form:
             continue
 
         level2_name = claim["path"][1]
-
         level3_name = claim["path"][2]
 
-        attributes = {}
+        for l2_item_dict in attributes_form[attribute_name].get("attributes", []):
+            if level2_name in l2_item_dict:
+                l2_attribute = l2_item_dict[level2_name]
+                if "attributes" not in l2_attribute:
+                    l2_attribute["type"] = "list"
+                    l2_attribute["attributes"] = []
 
-        for attribute in attributes_form[attribute_name]["attributes"]:
-            if level2_name in attribute:
-                attribute.update(
-                    {
-                        "attribute": level2_name,
-                        level3_name: {
-                            "mandatory": claim["mandatory"],
-                            "value_type": claim["value_type"],
-                            "source": claim["source"],
-                        },
-                    }
-                )
-                attribute.pop(level2_name)
-
-                if "cardinality" in attribute:
-                    attribute["cardinality"] = attribute["cardinality"]
-                if "not_used_if" in attribute:
-                    attribute["not_used_if"] = attribute["not_used_if"]
-
-            elif "attribute" in attribute:
-                attribute.update(
+                l2_attribute["attributes"].append(
                     {
                         level3_name: {
                             "mandatory": claim["mandatory"],
-                            "value_type": claim["value_type"],
+                            "type": claim[
+                                "value_type"
+                            ],  # FIX: Use 'type' for consistency
                             "source": claim["source"],
                         }
                     }
@@ -452,7 +463,7 @@ def getOptionalAttributesSDJWT(claims):
                 {
                     "country_code": {
                         "mandatory": True,
-                        "value_type": "string",
+                        "type": "string",
                         "source": "user",
                     }
                 }
@@ -481,7 +492,7 @@ def getOptionalAttributesSDJWT(claims):
         level2_name = claim["path"][1]
         attributes[level2_name] = {
             "mandatory": claim["mandatory"],
-            "value_type": claim["value_type"],
+            "type": claim["value_type"],
             "source": claim["source"],
         }
 
@@ -507,36 +518,15 @@ def getOptionalAttributesSDJWT(claims):
             continue
 
         level2_name = claim["path"][1]
-
         level3_name = claim["path"][2]
-
-        attributes = {}
 
         for attribute in attributes_form[attribute_name]["attributes"]:
             if level2_name in attribute:
-                attribute.update(
-                    {
-                        "attribute": level2_name,
-                        level3_name: {
-                            "mandatory": claim["mandatory"],
-                            "value_type": claim["value_type"],
-                            "source": claim["source"],
-                        },
-                    }
-                )
-                attribute.pop(level2_name)
-
-                if "cardinality" in attribute:
-                    attribute["cardinality"] = attribute["cardinality"]
-                if "not_used_if" in attribute:
-                    attribute["not_used_if"] = attribute["not_used_if"]
-
-            elif "attribute" in attribute:
-                attribute.update(
+                attribute[level2_name].setdefault("attributes", []).append(
                     {
                         level3_name: {
                             "mandatory": claim["mandatory"],
-                            "value_type": claim["value_type"],
+                            "type": claim["value_type"],
                             "source": claim["source"],
                         }
                     }
@@ -563,8 +553,10 @@ def getAttributesForm2(credentials_requested):
         if format == "mso_mdoc":
             namescapes = getNamespaces(credentialsSupported[request]["claims"])
             for namescape in namescapes:
-                attributes_req = getOptionalAttributes(
-                    credentialsSupported[request]["claims"], namescape
+                attributes_req.update(
+                    getOptionalAttributes(
+                        credentialsSupported[request]["claims"], namescape
+                    )
                 )
 
         elif format == "dc+sd-jwt":
@@ -584,85 +576,38 @@ def getAttributesForm2(credentials_requested):
 
 def getOptionalAttributes(claims, namespace):
     """
-    Function to get mandatory attributes from credential
+    Function to get optional attributes from credential.
+    Now passes the claim's value_type to the helper function.
     """
-
     attributes_form = {}
 
     for claim in claims:
-
         if "overall_issuer_conditions" in claim:
             for key, value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key: value})
-
-        elif claim["mandatory"] == False and claim["path"][0] == namespace:
-
+        elif not claim.get("mandatory") and claim.get("path", [None])[0] == namespace:
             attribute_name = claim["path"][1]
-
-            # ("\nMisc attribute_name: ", attribute_name)
-
-            if "value_type" in claim:
-                attributes_form.update(
-                    {
-                        attribute_name: {
-                            "type": claim["value_type"],
-                            "filled_value": None,
-                        }
-                    }
-                )
+            attributes_form[attribute_name] = {
+                "type": claim.get("value_type", "string"),
+                "filled_value": None,
+            }
 
             if "issuer_conditions" in claim:
                 attributes_form[attribute_name]["type"] = "list"
-
-                if "cardinality" in claim["issuer_conditions"]:
-                    attributes_form[attribute_name]["cardinality"] = claim[
-                        "issuer_conditions"
-                    ]["cardinality"]
-
+                attributes_form[attribute_name]["cardinality"] = claim[
+                    "issuer_conditions"
+                ].get("cardinality")
                 if "at_least_one_of" in claim["issuer_conditions"]:
                     attributes_form[attribute_name]["at_least_one_of"] = claim[
                         "issuer_conditions"
                     ]["at_least_one_of"]
 
-                if claim["value_type"] in claim["issuer_conditions"]:
-                    # attributes_form[attribute_name]["attributes"] = [attribute_data["issuer_conditions"][attribute_data["value_type"]]]
-                    nested_attributes = {}
-                    nested_attributes_list = []
-
-                    for key, value in claim["issuer_conditions"][
-                        claim["value_type"]
-                    ].items():
-
-                        if "issuer_conditions" not in value:
-                            nested_attributes[key] = value
-
-                        else:
-
-                            attributes_append = {
-                                "attribute": key,
-                                "cardinality": value["issuer_conditions"][
-                                    "cardinality"
-                                ],
-                            }
-                            # attributes.append[{"attribute": key, "cardinality":value["issuer_conditions"]["cardinality"]}]
-
-                            for key2, value2 in value["issuer_conditions"][
-                                value["value_type"]
-                            ].items():
-                                attributes_append[key2] = value2
-
-                            if "not_used_if" in value["issuer_conditions"]:
-                                attributes_append["not_used_if"] = value[
-                                    "issuer_conditions"
-                                ]["not_used_if"]
-
-                            nested_attributes_list.append(attributes_append)
-
-                    nested_attributes_list.append(nested_attributes)
-
-                    attributes_form[attribute_name][
-                        "attributes"
-                    ] = nested_attributes_list
+                # Pass the value_type to the helper
+                attributes_form[attribute_name]["attributes"] = (
+                    _process_nested_attributes(
+                        claim["issuer_conditions"], claim.get("value_type")
+                    )
+                )
 
     return attributes_form
 
@@ -755,6 +700,7 @@ def doctype2credentialSDJWT(doctype, format):
     for credential_id, credential in credentialsSupported.items():
         if (
             credential["format"] == format
+            and "doctype" in credential.get("issuer_config", {})
             and credential["issuer_config"]["doctype"] == doctype
         ):
             return credential
