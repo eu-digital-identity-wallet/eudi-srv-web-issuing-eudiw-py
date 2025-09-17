@@ -106,18 +106,20 @@ def formatter(data, un_distinguishing_sign, doctype, format):
 
         expiry = today + datetime.timedelta(days=doctype_config["validity"])
 
-        namescapes = getNamespaces(requested_credential["claims"])
+        namescapes = getNamespaces(
+            requested_credential["credential_metadata"]["claims"]
+        )
         for namescape in namescapes:
             attributes_req = getMandatoryAttributes(
-                requested_credential["claims"], namescape
+                requested_credential["credential_metadata"]["claims"], namescape
             )
 
             attributes_req2 = getOptionalAttributes(
-                requested_credential["claims"], namescape
+                requested_credential["credential_metadata"]["claims"], namescape
             )
 
             issuer_claims = getIssuerFilledAttributes(
-                requested_credential["claims"], namescape
+                requested_credential["credential_metadata"]["claims"], namescape
             )
 
             pdata = {namescape: {}}
@@ -143,11 +145,17 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             "claims": {},
         }
 
-        attributes_req = getMandatoryAttributesSDJWT(requested_credential["claims"])
+        attributes_req = getMandatoryAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
 
-        attributes_req2 = getOptionalAttributesSDJWT(requested_credential["claims"])
+        attributes_req2 = getOptionalAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
 
-        issuer_claims = getIssuerFilledAttributesSDJWT(requested_credential["claims"])
+        issuer_claims = getIssuerFilledAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
 
         pdata["claims"] = {}
 

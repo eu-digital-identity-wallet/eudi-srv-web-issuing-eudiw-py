@@ -17,6 +17,7 @@
             ]
          }
       },
+      "credential_metadata": {
       "display":[
          {
             "name":"Age over 18 Pseudonym",
@@ -114,7 +115,8 @@
                }
             ]
          }
-      ],
+      ]
+   },
       "issuer_config":{
          "issuing_authority":"Test PID issuer",
          "organization_id":"EUDI Wallet Reference Implementation",

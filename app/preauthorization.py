@@ -24,6 +24,7 @@ This route generates a client registration capable of using a pre-authorization 
 import base64
 import io
 import json
+import random
 from flask import (
     Blueprint,
     render_template,
@@ -284,6 +285,25 @@ def credentialOfferReq2():
 
     data = json_payload["credentials"][0]["data"]
 
+    scope = " ".join(credential_ids)
+    print("\ncredential_list: ", scope)
+
+    session_id = request_preauth_token(scope=scope)
+
+    print("\nsession_id", session_id)
+
+    session_manager.update_authorization_details(
+        session_id=session_id, authorization_details=authorization_details
+    )
+
+    session_manager.update_user_data(session_id=session_id, user_data=data)
+
+    current_session = session_manager.get_session(session_id=session_id)
+
+    pre_auth_code = current_session.pre_authorized_code
+
+    tx_code = current_session.tx_code
+
     """ pre_auth_code = generate_preauth_token(
         data=data, authorization_details=authorization_details
     )
@@ -326,6 +346,7 @@ def credentialOfferReq2():
         + urllib.parse.quote(json_string, safe=":/")
     )
 
+    # return {"credential_offer": credential_offer, "uri": uri}
     return credential_offer  # {"credential_offer": credential_offer,"uri": uri}
 
 

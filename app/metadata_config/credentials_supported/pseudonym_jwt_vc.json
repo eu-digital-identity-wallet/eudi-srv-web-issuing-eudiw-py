@@ -27,6 +27,8 @@
            ]
         }
      },
+          "vct":"urn:eu.europa.ec.eudi:pseudonym_age_over_18:1",
+     "credential_metadata": {
      "display":[
         {
            "name":"Age over 18 Pseudonym (sd-jwt-vc)",
@@ -37,7 +39,6 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:pseudonym_age_over_18:1",
      "claims":[
         {
            "path":[
@@ -119,7 +120,8 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
         "organization_id":"EUDI Wallet Reference Implementation",

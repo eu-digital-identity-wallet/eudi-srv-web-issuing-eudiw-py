@@ -27,6 +27,8 @@
            ]
         }
      },
+     "vct":"urn:eu.europa.ec.eudi:por:1",
+     "credential_metadata": {
      "display":[
         {
            "name":"Power Of Representation (sd-jwt-vc)",
@@ -37,7 +39,6 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:por:1",
      "claims":[
         {
            "path":[
@@ -187,7 +188,8 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
         "organization_id":"EUDI Wallet Reference Implementation",

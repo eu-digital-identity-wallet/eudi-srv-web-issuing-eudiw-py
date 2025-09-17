@@ -38,6 +38,7 @@
            ]
         }
      },
+     "credential_metadata": {
      "display":[
         {
            "name":"Tax Number",
@@ -252,7 +253,8 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
         "organization_id":"EUDI Wallet Reference Implementation",

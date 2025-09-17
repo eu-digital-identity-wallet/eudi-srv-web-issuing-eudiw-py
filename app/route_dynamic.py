@@ -591,7 +591,7 @@ def red():
         else:
             credential = scope  """
 
-        credential = credentialsSupported[credential_requested]["display"][0]["name"]
+        credential = credentialsSupported[credential_requested]["credential_metadata"]["display"][0]["name"]
 
         presentation_data.update({credential: {}})
 
@@ -1235,7 +1235,7 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         else:
             credential = scope """
 
-        credential = credentialsSupported[credential_requested]["display"][0]["name"]
+        credential = credentialsSupported[credential_requested]["credential_metadata"]["display"][0]["name"]
 
         presentation_data.update({credential: {}})
 

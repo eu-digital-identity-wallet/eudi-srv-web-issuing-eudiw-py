@@ -27,6 +27,7 @@
             ]
          }
       },
+      "credential_metadata": {
       "display":[
          {
             "name":"Employee ID (TBD)",
@@ -158,7 +159,8 @@
                }
             ]
          }
-      ],
+      ]
+   },
       "issuer_config":{
          "issuing_authority":"Test PID issuer",
          "organization_id":"EUDI Wallet Reference Implementation",

@@ -16,6 +16,8 @@
            ]
         }
      },
+      "vct":"urn:eu.europa.ec.eudi:diploma:1:1",
+     "credential_metadata": {
      "display":[
         {
            "name":"Diploma (TBD)",
@@ -26,7 +28,6 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:diploma:1:1",
      "claims":[
         {
            "path":[
@@ -252,7 +253,8 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
         "organization_id":"EUDI Wallet Reference Implementation",

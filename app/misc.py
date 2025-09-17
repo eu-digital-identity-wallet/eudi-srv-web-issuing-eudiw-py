@@ -200,17 +200,22 @@ def getAttributesForm(credentials_requested):
 
         attributes_req = {}
         if format == "mso_mdoc":
-            namescapes = getNamespaces(credentialsSupported[request]["claims"])
+            namescapes = getNamespaces(
+                credentialsSupported[request]["credential_metadata"]["claims"]
+            )
             for namescape in namescapes:
                 attributes_req.update(
                     getMandatoryAttributes(
-                        credentialsSupported[request]["claims"], namescape
+                        credentialsSupported[request]["credential_metadata"]["claims"],
+                        namescape,
                     )
                 )
 
         elif format == "dc+sd-jwt":
             attributes_req.update(
-                getMandatoryAttributesSDJWT(credentialsSupported[request]["claims"])
+                getMandatoryAttributesSDJWT(
+                    credentialsSupported[request]["credential_metadata"]["claims"]
+                )
             )
 
         for attribute in attributes_req:
@@ -551,17 +556,22 @@ def getAttributesForm2(credentials_requested):
         attributes_req = {}
 
         if format == "mso_mdoc":
-            namescapes = getNamespaces(credentialsSupported[request]["claims"])
+            namescapes = getNamespaces(
+                credentialsSupported[request]["credential_metadata"]["claims"]
+            )
             for namescape in namescapes:
                 attributes_req.update(
                     getOptionalAttributes(
-                        credentialsSupported[request]["claims"], namescape
+                        credentialsSupported[request]["credential_metadata"]["claims"],
+                        namescape,
                     )
                 )
 
         elif format == "dc+sd-jwt":
             attributes_req.update(
-                getOptionalAttributesSDJWT(credentialsSupported[request]["claims"])
+                getOptionalAttributesSDJWT(
+                    credentialsSupported[request]["credential_metadata"]["claims"]
+                )
             )
 
         for attribute in attributes_req:
