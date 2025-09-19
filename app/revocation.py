@@ -98,89 +98,42 @@ def oid4vp_call():
 
     # print("\nrequested: ", credentials_requested)
 
-    for id in form:
-        credential = credentialsSupported[id]
-        fields = []
+    dcql_credentials = []
+    query_id_counter = 0
 
-        if credential["format"] == "mso_mdoc":
-            doctype = credential["doctype"]
-            format = {"mso_mdoc": {"alg": ["ES256", "ES384", "ES512", "EdDSA"]}}
+    for credential_requested in form:
+        credential_config = credentialsSupported[credential_requested]
+        credential_metadata = credential_config["credential_metadata"]
+        credential_format = credential_config["format"]
 
-            for claim in credential["claims"]:
-                if claim["mandatory"] == True:
-                    fields.append(
-                        {
-                            "path": ["$" + "".join(f"['{p}']" for p in claim["path"])],
-                            "intent_to_retain": False,
-                        }
-                    )
+        query_id = f"query_{query_id_counter}"
+        dcql_credential = {"id": query_id, "format": credential_format, "claims": []}
 
-            input_descriptors.append(
-                {
-                    "id": doctype,
-                    "format": format,
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {"fields": fields},
-                }
+        # Add the meta object based on the format
+        if credential_format == "dc+sd-jwt":
+            dcql_credential["meta"] = {"vct_values": [credential_config["vct"]]}
+        elif credential_format == "mso_mdoc":
+            dcql_credential["meta"] = {"doctype_value": credential_config["doctype"]}
+
+        for claim in credential_metadata["claims"]:
+            dcql_credential["claims"].append(
+                {"path": claim["path"], "intent_to_retain": False}
             )
 
-        elif credential["format"] == "dc+sd-jwt":
-            format = {
-                "dc+sd-jwt": {
-                    "sd-jwt_alg_values": ["ES256", "ES384", "ES512"],
-                    "kb-jwt_alg_values": [
-                        "RS256",
-                        "RS384",
-                        "RS512",
-                        "ES256",
-                        "ES384",
-                        "ES512",
-                    ],
-                }
-            }
+        dcql_credentials.append(dcql_credential)
 
-            fields.append(
-                {
-                    "path": ["$.vct"],
-                    "filter": {
-                        "type": "string",
-                        "const": credentialsSupported[id]["vct"],
-                    },
-                },
-            )
+        query_id_counter += 1
 
-            for claim in credential["claims"]:
-                if claim["mandatory"] == True:
-                    fields.append(
-                        {
-                            "path": ["$." + ".".join(claim["path"])],
-                            "intent_to_retain": False,
-                        }
-                    )
-            print("\nfields: ", fields)
-
-            input_descriptors.append(
-                {
-                    "id": str(uuid.uuid4()),
-                    "format": format,
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {"fields": fields},
-                }
-            )
-
-            print("\ninput_descriptors: ", input_descriptors)
+    # Final DCQL query
+    dcql_query = {"credentials": dcql_credentials}
 
     url = cfgservice.dynamic_presentation_url
     payload_cross_device = json.dumps(
         {
             "type": "vp_token",
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "presentation_definition": {
-                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors,
-            },
+            "dcql_query": dcql_query,
+            "request_uri_method": "post",
         }
     )
 
@@ -188,12 +141,10 @@ def oid4vp_call():
         {
             "type": "vp_token",
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "presentation_definition": {
-                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors,
-            },
+            "request_uri_method": "post",
+            "dcql_query": dcql_query,
             "wallet_response_redirect_uri_template": cfgservice.service_url
-            + "revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id="
+            + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
             + session_id,
         }
     )

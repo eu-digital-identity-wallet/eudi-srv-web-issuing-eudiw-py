@@ -50,7 +50,16 @@ class ConfCountries:
                 "given_name": "CurrentGivenName",
                 "birth_date": "DateOfBirth",
             },
-            "connection_type": "eidasnode",
+            "connection_type": "oauth",
+            "oauth_auth": {
+                "base_url": "https://eidas.projj.eu",
+                "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
+                "scope": "profile",
+                "state": "hkMVY7vjuN7xyLl5",
+                "response_type": "code",
+                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            },
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
         },
         formCountry: {

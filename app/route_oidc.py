@@ -604,6 +604,8 @@ def credential():
 
     # Deferred case. Issuer doesnt have the data yet
 
+    is_deferred = False
+
     if ("error" in _response and _response["error"] == "Pending") or (
         "credential_configuration_id" in validated_credential_request
         and validated_credential_request["credential_configuration_id"]
@@ -615,7 +617,8 @@ def credential():
             transaction_id=_transaction_id,
             credential_request=validated_credential_request,
         )
-        _response = {"transaction_id": _transaction_id}
+        _response = {"transaction_id": _transaction_id, "interval": 30}
+        is_deferred = True
 
     cfgservice.app_logger.info(
         f", Session ID: {session_id}, Credential response, Payload: {_response}"
@@ -631,9 +634,13 @@ def credential():
             f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
         )
 
-        return _response
+        if is_deferred:
+            return _response, 202
+        return _response, 200
 
-    return _response
+    if is_deferred:
+        return _response, 202
+    return _response, 200
 
 
 @oidc.route("/notification", methods=["POST"])
@@ -702,9 +709,13 @@ def nonce():
     data = jwe.deserialize_compact(encrypted_jwt, key)
     jwe_payload = data["payload"]
 
-    response = {"c_nonce": encrypted_jwt.decode("utf-8")}
+    response_data = {"c_nonce": encrypted_jwt.decode("utf-8")}
 
-    return make_response(response, 200)
+    response = jsonify(response_data)
+
+    response.headers["Cache-Control"] = "no-store"
+
+    return response, 200
 
 
 @oidc.route("/deferred_credential", methods=["POST"])
@@ -789,26 +800,35 @@ def deferred_credential():
 
     # Deferred case. Issuer doesnt have the data yet
 
+    is_deferred = False
     if "error" in _response and _response["error"] == "Pending":
-        _response = {"error": "issuance_pending", "interval": 30}
+        _response = {"transaction_id": deferred_transaction_id, "interval": 30}
+        is_deferred = True
 
     cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential response, Payload: {_response}"
+        f", Session ID: {session_id}, Deferred credential response, Payload: {_response}"
     )
 
-    if "credential_response_encryption" in validated_credential_request:
+    if "credential_response_encryption" in deferred_request:
+        validated_credential_request["validated_credential_request"] = deferred_request[
+            "credential_response_encryption"
+        ]
         _response = encrypt_response(
             credential_request=validated_credential_request,
             credential_response=_response,
         )
 
         cfgservice.app_logger.info(
-            f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
+            f", Session ID: {session_id}, Deferred credential encrypted response, Payload: {_response.data.decode('utf-8')}"
         )
 
-        return _response
+        if is_deferred:
+            return _response, 202
+        return _response, 200
 
-    return _response
+    if is_deferred:
+        return _response, 202
+    return _response, 200
 
 
 @oidc.route("credential_offer_choice", methods=["GET"])
