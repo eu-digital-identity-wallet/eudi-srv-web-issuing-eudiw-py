@@ -205,48 +205,60 @@ def cbor2elems(mdoc):
     return d
 
 
-def sdjwtNestedClaims(claims, vct):
+def sdjwtNestedClaims(claims, credential_metadata):
+
 
     nestedDict = {}
 
+    sd_map = {}
+    if "credential_metadata" in credential_metadata and "claims" in credential_metadata["credential_metadata"]:
+        for claim_meta in credential_metadata["credential_metadata"]["claims"]:
+            # Use the last part of the 'path' as the claim name
+            claim_name = claim_meta["path"][-1]
+            sd_map[claim_name] = claim_meta.get("selective_disclosure", True)
+
     for claim, value in claims.items():
-        if isinstance(value, list) and claim != "nationalities" and len(value) > 1:
-            subClaims = []
-            for element in value:
-                if isinstance(element, dict):
-                    subClaimsElement = {}
-                    for attribute, value2 in element.items():
-                        subClaimsElement.update({SDObj(value=attribute): value2})
+        if sd_map.get(claim, True):
+            if isinstance(value, list) and claim != "nationalities" and len(value) > 1:
+                subClaims = []
+                for element in value:
+                    if isinstance(element, dict):
+                        subClaimsElement = {}
+                        for attribute, value2 in element.items():
+                            subClaimsElement.update({SDObj(value=attribute): value2})
 
-                subClaims.append(subClaimsElement)
+                    subClaims.append(subClaimsElement)
 
-            nestedDict.update({SDObj(value=claim): subClaims})
+                nestedDict.update({SDObj(value=claim): subClaims})
 
-        elif isinstance(value, list) and claim != "nationalities" and len(value) == 1:
-            subClaims = {}
-            for element in value:
-                if isinstance(element, dict):
-                    for attribute, value2 in element.items():
-                        subClaims.update({SDObj(value=attribute): value2})
+            elif isinstance(value, list) and claim != "nationalities" and len(value) == 1:
+                subClaims = {}
+                for element in value:
+                    if isinstance(element, dict):
+                        for attribute, value2 in element.items():
+                            subClaims.update({SDObj(value=attribute): value2})
 
-            nestedDict.update({SDObj(value=claim): subClaims})
+                nestedDict.update({SDObj(value=claim): subClaims})
 
-        elif isinstance(value, dict):
-            subClaims = {}
-            for attribute, value2 in value.items():
-                subClaims.update({SDObj(value=attribute): value2})
+            elif isinstance(value, dict):
+                subClaims = {}
+                for attribute, value2 in value.items():
+                    subClaims.update({SDObj(value=attribute): value2})
 
-            nestedDict.update({SDObj(value=claim): subClaims})
+                nestedDict.update({SDObj(value=claim): subClaims})
 
-        elif isinstance(value, list) and claim == "nationalities":
-            nationalitiesArray = []
-            for nationality in value:
-                nationalitiesArray.append(SDObj(value=nationality))
+            elif isinstance(value, list) and claim == "nationalities":
+                nationalitiesArray = []
+                for nationality in value:
+                    nationalitiesArray.append(SDObj(value=nationality))
 
-            nestedDict.update({SDObj(value=claim): nationalitiesArray})
+                nestedDict.update({SDObj(value=claim): nationalitiesArray})
 
+            else:
+                nestedDict.update({SDObj(value=claim): value})
+        
         else:
-            nestedDict.update({SDObj(value=claim): value})
+            nestedDict.update({claim: value})
 
     return nestedDict
 
@@ -369,7 +381,7 @@ def sdjwtFormatter(PID, country):
         PID_DATA = pid_data["claims"]
         JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA)) """
 
-    JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"], vct))
+    JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"], PID["credential_metadata"]))
 
     datafinal.update(JWT_PID_DATA)
 

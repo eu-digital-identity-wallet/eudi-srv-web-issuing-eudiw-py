@@ -137,7 +137,7 @@ def setup_metadata():
 
     oidc_metadata_clean["credential_configurations_supported"] = remove_keys(
         copy.deepcopy(credentials_supported),
-        {"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source"},
+        {"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source", "selective_disclosure"},
     )
 
     old_domain = oidc_metadata["credential_issuer"]

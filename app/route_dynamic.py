@@ -258,39 +258,15 @@ def dynamic_R1(country):
         # return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
-        country_data = cfgcountries.supported_countries[country]["oidc_auth"].copy()
+        oauth_data = cfgcountries.supported_countries[country]["oauth_auth"]
 
-        url = country_data["url"] + "redirect_uri=" + country_data["redirect_uri"]
-
-        pt_attributes = list()
-
-        if isinstance(country_data["scope"], dict):
-            scope_final = list()
-            for request in credentials_requested:
-                if credentialsSupported[request]["format"] == "mso_mdoc":
-                    scope = credentialsSupported[request]["doctype"]
-                elif credentialsSupported[request]["format"] == "dc+sd-jwt":
-                    scope = credentialsSupported[request]["issuer_config"]["doctype"]
-                if scope not in scope_final:
-                    scope_final.append(scope)
-
-            for scope in scope_final:
-                if scope in country_data["scope"]:
-                    attributes = country_data["scope"][scope]
-
-                    for a in attributes:
-                        if attributes[a] not in pt_attributes:
-                            pt_attributes.append(attributes[a])
-
-            scope_pt = " ".join(pt_attributes)
-
-            country_data["scope"] = scope_pt
-
-        for url_part in country_data:
-            if url_part == "url" or url_part == "redirect_uri":
-                pass
-            else:
-                url = url + "&" + url_part + "=" + country_data[url_part]
+        return redirect(
+            generate_connector_authorization_url(
+                oauth_data=oauth_data,
+                country=country,
+                credentials_requested=credentials_requested,
+            )
+        )
 
         return redirect(url)
 
@@ -335,9 +311,10 @@ def red():
     # session["route"] = "/dynamic/redirect"
 
     session_id = session["session_id"]
+    print("\nsession_id ", session_id)
     current_session = session_manager.get_session(session_id=session_id)
 
-    if current_session.country == "PT":
+    """ if current_session.country == "PT":
 
         if not request.args:  # if args is empty
             return render_template("/dynamic/pt_url.html")
@@ -383,13 +360,13 @@ def red():
         if "error" in data and data["error"] == "Pending" and "response" in data:
             data = data["response"]
 
-        """ i = 0
-        while "error" in data and data["error"] == "Pending" and i < 20:
-            time.sleep(2)
-            data = dynamic_R2_data_collect(
-            country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
-            )
-            i =+ 2 """
+        # i = 0
+        #while "error" in data and data["error"] == "Pending" and i < 20:
+        #    time.sleep(2)
+        #    data = dynamic_R2_data_collect(
+        #    country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
+        #    )
+        #    i =+ 2
 
         portuguese_fields = dict()
         form_data = {}
@@ -466,10 +443,10 @@ def red():
             today = date.today()
             expiry = today + timedelta(days=doctype_config["validity"])
 
-            """ if form_data[doctype]["birth_date"] != "Pending":
-                form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
-            else:
-                form_data[doctype].update({"age_over_18":"Pending"}) """
+            #if form_data[doctype]["birth_date"] != "Pending":
+            #    form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
+            #else:
+            #    form_data[doctype].update({"age_over_18":"Pending"})
 
             form_data[doctype].update(
                 {"estimated_issuance_date": today.strftime("%Y-%m-%d")}
@@ -516,7 +493,7 @@ def red():
 
         session_manager.update_jws_token(session_id=session_id, jws_token=jws_token)
         # session["jws_token"] = jws_token
-        # session["country"] = country
+        # session["country"] = country """
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
     if not v:  # if not all arguments are available
@@ -526,55 +503,69 @@ def red():
             error_description="Missing mandatory IdP fields",
         )
 
+    auth_code = request.args.get("code")
+
+    country_config = cfgcountries.supported_countries[current_session.country]
+
     metadata_url = (
-        cfgcountries.supported_countries[current_session.country]["oidc_auth"][
-            "base_url"
-        ]
-        + "/.well-known/openid-configuration"
+        country_config["oauth_auth"]["base_url"]
+        + "/.well-known/oauth-authorization-server"
     )
+
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
 
-    redirect_data = cfgcountries.supported_countries[current_session.country][
-        "oidc_redirect"
-    ]
+    token_endpoint_headers = {}
+    if (
+        "token_endpoint" in country_config["oauth_auth"]
+        and "header" in country_config["oauth_auth"]["token_endpoint"]
+    ):
+        token_endpoint_headers = country_config["oauth_auth"]["token_endpoint"][
+            "headers"
+        ]
 
-    # url = redirect_data["url"]
-    headers = redirect_data["headers"]
+    if (
+        "oauth_auth" in country_config
+        and "client_id" in country_config["oauth_auth"]
+        and "client_secret" in country_config["oauth_auth"]
+    ):
+        auth_string = f"{country_config['oauth_auth']['client_id']}:{country_config['oauth_auth']['client_secret']}"
+        encoded_auth = base64.b64encode(auth_string.encode("utf-8")).decode("utf-8")
 
-    data = "code=" + request.args.get("code")
-    for key in redirect_data:
-        if key != "headers":
-            data = data + "&" + key + "=" + redirect_data[key]
+        token_endpoint_headers["Authorization"] = f"Basic {encoded_auth}"
 
-    """ data = (
-        "grant_type="
-        + redirect_data["grant_type"]
-        + "&code="
-        + request.args.get("code")
-        + "&redirect_uri="Form
-        + redirect_data["redirect_uri"]
-    ) """
+    data = f"code={request.args.get('code')}"
 
-    r = requests.post(token_endpoint, headers=headers, data=data)
-    json_response = json.loads(r.text)
-    session["access_token"] = json_response["access_token"]
+    params = {
+        "grant_type": "authorization_code",
+        "code": auth_code,
+        "redirect_uri": country_config["oauth_auth"]["redirect_uri"],
+    }
+
+    try:
+        response = requests.post(
+            token_endpoint,
+            data=params,
+            headers=token_endpoint_headers,
+        )
+
+        response.raise_for_status()
+        token_data = response.json()
+        print("Access Token:", token_data.get("access_token"))
+
+        access_token = token_data.get("access_token")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+
+    session["access_token"] = access_token
 
     cfgserv.app_logger.info(
-        " - INFO - "
-        + "/dynamic/redicret"
-        + " - Version:"
-        + cfgserv.current_version
-        + " - Country: "
-        + current_session.country
-        + "- Code: "
-        + request.args.get("code")
-        + " -  entered the route"
+        f" - INFO - /dynamic/redicret - Version:{cfgserv.current_version} - Country: {current_session.country} - Code: {request.args.get('code')} - entered the route"
     )
 
     data = dynamic_R2_data_collect(
-        country=current_session.country, user_id=session["access_token"]
+        country=current_session.country, session_id=session_id, access_token=access_token
     )
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -591,7 +582,9 @@ def red():
         else:
             credential = scope  """
 
-        credential = credentialsSupported[credential_requested]["credential_metadata"]["display"][0]["name"]
+        credential = credentialsSupported[credential_requested]["credential_metadata"][
+            "display"
+        ][0]["name"]
 
         presentation_data.update({credential: {}})
 
@@ -682,6 +675,7 @@ def red():
 
     user_id = current_session.country + "." + session["access_token"]
 
+    print("\npresentation_data: ", presentation_data)
     return render_template(
         "dynamic/form_authorize.html",
         presentation_data=presentation_data,
@@ -723,10 +717,11 @@ def dynamic_R2():
     # session["version"] = cfgserv.current_version
     # session["route"] = "/dynamic/form_R2"
 
-    data = dynamic_R2_data_collect(country=country, user_id=user_id)
+    data = current_session.user_data #dynamic_R2_data_collect(country=country, user_id=user_id)
 
-    if "error" in data:
-        return data
+    print("\ndynamic_r2 data: ", data)
+    """ if "error" in data:
+        return data """
 
     # log.logger_info.info(" - INFO - " + session["route"] + " - " + session['device_publickey'] + " -  entered the route")
 
@@ -740,7 +735,7 @@ def dynamic_R2():
     return credential_response
 
 
-def dynamic_R2_data_collect(country, user_id):
+def dynamic_R2_data_collect(country, session_id, access_token):
     """
     Funtion to get attributes from selected credential issuer country
 
@@ -751,7 +746,7 @@ def dynamic_R2_data_collect(country, user_id):
 
     if country == "FC":
 
-        current_session = session_manager.get_session(session_id=user_id)
+        current_session = session_manager.get_session(session_id=session_id)
 
         data = (
             current_session.user_data
@@ -763,6 +758,7 @@ def dynamic_R2_data_collect(country, user_id):
         # session["version"] = cfgserv.current_version
         # session["country"] = data["issuing_country"]
 
+        print("\ndynamic_R2_data_collect user_data: ", data)
         return data
 
     if country == "sample":
@@ -774,7 +770,7 @@ def dynamic_R2_data_collect(country, user_id):
         # session["version"] = cfgserv.current_version
         # session["country"] = data["issuing_country"]
 
-        current_session = session_manager.get_session(session_id=user_id)
+        current_session = session_manager.get_session(session_id=session_id)
 
         data = current_session.user_data
 
@@ -810,7 +806,8 @@ def dynamic_R2_data_collect(country, user_id):
         return data
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "oauth":
-        attribute_request = cfgcountries.supported_countries[country][
+
+        """attribute_request = cfgcountries.supported_countries[country][
             "attribute_request"
         ]
         url = attribute_request["url"] + user_id
@@ -831,9 +828,52 @@ def dynamic_R2_data_collect(country, user_id):
         except:
             credential_error_resp(
                 "invalid_credential_request", "openid connection failed"
-            )
+            )"""
+
+        metadata_url = (
+            cfgcountries.supported_countries[country]["oauth_auth"]["base_url"]
+            + "/.well-known/oauth-authorization-server"
+        )
+
+        metadata_json = requests.get(metadata_url).json()
+
+        user_info_endpoint = metadata_json["userinfo_endpoint"]
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        try:
+            response = requests.get(user_info_endpoint, headers=headers)
+
+            response.raise_for_status()
+
+            user_data = response.json()
+
+            print("\nbefore_user_data: ", user_data)
+
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred while fetching user data: {e}")
+            if response:
+                print("Response Body:", response.text)
+
+        if "custom_modifiers" in cfgcountries.supported_countries[country]:
+            custom_modifiers = cfgcountries.supported_countries[country][
+                "custom_modifiers"
+            ]
+
+            for modifier in custom_modifiers:
+                if custom_modifiers[modifier] in user_data:
+                    user_data[modifier] = user_data[custom_modifiers[modifier]]
+                    user_data.pop(custom_modifiers[modifier])
+
+        print("\nafter_user_data: ", user_data)
+
+        print("\nsession_id", session_id)
+        session_manager.update_user_data(session_id=session_id, user_data=user_data)
+
+        return user_data
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
+
         attribute_request = cfgcountries.supported_countries[country][
             "attribute_request"
         ]
@@ -849,13 +889,13 @@ def dynamic_R2_data_collect(country, user_id):
         userinfo_endpoint = metadata_json["userinfo_endpoint"]
 
         if country == "EE":
-            url = userinfo_endpoint + "?access_token=" + user_id
+            url = userinfo_endpoint + "?access_token=" + access_token
 
             headers = attribute_request["header"]
         else:
             url = userinfo_endpoint
             headers = attribute_request["header"]
-            headers["Authorization"] = f"Bearer {user_id}"
+            headers["Authorization"] = f"Bearer {access_token}"
 
         try:
             r2 = requests.get(url, headers=headers)
@@ -1235,7 +1275,9 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         else:
             credential = scope """
 
-        credential = credentialsSupported[credential_requested]["credential_metadata"]["display"][0]["name"]
+        credential = credentialsSupported[credential_requested]["credential_metadata"][
+            "display"
+        ][0]["name"]
 
         presentation_data.update({credential: {}})
 
@@ -1473,23 +1515,32 @@ def redirect_wallet():
     ) """
 
 
-def generate_connector_authorization_url(country: str, credentials_requested: list):
-    authorize_url = "https://eidas.projj.eu/authorize"
+def generate_connector_authorization_url(
+    oauth_data: dict, country: str, credentials_requested: list
+):
+    metadata_url = (
+        f"{oauth_data.get('base_url')}/.well-known/oauth-authorization-server"
+    )
+
+    metadata_json = requests.get(metadata_url).json()
+
+    authorization_endpoint = metadata_json["authorization_endpoint"]
+
     state = str(uuid4())
     session["oauth_state"] = state
 
     params = {
-        "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-        "redirect_uri": f"{cfgserv.service_url}dynamic/connector_callback",
+        "client_id": oauth_data["client_id"],
+        "redirect_uri": oauth_data["redirect_uri"],
         "response_type": "code",
-        "scope": "profile",
+        "scope": credentials_requested[0],
         "state": state,
-        "country": country,
-        "credentials_requested": credentials_requested[0],
-        "metadata_url": f"{cfgserv.service_url}.well-known/openid-credential-issuer",
+        "entity": country,
+        # "credentials_requested": credentials_requested[0],
+        # "metadata_url": f"{cfgserv.service_url}.well-known/openid-credential-issuer2",
     }
 
-    full_url = f"{authorize_url}?{urlencode(params)}"
+    full_url = f"{authorization_endpoint}?{urlencode(params)}"
 
     return full_url
 
@@ -1553,38 +1604,3 @@ def connector_callback():
     print("\nsession_id", session["session_id"])
 
     return ""
-
-
-# To test with seafarer
-def build_nested_structure(flat_dict):
-    result = {}
-
-    for compound_key, value in flat_dict.items():
-        # split keys like capacities[0][codes][1][remarks]
-        parts = re.findall(r"[^\[\]]+", compound_key)
-        current = result
-
-        for i, part in enumerate(parts):
-            is_last = i == len(parts) - 1
-            if part.isdigit():  # numeric → list index
-                idx = int(part)
-                if not isinstance(current, list):
-                    current_key = parts[i - 1]
-                    current[current_key] = []
-                    current = current[current_key]
-                while len(current) <= idx:
-                    current.append({})
-                current = current[idx]
-            else:
-                if is_last:
-                    current[part] = value
-                else:
-                    if part not in current:
-                        # if next part is digit, make it a list, else dict
-                        if parts[i + 1].isdigit():
-                            current[part] = []
-                        else:
-                            current[part] = {}
-                    current = current[part]
-
-    return result

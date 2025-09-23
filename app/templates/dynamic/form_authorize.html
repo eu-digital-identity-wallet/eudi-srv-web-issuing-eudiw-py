@@ -41,15 +41,17 @@
 <div class="attribute-block">
     <label class="font-pf block font-bold text-custom-gray">{{ name | replace('_', ' ') | title }}</label>
     <div class="mt-2 pl-4 border-l-2 border-gray-400 space-y-3">
-        {% for item in value %}
-        {# For each item in the list, create a slightly indented block #}
+        {%- for item in value %}
         <div class="bg-white/60 p-3 rounded-md">
-            {% for sub_name, sub_value in item.items() %}
-            {# Recursively call the macro to display the item's contents #}
-            {{ render_attribute_display(sub_name, sub_value) }}
-            {% endfor %}
+            {%- if item is mapping %}
+                {%- for sub_name, sub_value in item.items() %}
+                    {{ render_attribute_display(sub_name, sub_value) }}
+                {%- endfor %}
+            {%- else %}
+                <p class="font-pf text-base text-custom-gray">{{ item }}</p>
+            {%- endif %}
         </div>
-        {% endfor %}
+        {%- endfor %}
     </div>
 </div>
 {# It's an image #}
