@@ -28,15 +28,28 @@
 <div class="dynamic-attribute-row" data-attr-name="{{ name }}">
     {% set current_name = name_prefix + ('[{}]'.format(name) if name_prefix else name) %}
 
+
+    {# Dropdown Select Menu #}
+    {% if attr.options is defined and attr.options %}
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ name | replace('_', ' ') | title }}</label>
+        <select name="{{ current_name }}"
+            class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500">
+            {% for option in attr.options %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
     {# Simple Input Types (string, date, number) #}
-    {% if attr.type in ['string', 'full-date', 'uint'] or name == 'user_pseudonym' %}
+    {% elif attr.type in ['string', 'full-date', 'uint'] or name == 'user_pseudonym' %}
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 mb-1">{{ name | replace('_', ' ') | title }}</label>
         <input type="{{ 'date' if attr.type == 'full-date' else 'number' if attr.type == 'uint' else 'text' }}"
             class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500"
             name="{{ current_name }}" value="{{ attr.filled_value if attr.filled_value is not none else '' }}" {% if
-            attr.filled_value or name=='user_pseudonym' %}readonly{% endif %} {% if not is_optional %}required{% endif
-            %} {% if attr.type=='uint' %}min="0" {% endif %}>
+            attr.filled_value or name=='user_pseudonym' %}readonly{% endif %} {% if attr.get('mandatory') %}required{%
+            endif %} {% if attr.type=='uint' %}min="0" {% endif %}>
     </div>
 
     {# Boolean (Toggle Switch) #}
@@ -55,12 +68,15 @@
 
     {# List Type (Recursive & Conditional Logic) #}
     {% elif attr.type == 'list' %}
-    <div class="p-4 border border-gray-200 rounded-md space-y-4 mb-4 list-container" data-list-name="{{ name }}">
+    <div class="p-4 border border-gray-200 rounded-md space-y-4 mb-4 list-container" data-list-name="{{ name }}" {% if
+        attr.at_least_one_of %}data-at-least-one-of='{{ attr.at_least_one_of | tojson | safe }}' {% endif %}>
         <h3 class="text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</h3>
-
+        <div class="hidden text-sm text-red-600 p-3 bg-red-50 rounded-md at-least-one-of-error">
+            Please fill in at least one of the fields in this section.
+        </div>
         <div class="list-items-wrapper space-y-4">
 
-            {# UNTOUCHED: Special handling for Seafarer 'capacities' (mdoc only). #}
+            {# Special handling for Seafarer 'capacities' (mdoc only). #}
             {% if name == 'capacities' %}
             <div class="list-item p-4 border rounded-md bg-gray-50 shadow-sm relative">
                 {{ render_attribute('capacity_code', attr.attributes.capacity_code, is_optional,
@@ -131,68 +147,70 @@
     {# Image Upload #}
     {% elif attr.type == 'jpeg' %}
     {% if name == 'signature_usual_mark' or name == 'signature_usual_mark_issuing_officer' %}
-        <div class="mb-4">
-            <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
-            <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
-            <div class="mt-2 space-y-4">
-                <div class="flex items-center gap-4">
-                    <label>
-                        <input type="radio" name="{{ name }}" value="Sig1" class="sr-only peer/sig1" {% if not is_optional %}checked{% endif %}>
-                        <img src="{{ url_for('static', filename='signature1.jpg') }}"
-                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/sig1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/sig1:opacity-100">
-                    </label>
-                </div>
-                <div>
-                    <label for="fileInput-{{name}}" class="cursor-pointer">
-                        <input type="radio" name="{{ name }}" value="SigUpload" id="OptionSigUpload-{{name}}"
-                            class="sr-only peer/sigupload">
-                        <div
-                            class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/sigupload:border-indigo-600">
-                            <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
-                                accept="image/jpeg" capture>
-                            <span>Upload a signature file</span>
-                            <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x100</p>
-                        </div>
-                    </label>
-                    <div id="preview-{{name}}" class="mt-2"></div>
-                </div>
+    <div class="mb-4">
+        <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
+        <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
+        <div class="mt-2 space-y-4">
+            <div class="flex items-center gap-4">
+                <label>
+                    <input type="radio" name="{{ name }}" value="Sig1" class="sr-only peer/sig1" {% if not is_optional
+                        %}checked{% endif %}>
+                    <img src="{{ url_for('static', filename='signature1.jpg') }}"
+                        class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/sig1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/sig1:opacity-100">
+                </label>
+            </div>
+            <div>
+                <label for="fileInput-{{name}}" class="cursor-pointer">
+                    <input type="radio" name="{{ name }}" value="SigUpload" id="OptionSigUpload-{{name}}"
+                        class="sr-only peer/sigupload">
+                    <div
+                        class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/sigupload:border-indigo-600">
+                        <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
+                            accept="image/jpeg" capture>
+                        <span>Upload a signature file</span>
+                        <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x100</p>
+                    </div>
+                </label>
+                <div id="preview-{{name}}" class="mt-2"></div>
             </div>
         </div>
+    </div>
     {% else %}
-        <div class="mb-4">
-            <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
-            <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
-            <div class="mt-2 space-y-4">
-                <div class="flex items-center gap-4">
-                    <label>
-                        <input type="radio" name="{{ name }}" value="Port1" class="sr-only peer/port1" {% if not is_optional %}checked{% endif %}>
-                        <img src="{{ url_for('static', filename='image.jpeg') }}"
-                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port1:opacity-100">
-                    </label>
-                    <label>
-                        <input type="radio" name="{{ name }}" value="Port2" class="sr-only peer/port2">
-                        <img src="{{ url_for('static', filename='image2.jpeg') }}"
-                            class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port2:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port2:opacity-100">
-                    </label>
-                </div>
-                <div>
-                    <label for="fileInput-{{name}}" class="cursor-pointer">
-                        <input type="radio" name="{{ name }}" value="PortUpload" id="OptionPortUpload-{{name}}"
-                            class="sr-only peer/portupload">
-                        <div
-                            class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/portupload:border-indigo-600">
-                            <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
-                                accept="image/jpeg" capture>
-                            <span>Upload a file</span>
-                            <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x433</p>
-                        </div>
-                    </label>
-                    <div id="preview-{{name}}" class="mt-2"></div>
-                </div>
+    <div class="mb-4">
+        <label class="block text-lg font-semibold text-gray-800">{{ name | replace('_', ' ') | title }}</label>
+        <p class="text-sm text-gray-600">Please select one option or upload a file.</p>
+        <div class="mt-2 space-y-4">
+            <div class="flex items-center gap-4">
+                <label>
+                    <input type="radio" name="{{ name }}" value="Port1" class="sr-only peer/port1" {% if not is_optional
+                        %}checked{% endif %}>
+                    <img src="{{ url_for('static', filename='image.jpeg') }}"
+                        class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port1:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port1:opacity-100">
+                </label>
+                <label>
+                    <input type="radio" name="{{ name }}" value="Port2" class="sr-only peer/port2">
+                    <img src="{{ url_for('static', filename='image2.jpeg') }}"
+                        class="w-24 h-24 rounded-lg border-2 border-transparent peer-checked/port2:border-indigo-600 cursor-pointer object-cover opacity-50 peer-checked/port2:opacity-100">
+                </label>
+            </div>
+            <div>
+                <label for="fileInput-{{name}}" class="cursor-pointer">
+                    <input type="radio" name="{{ name }}" value="PortUpload" id="OptionPortUpload-{{name}}"
+                        class="sr-only peer/portupload">
+                    <div
+                        class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center peer-checked/portupload:border-indigo-600">
+                        <input type="file" name="{{ name }}" id="fileInput-{{name}}" class="hidden file-input"
+                            accept="image/jpeg" capture>
+                        <span>Upload a file</span>
+                        <p class="text-xs text-gray-500">Type: image/jpeg, Size(pixels): 360x433</p>
+                    </div>
+                </label>
+                <div id="preview-{{name}}" class="mt-2"></div>
             </div>
         </div>
+    </div>
     {% endif %}
-{% endif %}
+    {% endif %}
 </div>
 {% endmacro %}
 
@@ -434,12 +452,7 @@
                     const fileInput = event.target;
                     const file = fileInput.files[0];
                     const container = fileInput.closest('.dynamic-attribute-row');
-                    
-                    // Find the radio button associated with the file upload for this specific field.
-                    // The id of the radio button is "OptionPortUpload-{{name}}" or "OptionSigUpload-{{name}}".
-                    // We can find it by looking for a radio button with the same "name" attribute as the file input.
-                    const uploadRadio = container.querySelector(`input[type="radio"][name="${fileInput.name}"][value$="Upload"]`);
-
+                    const uploadRadio = container.querySelector('input[type="radio"][value="Port3"]');
                     const previewContainer = container.querySelector('[id^="preview-"]');
 
                     if (file && uploadRadio) {
@@ -452,7 +465,7 @@
                                 img.src = e.target.result;
                                 img.className = 'w-24 h-auto rounded-lg mt-2 object-cover';
                                 previewContainer.appendChild(img);
-                            };
+                            }
                             reader.readAsDataURL(file);
                         }
                     } else if (previewContainer) {
@@ -462,42 +475,41 @@
             });
         });
 
-        // =======================================================
-        // Special Case: Driving Privileges (Legacy JS)
-        // =======================================================
-        function addDrivingCategory() {
-            const container = document.getElementById('AddCategory');
-            const newIndex = container.children.length;
-            const newCategoryDiv = document.createElement("div");
-            newCategoryDiv.className = `removeclass${newIndex + 1} space-y-2 mt-4 border p-3 rounded-md bg-gray-50`;
-            newCategoryDiv.innerHTML = `
-            <label>Category</label>
-            <select name="driving_privileges[${newIndex}][vehicle_category_code]" class="w-full p-2 border border-gray-300 rounded-md">
-                <option>AM</option><option>A1</option><option>A2</option><option>A</option><option>B1</option><option>B</option><option>C1</option><option>C</option><option>D1</option><option>D</option><option>BE</option><option>C1E</option><option>CE</option><option>D1E</option><option>DE</option>
-            </select>
-            <div>Issue Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="driving_privileges[${newIndex}][issue_date]" required></div>
-            <div>Expiry Date: <input type="date" class="w-full p-2 border border-gray-300 rounded-md" name="driving_privileges[${newIndex}][expiry_date]" required></div>
-            <button type="button" class="text-xs text-red-600 hover:text-red-800 font-semibold" onclick="this.parentElement.remove();">Remove Category</button>
-        `;
-            container.appendChild(newCategoryDiv);
-        }
 
         // =======================================================
         // Form Submission Validation
         // =======================================================
         function submitValidation() {
+            //at least one of validation
+            document.querySelectorAll('.at-least-one-of-error').forEach(el => el.classList.add('hidden'));
+
+            const containersToValidate = document.querySelectorAll('[data-at-least-one-of]');
+            for (const container of containersToValidate) {
+                const fields = JSON.parse(container.dataset.atLeastOneOf);
+
+                // Use Array.some() to check if at least one field has a value
+                const isAnyFieldFilled = fields.some(fieldName => {
+                    const input = container.querySelector(`[name$="[${fieldName}]"]`);
+                    return input && input.value.trim() !== '';
+                });
+
+                if (!isAnyFieldFilled) {
+                    const errorElement = container.querySelector('.at-least-one-of-error');
+                    if (errorElement) {
+                        errorElement.classList.remove('hidden');
+                    }
+                    // Scroll the error into view for better user experience
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return false; // Prevent form submission
+                }
+            }
+
             const fileInputs = document.querySelectorAll('.file-input');
             for (const fileInput of fileInputs) {
-                const container = fileInput.closest('.dynamic-attribute-row');
-                
-                // Find the radio button associated with this file input.
-                // It must have the same 'name' as the file input and a value ending in 'Upload'.
-                const radio = container.querySelector(`input[type="radio"][name="${fileInput.name}"][value$="Upload"]`);
-
+                const radio = fileInput.closest('.dynamic-attribute-row').querySelector('input[type="radio"][value="Port3"]');
                 if (radio && radio.checked) {
                     if (!fileInput.files[0]) {
-                        const fieldName = fileInput.name.replace('_', ' ').toLowerCase();
-                        alert(`Please select a file to upload or choose another option for ${fieldName}.`);
+                        alert('Please select a file to upload or choose another portrait option.');
                         return false;
                     }
                 }
@@ -506,7 +518,6 @@
         }
 
         // Make functions globally accessible for inline event handlers
-        window.addDrivingCategory = addDrivingCategory;
         window.submitValidation = submitValidation;
     </script>
 </body>

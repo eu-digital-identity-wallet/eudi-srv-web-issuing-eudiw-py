@@ -853,7 +853,7 @@ def credential_offer():
             ):
                 credentials["sd-jwt vc format"].update(
                     # {"Personal Identification Data": cred}
-                    {cred: credential["display"][0]["name"]}
+                    {cred: credential["credential_metadata"]["display"][0]["name"]}
                 )
 
         if credential["format"] == "mso_mdoc":
@@ -863,7 +863,7 @@ def credential_offer():
                 in cfgservice.auth_method_supported_credencials["country_selection"]
             ):
                 credentials["mdoc format"].update(
-                    {cred: credential["display"][0]["name"]}
+                    {cred: credential["credential_metadata"]["display"][0]["name"]}
                 )
 
     return render_template(

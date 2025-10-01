@@ -41,28 +41,28 @@
 <div class="attribute-block">
     <label class="font-pf block font-bold text-custom-gray">{{ name | replace('_', ' ') | title }}</label>
     <div class="mt-2 pl-4 border-l-2 border-gray-400 space-y-3">
-        {%- for item in value %}
+        {% for item in value %}
+        {# For each item in the list, create a slightly indented block #}
         <div class="bg-white/60 p-3 rounded-md">
-            {%- if item is mapping %}
-                {%- for sub_name, sub_value in item.items() %}
-                    {{ render_attribute_display(sub_name, sub_value) }}
-                {%- endfor %}
-            {%- else %}
-                <p class="font-pf text-base text-custom-gray">{{ item }}</p>
-            {%- endif %}
+            {# Check if the item is a dictionary before trying to loop through its items #}
+            {% if item is mapping %}
+            {% for sub_name, sub_value in item.items() %}
+            {# Recursively call the macro to display the item's contents #}
+            {{ render_attribute_display(sub_name, sub_value) }}
+            {% endfor %}
+            {# If the item is not a dictionary (e.g., just a string), display it directly #}
+            {% else %}
+            <p class="font-pf text-base text-custom-gray">{{ item }}</p>
+            {% endif %}
         </div>
-        {%- endfor %}
+        {% endfor %}
     </div>
 </div>
 {# It's an image #}
-{% elif name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image","signature_usual_mark", "picture"] %}
+{% elif name in ["portrait", "issuing_authority_logo", "signature_usual_mark_issuing_officer", "image"] %}
 <div class="attribute-block">
     <label class="block text-base font-bold text-custom-gray">{{ name | title }}</label>
-    {% if "signature" in name %}
-        <img class="mt-1 rounded-lg shadow-md w-48 h-auto object-cover" src="data:image/jpeg;base64,{{ value }}">
-    {% else %}
-        <img class="mt-1 rounded-lg shadow-md w-32 h-32 object-cover" src="data:image/jpeg;base64,{{ value }}">
-    {% endif %}
+    <img class="mt-1 rounded-lg shadow-md w-32 h-32 object-cover" src="data:image/jpeg;base64,{{ value }}">
 </div>
 {# It's a simple value (string, number, etc.) #}
 {% else %}
