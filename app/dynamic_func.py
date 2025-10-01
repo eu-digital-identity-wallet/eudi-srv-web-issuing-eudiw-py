@@ -314,7 +314,11 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "age_birth_year" in data and isinstance(data["age_birth_year"], str):
         data.update({"age_birth_year": int(data["age_birth_year"])})
 
-    if "gender" in data and isinstance(data["gender"], str) and data["gender"].isdigit():
+    if (
+        "gender" in data
+        and isinstance(data["gender"], str)
+        and data["gender"].isdigit()
+    ):
         data["gender"] = int(data["gender"])
 
     if "residence_address" in data and isinstance(data["residence_address"], list):
@@ -323,8 +327,12 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "issuing_authority_logo" in issuer_claims:
         data.update({"issuing_authority_logo": cfgserv.issuing_authority_logo})
 
-    if format == "dc+sd-jwt" and "birthdate" not in data and "birth_date" in data and "birthdate" in attributes_req:
-        print("\ninside if")
+    if (
+        format == "dc+sd-jwt"
+        and "birthdate" not in data
+        and "birth_date" in data
+        and "birthdate" in attributes_req
+    ):
         data["birthdate"] = data.pop("birth_date")
 
     if format == "mso_mdoc":
