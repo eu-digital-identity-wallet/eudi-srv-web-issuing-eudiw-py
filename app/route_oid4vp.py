@@ -284,14 +284,11 @@ def getpidoid4vp():
             error_description=error_msg,
         )
 
-    mdoc_json = cbor2elems(response.json()["vp_token"][0] + "==")
+    mdoc_json = cbor2elems(response.json()["vp_token"]["query_0"][0] + "==")
     is_ageOver18 = False
     attributesForm = {}
 
     if current_session.authorization_details:
-        print("\nauthorization_details: ", current_session.authorization_details)
-
-        print("\n")
 
         for credential_id in current_session.authorization_details:
             if isinstance(credential_id, dict):
