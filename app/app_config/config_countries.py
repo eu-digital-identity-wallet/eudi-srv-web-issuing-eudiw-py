@@ -122,39 +122,16 @@ class ConfCountries:
                 "eu.europa.ec.eudi.over18_mdoc",
             ],
             "connection_type": "oauth",
-            "oidc_auth": {
-                "url": "https://preprod.autenticacao.gov.pt/oauth/askauthorization?",
-                "redirect_uri": "https://preprod.issuer.eudiw.dev/"
-                + "dynamic/redirect",
-                "scope": {
-                    "eu.europa.ec.eudi.pid.1": {
-                        "given_name": "http://interop.gov.pt/MDC/Cidadao/NomeProprio",
-                        "family_name": "http://interop.gov.pt/MDC/Cidadao/NomeApelido",
-                        "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
-                        #"nationality": "http://interop.gov.pt/MDC/Cidadao/Nacionalidade",
-                        #"birth_place":"http://interop.gov.pt/IMTT/Cidadao/LocalNascimento",
-                        #"nif":"http://interop.gov.pt/MDC/Cidadao/NIF"
-                        
-                    },
-                    "org.iso.18013.5.1.mDL": {
-                        "nif": "http://interop.gov.pt/MDC/Cidadao/NIF",
-                        "birth_date": "http://interop.gov.pt/MDC/Cidadao/DataNascimento",
-                        "given_name": "http://interop.gov.pt/IMTT/Cidadao/NomeProprio",
-                        "family_name": "http://interop.gov.pt/IMTT/Cidadao/NomeApelido",
-                        "issuing_authority": "http://interop.gov.pt/IMTT/Cidadao/EntidadeEmissora",
-                        "document_number": "http://interop.gov.pt/IMTT/Cidadao/NoCarta",
-                        "portrait": "http://interop.gov.pt/DadosCC/Cidadao/Foto",
-                        "driving_privileges": "http://interop.gov.pt/IMTT/Cidadao/Categorias",
-                    },
-                },
-                "response_type": "token",
-                "client_id": "4819147113201437011",
-            },
-            "attribute_request": {
-                "url": "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager?token=",
-                "headers": "",
-                "custom_modifiers": "",
-            },
+            "oauth_auth": {
+                "base_url": "https://country-connector.ageverification.dev",
+                "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
+                "scope": "profile",
+                "state": "hkMVY7vjuN7xyLl5",
+                "response_type": "code",
+                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            }
+
         },
         "EE": {
             "name": "Estonia",
