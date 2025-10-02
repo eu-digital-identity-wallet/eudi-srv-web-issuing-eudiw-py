@@ -89,15 +89,15 @@ def validate_vp_token(response_json, credentials_requested):
         return True, errorMsg
 
     # Validate values received are the same values requested
-    namespaces = mdoc_cbor["documents"][0]["issuerSigned"]["nameSpaces"]
+    #namespaces = mdoc_cbor["documents"][0]["issuerSigned"]["nameSpaces"]
 
-    attributes_requested = []
+    #attributes_requested = []
 
-    for id in credentials_requested:
+    """ for id in credentials_requested:
         for doctype in cfgservice.dynamic_issuing[id]:
             for namespace in cfgservice.dynamic_issuing[id][doctype]:
                 for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
-                    attributes_requested.append(attribute)
+                    attributes_requested.append(attribute) """
 
     # attributes_requested = auth_request_values["input_descriptor"]
     """ attributes_received = []
