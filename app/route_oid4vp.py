@@ -48,6 +48,7 @@ CORS(oid4vp)  # enable CORS on the blue print
 
 # secrets
 from app.data_management import oid4vp_requests, form_dynamic_data
+from . import oidc_metadata
 
 
 @oid4vp.route("/oid4vp", methods=["GET"])
@@ -80,40 +81,44 @@ def openid4vp():
 
     session["oid4vp_cred_requested"] = credentials_requested
 
-    input_descriptors = []
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    for id in credentials_requested:
-        for doctype in cfgservice.dynamic_issuing[id]:
-            fields = []
-            input_descriptors.append(
-                {
-                    "id": doctype,
-                    "format": {
-                        "mso_mdoc": {"alg": ["ES256", "ES384", "ES512", "EdDSA"]}
-                    },
-                    "name": "EUDI PID",
-                    "purpose": "We need to verify your identity",
-                    "constraints": {"fields": fields},
-                }
+    dcql_credentials = []
+    query_id_counter = 0
+
+    credentials = ["eu.europa.ec.eudi.pid_mdoc"]
+    for credential_requested in credentials:
+        credential_config = credentialsSupported[credential_requested]
+        credential_format = credential_config["format"]
+
+        query_id = f"query_{query_id_counter}"
+        dcql_credential = {"id": query_id, "format": credential_format, "claims": []}
+
+        # Add the meta object based on the format
+        if credential_format == "dc+sd-jwt":
+            dcql_credential["meta"] = {"vct_values": [credential_config["vct"]]}
+        elif credential_format == "mso_mdoc":
+            dcql_credential["meta"] = {"doctype_value": credential_config["doctype"]}
+
+        for claim in credential_config["claims"]:
+            dcql_credential["claims"].append(
+                {"path": claim["path"], "intent_to_retain": False}
             )
-            for namespace in cfgservice.dynamic_issuing[id][doctype]:
-                for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
-                    fields.append(
-                        {
-                            "path": ["$['" + namespace + "']['" + attribute + "']"],
-                            "intent_to_retain": False,
-                        }
-                    )
+
+        dcql_credentials.append(dcql_credential)
+
+        query_id_counter += 1
+
+    # Final DCQL query
+    dcql_query = {"credentials": dcql_credentials}
 
     url = cfgservice.dynamic_presentation_url
     payload_cross_device = json.dumps(
         {
             "type": "vp_token",
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "presentation_definition": {
-                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors,
-            },
+            "dcql_query": dcql_query,
+            "request_uri_method": "post",
         }
     )
 
@@ -121,10 +126,8 @@ def openid4vp():
         {
             "type": "vp_token",
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "presentation_definition": {
-                "id": "32f54163-7166-48f1-93d8-ff217bdb0653",
-                "input_descriptors": input_descriptors,
-            },
+            "request_uri_method": "post",
+            "dcql_query": dcql_query,
             "wallet_response_redirect_uri_template": cfgservice.service_url
             + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
             + session["session_id"],
@@ -265,7 +268,8 @@ def getpidoid4vp():
             error_description=error_msg,
         )
 
-    mdoc_json = cbor2elems(response.json()["vp_token"][0] + "==")
+    mdoc_json = cbor2elems(response.json()["vp_token"]["query_0"][0] + "==")
+
     is_ageOver18 = False
     attributesForm = {}
 
