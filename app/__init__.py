@@ -145,7 +145,6 @@ def setup_metadata():
     oidc_metadata = replace_domain(oidc_metadata, old_domain, new_domain)
 
 
-
 setup_metadata()
 
 

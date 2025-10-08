@@ -770,7 +770,6 @@ def token():
 
         response_json = json.loads(response.get_data())
 
-
         if "access_token" in response_json:
             session_id = str(uuid.uuid4())
             session_ids.update(
@@ -875,13 +874,13 @@ def credential():
     access_token = headers["Authorization"][7:]
     session_id = getSessionId_accessToken(access_token)
 
-    """ cfgservice.app_logger.info(
+    cfgservice.app_logger.info(
         ", Session ID: "
         + session_id
         + ", "
         + "Credential Request, Payload: "
         + str(payload)
-    ) """
+    )
 
     _response = service_endpoint(current_app.server.get_endpoint("credential"))
 

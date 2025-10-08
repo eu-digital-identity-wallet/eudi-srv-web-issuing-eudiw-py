@@ -278,6 +278,7 @@ def getMandatoryAttributesSDJWT(claims):
     for claim in level1_claims:
         attribute_name = claim["path"][0]
         if attribute_name == "nationalities":
+
             attributes_form.update(
                 {attribute_name: {"type": claim["value_type"], "filled_value": None}}
             )
@@ -333,7 +334,6 @@ def getMandatoryAttributesSDJWT(claims):
             "nationalities",
             "place_of_birth",
         ):
-
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim[
                     "issuer_conditions"
