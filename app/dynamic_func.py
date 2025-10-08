@@ -275,9 +275,6 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     if "residence_address" in data and isinstance(data["residence_address"], list):
         data.update({"residence_address": data["residence_address"][0]})
 
-    if "residence_address" in data and isinstance(data["residence_address"], list):
-        data.update({"residence_address": data["residence_address"][0]})
-
     if format == "mso_mdoc":
         for attribute in attributes_req:
             pdata[namescape].update({attribute: data[attribute]})
