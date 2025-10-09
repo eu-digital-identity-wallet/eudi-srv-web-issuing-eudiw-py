@@ -28,7 +28,12 @@ import re
 import time
 import uuid
 import urllib.parse
-from app.misc import authentication_error_redirect, scope2details, vct2id
+from app.misc import (
+    authentication_error_redirect,
+    scope2details,
+    vct2id,
+    verify_jwt_with_x5c,
+)
 import segno
 
 from flask import (
@@ -378,11 +383,17 @@ def verify_credential_request(credential_request):
         if "proof_type" not in credential_request["proof"]:
             return jsonify({"error": "Credential Issuer requires key proof."}), 401
 
-        if (
+        elif (
+            credential_request["proof"]["proof_type"] == "attestation"
+            and "attestation" not in credential_request["proof"]
+        ):
+            return jsonify({"error": "Missing jwt field."}), 401
+
+        elif (
             credential_request["proof"]["proof_type"] == "jwt"
             and "jwt" not in credential_request["proof"]
         ):
-            return jsonify({"error": "Missing jwt field."}), 401
+            return jsonify({"error": "Missing attestation field."}), 401
 
     return credential_request
 
@@ -394,10 +405,14 @@ from cryptography.hazmat.primitives import serialization
 
 
 # gets the public key from a JWK
-def pKfromJWK(jwt_encoded):
+def pKfromJWT(jwt_encoded):
     jwt_decoded = jwt.get_unverified_header(jwt_encoded)
     jwk = jwt_decoded["jwk"]
 
+    return pKfromJWK(jwk)
+
+
+def pKfromJWK(jwk):
     if "crv" not in jwk or jwk["crv"] != "P-256":
         _resp = {
             "error": "invalid_proof",
@@ -438,6 +453,13 @@ from authlib.jose import JsonWebEncryption
 from authlib.jose import JsonWebKey
 
 
+def decode_verify_attestation(jwt_raw):
+    claims = verify_jwt_with_x5c(jwt_raw=jwt_raw)
+
+    print("\nclaims: ", claims)
+    return claims
+
+
 def generate_credentials(credential_request, session_id):
     formatter_request = {}
 
@@ -449,27 +471,28 @@ def generate_credentials(credential_request, session_id):
         }
     )
 
+    pubKeys = []
+
     if (
         "proof" in credential_request
         and credential_request["proof"]["proof_type"] == "jwt"
     ):
         try:
             jwt_encoded = credential_request["proof"]["jwt"]
-            device_key = pKfromJWK(jwt_encoded)
+            device_key = pKfromJWT(jwt_encoded)
             formatter_request.update({"proofs": [{"jwt": device_key}]})
 
         except Exception as e:
             return ""
 
-    pubKeys = []
-    if "proofs" in credential_request:
+    elif "proofs" in credential_request:
         for alg, key_list in credential_request["proofs"].items():
             if alg != "jwt":
                 return {"error": "proof currently not supported"}
             else:
                 for jwt_ in key_list:
                     try:
-                        device_key = pKfromJWK(jwt_)
+                        device_key = pKfromJWT(jwt_)
                         pubKeys.append({alg: device_key})
                     except Exception as e:
                         _resp = {
@@ -481,6 +504,17 @@ def generate_credentials(credential_request, session_id):
                 session_manager.update_is_batch_credential(
                     session_id=session_id, is_batch_credential=True
                 )
+
+        formatter_request.update({"proofs": pubKeys})
+
+    elif (
+        "proof" in credential_request
+        and credential_request["proof"]["proof_type"] == "attestation"
+    ):
+        claims = decode_verify_attestation(credential_request["proof"]["attestation"])
+        for _jwk in claims["attested_keys"]:
+            device_key = pKfromJWK(_jwk)
+            pubKeys.append({"attestation": device_key})
 
         formatter_request.update({"proofs": pubKeys})
 
@@ -831,12 +865,12 @@ def deferred_credential():
     return _response, 200
 
 
-@oidc.route("credential_offer_choice", methods=["GET"])
+""" @oidc.route("credential_offer_choice", methods=["GET"])
 def credential_offer():
-    """Page for selecting credentials
+    #Page for selecting credentials
 
-    Loads credentials supported by EUDIW Issuer
-    """
+    #Loads credentials supported by EUDIW Issuer
+
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     credentials = {"sd-jwt vc format": {}, "mdoc format": {}}
@@ -871,7 +905,7 @@ def credential_offer():
         cred=credentials,
         redirect_url=cfgservice.service_url,
         credential_offer_URI="openid-credential-offer://",
-    )
+    ) """
 
 
 """ @oidc.route("/test_dump", methods=["GET", "POST"])
@@ -899,7 +933,7 @@ def load_test():
     return "load" """
 
 
-@oidc.route("/credential_offer", methods=["GET", "POST"])
+""" @oidc.route("/credential_offer", methods=["GET", "POST"])
 def credentialOffer():
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -959,12 +993,12 @@ def credentialOffer():
                 out = io.BytesIO()
                 qrcode.save(out, kind="png", scale=3)
 
-                """ qrcode.to_artistic(
-                    background=cfgtest.qr_png,
-                    target=out,
-                    kind="png",
-                    scale=4,
-                ) """
+                # qrcode.to_artistic(
+                #    background=cfgtest.qr_png,
+                #    target=out,
+                #    kind="png",
+                #    scale=4,
+                #)
                 # qrcode.terminal()
                 # qr_img_base64 = qrcode.png_data_uri(scale=4)
 
@@ -985,6 +1019,7 @@ def credentialOffer():
 
     else:
         return redirect(cfgservice.service_url + "credential_offer_choice")
+ """
 
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])

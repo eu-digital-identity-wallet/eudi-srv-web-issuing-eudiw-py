@@ -499,6 +499,8 @@ def red():
 
     auth_code = request.args.get("code")
 
+    print("\nauth_code", auth_code)
+
     country_config = cfgcountries.supported_countries[current_session.country]
 
     metadata_url = (
@@ -509,6 +511,8 @@ def red():
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
+
+    print("\ntoken_endpoint", token_endpoint)
 
     token_endpoint_headers = {}
     if (
@@ -537,6 +541,7 @@ def red():
         "redirect_uri": country_config["oauth_auth"]["redirect_uri"],
     }
 
+    print("\ntoken_endpoint_request", params, "\n", token_endpoint_headers)
     try:
         response = requests.post(
             token_endpoint,
@@ -549,6 +554,8 @@ def red():
         print("Access Token:", token_data.get("access_token"))
 
         access_token = token_data.get("access_token")
+
+        print("\naccess_token", access_token)
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
@@ -1015,6 +1022,9 @@ def credentialCreation(credential_request, data, country, session_id):
 
         if "jwt" in proof:
             device_publickey = proof["jwt"]
+
+        if "attestation" in proof:
+            device_publickey = proof["attestation"]
 
         # device_publickey = credential["device_publickey"]
 
