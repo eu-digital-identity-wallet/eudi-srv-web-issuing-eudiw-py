@@ -59,7 +59,7 @@ from boot_validate import (
 )
 
 from app_config.config_service import ConfService as cfgserv
-from app_config.config_countries import ConfCountries as cfgcountries
+from app_config.config_countries import ConfCountries as cfgcountries, ConfFrontend
 from redirect_func import url_get
 from misc import (
     authentication_error_redirect,
@@ -68,6 +68,7 @@ from misc import (
     generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
+    post_redirect_with_payload,
     scope2details,
     calculate_age,
     validate_image,
@@ -142,12 +143,24 @@ def Supported_Countries():
 
     # session["jws_token"] = token  # authorization_params["token"]
 
-    return render_template(
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_countries",
+        data_payload={
+            "countries": display_countries,
+            "authorization_details": current_session.authorization_details,
+            "redirect_url": cfgserv.service_url,
+            "session_id": session_id,
+        },
+    )
+
+    """ return render_template(
         "dynamic/dynamic-countries.html",
         countries=display_countries,
         authorization_details=json.dumps(current_session.authorization_details),
         redirect_url=cfgserv.service_url,
-    )
+    ) """
 
 
 @dynamic.route("/country_selected", methods=["GET", "POST"])
@@ -219,12 +232,26 @@ def dynamic_R1(country):
             if key not in mandatory_attributes
         }
 
-        return render_template(
+        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
+            "url"
+        ]
+
+        return post_redirect_with_payload(
+            target_url=f"{target_url}/display_form",
+            data_payload={
+                "mandatory_attributes": mandatory_attributes,
+                "optional_attributes": optional_attributes_filtered,
+                "redirect_url": f"{cfgserv.service_url}dynamic/form",
+                "session_id": session_id,
+            },
+        )
+
+        """ return render_template(
             "dynamic/dynamic-form.html",
             mandatory_attributes=mandatory_attributes,
             optional_attributes=optional_attributes_filtered,
             redirect_url=cfgserv.service_url + "dynamic/form",
-        )
+        ) """
 
     elif country == "sample":
 
@@ -1149,7 +1176,6 @@ def auth():
         )
     choice = request.form.get("optionsRadios")
 
-    choice = request.form.get("optionsRadios")
     if choice == "link1":
         return redirect(cfgserv.service_url + "oid4vp")
     elif choice == "link2":
@@ -1519,12 +1545,23 @@ def Dynamic_form():
 
     print("\nPresentation Data: ", presentation_data)
 
-    return render_template(
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_authorization",
+        data_payload={
+            "presentation_data": presentation_data,
+            "redirect_url": f"{cfgserv.service_url}dynamic/redirect_wallet",
+            "session_id": session_id,
+        },
+    )
+
+    """ return render_template(
         "dynamic/form_authorize.html",
         presentation_data=presentation_data,
         user_id=user_id,
         redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
-    )
+    ) """
 
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])

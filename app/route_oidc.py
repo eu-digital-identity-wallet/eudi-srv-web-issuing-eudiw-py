@@ -30,6 +30,7 @@ import uuid
 import urllib.parse
 from app.misc import (
     authentication_error_redirect,
+    post_redirect_with_payload,
     scope2details,
     vct2id,
     verify_jwt_with_x5c,
@@ -38,6 +39,7 @@ import segno
 
 from flask import (
     Blueprint,
+    Response,
     jsonify,
     request,
     session,
@@ -61,7 +63,7 @@ from datetime import datetime, timedelta
 import requests
 
 from .app_config.config_service import ConfService as cfgservice
-
+from .app_config.config_countries import ConfFrontend
 from . import oidc_metadata, openid_metadata, oidc_metadata_clean
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
@@ -78,7 +80,7 @@ def well_known2():
     info = {
         "response": openid_metadata,
         "http_headers": [
-            ("Content-type", "application/json; charset=utf-8"),
+            ("Content-type", "application/json"),
             ("Pragma", "no-cache"),
             ("Cache-Control", "no-store"),
         ],
@@ -93,13 +95,23 @@ def well_known2():
     return resp
 
 
+@oidc.route("/.well-known/oauth-authorization-server/frontend")
+def well_known3():
+    url = "https://dev.issuer.eudiw.dev/frontend/.well-known/oauth-authorization-server"
+    r = requests.get(url)
+
+    return Response(
+        r.content, status=r.status_code, content_type=r.headers.get("Content-Type")
+    )
+
+
 @oidc.route("/.well-known/<service>")
 def well_known(service):
     if service == "openid-credential-issuer":
         info = {
             "response": oidc_metadata_clean,
             "http_headers": [
-                ("Content-type", "application/json; charset=utf-8"),
+                ("Content-type", "application/json"),
                 ("Pragma", "no-cache"),
                 ("Cache-Control", "no-store"),
             ],
@@ -116,7 +128,7 @@ def well_known(service):
         info = {
             "response": oidc_metadata,
             "http_headers": [
-                ("Content-type", "application/json; charset=utf-8"),
+                ("Content-type", "application/json"),
                 ("Pragma", "no-cache"),
                 ("Cache-Control", "no-store"),
             ],
@@ -133,7 +145,7 @@ def well_known(service):
         info = {
             "response": openid_metadata,
             "http_headers": [
-                ("Content-type", "application/json; charset=utf-8"),
+                ("Content-type", "application/json"),
                 ("Pragma", "no-cache"),
                 ("Cache-Control", "no-store"),
             ],
@@ -152,7 +164,7 @@ def well_known(service):
         info = {
             "response": openid_metadata,
             "http_headers": [
-                ("Content-type", "application/json; charset=utf-8"),
+                ("Content-type", "application/json"),
                 ("Pragma", "no-cache"),
                 ("Cache-Control", "no-store"),
             ],
@@ -166,21 +178,20 @@ def well_known(service):
 
         return resp
 
-    elif service == "webfinger":
-        _endpoint = current_app.server.get_endpoint("discovery")
     else:
         return make_response("Not supported", 400)
-
-    return service_endpoint(_endpoint)
 
 
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
 
+    print("\nauth_choice: ", request.args)
+
     token = request.args.get("token")
     session_id = request.args.get("session_id")
     scope = request.args.get("scope")
     authorization_details_str = request.args.get("authorization_details")
+    frontend_id = request.args.get("frontend_id")
 
     session["session_id"] = session_id
 
@@ -232,6 +243,7 @@ def auth_choice():
         scope=credential_configuration_id,
         authorization_details=authorization_details,
         credentials_requested=credentials_requested,
+        frontend_id=frontend_id,
     )
 
     for cred in credentials_requested:
@@ -263,13 +275,28 @@ def auth_choice():
     if pid_auth == False and country_selection == False:
         error = "Combination of requested credentials is not valid!"
 
-    return render_template(
+    print("\npid_auth: ", pid_auth)
+    print("\ncountry_selection: ", country_selection)
+
+    target_url = ConfFrontend.registered_frontends[frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_auth_method",
+        data_payload={
+            "pid_auth": pid_auth,
+            "country_selection": country_selection,
+            "redirect_url": cfgservice.service_url,
+            "session_id": session_id,
+        },
+    )
+
+    """ return render_template(
         "misc/auth_method.html",
         pid_auth=pid_auth,
         country_selection=country_selection,
         error=error,
         redirect_url=cfgservice.service_url,
-    )
+    ) """
 
     # return render_template("misc/auth_method.html")
 
@@ -865,11 +892,11 @@ def deferred_credential():
     return _response, 200
 
 
-""" @oidc.route("credential_offer_choice", methods=["GET"])
+@oidc.route("credential_offer_choice", methods=["GET"])
 def credential_offer():
-    #Page for selecting credentials
+    # Page for selecting credentials
 
-    #Loads credentials supported by EUDIW Issuer
+    # Loads credentials supported by EUDIW Issuer
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
@@ -905,7 +932,7 @@ def credential_offer():
         cred=credentials,
         redirect_url=cfgservice.service_url,
         credential_offer_URI="openid-credential-offer://",
-    ) """
+    )
 
 
 """ @oidc.route("/test_dump", methods=["GET", "POST"])
@@ -933,7 +960,7 @@ def load_test():
     return "load" """
 
 
-""" @oidc.route("/credential_offer", methods=["GET", "POST"])
+@oidc.route("/credential_offer", methods=["GET", "POST"])
 def credentialOffer():
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -998,7 +1025,7 @@ def credentialOffer():
                 #    target=out,
                 #    kind="png",
                 #    scale=4,
-                #)
+                # )
                 # qrcode.terminal()
                 # qr_img_base64 = qrcode.png_data_uri(scale=4)
 
@@ -1019,7 +1046,6 @@ def credentialOffer():
 
     else:
         return redirect(cfgservice.service_url + "credential_offer_choice")
- """
 
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])

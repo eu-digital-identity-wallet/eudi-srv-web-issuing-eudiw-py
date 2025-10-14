@@ -217,3 +217,11 @@ class ConfCountries:
             "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
         },
     }
+
+
+class ConfFrontend:
+    registered_frontends = {
+        "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {
+            "url": "https://dev.issuer.eudiw.dev/frontend"
+        }
+    }

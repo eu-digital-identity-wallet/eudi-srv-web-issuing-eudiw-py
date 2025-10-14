@@ -15,9 +15,6 @@
 # limitations under the License.
 #
 ###############################################################################
-# --- Session: The data model for a single request session ---
-# This class is a simple data container, holding the state for a single session.
-# It does not perform any multi-threaded operations and therefore does not need any locks.
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, List
 import threading
@@ -35,6 +32,7 @@ class Session:
         pre_authorized_code (Optional[str]): A pre-authorized code for issuance.
         pre_authorized_code_ref (Optional[str]): A reference for the pre-authorized code.
         jws_token (Optional[str]): A JWS token for the session.
+        frontend_id (Optional[str]): A unique identifier for the frontend application.
         scope (Optional[str]): A string representing the requested scope.
         authorization_details (Optional[List[Dict]]): A list of dictionaries of authorization details.
         credentials_requested (Optional[List[Dict]]): A list of dictionaries representing the credentials requested.
@@ -53,6 +51,7 @@ class Session:
         pre_authorized_code: Optional[str] = None,
         pre_authorized_code_ref: Optional[str] = None,
         jws_token: Optional[str] = None,
+        frontend_id: Optional[str] = None,
         scope: Optional[str] = None,
         authorization_details: Optional[List[Dict]] = None,
         credentials_requested: Optional[List[Dict]] = None,
@@ -69,6 +68,7 @@ class Session:
         self.pre_authorized_code = pre_authorized_code
         self.pre_authorized_code_ref = pre_authorized_code_ref
         self.jws_token = jws_token
+        self.frontend_id = frontend_id
         self.scope = scope
         self.authorization_details = authorization_details
         self.credentials_requested = credentials_requested
@@ -94,6 +94,8 @@ class Session:
             data["pre_authorized_code_ref"] = self.pre_authorized_code_ref
         if self.jws_token is not None:
             data["jws_token"] = self.jws_token
+        if self.frontend_id is not None:
+            data["frontend_id"] = self.frontend_id
         if self.scope is not None:
             data["scope"] = self.scope
         if self.authorization_details is not None:
@@ -123,6 +125,8 @@ class Session:
             )
         if self.jws_token:
             optional_parts.append(f"jws_token='{self.jws_token}'")
+        if self.frontend_id:
+            optional_parts.append(f"frontend_id='{self.frontend_id}'")
         if self.scope:
             optional_parts.append(f"scope='{self.scope}'")
         if self.authorization_details:
@@ -183,6 +187,7 @@ class SessionManager:
         pre_authorized_code: Optional[str] = None,
         pre_authorized_code_ref: Optional[str] = None,
         jws_token: Optional[str] = None,
+        frontend_id: Optional[str] = None,
         scope: Optional[str] = None,
         authorization_details: Optional[List[Dict]] = None,
         credentials_requested: Optional[List[Dict]] = None,
@@ -204,6 +209,7 @@ class SessionManager:
             pre_authorized_code=pre_authorized_code,
             pre_authorized_code_ref=pre_authorized_code_ref,
             jws_token=jws_token,
+            frontend_id=frontend_id,
             scope=scope,
             authorization_details=authorization_details,
             credentials_requested=credentials_requested,
@@ -345,6 +351,22 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update jws_token for non-existent session_id: {session_id}"
+                )
+
+    def update_frontend_id(self, session_id: str, frontend_id: str):
+        """
+        Updates the 'frontend_id' attribute of a session.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.frontend_id = frontend_id
+                print(
+                    f"Updated frontend_id for session_id {session_id} to: {frontend_id}"
+                )
+            else:
+                print(
+                    f"Warning: Attempted to update frontend_id for non-existent session_id: {session_id}"
                 )
 
     def update_tx_code(self, session_id: str, tx_code: int):
