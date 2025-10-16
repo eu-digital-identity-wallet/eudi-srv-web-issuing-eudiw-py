@@ -207,11 +207,13 @@ def cbor2elems(mdoc):
 
 def sdjwtNestedClaims(claims, credential_metadata):
 
-
     nestedDict = {}
 
     sd_map = {}
-    if "credential_metadata" in credential_metadata and "claims" in credential_metadata["credential_metadata"]:
+    if (
+        "credential_metadata" in credential_metadata
+        and "claims" in credential_metadata["credential_metadata"]
+    ):
         for claim_meta in credential_metadata["credential_metadata"]["claims"]:
             # Use the last part of the 'path' as the claim name
             claim_name = claim_meta["path"][-1]
@@ -231,7 +233,9 @@ def sdjwtNestedClaims(claims, credential_metadata):
 
                 nestedDict.update({SDObj(value=claim): subClaims})
 
-            elif isinstance(value, list) and claim != "nationalities" and len(value) == 1:
+            elif (
+                isinstance(value, list) and claim != "nationalities" and len(value) == 1
+            ):
                 subClaims = {}
                 for element in value:
                     if isinstance(element, dict):
@@ -256,30 +260,11 @@ def sdjwtNestedClaims(claims, credential_metadata):
 
             else:
                 nestedDict.update({SDObj(value=claim): value})
-        
+
         else:
             nestedDict.update({claim: value})
 
     return nestedDict
-
-    """ for subClaim in subClaims:
-        if len(subClaim) == 1 and SDObj(value=subClaim[0]) not in nestedDict:
-            nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
-
-        elif  len(subClaim) == 2:
-            path1 = subClaim[0]
-            path2 = subClaim[1]
-
-            if SDObj(value=subClaim[0]) not in nestedDict:
-                nestedDict.update({SDObj(value=subClaim[0]):claims[subClaim[0]]})
-
-            if isinstance(claims[subClaim[0]], list):
-                for element in claims[subClaim[0]]:
-
-
-
-        
-        elif  len(subClaim) == 3: """
 
 
 def sdjwtFormatter(PID, country):
@@ -295,35 +280,16 @@ def sdjwtFormatter(PID, country):
     hash_object = hashlib.sha256()
 
     seed = int(hash_object.hexdigest(), 16)
-    # doctype = PID["credential_metadata"]["issuer_config"]["doctype"]
-
-    PID_Claims_data = PID["data"]["claims"]
-
-    """ if "date_of_issuance" in PID_Claims_data:
-        iat = DatestringFormatter(PID_Claims_data["date_of_issuance"])
-    else:
-        iat = DatestringFormatter(today.strftime("%Y-%m-%d"))
-        PID_Claims_data.pop("issuance_date") """
 
     today = datetime.date.today()
 
     iat = DatestringFormatter(today.strftime("%Y-%m-%d"))
-
-    """ if "date_of_expiry" in PID_Claims_data:
-        exp = DatestringFormatter(PID_Claims_data["date_of_expiry"])
-        validity = PID_Claims_data["date_of_expiry"]
-    else:
-        exp = DatestringFormatter(PID_Claims_data["expiry_date"])
-        validity = PID_Claims_data["expiry_date"]
-        PID_Claims_data.pop("expiry_date") """
 
     validity = (
         today
         + datetime.timedelta(PID["credential_metadata"]["issuer_config"]["validity"])
     ).strftime("%Y-%m-%d")
     exp = DatestringFormatter(validity)
-
-    # jti = str(uuid4())
 
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]
@@ -352,13 +318,8 @@ def sdjwtFormatter(PID, country):
 
     claims = {
         "iss": cfgservice.service_url[:-1],
-        # "iss": "https://issuer.eudiw.dev",
-        # "jti": jti,
         "iat": iat,
-        # "nbf": iat,
         "exp": exp,
-        # "status": "validation status URL",
-        # "vct":"urn:"+ doctype,
         "vct": vct,
     }
 
@@ -369,19 +330,9 @@ def sdjwtFormatter(PID, country):
 
     JWT_PID_DATA = {}
 
-    # for x, value in enumerate(list(pid_data["claims"].keys())):
-
-    # namespace = list(pid_data["claims"].keys())[x]
-    # PID_DATA = pid_data["claims"]
-
-    # JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA))
-
-    """ for x, value in enumerate(list(pid_data["claims"].keys())):
-        namespace = list(pid_data["claims"].keys())[x]
-        PID_DATA = pid_data["claims"]
-        JWT_PID_DATA.update(DATA_sd_jwt(PID_DATA)) """
-
-    JWT_PID_DATA.update(sdjwtNestedClaims(pid_data["claims"], PID["credential_metadata"]))
+    JWT_PID_DATA.update(
+        sdjwtNestedClaims(pid_data["claims"], PID["credential_metadata"])
+    )
 
     datafinal.update(JWT_PID_DATA)
 

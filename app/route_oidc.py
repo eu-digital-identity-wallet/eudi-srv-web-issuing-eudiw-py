@@ -565,7 +565,9 @@ def generate_credentials(credential_request, session_id):
 def encrypt_response(credential_request, credential_response):
     encryption_config = credential_request.get("credential_response_encryption", {})
 
-    if not all(k in encryption_config for k in ["jwk", "alg", "enc"]):
+    if not encryption_config or not all(
+        k in encryption_config for k in ["jwk", "alg", "enc"]
+    ):
         return (
             jsonify(
                 {

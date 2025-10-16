@@ -40,10 +40,12 @@ import segno
 
 from app.route_dynamic import form_formatter, presentation_formatter
 from .app_config.config_service import ConfService as cfgservice
+from app_config.config_countries import ConfFrontend
 from app.misc import (
     generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
+    post_redirect_with_payload,
 )
 
 from . import session_manager
@@ -80,6 +82,10 @@ def preauthRed():
         session_id=session_id, authorization_details=authorization_details
     )
 
+    session_manager.update_frontend_id(
+        session_id=session_id, frontend_id="5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+    )
+
     # session["authorization_details"] = authorization_details
 
     credentials_requested = []
@@ -109,11 +115,18 @@ def preauthRed():
         if key not in mandatory_attributes
     }
 
-    return render_template(
-        "dynamic/dynamic-form.html",
-        mandatory_attributes=mandatory_attributes,
-        optional_attributes=optional_attributes_filtered,
-        redirect_url=cfgservice.service_url + "preauth_form",
+    current_session = session_manager.get_session(session_id=session_id)
+
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_form",
+        data_payload={
+            "mandatory_attributes": mandatory_attributes,
+            "optional_attributes": optional_attributes_filtered,
+            "redirect_url": f"{cfgservice.service_url}preauth_form",
+            "session_id": session_id,
+        },
     )
 
 
@@ -131,6 +144,8 @@ def preauth_form():
         form_data.update({"effective_from_date": rfc3339_string})
 
     session_id = session["session_id"]
+
+    current_session = session_manager.get_session(session_id=session_id)
 
     form_data.pop("proceed")
 
@@ -150,11 +165,15 @@ def preauth_form():
 
     print("\nPresentation Data: ", presentation_data)
 
-    return render_template(
-        "dynamic/form_authorize.html",
-        presentation_data=presentation_data,
-        user_id=session_id,
-        redirect_url=cfgservice.service_url + "/form_authorize_generate",
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_authorization",
+        data_payload={
+            "presentation_data": presentation_data,
+            "redirect_url": f"{cfgservice.service_url}form_authorize_generate",
+            "session_id": session_id,
+        },
     )
 
 

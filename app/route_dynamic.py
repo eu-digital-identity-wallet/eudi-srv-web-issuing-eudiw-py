@@ -152,13 +152,6 @@ def Supported_Countries():
         },
     )
 
-    """ return render_template(
-        "dynamic/dynamic-countries.html",
-        countries=display_countries,
-        authorization_details=json.dumps(current_session.authorization_details),
-        redirect_url=cfgserv.service_url,
-    ) """
-
 
 @dynamic.route("/country_selected", methods=["GET", "POST"])
 def country_selected():
@@ -200,14 +193,6 @@ def dynamic_R1(country):
     credentials_requested = current_session.credentials_requested
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    """ log.logger_info.info(
-        " - INFO -  Version:"
-        + cfgserv.current_version
-        + " -  URL_R1 for Country: "
-        + country
-        + " has been created"
-    ) """
-
     if country == "FC":
 
         mandatory_attributes = getAttributesForm(current_session.credentials_requested)
@@ -243,13 +228,6 @@ def dynamic_R1(country):
             },
         )
 
-        """ return render_template(
-            "dynamic/dynamic-form.html",
-            mandatory_attributes=mandatory_attributes,
-            optional_attributes=optional_attributes_filtered,
-            redirect_url=cfgserv.service_url + "dynamic/form",
-        ) """
-
     elif country == "sample":
 
         session_manager.update_user_data(
@@ -280,8 +258,6 @@ def dynamic_R1(country):
                 credentials_requested=credentials_requested,
             )
         )
-
-        return redirect(url)
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
 
@@ -326,187 +302,6 @@ def red():
     session_id = session["session_id"]
     print("\nsession_id ", session_id)
     current_session = session_manager.get_session(session_id=session_id)
-
-    """ if current_session.country == "PT":
-
-        if not request.args:  # if args is empty
-            return render_template("/dynamic/pt_url.html")
-
-        (v, l) = validate_mandatory_args(request.args, ["access_token"])
-        if not v:  # if not all arguments are available
-            return authentication_error_redirect(
-                jws_token=current_session.jws_token,
-                error="Missing mandatory args-PT",
-                error_description="Missing mandatory PT-IdP fields",
-            )
-
-        token = request.args.get("access_token")
-
-        if not token:
-            raise ValueError("Access token is required")
-
-        if not re.match(r"^[A-Za-z0-9_-]+$", token):
-            raise ValueError("Invalid token format")
-
-        r1 = requests.post(
-            "https://preprod.autenticacao.gov.pt/oauthresourceserver/api/AttributeManager",
-            json={"token": token},
-        )
-
-        cfgserv.app_logger.info(
-            " - INFO - "
-            + "dynamic/redirect"
-            + " - Version:"
-            + cfgserv.current_version
-            + " - Country: "
-            + current_session.country
-            + " -  entered the route"
-        )
-
-        data = dynamic_R2_data_collect(
-            country=current_session.country,
-            user_id=token
-            + "&authenticationContextId="
-            + r1.json()["authenticationContextId"],
-        )
-
-        if "error" in data and data["error"] == "Pending" and "response" in data:
-            data = data["response"]
-
-        # i = 0
-        #while "error" in data and data["error"] == "Pending" and i < 20:
-        #    time.sleep(2)
-        #    data = dynamic_R2_data_collect(
-        #    country=session["country"], user_id= token + "&authenticationContextId=" + r1.json()["authenticationContextId"]
-        #    )
-        #    i =+ 2
-
-        portuguese_fields = dict()
-        form_data = {}
-
-        credential_requested = current_session.credentials_requested
-        credentialsSupported = oidc_metadata["credential_configurations_supported"]
-
-        for id in credential_requested:
-            format = credentialsSupported[id]["format"]
-            if format == "mso_mdoc":
-                doctype = credentialsSupported[id]["doctype"]
-            elif format == "dc+sd-jwt":
-                doctype = credentialsSupported[id]["issuer_config"]["doctype"]
-
-            portuguese_fields.update(
-                {
-                    doctype: {
-                        "config": cfgcountries.supported_countries["PT"]["oidc_auth"][
-                            "scope"
-                        ][doctype],
-                        "format": format,
-                    }
-                }
-            )
-
-        for doctype in portuguese_fields:
-            for fields in portuguese_fields[doctype]["config"]:
-                for item in data:
-                    if item["name"] == portuguese_fields[doctype]["config"][fields]:
-                        if item["state"] == "Pending":
-                            value = "Pending"
-                        else:
-                            value = item["value"]
-
-                        if doctype not in form_data:
-                            form_data.update({doctype: {fields: value}})
-                        else:
-                            form_data[doctype].update({fields: value})
-                        # form_data[doctype][fields] = item["value"]
-                        break
-
-        for doctype in portuguese_fields:
-            if (
-                "birth_date" in form_data[doctype]
-                and form_data[doctype]["birth_date"] != "Pending"
-            ):
-                form_data[doctype]["birth_date"] = datetime.strptime(
-                    form_data[doctype]["birth_date"], "%d-%m-%Y"
-                ).strftime("%Y-%m-%d")
-
-            if (
-                "driving_privileges" in form_data[doctype]
-                and form_data[doctype]["driving_privileges"] != "Pending"
-            ):
-                json_priv = json.loads(form_data[doctype]["driving_privileges"])
-                form_data[doctype].update({"driving_privileges": json_priv})
-
-            if (
-                "driving_privileges" in form_data[doctype]
-                and form_data[doctype]["driving_privileges"] == "Pending"
-            ):
-                json_priv = [
-                    {
-                        "Type": "Pending",
-                        "IssueDate": "Pending",
-                        "ExpiryDate": "Pending",
-                        "Restriction": [],
-                    }
-                ]
-                form_data[doctype].update({"driving_privileges": json_priv})
-
-            doctype_config = cfgserv.config_doctype[doctype]
-
-            today = date.today()
-            expiry = today + timedelta(days=doctype_config["validity"])
-
-            #if form_data[doctype]["birth_date"] != "Pending":
-            #    form_data[doctype].update({"age_over_18": True if calculate_age(form_data[doctype]["birth_date"]) >= 18 else False})
-            #else:
-            #    form_data[doctype].update({"age_over_18":"Pending"})
-
-            form_data[doctype].update(
-                {"estimated_issuance_date": today.strftime("%Y-%m-%d")}
-            )
-            form_data[doctype].update(
-                {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
-            )
-            form_data[doctype].update({"issuing_country": current_session.country})
-            form_data[doctype].update(
-                {"issuing_authority": doctype_config["issuing_authority"]}
-            )
-            if "credential_type" in doctype_config:
-                form_data[doctype].update(
-                    {"credential_type": doctype_config["credential_type"]}
-                )
-
-            if portuguese_fields[doctype]["format"] == "mso_mdoc":
-                form_data[doctype]["nationality"] = ["PT"]
-                form_data[doctype]["birth_place"] = "Lisboa"
-            elif portuguese_fields[doctype]["format"] == "dc+sd-jwt":
-                form_data[doctype]["place_of_birth"] = [{"locality": "Lisboa"}]
-                form_data[doctype]["nationalities"] = ["PT"]
-
-        user_id = (
-            current_session.country
-            + "."
-            + token
-            + "&authenticationContextId="
-            + r1.json()["authenticationContextId"]
-        )
-
-        return render_template(
-            "dynamic/form_authorize.html",
-            presentation_data=form_data,
-            user_id=user_id,
-            redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
-        )
-
-    elif current_session.country is None:
-
-        country, jws_token = request.args.get("state").split(".")
-
-        session_manager.update_country(session_id=session_id, country=country)
-
-        session_manager.update_jws_token(session_id=session_id, jws_token=jws_token)
-        # session["jws_token"] = jws_token
-        # session["country"] = country """
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
     if not v:  # if not all arguments are available
@@ -686,11 +481,16 @@ def red():
     user_id = current_session.country + "." + session["access_token"]
 
     print("\npresentation_data: ", presentation_data)
-    return render_template(
-        "dynamic/form_authorize.html",
-        presentation_data=presentation_data,
-        user_id=user_id,
-        redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
+
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_authorization",
+        data_payload={
+            "presentation_data": presentation_data,
+            "redirect_url": f"{cfgserv.service_url}dynamic/redirect_wallet",
+            "session_id": session_id,
+        },
     )
 
 
