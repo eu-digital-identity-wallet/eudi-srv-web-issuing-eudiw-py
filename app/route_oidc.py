@@ -193,6 +193,9 @@ def auth_choice():
     authorization_details_str = request.args.get("authorization_details")
     frontend_id = request.args.get("frontend_id")
 
+    if not frontend_id:
+        frontend_id = "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+
     session["session_id"] = session_id
 
     supported_credencials = cfgservice.auth_method_supported_credencials
@@ -619,8 +622,14 @@ def credential():
     if not auth_header:
         return jsonify({"error": "Authorization header is missing"}), 401
 
-    if not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Authorization header must be a Bearer token"}), 401
+    if not (
+        auth_header.lower().startswith("bearer ")
+        or auth_header.lower().startswith("dpop ")
+    ):
+        return (
+            jsonify({"error": "Authorization header must be a Bearer or DPoP token"}),
+            401,
+        )
 
     try:
         bearer_token = auth_header.split(" ")[1]
@@ -637,15 +646,15 @@ def credential():
     # If the result is not a tuple, it's the username string
     session_id = verification_result_introspection
 
-    cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential Request, Payload: {credential_request}"
-    )
-
     verification_result_request = verify_credential_request(credential_request)
 
     if isinstance(verification_result_request, tuple):
         # If it's a tuple, it's an error response. Return it immediately.
         return verification_result_request
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential Request, Payload: {verification_result_request}"
+    )
 
     # If the check passes, the result is the validated request dictionary.
     validated_credential_request = verification_result_request
@@ -770,11 +779,15 @@ def nonce():
     data = jwe.deserialize_compact(encrypted_jwt, key)
     jwe_payload = data["payload"]
 
-    response_data = {"c_nonce": encrypted_jwt.decode("utf-8")}
+    encrypted_jwt_str = encrypted_jwt.decode("utf-8")
+
+    response_data = {"c_nonce": encrypted_jwt_str}
 
     response = jsonify(response_data)
 
     response.headers["Cache-Control"] = "no-store"
+
+    response.headers["DPoP-Nonce"] = encrypted_jwt_str
 
     return response, 200
 
@@ -788,8 +801,13 @@ def deferred_credential():
 
     deferred_transaction_id = deferred_request["transaction_id"]
 
+    try:
+        uuid.UUID(deferred_transaction_id, version=4)
+    except (ValueError, AttributeError):
+        return jsonify({"error": "invalid_transaction_id_format"}), 401
+
     cfgservice.app_logger.info(
-        f", Started Deferred Request, Payload: {deferred_request}"
+        f", Started Deferred Request, Transaction ID: {deferred_transaction_id}"
     )
 
     # Get the Authorization header from the request
