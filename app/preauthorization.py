@@ -46,9 +46,6 @@ from app.misc import (
     getAttributesForm2,
 )
 
-from app.data_management import (
-    transaction_codes,
-)
 from . import session_manager
 
 
@@ -195,17 +192,6 @@ def generate_offer(data):
 
     print("\npre_auth_code: ", pre_auth_code)
 
-    """ transaction_codes.update(
-        {
-            transaction_id: {
-                "pre_auth_code": pre_auth_code,
-                "tx_code": str(tx_code),
-                "expires": datetime.now()
-                + timedelta(minutes=cfgservice.tx_code_expiry),
-            }
-        }
-    ) """
-
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],
         "credential_configuration_ids": current_session.credentials_requested,
@@ -303,25 +289,6 @@ def credentialOfferReq2():
     pre_auth_code = current_session.pre_authorized_code
 
     tx_code = current_session.tx_code
-
-    """ pre_auth_code = generate_preauth_token(
-        data=data, authorization_details=authorization_details
-    )
-
-    tx_code = random.randint(10000, 99999) """
-
-    """ transaction_id = generate_unique_id()
-
-    transaction_codes.update(
-        {
-            transaction_id: {
-                "pre_auth_code": pre_auth_code,
-                "tx_code": str(tx_code),
-                "expires": datetime.now()
-                + timedelta(minutes=cfgservice.tx_code_expiry),
-            }
-        }
-    ) """
 
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],

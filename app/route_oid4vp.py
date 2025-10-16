@@ -49,9 +49,6 @@ from . import oidc_metadata
 oid4vp = Blueprint("oid4vp", __name__, url_prefix="/")
 CORS(oid4vp)  # enable CORS on the blue print
 
-# secrets
-from app.data_management import oid4vp_requests, form_dynamic_data
-
 
 @oid4vp.route("/oid4vp", methods=["GET"])
 def openid4vp():
@@ -67,24 +64,6 @@ def openid4vp():
         + "Authorization selection, Type: "
         + "oid4vp"
     )
-
-    """ authorization_params = session["authorization_params"]
-    authorization_details = []
-
-    if "authorization_details" in authorization_params:
-        authorization_details.extend(
-            json.loads(authorization_params["authorization_details"])
-        )
-    if "scope" in authorization_params:
-        authorization_details.extend(scope2details(authorization_params["scope"]))
-
-    credentials_requested = []
-    for cred in authorization_details:
-        if "credential_configuration_id" in cred:
-            if cred["credential_configuration_id"] not in credentials_requested:
-                credentials_requested.append(cred["credential_configuration_id"])
-
-    session["oid4vp_cred_requested"] = credentials_requested """
 
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
@@ -156,14 +135,8 @@ def openid4vp():
     print("\nresponse_cross: ", response_cross)
     print("\nresponse_same: ", response_same)
 
-    oid4vp_requests.update(
-        {
-            session_id: {
-                "response": response_same,
-                "expires": datetime.now()
-                + timedelta(minutes=cfgservice.deffered_expiry),
-            }
-        }
+    session_manager.update_oid4vp_transaction_id(
+        session_id=session_id, oid4vp_transaction_id=response_same["transaction_id"]
     )
 
     domain = urlparse(url).netloc
@@ -224,24 +197,17 @@ def getpidoid4vp():
             ", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device"
         )
 
+        current_session = session_manager.get_session(session_id=session["session_id"])
+
         response_code = request.args.get("response_code")
-        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
-            "transaction_id"
-        ]
-        url = (
-            cfgservice.dynamic_presentation_url
-            + presentation_id
-            + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
-            + "&response_code="
-            + response_code
-        )
+
+        presentation_id = current_session.oid4vp_transaction_id
+
+        url = f"{cfgservice.dynamic_presentation_url}{presentation_id}?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=&response_code={response_code}"
 
     elif "presentation_id" in request.args:
         cfgservice.app_logger.info(
-            ", Session ID: "
-            + session["session_id"]
-            + ", "
-            + "oid4vp flow: cross_device"
+            f", Session ID: {session['session_id']}, oid4vp flow: cross_device"
         )
 
         presentation_id = request.args.get("presentation_id")
@@ -252,11 +218,7 @@ def getpidoid4vp():
         if not re.match(r"^[A-Za-z0-9_-]+$", presentation_id):
             raise ValueError("Invalid Presentation id format")
 
-        url = (
-            cfgservice.dynamic_presentation_url
-            + presentation_id
-            + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
-        )
+        url = f"{cfgservice.dynamic_presentation_url}{presentation_id}?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
 
     headers = {
         "Content-Type": "application/json",
@@ -349,19 +311,23 @@ def getpidoid4vp():
         )
         session_manager.update_country(session_id=session_id, country="FC")
 
-        presentation_data = attributesForm.copy()
+        presentation_data = {}
+
+        presentation_data["Age over 18 Pseudonym"] = attributesForm.copy()
 
         today = date.today()
         expiry = today + timedelta(days=doctype_config["validity"])
 
-        presentation_data.update(
+        presentation_data["Age over 18 Pseudonym"].update(
             {"estimated_issuance_date": today.strftime("%Y-%m-%d")}
         )
-        presentation_data.update({"estimated_expiry_date": expiry.strftime("%Y-%m-%d")})
+        presentation_data["Age over 18 Pseudonym"].update(
+            {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
+        )
 
         return render_template(
-            "dynamic/form_authorize_oid4vp.html",
-            attributes=presentation_data,
+            "dynamic/form_authorize.html",
+            presentation_data=presentation_data,
             user_id=session_id,
             redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
         )

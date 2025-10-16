@@ -315,26 +315,6 @@
         },
         {
            "path":[
-              "age_equal_or_over"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"18_test",
-           "display":[
-              {
-                 "name":"Age Over 18",
-                 "locale":"en"
-              }
-           ],
-           "issuer_conditions":{
-              "cardinality":{
-                 "min":0,
-                 "max":1
-              }
-           }
-        },
-        {
-           "path":[
               "email_address"
            ],
            "mandatory":false,
@@ -357,62 +337,6 @@
            "display":[
               {
                  "name":"Mobile Phone Number",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_equal_or_over",
-              "16"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 16",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_equal_or_over",
-              "18"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 18",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_in_years"
-           ],
-           "mandatory":false,
-           "value_type":"uint",
-           "display":[
-              {
-                 "name":"Age in Years",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_birth_year"
-           ],
-           "mandatory":false,
-           "value_type":"uint",
-           "display":[
-              {
-                 "name":"Age Year of Birth",
                  "locale":"en"
               }
            ]

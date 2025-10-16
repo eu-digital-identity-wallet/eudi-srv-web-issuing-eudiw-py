@@ -41,6 +41,7 @@ class Session:
         transaction_id (Optional[Dict[str, Dict]]): A dictionary of transaction IDs for deferred issuance.
         notification_ids (List[str]): A list of notification IDs for the session.
         is_batch_credential (bool): A flag indicating if the session is for a batch credential.
+        oid4vp_transaction_id (Optional[str]): A unique identifier for an OID4VP transaction.
     """
 
     def __init__(
@@ -59,7 +60,8 @@ class Session:
         tx_code: Optional[int] = None,
         transaction_id: Optional[Dict[str, Dict]] = None,
         notification_ids: Optional[List[str]] = None,
-        is_batch_credential: bool = False,  # Changed to be non-optional with a default value
+        is_batch_credential: bool = False,
+        oid4vp_transaction_id: Optional[str] = None,  # <-- ADDED
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -77,13 +79,14 @@ class Session:
         self.transaction_id = transaction_id if transaction_id is not None else {}
         self.notification_ids = notification_ids if notification_ids is not None else []
         self.is_batch_credential = is_batch_credential
+        self.oid4vp_transaction_id = oid4vp_transaction_id  # <-- ADDED
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
         data = {
             "session_id": self.session_id,
             "expiry_time": self.expiry_time.isoformat(),
-            "is_batch_credential": self.is_batch_credential,  # Always include this attribute
+            "is_batch_credential": self.is_batch_credential,
         }
         # Add optional attributes if they exist
         if self.country is not None:
@@ -110,6 +113,8 @@ class Session:
             data["transaction_id"] = self.transaction_id
         if self.notification_ids:
             data["notification_ids"] = self.notification_ids
+        if self.oid4vp_transaction_id is not None:  # <-- ADDED
+            data["oid4vp_transaction_id"] = self.oid4vp_transaction_id
         return data
 
     def __repr__(self):
@@ -145,10 +150,14 @@ class Session:
             optional_parts.append(f"transaction_id='{self.transaction_id}'")
         if self.notification_ids:
             optional_parts.append(f"notification_ids='{self.notification_ids}'")
+        if self.oid4vp_transaction_id:  # <-- ADDED
+            optional_parts.append(
+                f"oid4vp_transaction_id='{self.oid4vp_transaction_id}'"
+            )
 
         return (
             f"Session(session_id='{self.session_id}', "
-            f"is_batch_credential={self.is_batch_credential}, "  # Always include this attribute
+            f"is_batch_credential={self.is_batch_credential}, "
             f"expiry_time='{self.expiry_time.isoformat()}'"
             f"{', ' + ', '.join(optional_parts) if optional_parts else ''})"
         )
@@ -193,7 +202,7 @@ class SessionManager:
         credentials_requested: Optional[List[Dict]] = None,
         user_data: Optional[Dict] = None,
         tx_code: Optional[int] = None,
-        is_batch_credential: bool = False,  # Changed to be non-optional with a default value
+        is_batch_credential: bool = False,
     ) -> Session:
         """
         Creates and stores a new Session object.
@@ -216,6 +225,7 @@ class SessionManager:
             user_data=user_data,
             tx_code=tx_code,
             is_batch_credential=is_batch_credential,
+            # oid4vp_transaction_id is not set here, it defaults to None
         )
 
         with self._sessions_lock:
@@ -397,6 +407,22 @@ class SessionManager:
             else:
                 print(
                     f"Warning: Attempted to update is_batch_credential for non-existent session_id: {session_id}"
+                )
+
+    def update_oid4vp_transaction_id(self, session_id: str, oid4vp_transaction_id: str):
+        """
+        Updates the 'oid4vp_transaction_id' attribute of a session.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.oid4vp_transaction_id = oid4vp_transaction_id
+                print(
+                    f"Updated oid4vp_transaction_id for session_id {session_id} to: {oid4vp_transaction_id}"
+                )
+            else:
+                print(
+                    f"Warning: Attempted to update oid4vp_transaction_id for non-existent session_id: {session_id}"
                 )
 
     def add_transaction_id(

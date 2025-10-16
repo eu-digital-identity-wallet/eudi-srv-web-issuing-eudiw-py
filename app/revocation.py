@@ -43,9 +43,10 @@ from . import oidc_metadata
 from misc import generate_unique_id
 from datetime import datetime, timedelta
 import cbor2
-from app.data_management import (
+
+""" from app.data_management import (
     oid4vp_requests,
-)
+) """
 from sd_jwt.holder import SDJWTHolder
 import jwt
 from cryptography import x509
@@ -163,7 +164,7 @@ def oid4vp_call():
         "POST", url[:-1], headers=headers, data=payload_same_device
     ).json()
 
-    oid4vp_requests.update(
+    """ oid4vp_requests.update(
         {
             session_id: {
                 "response": response_same,
@@ -171,7 +172,7 @@ def oid4vp_call():
                 + timedelta(minutes=cfgservice.deffered_expiry),
             }
         }
-    )
+    ) """
 
     domain = urlparse(url).netloc
 
@@ -368,12 +369,12 @@ def oid4vp_get():
         )
 
         response_code = request.args.get("response_code")
-        presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
+        """ presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
             "transaction_id"
-        ]
+        ] """
 
         # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
-        if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
+        """ if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
             raise ValueError("Invalid presentation_id")
 
         url = (
@@ -382,7 +383,7 @@ def oid4vp_get():
             + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
             + "&response_code="
             + response_code
-        )
+        ) """
 
     elif "presentation_id" in request.args:
         presentation_id = request.args["presentation_id"]

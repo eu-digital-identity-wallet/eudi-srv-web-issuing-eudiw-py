@@ -81,49 +81,6 @@
          {
             "path":[
                "eu.europa.ec.eudi.pid.1",
-               "age_over_18"
-            ],
-            "mandatory":false,
-            "source":"user",
-            "value_type":"bool",
-            "display":[
-               {
-                  "name":"Age Over 18",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.pid.1",
-               "age_in_years"
-            ],
-            "mandatory":false,
-            "value_type":"uint",
-            "display":[
-               {
-                  "name":"Age in Years",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.pid.1",
-               "age_birth_year"
-            ],
-            "mandatory":false,
-            "value_type":"uint",
-            "display":[
-               {
-                  "name":"Age Year of Birth",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.eudi.pid.1",
                "family_name_birth"
             ],
             "mandatory":false,

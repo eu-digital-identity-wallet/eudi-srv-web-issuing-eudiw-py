@@ -137,7 +137,13 @@ def setup_metadata():
 
     oidc_metadata_clean["credential_configurations_supported"] = remove_keys(
         copy.deepcopy(credentials_supported),
-        {"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source", "selective_disclosure"},
+        {
+            "issuer_conditions",
+            "issuer_config",
+            "overall_issuer_conditions",
+            "source",
+            "selective_disclosure",
+        },
     )
 
     old_domain = oidc_metadata["credential_issuer"]
@@ -319,7 +325,6 @@ def create_app(test_config=None):
 
     # register blueprint for the /pid route
     from . import (
-        route_eidasnode,
         route_formatter,
         route_oidc,
         route_dynamic,
@@ -328,7 +333,6 @@ def create_app(test_config=None):
         revocation,
     )
 
-    app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
     app.register_blueprint(revocation.revocation)

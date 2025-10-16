@@ -1124,10 +1124,7 @@ def post_redirect_with_payload(target_url: str, data_payload: dict):
     json_data_string = json.dumps(data_payload)
 
     # 2. Define the intermediate HTML template
-    # The 'data' variable contains the JSON string.
-    # We use '| safe' to prevent Jinja2 from escaping quotes in the JSON string,
-    # which is necessary for it to be placed correctly in the input value attribute.
-    # The 'onload' JavaScript triggers the form submission immediately.
+    # Submit immediately without waiting for page load or rendering
     AUTO_SUBMIT_HTML = """
     <!DOCTYPE html>
     <html lang="en">
@@ -1135,27 +1132,26 @@ def post_redirect_with_payload(target_url: str, data_payload: dict):
         <meta charset="UTF-8">
         <title>Redirecting...</title>
         <style>
-            body { font-family: Inter, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f9fb; }
-            .message { padding: 20px; border-radius: 8px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-            noscript { color: #dc3545; font-weight: bold; }
+            body { margin: 0; padding: 0; overflow: hidden; }
+            #redirect_form { display: none; }
         </style>
     </head>
-    <body onload="document.forms['redirect_form'].submit();">
-        <div class="message">
-            <p>Please wait while we securely transfer your data...</p>
-            
-            <form name="redirect_form" method="POST" action="{{ url }}">
-                <!-- The payload field contains the entire JSON data -->
-                <input type="hidden" name="payload" value='{{ data | safe }}'>
-                
-                <noscript>
-                    <p>JavaScript is disabled. Please click the button below:</p>
+    <body>
+        <form id="redirect_form" method="POST" action="{{ url }}">
+            <input type="hidden" name="payload" value='{{ data | safe }}'>
+            <noscript>
+                <div style="font-family: sans-serif; padding: 20px; text-align: center;">
+                    <p>JavaScript is required. Please click the button below:</p>
                     <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
                         Continue
                     </button>
-                </noscript>
-            </form>
-        </div>
+                </div>
+            </noscript>
+        </form>
+        <script>
+            // Submit immediately without waiting for full page load
+            document.getElementById('redirect_form').submit();
+        </script>
     </body>
     </html>
     """

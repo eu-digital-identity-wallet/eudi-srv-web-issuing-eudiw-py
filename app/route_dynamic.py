@@ -51,7 +51,6 @@ from flask import (
 from flask_api import status
 from flask_cors import CORS
 import requests
-from app.lighttoken import handle_response
 from app.validate_vp_token import validate_vp_token
 
 from boot_validate import (
@@ -89,8 +88,6 @@ from app_config.config_secrets import flask_secret_key
 
 # app.config["SECRET_KEY"] = flask_secret_key
 # app.config["dynamic"] = {}
-
-from app.data_management import form_dynamic_data
 
 
 @dynamic.route("/", methods=["GET", "POST"])
@@ -258,11 +255,6 @@ def dynamic_R1(country):
         session_manager.update_user_data(
             session_id=session_id, user_data=cfgserv.sample_data.copy()
         )
-
-        """ form_dynamic_data[user_id] = cfgserv.sample_data.copy()
-        form_dynamic_data[user_id].update(
-            {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
-        ) """
 
         # session["returnURL"] = cfgserv.OpenID_first_endpoint
 
@@ -660,18 +652,6 @@ def red():
                 {"credential_type": doctype_config["credential_type"]}
             )
 
-        if "birth_date" in presentation_data[credential]:
-            presentation_data[credential].update(
-                {
-                    "age_over_18": (
-                        True
-                        if calculate_age(presentation_data[credential]["birth_date"])
-                        >= 18
-                        else False
-                    )
-                }
-            )
-
         if "driving_privileges" in presentation_data[credential] and isinstance(
             presentation_data[credential]["driving_privileges"], str
         ):
@@ -780,9 +760,7 @@ def dynamic_R2_data_collect(country, session_id, access_token):
 
         current_session = session_manager.get_session(session_id=session_id)
 
-        data = (
-            current_session.user_data
-        )  # form_dynamic_data.get(user_id, "Data not found")
+        data = current_session.user_data
 
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
@@ -794,8 +772,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
         return data
 
     if country == "sample":
-        # data = form_dynamic_data.get(user_id, "Data not found")
-
         """if data == "Data not found":
         return {"error": "error", "error_description": "Data not found"}"""
 
@@ -805,35 +781,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
         current_session = session_manager.get_session(session_id=session_id)
 
         data = current_session.user_data
-
-        return data
-
-    elif cfgcountries.supported_countries[country]["connection_type"] == "eidasnode":
-        (b, data) = handle_response(user_id)
-
-        if "custom_modifiers" in cfgcountries.supported_countries[country]:
-            custom_modifiers = cfgcountries.supported_countries[country][
-                "custom_modifiers"
-            ]
-            for modifier in custom_modifiers:
-                if custom_modifiers[modifier] in data:
-                    data[modifier] = data[custom_modifiers[modifier]]
-                    data.pop(custom_modifiers[modifier])
-
-        data["nationality"] = [country]
-        data["nationalities"] = [country]
-
-        birth_places = {
-            "EU": "Brussels",
-            "EE": "Tallinn",
-            "CZ": "Prague",
-            "NL": "Amsterdam",
-            "LU": "Luxembourg",
-        }
-
-        if country in birth_places:
-            data["birth_place"] = birth_places[country]
-            data["place_of_birth"] = [{"locality": birth_places[country]}]
 
         return data
 
@@ -887,22 +834,41 @@ def dynamic_R2_data_collect(country, session_id, access_token):
             if response:
                 print("Response Body:", response.text)
 
-        if "custom_modifiers" in cfgcountries.supported_countries[country]:
-            custom_modifiers = cfgcountries.supported_countries[country][
-                "custom_modifiers"
-            ]
+        cleaned_user_data = {}
 
-            for modifier in custom_modifiers:
-                if custom_modifiers[modifier] in user_data:
-                    user_data[modifier] = user_data[custom_modifiers[modifier]]
-                    user_data.pop(custom_modifiers[modifier])
+        if country != "PT":
+            if "custom_modifiers" in cfgcountries.supported_countries[country]:
+                custom_modifiers = cfgcountries.supported_countries[country][
+                    "custom_modifiers"
+                ]
 
-        print("\nafter_user_data: ", user_data)
+                for modifier in custom_modifiers:
+                    if custom_modifiers[modifier] in user_data:
+                        cleaned_user_data[modifier] = user_data[
+                            custom_modifiers[modifier]
+                        ]
+                        user_data.pop(custom_modifiers[modifier])
+
+        else:
+            for attribute in user_data:
+                if (
+                    attribute["state"] == "Available"
+                    and "custom_modifiers" in cfgcountries.supported_countries[country]
+                    and attribute["name"]
+                    in cfgcountries.supported_countries[country]["custom_modifiers"]
+                ):
+                    cleaned_user_data[
+                        cfgcountries.supported_countries[country]["custom_modifiers"][
+                            attribute["name"]
+                        ]
+                    ] = attribute["value"]
+
+        print("\nafter_user_data: ", cleaned_user_data)
 
         print("\nsession_id", session_id)
 
-        user_data["nationality"] = [country]
-        user_data["nationalities"] = [country]
+        cleaned_user_data["nationality"] = [country]
+        cleaned_user_data["nationalities"] = [country]
 
         birth_places = {
             "EU": "Brussels",
@@ -910,15 +876,18 @@ def dynamic_R2_data_collect(country, session_id, access_token):
             "CZ": "Prague",
             "NL": "Amsterdam",
             "LU": "Luxembourg",
+            "PT": "Lisbon",
         }
 
         if country in birth_places:
-            user_data["birth_place"] = birth_places[country]
-            user_data["place_of_birth"] = [{"locality": birth_places[country]}]
+            cleaned_user_data["birth_place"] = birth_places[country]
+            cleaned_user_data["place_of_birth"] = [{"locality": birth_places[country]}]
 
-        session_manager.update_user_data(session_id=session_id, user_data=user_data)
+        session_manager.update_user_data(
+            session_id=session_id, user_data=cleaned_user_data
+        )
 
-        return user_data
+        return cleaned_user_data
 
     elif cfgcountries.supported_countries[country]["connection_type"] == "openid":
 
@@ -1533,14 +1502,6 @@ def Dynamic_form():
 
     session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
-    form_dynamic_data[user_id] = cleaned_data.copy()
-
-    form_dynamic_data[user_id].update(
-        {"expires": datetime.now() + timedelta(minutes=cfgserv.form_expiry)}
-    )
-
-    print("\nform_dynamic_data: ", form_dynamic_data[user_id])
-
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
 
     print("\nPresentation Data: ", presentation_data)
@@ -1555,13 +1516,6 @@ def Dynamic_form():
             "session_id": session_id,
         },
     )
-
-    """ return render_template(
-        "dynamic/form_authorize.html",
-        presentation_data=presentation_data,
-        user_id=user_id,
-        redirect_url=cfgserv.service_url + "dynamic/redirect_wallet",
-    ) """
 
 
 @dynamic.route("/redirect_wallet", methods=["GET", "POST"])
