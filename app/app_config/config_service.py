@@ -75,6 +75,10 @@ class ConfService:
         "NOUNCE_KEY", "/etc/eudiw/pid-issuer/privKey/nonce_rsa2048.pem"
     )
 
+    # credential request key
+    credential_request_priv_key = os.getenv(
+        "CREDENTIAL_KEY", "/etc/eudiw/pid-issuer/privKey/credential_request.pem"
+    )
     # eIDAS node PID attributes
     eidasnode_pid_attributes = ["CurrentFamilyName", "CurrentGivenName", "DateOfBirth"]
 
@@ -432,7 +436,7 @@ class ConfService:
             "eu.europa.ec.eudi.seafarer_mdoc",
             "eu.europa.ec.eudi.diploma_vc_sd_jwt",
             "eu.europa.ec.eudi.tax_residency_vc_sd_jwt",
-            "eu.europa.ec.eudi.employee_mdoc"
+            "eu.europa.ec.eudi.employee_mdoc",
         ],
     }
 

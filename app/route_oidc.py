@@ -49,7 +49,7 @@ from flask import (
     url_for,
 )
 from flask.helpers import make_response
-
+from jwcrypto import jwk, jwe
 from flask_cors import CORS
 import json
 import sys
@@ -605,10 +605,66 @@ def encrypt_response(credential_request, credential_response):
     return _response
 
 
+def decrypt_jwe_credential_request(jwt_token):
+    """
+    Decrypt JWE credential request using the PEM private key.
+    Returns the decrypted credential request as a dictionary.
+    """
+    if jwt_token.count(".") != 4:
+        raise ValueError("Invalid JWE format - expected 5 parts")
+
+    try:
+        with open(cfgservice.credential_request_priv_key, "r") as key_file:
+            pem_private_key = key_file.read()
+
+        private_key = jwk.JWK.from_pem(pem_private_key.encode("utf-8"))
+
+        jwe_token = jwe.JWE()
+        jwe_token.deserialize(jwt_token)
+        jwe_token.decrypt(private_key)
+
+        payload = jwe_token.payload.decode("utf-8")
+
+        cfgservice.app_logger.info(f"Successfully decrypted JWE payload")
+
+        credential_request = json.loads(payload)
+        return credential_request
+
+    except FileNotFoundError:
+        cfgservice.app_logger.error(
+            f"Private key file not found: {cfgservice.credential_request_priv_key}"
+        )
+        raise ValueError(f"Private key file not found")
+    except json.JSONDecodeError as e:
+        cfgservice.app_logger.error(
+            f"Failed to parse decrypted payload as JSON: {str(e)}"
+        )
+        raise ValueError(f"Decrypted payload is not valid JSON: {str(e)}")
+    except Exception as e:
+        cfgservice.app_logger.error(f"Failed to decrypt JWE: {str(e)}")
+        raise ValueError(f"Failed to decrypt JWE: {str(e)}")
+
+
 @oidc.route("/credential", methods=["POST"])
 def credential():
 
-    credential_request = request.get_json()
+    content_type = request.content_type
+
+    if content_type == "application/jwt":
+        jwt_token = request.get_data(as_text=True)
+
+        cfgservice.app_logger.info(
+            f", Started Credential Request (JWT), Token: {jwt_token}"
+        )
+
+        try:
+            credential_request = decrypt_jwe_credential_request(jwt_token)
+        except (jwt.InvalidTokenError, jwt.ExpiredSignatureError, Exception) as e:
+            cfgservice.app_logger.error(f"Failed to decrypt/verify JWT: {str(e)}")
+            return jsonify({"error": "Invalid JWT credential request"}), 400
+    else:
+        # Original JSON handling
+        credential_request = request.get_json()
 
     cfgservice.app_logger.info(
         f", Started Credential Request, Payload: {credential_request}"
