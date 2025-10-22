@@ -1067,12 +1067,7 @@ def form_formatter(form_data: dict) -> dict:
 
     # Add issuer-filled data
     cleaned_data.update(
-        {
-            "issuing_country": session_manager.get_session(
-                session["session_id"]
-            ).country,
-            "issuing_authority": cfgserv.mdl_issuing_authority,
-        }
+        {"issuing_country": session_manager.get_session(session["session_id"]).country}
     )
 
     final_data = {}

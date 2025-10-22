@@ -343,7 +343,7 @@
         },
         {
            "path":[
-              "issuance_date"
+              "date_of_issuance"
            ],
            "mandatory":true,
            "source":"issuer",
@@ -356,7 +356,7 @@
         },
         {
            "path":[
-              "expiry_date"
+              "date_of_expiry"
            ],
            "mandatory":true,
            "source":"issuer",
