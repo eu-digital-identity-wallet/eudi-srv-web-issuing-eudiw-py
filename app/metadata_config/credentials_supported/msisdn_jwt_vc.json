@@ -20,7 +20,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"MSISDN (sd-jwt-vc)",
+           "name":"MSISDN (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

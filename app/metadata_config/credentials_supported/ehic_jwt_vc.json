@@ -20,7 +20,7 @@
       "credential_metadata": {
      "display":[
         {
-           "name":"EHIC (sd-jwt-vc)",
+           "name":"EHIC (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

@@ -1,8 +1,8 @@
 {
-   "eu.europa.ec.eudi.pid_mdoc":{
+   "eu.europa.ec.eudi.pid_mdoc_deferred":{
       "format":"mso_mdoc",
       "doctype":"eu.europa.ec.eudi.pid.1",
-      "scope":"eu.europa.ec.eudi.pid_mdoc",
+      "scope":"eu.europa.ec.eudi.pid_mdoc_deferred",
       "policy":{
          "batch_size":15,
          "one_time_use":true
@@ -24,7 +24,7 @@
       "credential_metadata": {
       "display":[
          {
-            "name":"PID (MSO Mdoc)",
+            "name":"PID (MSO Mdoc Deferred)",
             "locale":"en",
             "logo":{
                "uri":"https://examplestate.com/public/pid.png",

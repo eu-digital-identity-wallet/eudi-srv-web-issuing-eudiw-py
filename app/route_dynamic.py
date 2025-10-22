@@ -426,7 +426,7 @@ def red():
         )
         presentation_data[credential].update(
             {"issuing_country": current_session.country}
-        ),
+        )
 
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
             presentation_data[credential].update(
@@ -1090,12 +1090,21 @@ def form_formatter(form_data: dict) -> dict:
             final_data[item] = value
 
     # Add issuer-filled data
+
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+
+    credentialMetadata = credentialsSupported[
+        session_manager.get_session(session["session_id"]).scope
+    ]
+
     final_data.update(
         {
             "issuing_country": session_manager.get_session(
                 session["session_id"]
             ).country,
-            "issuing_authority": cfgserv.mdl_issuing_authority,
+            "issuing_authority": credentialMetadata["issuer_config"][
+                "issuing_authority"
+            ],
         }
     )
 
@@ -1155,7 +1164,7 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         )
         presentation_data[credential].update(
             {"issuing_country": current_session.country}
-        ),
+        )
 
         if credential_requested == "eu.europa.ec.eudi.seafarer_mdoc":
             presentation_data[credential].update(

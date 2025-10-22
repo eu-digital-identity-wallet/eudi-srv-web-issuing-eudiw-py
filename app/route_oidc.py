@@ -794,7 +794,7 @@ def credential():
     if ("error" in _response and _response["error"] == "Pending") or (
         "credential_configuration_id" in validated_credential_request
         and validated_credential_request["credential_configuration_id"]
-        == "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint"
+        == "eu.europa.ec.eudi.pid_mdoc_deferred"
     ):
         _transaction_id = str(uuid.uuid4())
         session_manager.add_transaction_id(
@@ -825,17 +825,17 @@ def credential():
 
         print("\nfinal_response_1: ", type(_response))
         print("\nfinal_response_1.1: ", _response.data.decode("utf-8"))
-        
+
         if _response.status_code != 200:
             return _response
-        
+
         if is_deferred:
             print("\nfinal_response_2: ", _response)
             return _response, 202
         return _response, 200
 
     print("\nfinal_response_3: ", _response)
-    
+
     if is_deferred:
         return _response, 202
     return _response, 200

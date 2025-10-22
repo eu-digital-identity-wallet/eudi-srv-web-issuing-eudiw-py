@@ -24,7 +24,7 @@
       "credential_metadata": {
       "display":[
          {
-            "name":"Employee ID (TBD)",
+            "name":"Employee ID (MSO Mdoc)",
             "locale":"en",
             "logo":{
                "uri":"https://examplestate.com/public/pid.png",

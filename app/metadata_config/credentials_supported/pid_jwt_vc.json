@@ -20,7 +20,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"PID test (sd-jwt-vc)",
+           "name":"PID (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

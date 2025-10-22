@@ -35,7 +35,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Tax Number",
+           "name":"Tax Number (MSO Mdoc)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/tax.png",

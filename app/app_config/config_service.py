@@ -437,6 +437,7 @@ class ConfService:
             "eu.europa.ec.eudi.diploma_vc_sd_jwt",
             "eu.europa.ec.eudi.tax_residency_vc_sd_jwt",
             "eu.europa.ec.eudi.employee_mdoc",
+            "eu.europa.ec.eudi.pid_mdoc_deferred",
         ],
     }
 

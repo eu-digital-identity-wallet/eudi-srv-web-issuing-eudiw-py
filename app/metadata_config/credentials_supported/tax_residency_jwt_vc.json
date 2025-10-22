@@ -21,7 +21,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Tax Residency",
+           "name":"Tax Residency (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

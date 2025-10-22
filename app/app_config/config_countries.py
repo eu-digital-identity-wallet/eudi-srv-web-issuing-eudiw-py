@@ -44,6 +44,7 @@ class ConfCountries:
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
+                "eu.europa.ec.eudi.pid_mdoc_deferred",
             ],
             "custom_modifiers": {
                 "family_name": "CurrentFamilyName",
@@ -78,8 +79,6 @@ class ConfCountries:
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
                 "eu.europa.ec.eudi.loyalty_mdoc",
-                "eu.europa.ec.eudi.pseudonym_over18_mdoc",
-                "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint",
                 "eu.europa.ec.eudi.photoid",
                 "eu.europa.ec.eudi.por_mdoc",
                 "eu.europa.ec.eudi.iban_mdoc",
@@ -92,7 +91,6 @@ class ConfCountries:
                 "eu.europa.ec.eudi.msisdn_sd_jwt_vc",
                 "eu.europa.ec.eudi.hiid_sd_jwt_vc",
                 "eu.europa.ec.eudi.iban_sd_jwt_vc",
-                "eu.europa.ec.eudi.pseudonym_over18_sd_jwt_vc",
                 "eu.europa.ec.eudi.ehic_mdoc",
                 "eu.europa.ec.eudi.cor_mdoc",
                 "eu.europa.ec.eudi.ehic_sd_jwt_vc",
@@ -101,7 +99,8 @@ class ConfCountries:
                 "eu.europa.ec.eudi.seafarer_mdoc",
                 "eu.europa.ec.eudi.diploma_vc_sd_jwt",
                 "eu.europa.ec.eudi.tax_residency_vc_sd_jwt",
-                "eu.europa.ec.eudi.employee_mdoc"
+                "eu.europa.ec.eudi.employee_mdoc",
+                "eu.europa.ec.eudi.pid_mdoc_deferred",
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
@@ -120,8 +119,14 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
                 "eu.europa.ec.eudi.mdl_mdoc",
                 "eu.europa.ec.eudi.over18_mdoc",
+                "eu.europa.ec.eudi.pid_mdoc_deferred",
             ],
             "connection_type": "oauth",
+            "custom_modifiers": {
+                "http://interop.gov.pt/MDC/Cidadao/DataNascimento": "birth_date",
+                "http://interop.gov.pt/MDC/Cidadao/NomeApelido": "family_name",
+                "http://interop.gov.pt/MDC/Cidadao/NomeProprio": "given_name",
+            },
             "oauth_auth": {
                 "base_url": "https://country-connector.ageverification.dev",
                 "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
@@ -129,9 +134,8 @@ class ConfCountries:
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
                 "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
-            }
-
+                "client_secret": "F7n9pW6kQ2xJz1H8mR5bL4cD3aT9eS2uX7qP0yZ6hK5nV1mC8dA2oG7",
+            },
         },
         "EE": {
             "name": "Estonia",

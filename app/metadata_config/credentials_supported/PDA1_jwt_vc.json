@@ -31,7 +31,7 @@
       "credential_metadata": {
       "display":[
          {
-            "name":"PDA1 (sd-jwt-vc)",
+            "name":"PDA1 (SD-JWT VC)",
             "locale":"en",
             "logo":{
                "uri":"https://examplestate.com/public/pid.png",

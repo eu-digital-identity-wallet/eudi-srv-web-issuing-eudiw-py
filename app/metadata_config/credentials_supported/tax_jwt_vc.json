@@ -31,7 +31,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Tax Number (sd-jwt-vc)",
+           "name":"Tax Number (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

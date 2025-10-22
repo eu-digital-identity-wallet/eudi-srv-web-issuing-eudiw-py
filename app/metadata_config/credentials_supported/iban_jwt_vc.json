@@ -20,7 +20,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"IBAN (sd-jwt-vc)",
+           "name":"IBAN (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

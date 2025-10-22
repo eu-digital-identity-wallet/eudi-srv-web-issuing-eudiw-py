@@ -35,7 +35,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Health ID",
+           "name":"Health ID (MSO Mdoc)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/hiid.png",

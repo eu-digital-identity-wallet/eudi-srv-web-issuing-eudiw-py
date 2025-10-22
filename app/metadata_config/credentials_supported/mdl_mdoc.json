@@ -20,7 +20,7 @@
       "credential_metadata": {
       "display":[
          {
-            "name":"mDL",
+            "name":"mDL (MSO Mdoc)",
             "locale":"en",
             "logo":{
                "uri":"https://examplestate.com/public/mdl.png",
@@ -584,7 +584,7 @@
       ]
    },
       "issuer_config":{
-         "issuing_authority":"Test DL Issuer",
+         "issuing_authority":"Test mDL Issuer",
          "organization_id":"EUDI Wallet Reference Implementation",
          "validity":90,
          "organization_name":"Test mDL Issuer",

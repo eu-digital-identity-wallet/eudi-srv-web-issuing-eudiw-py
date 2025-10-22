@@ -24,7 +24,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"IBAN",
+           "name":"IBAN (MSO Mdoc)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/iban.png",

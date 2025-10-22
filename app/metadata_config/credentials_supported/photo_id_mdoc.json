@@ -20,7 +20,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Photo ID",
+           "name":"Photo ID (MSO Mdoc)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/mdl.png",

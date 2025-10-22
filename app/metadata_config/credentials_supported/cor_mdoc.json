@@ -30,7 +30,7 @@
        "credential_metadata": {
        "display":[
           {
-             "name":"Certificate of Residence",
+             "name":"Certificate of Residence (MSO Mdoc)",
              "locale":"en",
              "logo":{
                 "uri":"https://examplestate.com/public/cor.png",

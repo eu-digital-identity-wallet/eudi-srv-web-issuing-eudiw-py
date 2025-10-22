@@ -31,7 +31,7 @@
      "credential_metadata": {
      "display":[
         {
-           "name":"Health ID (sd-jwt-vc)",
+           "name":"Health ID (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",

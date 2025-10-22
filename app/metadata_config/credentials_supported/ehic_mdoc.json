@@ -24,7 +24,7 @@
       "credential_metadata":{
          "display":[
             {
-               "name":"EHIC",
+               "name":"EHIC (MSO Mdoc)",
                "locale":"en",
                "logo":{
                   "uri":"https://examplestate.com/public/pid.png",
