@@ -399,16 +399,13 @@ def verify_introspection(bearer_token):
 
     if not is_active:
         # Error 6: Inactive token
-        print("Token is inactive.")
-        return jsonify({"error": "Provided token is inactive."}), 401
+        return jsonify({"error": "invalid_token"}), 401
 
     if not username:
         # Error 7: Missing username in introspection response
         print("Token is active but missing username.")
         return (
-            jsonify(
-                {"error": "Token is active but does not contain a username claim."}
-            ),
+            jsonify({"error": "invalid_token"}),
             401,
         )
 
@@ -421,39 +418,35 @@ from app import session_manager
 def verify_credential_request(credential_request):
 
     if "credential_indentifier" in credential_request:
-        return jsonify({"error": "credential_identifier currently not supported."}), 401
+        return jsonify({"error": "invalid_credential_request"}), 400
 
     if (
         "credential_identifier" not in credential_request
         and "credential_configuration_id" not in credential_request
     ):
         return (
-            jsonify(
-                {
-                    "error": "Missing credential_identifier or credential_configuration_id"
-                }
-            ),
-            401,
+            jsonify({"error": "invalid_credential_request"}),
+            400,
         )
 
     if "proof" not in credential_request and "proofs" not in credential_request:
-        return jsonify({"error": "Credential Issuer requires key proof."}), 401
+        return jsonify({"error": "invalid_proof"}), 400
 
     elif "proof" in credential_request:
         if "proof_type" not in credential_request["proof"]:
-            return jsonify({"error": "Credential Issuer requires key proof."}), 401
+            return jsonify({"error": "invalid_proof"}), 400
 
         elif (
             credential_request["proof"]["proof_type"] == "attestation"
             and "attestation" not in credential_request["proof"]
         ):
-            return jsonify({"error": "Missing jwt field."}), 401
+            return jsonify({"error": "invalid_proof"}), 400
 
         elif (
             credential_request["proof"]["proof_type"] == "jwt"
             and "jwt" not in credential_request["proof"]
         ):
-            return jsonify({"error": "Missing attestation field."}), 401
+            return jsonify({"error": "invalid_proof"}), 400
 
     return credential_request
 
@@ -703,7 +696,27 @@ def decrypt_jwe_credential_request(jwt_token):
 @oidc.route("/credential", methods=["POST"])
 def credential():
 
+    auth_header = request.headers.get("Authorization")
     content_type = request.content_type
+
+    if not auth_header:
+        return make_response(jsonify({"error": "invalid_request"}), 401)
+
+    if not (
+        auth_header.lower().startswith("bearer ")
+        or auth_header.lower().startswith("dpop ")
+    ):
+        return make_response(
+            jsonify({"error": "invalid_token"}),
+            401,
+        )
+
+    bearer_token = None
+
+    try:
+        bearer_token = auth_header.split(" ")[1]
+    except IndexError:
+        return make_response(jsonify({"error": "invalid_token"}), 401)
 
     if content_type == "application/jwt":
         jwt_token = request.get_data(as_text=True)
@@ -716,9 +729,7 @@ def credential():
             credential_request = decrypt_jwe_credential_request(jwt_token)
         except (jwt.InvalidTokenError, jwt.ExpiredSignatureError, Exception) as e:
             cfgservice.app_logger.error(f"Failed to decrypt/verify JWT: {str(e)}")
-            return make_response(
-                jsonify({"error": "Invalid JWT credential request"}), 400
-            )
+            return make_response(jsonify({"error": "invalid_credential_request"}), 400)
     else:
         # Original JSON handling
         credential_request = request.get_json()
@@ -726,30 +737,6 @@ def credential():
     cfgservice.app_logger.info(
         f", Started Credential Request, Payload: {credential_request}"
     )
-
-    # Get the Authorization header from the request
-    auth_header = request.headers.get("Authorization")
-
-    bearer_token = None
-
-    if not auth_header:
-        return make_response(jsonify({"error": "Authorization header is missing"}), 401)
-
-    if not (
-        auth_header.lower().startswith("bearer ")
-        or auth_header.lower().startswith("dpop ")
-    ):
-        return make_response(
-            jsonify({"error": "Authorization header must be a Bearer or DPoP token"}),
-            401,
-        )
-
-    try:
-        bearer_token = auth_header.split(" ")[1]
-    except IndexError:
-        return make_response(
-            jsonify({"error": "Invalid Authorization header format"}), 401
-        )
 
     verification_result_introspection = verify_introspection(bearer_token=bearer_token)
 
@@ -809,35 +796,36 @@ def credential():
         f", Session ID: {session_id}, Credential response, Payload: {_response}"
     )
 
+    print("\nis_deferred: ", is_deferred)
+
     if "credential_response_encryption" in validated_credential_request:
         _response = encrypt_response(
             credential_request=validated_credential_request,
             credential_response=_response,
         )
 
+        print("\nresponse: ", _response)
         cfgservice.app_logger.info(
-            f", Session ID: {session_id}, Credential encrypted response, Payload: {_response}"
-        )
-
-        """ cfgservice.app_logger.info(
             f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
-        ) """
-
-        print("\nfinal_response_1: ", type(_response))
-        print("\nfinal_response_1.1: ", _response.data.decode("utf-8"))
+        )
 
         if _response.status_code != 200:
             return _response
 
         if is_deferred:
-            print("\nfinal_response_2: ", _response)
             return _response, 202
-        return _response, 200
 
-    print("\nfinal_response_3: ", _response)
+        cfgservice.app_logger.info(
+            f", Session ID: {session_id}, Credential Issuance Succesfull"
+        )
+        return _response, 200
 
     if is_deferred:
         return _response, 202
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential Issuance Succesfull"
+    )
     return _response, 200
 
 
@@ -922,7 +910,24 @@ def nonce():
 
 @oidc.route("/deferred_credential", methods=["POST"])
 def deferred_credential():
-    deferred_request = request.get_json()
+    content_type = request.content_type
+
+    if content_type == "application/jwt":
+        jwt_token = request.get_data(as_text=True)
+
+        cfgservice.app_logger.info(
+            f", Started Credential Request (JWT), Token: {jwt_token}"
+        )
+
+        try:
+            deferred_request = decrypt_jwe_credential_request(jwt_token)
+        except (jwt.InvalidTokenError, jwt.ExpiredSignatureError, Exception) as e:
+            cfgservice.app_logger.error(f"Failed to decrypt/verify JWT: {str(e)}")
+            return make_response(
+                jsonify({"error": "Invalid JWT credential request"}), 400
+            )
+    else:
+        deferred_request = request.get_json()
 
     if "transaction_id" not in deferred_request:
         return jsonify({"error": "invalid_transaction_id"}), 401
@@ -946,8 +951,8 @@ def deferred_credential():
     if not auth_header:
         return jsonify({"error": "Authorization header is missing"}), 401
 
-    if not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Authorization header must be a Bearer token"}), 401
+    """ if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Authorization header must be a Bearer token"}), 401 """
 
     try:
         bearer_token = auth_header.split(" ")[1]
@@ -1031,10 +1036,18 @@ def deferred_credential():
 
         if is_deferred:
             return _response, 202
+
+        cfgservice.app_logger.info(
+            f", Session ID: {session_id}, Credential Issuance Succesfull"
+        )
         return _response, 200
 
     if is_deferred:
         return _response, 202
+
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential Issuance Succesfull"
+    )
     return _response, 200
 
 
@@ -1114,18 +1127,32 @@ def get_logs_by_session():
 
     LOG_FILES = ["/tmp/oidc_log_dev/logs.log", "/tmp/log_dev/logs.log"]
     matches = []
+    seen_lines = set()
+    successful = False
 
     for log_file in LOG_FILES:
         try:
             with open(log_file, "r") as f:
                 for line in f:
-                    if f"Session ID: {session_id}" in line:
-                        matches.append(line.strip())
+                    if session_id in line:
+                        stripped_line = line.strip()
+                        if stripped_line not in seen_lines:
+                            seen_lines.add(stripped_line)
+                            matches.append(stripped_line)
+
+                            if "Credential Issuance Succesfull" in stripped_line:
+                                successful = True
         except FileNotFoundError:
-            # Just skip missing files silently
             continue
 
-    return jsonify({"session_id": session_id, "count": len(matches), "logs": matches})
+    return jsonify(
+        {
+            "session_id": session_id,
+            "count": len(matches),
+            "successful": successful,
+            "logs": matches,
+        }
+    )
 
 
 @oidc.route("/credential_offer2", methods=["GET", "POST"])

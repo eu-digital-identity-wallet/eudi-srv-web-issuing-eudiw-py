@@ -37,12 +37,14 @@ from misc import (
     authentication_error_redirect,
     getAttributesForm,
     getAttributesForm2,
+    post_redirect_with_payload,
     scope2details,
 )
 from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
 from .app_config.config_service import ConfService as cfgservice
+from app_config.config_countries import ConfFrontend
 from . import session_manager
 from . import oidc_metadata
 
@@ -70,7 +72,9 @@ def openid4vp():
     dcql_credentials = []
     query_id_counter = 0
 
-    for credential_requested in current_request.credentials_requested:
+    credentials_requested = ["eu.europa.ec.eudi.pid_mdoc"]
+
+    for credential_requested in credentials_requested:
         credential_config = credentialsSupported[credential_requested]
         credential_metadata = credential_config["credential_metadata"]
         credential_format = credential_config["format"]
@@ -180,13 +184,28 @@ def openid4vp():
         "utf-8"
     )
 
-    return render_template(
+    current_session = session_manager.get_session(session_id=session_id)
+
+    target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_pid_login",
+        data_payload={
+            "session_id": session_id,
+            "deeplink_url": deeplink_url,
+            "qr_img_base64": qr_img_base64,
+            "redirect_url": cfgservice.service_url,
+            "transaction_id": response_cross["transaction_id"],
+        },
+    )
+
+    """ return render_template(
         "openid/pid_login_qr_code.html",
         url_data=deeplink_url,
         qrcode=qr_img_base64,
         presentation_id=response_cross["transaction_id"],
         redirect_url=cfgservice.service_url,
-    )
+    ) """
 
 
 @oid4vp.route("/getpidoid4vp", methods=["GET"])
