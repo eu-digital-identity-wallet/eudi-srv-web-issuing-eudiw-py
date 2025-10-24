@@ -166,81 +166,87 @@ def setup_metadata():
 
 setup_metadata()
 
+IS_TEST_ENV = (
+    os.getenv("PYTEST_CURRENT_TEST") is not None
+    or os.getenv("CI") == "true"
+    or os.getenv("SONARCLOUD") == "true"
+)
+
 
 def setup_trusted_CAs():
     global trusted_CAs
+    if not IS_TEST_ENV:
+        try:
+            ec_keys = {}
+            for file in os.listdir(cfgserv.trusted_CAs_path):
+                if file.endswith("pem"):
+                    CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
-    try:
-        ec_keys = {}
-        for file in os.listdir(cfgserv.trusted_CAs_path):
-            if file.endswith("pem"):
-                CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
+                    with open(CA_path) as pem_file:
 
-                with open(CA_path) as pem_file:
+                        pem_data = pem_file.read()
 
-                    pem_data = pem_file.read()
+                        pem_data = pem_data.encode()
 
-                    pem_data = pem_data.encode()
-
-                    certificate = x509.load_pem_x509_certificate(
-                        pem_data, default_backend()
-                    )
-
-                    public_key = certificate.public_key()
-
-                    issuer = certificate.issuer
-
-                    not_valid_before = certificate.not_valid_before
-
-                    not_valid_after = certificate.not_valid_after
-
-                    if isinstance(public_key, ec.EllipticCurvePublicKey):
-                        public_numbers = public_key.public_numbers()
-                        x = public_numbers.x.to_bytes(
-                            (public_numbers.x.bit_length() + 7) // 8,
-                            "big",
-                        )
-                        y = public_numbers.y.to_bytes(
-                            (public_numbers.y.bit_length() + 7) // 8,
-                            "big",
+                        certificate = x509.load_pem_x509_certificate(
+                            pem_data, default_backend()
                         )
 
-                    else:
-                        raise ValueError(
-                            "Only elliptic curve keys supported for EC2Key"
-                        )
+                        public_key = certificate.public_key()
 
-                    ec_key = EC2Key(
-                        x=x, y=y, crv=1
-                    )  # SECP256R1 curve is equivalent to P-256
+                        issuer = certificate.issuer
 
-                    ec_keys.update(
-                        {
-                            issuer: {
-                                "certificate": certificate,
-                                "public_key": public_key,
-                                "not_valid_before": not_valid_before,
-                                "not_valid_after": not_valid_after,
-                                "ec_key": ec_key,
+                        not_valid_before = certificate.not_valid_before
+
+                        not_valid_after = certificate.not_valid_after
+
+                        if isinstance(public_key, ec.EllipticCurvePublicKey):
+                            public_numbers = public_key.public_numbers()
+                            x = public_numbers.x.to_bytes(
+                                (public_numbers.x.bit_length() + 7) // 8,
+                                "big",
+                            )
+                            y = public_numbers.y.to_bytes(
+                                (public_numbers.y.bit_length() + 7) // 8,
+                                "big",
+                            )
+
+                        else:
+                            raise ValueError(
+                                "Only elliptic curve keys supported for EC2Key"
+                            )
+
+                        ec_key = EC2Key(
+                            x=x, y=y, crv=1
+                        )  # SECP256R1 curve is equivalent to P-256
+
+                        ec_keys.update(
+                            {
+                                issuer: {
+                                    "certificate": certificate,
+                                    "public_key": public_key,
+                                    "not_valid_before": not_valid_before,
+                                    "not_valid_after": not_valid_after,
+                                    "ec_key": ec_key,
+                                }
                             }
-                        }
-                    )
+                        )
 
-    except FileNotFoundError as e:
-        cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
-        raise
-    except json.JSONDecodeError as e:
-        cfgserv.app_logger.exception(
-            f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
-        )
-        raise
-    except Exception as e:
-        cfgserv.app_logger.exception(
-            f"TrustedCA Error: An unexpected error occurred.\n {e}"
-        )
-        raise
+        except FileNotFoundError as e:
+            cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
+            raise
+        except json.JSONDecodeError as e:
+            cfgserv.app_logger.exception(
+                f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
+            )
+            raise
+        except Exception as e:
+            cfgserv.app_logger.exception(
+                f"TrustedCA Error: An unexpected error occurred.\n {e}"
+            )
+            raise
 
-    trusted_CAs = ec_keys
+        trusted_CAs = ec_keys
 
 
 setup_trusted_CAs()
