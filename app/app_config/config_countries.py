@@ -104,9 +104,6 @@ class ConfCountries:
             ],
             "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
-            ],
-            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
-        },
         "PT": {
             "name": "Portugal",
             "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_PT.pem",
