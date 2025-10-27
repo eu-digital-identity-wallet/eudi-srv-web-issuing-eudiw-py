@@ -1124,12 +1124,15 @@ def get_logs_by_session():
     seen_lines = set()
     successful = False
 
+    ANSI_ESCAPE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+    ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+
     for log_file in LOG_FILES:
         try:
             with open(log_file, "r") as f:
                 for line in f:
                     if session_id in line:
-                        stripped_line = line.strip()
+                        stripped_line = ANSI_ESCAPE.sub("", line).strip()
                         if stripped_line not in seen_lines:
                             seen_lines.add(stripped_line)
                             matches.append(stripped_line)

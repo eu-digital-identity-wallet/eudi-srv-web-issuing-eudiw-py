@@ -33,8 +33,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r app/requirements.txt pytest pytest-cov
-      - name: Install OpenSSL dependencies
-        run: sudo apt-get update && sudo apt-get install -y libssl-dev
       - name: Run tests and generate coverage.xml
         run: pytest --cov=app --cov-report=xml:coverage.xml
       - name: setup projectkey
