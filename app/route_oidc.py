@@ -29,7 +29,6 @@ import time
 import uuid
 import urllib.parse
 from app.misc import (
-    authentication_error_redirect,
     generate_unique_id,
     post_redirect_with_payload,
     scope2details,
@@ -161,7 +160,6 @@ def well_known(service):
         return resp
 
     elif service == "openid-configuration":
-        # _endpoint = current_app.server.get_endpoint("provider_config")
         info = {
             "response": openid_metadata,
             "http_headers": [
@@ -241,11 +239,7 @@ def auth_choice():
     print("\nauth_choice 12")
     if not authorization_details:
         print("\nauth_choice 3")
-        return authentication_error_redirect(
-            jws_token=token,  # authorization_params["token"],
-            error="invalid authentication",
-            error_description="No authorization details or scope found in dynamic route.",
-        )
+        raise ValueError(f"invalid authentication. Session ID: {session_id}")
 
     print("\nauth_choice 14")
     credentials_requested = []

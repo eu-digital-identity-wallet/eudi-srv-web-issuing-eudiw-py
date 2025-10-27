@@ -61,7 +61,6 @@ from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries, ConfFrontend
 from redirect_func import url_get
 from misc import (
-    authentication_error_redirect,
     convert_png_to_jpeg,
     credential_error_resp,
     generate_unique_id,
@@ -305,11 +304,7 @@ def red():
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
     if not v:  # if not all arguments are available
-        return authentication_error_redirect(
-            jws_token=current_session.jws_token,
-            error="Missing fields",
-            error_description="Missing mandatory IdP fields",
-        )
+        raise ValueError(f"Missing mandatory IdP fields: {l}")
 
     auth_code = request.args.get("code")
 
@@ -938,11 +933,8 @@ def auth():
     current_session = session_manager.get_session(session_id=session_id)
 
     if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return authentication_error_redirect(
-            jws_token=current_session.jws_token,
-            error="Process Canceled",
-            error_description="User canceled authentication",
-        )
+        raise ValueError(f"User canceled authentication. Session ID: {session_id}")
+
     choice = request.form.get("optionsRadios")
 
     if choice == "link1":

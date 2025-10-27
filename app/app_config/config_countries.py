@@ -16,10 +16,10 @@
 #
 ###############################################################################
 """
-The PID Issuer Web service is a component of the PID Provider backend. 
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
-This config_countries.py contains configuration data related to the countries supported by the PID Issuer. 
+This config_countries.py contains configuration data related to the countries supported by the PID Issuer.
 
 NOTE: You should only change it if you understand what you're doing.
 """

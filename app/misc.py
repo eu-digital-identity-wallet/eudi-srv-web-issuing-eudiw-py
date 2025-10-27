@@ -799,39 +799,6 @@ def credential_error_resp(error, desc):
     )
 
 
-# Error redirection to the wallet during authentication
-def authentication_error_redirect(jws_token, error, error_description):
-    authn_method = current_app.server.get_context().authn_broker.get_method_by_id(
-        "user"
-    )
-    try:
-        auth_args = authn_method.unpack_token(jws_token)
-    except:
-        return make_response(
-            json.dumps(
-                {"error": "invalid_request", "error_description": "Cookie Lost"}
-            ),
-            400,
-        )
-
-    if error is None:
-        error = "invalid_request"
-
-    if error_description is None:
-        error_description = "invalid_request"
-
-    return redirect(
-        url_get(
-            auth_args["return_uri"],
-            {
-                "error": error,
-                "error_description": error_description,
-            },
-        ),
-        code=302,
-    )
-
-
 # Error redirection to the wallet during authentication without jws_token
 def auth_error_redirect(return_uri, error, error_description=None):
 

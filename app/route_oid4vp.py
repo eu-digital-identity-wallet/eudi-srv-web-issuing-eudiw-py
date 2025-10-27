@@ -22,23 +22,20 @@ It has support for both same device and cross device oid4vp
 """
 
 import base64
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 import io
 import json
 import re
 from urllib.parse import urlparse
 from uuid import uuid4
-from flask import Blueprint, Flask, jsonify, render_template, request, session
+from flask import Blueprint, jsonify, render_template, request, session
 from flask_cors import CORS
 import requests
 import segno
 from misc import (
-    generate_unique_id,
-    authentication_error_redirect,
     getAttributesForm,
     getAttributesForm2,
     post_redirect_with_payload,
-    scope2details,
 )
 from formatter_func import cbor2elems
 
@@ -259,11 +256,7 @@ def getpidoid4vp():
         cfgservice.app_logger.error(
             ", Session ID: " + session_id + ", " + "OID4VP error: " + error_msg
         )
-        return authentication_error_redirect(
-            jws_token=current_session.jws_token,
-            error="invalid_request",
-            error_description=error_msg,
-        )
+        raise ValueError(f"invalid_request. Session ID: {session_id}")
 
     mdoc_json = cbor2elems(response.json()["vp_token"]["query_0"][0] + "==")
     is_ageOver18 = False

@@ -358,7 +358,7 @@ def create_app(test_config=None):
 
     cfgserv.app_logger.info(" - DEBUG - FLASK started")
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    """ dir_path = os.path.dirname(os.path.realpath(__file__))
 
     config = create_from_config_file(
         Configuration,
@@ -384,7 +384,7 @@ def create_app(test_config=None):
         else:
             endp.vpath = _vpath
 
-    app.server = server
+    app.server = server """
 
     return app
 
