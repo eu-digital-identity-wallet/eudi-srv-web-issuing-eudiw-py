@@ -53,10 +53,10 @@ def clear_par():
 
 
 def run_scheduler():
-    # print("Run scheduler.")
-    threading.Timer(scheduler_call, run_scheduler).start()
+    timer = threading.Timer(scheduler_call, run_scheduler)
+    timer.daemon = True  # Set as daemon thread
+    timer.start()
     clear_par()
 
 
-if __name__ == "__main__":
-    run_scheduler()
+run_scheduler()

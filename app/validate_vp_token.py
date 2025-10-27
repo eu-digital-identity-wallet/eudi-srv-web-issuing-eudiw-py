@@ -19,8 +19,6 @@
 This validate_vp_token.py file contains functions related to validate VP Token.
 
 """
-import re
-import cryptography
 from pycose.messages import Sign1Message
 from pycose.headers import X5chain
 import base64
@@ -29,13 +27,11 @@ import cbor2
 from pycose.keys import EC2Key
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding, ec
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography import x509
 import datetime
 import hashlib
 from . import trusted_CAs
-from .app_config.config_service import ConfService as cfgservice
 
 
 def validate_vp_token(response_json, credentials_requested):
@@ -56,14 +52,11 @@ def validate_vp_token(response_json, credentials_requested):
         ],
     }
 
-
     if "vp_token" not in response_json:
         return True, "The path value from presentation_submission is not valid."
-    
+
     if "query_0" not in response_json["vp_token"]:
         return True, "The path value from presentation_submission is not valid."
-
-    
 
     mdoc = response_json["vp_token"]["query_0"][0]
     mdoc_ver = None
@@ -89,9 +82,9 @@ def validate_vp_token(response_json, credentials_requested):
         return True, errorMsg
 
     # Validate values received are the same values requested
-    #namespaces = mdoc_cbor["documents"][0]["issuerSigned"]["nameSpaces"]
+    # namespaces = mdoc_cbor["documents"][0]["issuerSigned"]["nameSpaces"]
 
-    #attributes_requested = []
+    # attributes_requested = []
 
     """ for id in credentials_requested:
         for doctype in cfgservice.dynamic_issuing[id]:
@@ -123,7 +116,7 @@ def validate_vp_token(response_json, credentials_requested):
     ):
 
         return False, "" """
-    
+
     return False, ""
 
 

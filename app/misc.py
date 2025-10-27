@@ -742,7 +742,22 @@ def vct2doctype(vct: str):
             "vct" in credentialsSupported[credential]
             and credentialsSupported[credential]["vct"] == vct
         ):
-            return credentialsSupported[credential]["issuer_config"]["doctype"]
+            issuer_config = credentialsSupported[credential].get("issuer_config")
+
+            if issuer_config and "doctype" in issuer_config:
+                return issuer_config["doctype"]
+            else:
+                return None
+
+
+""" def vct2doctype(vct: str):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    for credential in credentialsSupported:
+        if (
+            "vct" in credentialsSupported[credential]
+            and credentialsSupported[credential]["vct"] == vct
+        ):
+            return credentialsSupported[credential]["issuer_config"]["doctype"] """
 
 
 def vct2id(vct):
