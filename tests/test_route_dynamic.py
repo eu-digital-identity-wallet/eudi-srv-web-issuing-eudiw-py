@@ -1007,3 +1007,1242 @@ class TestCredentialCreation:
         assert isinstance(result["credentials"], list)
         assert len(result["credentials"]) == 2
         assert all("credential" in cred for cred in result["credentials"])
+
+
+# -----------------------
+# Test: Auth Method Route
+# -----------------------
+class TestAuthMethod:
+    """Test class for /auth_method route"""
+
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        """Setup common mocks for auth method tests"""
+        # Mock session_manager
+        patcher_get_session = patch("app.route_dynamic.session_manager.get_session")
+        self.mock_get_session = patcher_get_session.start()
+
+        # Mock cfgserv
+        class MockCfgServ:
+            service_url = "https://service.test/"
+            app_logger = MagicMock()
+
+        patch("app.route_dynamic.cfgserv", new=MockCfgServ).start()
+
+        yield
+        patch.stopall()
+
+    def test_cancelled_form_returns_500(self, client):
+        """Test that cancelling the form triggers ValueError (caught by Flask as 500)"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session_123"
+
+        response = client.post("/dynamic/auth_method", data={"Cancelled": "true"})
+
+        # Flask catches the ValueError and returns 500
+        assert response.status_code == 500
+
+    def test_link1_redirects_to_oid4vp(self, client):
+        """Test selecting link1 redirects to oid4vp endpoint"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.post("/dynamic/auth_method", data={"optionsRadios": "link1"})
+
+        assert response.status_code == 302  # Redirect status code
+        assert response.location == "https://service.test/oid4vp"
+
+    def test_link2_redirects_to_dynamic(self, client):
+        """Test selecting link2 redirects to dynamic endpoint"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.post("/dynamic/auth_method", data={"optionsRadios": "link2"})
+
+        assert response.status_code == 302  # Redirect status code
+        assert response.location == "https://service.test/dynamic/"
+
+    def test_get_request_returns_none(self, client):
+        """Test GET request returns 500 due to missing return statement"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.get("/dynamic/auth_method")
+
+        # Function doesn't handle GET, returns None -> 500 error
+        assert response.status_code == 500
+
+    def test_session_manager_get_session_called(self, client):
+        """Test that session_manager.get_session is called with correct session_id"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "specific_session_id"
+
+        client.post("/dynamic/auth_method", data={"optionsRadios": "link1"})
+
+        self.mock_get_session.assert_called_once_with(session_id="specific_session_id")
+
+    def test_no_option_selected_returns_500(self, client):
+        """Test behavior when no radio option is selected returns 500"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.post("/dynamic/auth_method", data={})
+
+        # No matching condition, returns None -> 500 error
+        assert response.status_code == 500
+
+    def test_invalid_option_selected_returns_500(self, client):
+        """Test behavior when invalid option is selected returns 500"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.post(
+            "/dynamic/auth_method", data={"optionsRadios": "invalid_link"}
+        )
+
+        # No matching condition, returns None -> 500 error
+        assert response.status_code == 500
+
+    def test_missing_session_id_returns_500(self, client):
+        """Test behavior when session_id is missing returns 500"""
+        mock_session = MagicMock()
+        self.mock_get_session.return_value = mock_session
+
+        # Don't set session_id
+        response = client.post("/dynamic/auth_method", data={"optionsRadios": "link1"})
+
+        # KeyError is caught by Flask and returns 500
+        assert response.status_code == 500
+
+
+# -----------------------
+# Test: Form Formatter Function
+# -----------------------
+class TestFormFormatter:
+    """Test class for form_formatter function"""
+
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        """Setup common mocks for form formatter tests"""
+
+        # Mock cfgserv
+        class MockCfgServ:
+            portrait1 = "base64_portrait1_data"
+            portrait2 = "base64_portrait2_data"
+            signature_usual_mark_issuing_officer = "base64_signature_data"
+
+        patch("app.route_dynamic.cfgserv", MockCfgServ).start()
+
+        # Mock session_manager
+        mock_session = MagicMock()
+        mock_session.country = "EU"
+        mock_session.scope = "eu.europa.ec.eudi.pid_mdoc"
+
+        patcher_get_session = patch("app.route_dynamic.session_manager.get_session")
+        self.mock_get_session = patcher_get_session.start()
+        self.mock_get_session.return_value = mock_session
+
+        # Mock oidc_metadata
+        self.mock_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "issuer_config": {
+                        "issuing_authority": "Test Authority",
+                        "validity": 90,
+                    }
+                }
+            }
+        }
+        patch("app.route_dynamic.oidc_metadata", self.mock_metadata).start()
+
+        # Mock session dict
+        self.session_dict = {"session_id": "test_session"}
+        patch("app.route_dynamic.session", self.session_dict).start()
+
+        yield
+        patch.stopall()
+
+    def test_simple_key_value_pairs(self):
+        """Test handling of simple key-value pairs"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "given_name": "John",
+            "birth_date": "1990-01-01",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["family_name"] == "Doe"
+        assert result["given_name"] == "John"
+        assert result["birth_date"] == "1990-01-01"
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_skip_empty_values(self):
+        """Test that empty values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "given_name": "", "middle_name": None}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "given_name" not in result
+        assert "middle_name" not in result
+
+    def test_skip_control_buttons(self):
+        """Test that form control buttons are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "proceed": "Submit",
+            "Cancelled": "Cancel",
+            "NumberCategories": "5",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "proceed" not in result
+        assert "Cancelled" not in result
+        assert "NumberCategories" not in result
+
+    def test_skip_option_on_values(self):
+        """Test that radio button 'on' values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "option1": "on", "option2": "selected_value"}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "option1" not in result
+        assert result["option2"] == "selected_value"
+
+    @patch("app.route_dynamic.datetime")
+    def test_effective_from_date_formatting(self, mock_datetime):
+        """Test RFC3339 date formatting for effective_from_date"""
+        from app.route_dynamic import form_formatter
+
+        # Mock datetime behavior
+        mock_dt = MagicMock()
+        mock_dt.isoformat.return_value = "2024-01-01T00:00:00+00:00"
+        mock_datetime.strptime.return_value.replace.return_value = mock_dt
+
+        form_data = {"effective_from_date": "2024-01-01T12:00:00", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["effective_from_date"] == "2024-01-01T00:00:00Z"
+        assert result["family_name"] == "Doe"
+
+    def test_nested_list_structure(self):
+        """Test parsing of nested list structures like capacities[0][codes][1]"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][name]": "Manager",
+            "capacities[0][codes][0][code]": "MGR",
+            "capacities[0][codes][1][code]": "EXEC",
+            "capacities[1][name]": "Director",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "capacities" in result
+        assert isinstance(result["capacities"], list)
+        assert len(result["capacities"]) == 2
+        assert result["capacities"][0]["name"] == "Manager"
+        assert result["capacities"][0]["codes"][0]["code"] == "MGR"
+        assert result["capacities"][0]["codes"][1]["code"] == "EXEC"
+        assert result["capacities"][1]["name"] == "Director"
+
+    def test_places_of_work_aggregation(self):
+        """Test aggregation of places_of_work data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "places_of_work[0][no_fixed_place][0][country_code]": "PT",
+            "places_of_work[1][no_fixed_place][0][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "places_of_work" in result
+        assert isinstance(result["places_of_work"], list)
+        assert len(result["places_of_work"]) == 1
+        assert "no_fixed_place" in result["places_of_work"][0]
+        assert len(result["places_of_work"][0]["no_fixed_place"]) == 2
+
+    def test_nationality_transformation(self):
+        """Test nationality list transformation from dict to country codes"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationality[0][country_code]": "PT",
+            "nationality[1][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationality" in result
+        assert isinstance(result["nationality"], list)
+        assert result["nationality"] == ["PT", "ES"]
+
+    def test_nationalities_transformation(self):
+        """Test nationalities (plural) list transformation"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationalities[0][country_code]": "FR",
+            "nationalities[1][country_code]": "DE",
+            "nationalities[2][country_code]": "IT",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationalities" in result
+        assert isinstance(result["nationalities"], list)
+        assert result["nationalities"] == ["FR", "DE", "IT"]
+
+    def test_portrait_port1_replacement(self):
+        """Test portrait Port1 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"portrait": "Port1", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["family_name"] == "Doe"
+
+    def test_portrait_port2_replacement(self):
+        """Test portrait Port2 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait2_data"
+
+    def test_portrait_custom_value(self):
+        """Test portrait custom base64 value is preserved"""
+        from app.route_dynamic import form_formatter
+
+        custom_portrait = "custom_base64_portrait_data"
+        form_data = {
+            "portrait": custom_portrait,
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == custom_portrait
+
+    def test_image_port1_replacement(self):
+        """Test image Port1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait1_data"
+
+    def test_image_port2_replacement(self):
+        """Test image Port2 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait2_data"
+
+    def test_signature_usual_mark_replacement(self):
+        """Test signature_usual_mark Sig1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_signature_usual_mark_issuing_officer_replacement(self):
+        """Test signature_usual_mark_issuing_officer Sig1 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark_issuing_officer": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark_issuing_officer"] == "base64_signature_data"
+
+    def test_picture_field_replacement(self):
+        """Test picture field Port1/Port2 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "picture": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["picture"] == "base64_portrait1_data"
+
+    def test_multiple_image_fields(self):
+        """Test multiple image-related fields with different values"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port1",
+            "image": "Port2",
+            "picture": "custom_base64_data",
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["image"] == "base64_portrait2_data"
+        assert result["picture"] == "custom_base64_data"
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_complex_nested_structure(self):
+        """Test complex nested structure with mixed dictionaries and lists"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][type]": "legal",
+            "capacities[0][codes][0][code]": "A1",
+            "capacities[0][codes][0][description]": "Admin",
+            "capacities[0][codes][1][code]": "B2",
+            "capacities[1][type]": "natural",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["capacities"][0]["type"] == "legal"
+        assert result["capacities"][0]["codes"][0]["code"] == "A1"
+        assert result["capacities"][0]["codes"][0]["description"] == "Admin"
+        assert result["capacities"][0]["codes"][1]["code"] == "B2"
+        assert result["capacities"][1]["type"] == "natural"
+
+    def test_issuing_country_and_authority_added(self):
+        """Test that issuing_country and issuing_authority are added"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_empty_form_data(self):
+        """Test handling of empty form data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {}
+
+        result = form_formatter(form_data)
+
+        # Should still have issuer-filled data
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_session_manager_called_correctly(self):
+        """Test that session_manager.get_session is called with correct session_id"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe"}
+
+        form_formatter(form_data)
+
+        # Should be called at least twice (for country and scope)
+        assert self.mock_get_session.call_count >= 2
+
+        # Check that all calls used the correct session_id
+        # The function is called as: session_manager.get_session(session["session_id"])
+        # This means session_id is a positional argument
+        for call in self.mock_get_session.call_args_list:
+            # call[0] is a tuple of positional arguments
+            # call[1] is a dict of keyword arguments
+            assert len(call[0]) > 0 and call[0][0] == "test_session"
+
+
+# -----------------------
+# Test: Form Formatter Function
+# -----------------------
+class TestFormFormatter:
+    """Test class for form_formatter function"""
+
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        """Setup common mocks for form formatter tests"""
+
+        # Mock cfgserv
+        class MockCfgServ:
+            portrait1 = "base64_portrait1_data"
+            portrait2 = "base64_portrait2_data"
+            signature_usual_mark_issuing_officer = "base64_signature_data"
+
+        patch("app.route_dynamic.cfgserv", MockCfgServ).start()
+
+        # Mock session_manager
+        mock_session = MagicMock()
+        mock_session.country = "EU"
+        mock_session.scope = "eu.europa.ec.eudi.pid_mdoc"
+
+        patcher_get_session = patch("app.route_dynamic.session_manager.get_session")
+        self.mock_get_session = patcher_get_session.start()
+        self.mock_get_session.return_value = mock_session
+
+        # Mock oidc_metadata
+        self.mock_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "issuer_config": {
+                        "issuing_authority": "Test Authority",
+                        "validity": 90,
+                    }
+                }
+            }
+        }
+        patch("app.route_dynamic.oidc_metadata", self.mock_metadata).start()
+
+        # Mock session dict
+        self.session_dict = {"session_id": "test_session"}
+        patch("app.route_dynamic.session", self.session_dict).start()
+
+        yield
+        patch.stopall()
+
+    def test_simple_key_value_pairs(self):
+        """Test handling of simple key-value pairs"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "given_name": "John",
+            "birth_date": "1990-01-01",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["family_name"] == "Doe"
+        assert result["given_name"] == "John"
+        assert result["birth_date"] == "1990-01-01"
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_skip_empty_values(self):
+        """Test that empty values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "given_name": "", "middle_name": None}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "given_name" not in result
+        assert "middle_name" not in result
+
+    def test_skip_control_buttons(self):
+        """Test that form control buttons are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "proceed": "Submit",
+            "Cancelled": "Cancel",
+            "NumberCategories": "5",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "proceed" not in result
+        assert "Cancelled" not in result
+        assert "NumberCategories" not in result
+
+    def test_skip_option_on_values(self):
+        """Test that radio button 'on' values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "option1": "on", "option2": "selected_value"}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "option1" not in result
+        assert result["option2"] == "selected_value"
+
+    @patch("app.route_dynamic.datetime")
+    def test_effective_from_date_formatting(self, mock_datetime):
+        """Test RFC3339 date formatting for effective_from_date"""
+        from app.route_dynamic import form_formatter
+
+        # Mock datetime behavior
+        mock_dt = MagicMock()
+        mock_dt.isoformat.return_value = "2024-01-01T00:00:00+00:00"
+        mock_datetime.strptime.return_value.replace.return_value = mock_dt
+
+        form_data = {"effective_from_date": "2024-01-01T12:00:00", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["effective_from_date"] == "2024-01-01T00:00:00Z"
+        assert result["family_name"] == "Doe"
+
+    def test_nested_list_structure(self):
+        """Test parsing of nested list structures like capacities[0][codes][1]"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][name]": "Manager",
+            "capacities[0][codes][0][code]": "MGR",
+            "capacities[0][codes][1][code]": "EXEC",
+            "capacities[1][name]": "Director",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "capacities" in result
+        assert isinstance(result["capacities"], list)
+        assert len(result["capacities"]) == 2
+        assert result["capacities"][0]["name"] == "Manager"
+        assert result["capacities"][0]["codes"][0]["code"] == "MGR"
+        assert result["capacities"][0]["codes"][1]["code"] == "EXEC"
+        assert result["capacities"][1]["name"] == "Director"
+
+    def test_places_of_work_aggregation(self):
+        """Test aggregation of places_of_work data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "places_of_work[0][no_fixed_place][0][country_code]": "PT",
+            "places_of_work[1][no_fixed_place][0][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "places_of_work" in result
+        assert isinstance(result["places_of_work"], list)
+        assert len(result["places_of_work"]) == 1
+        assert "no_fixed_place" in result["places_of_work"][0]
+        assert len(result["places_of_work"][0]["no_fixed_place"]) == 2
+
+    def test_nationality_transformation(self):
+        """Test nationality list transformation from dict to country codes"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationality[0][country_code]": "PT",
+            "nationality[1][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationality" in result
+        assert isinstance(result["nationality"], list)
+        assert result["nationality"] == ["PT", "ES"]
+
+    def test_nationalities_transformation(self):
+        """Test nationalities (plural) list transformation"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationalities[0][country_code]": "FR",
+            "nationalities[1][country_code]": "DE",
+            "nationalities[2][country_code]": "IT",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationalities" in result
+        assert isinstance(result["nationalities"], list)
+        assert result["nationalities"] == ["FR", "DE", "IT"]
+
+    def test_portrait_port1_replacement(self):
+        """Test portrait Port1 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"portrait": "Port1", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["family_name"] == "Doe"
+
+    def test_portrait_port2_replacement(self):
+        """Test portrait Port2 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait2_data"
+
+    def test_portrait_custom_value(self):
+        """Test portrait custom base64 value is preserved"""
+        from app.route_dynamic import form_formatter
+
+        custom_portrait = "custom_base64_portrait_data"
+        form_data = {
+            "portrait": custom_portrait,
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == custom_portrait
+
+    def test_image_port1_replacement(self):
+        """Test image Port1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait1_data"
+
+    def test_image_port2_replacement(self):
+        """Test image Port2 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait2_data"
+
+    def test_signature_usual_mark_replacement(self):
+        """Test signature_usual_mark Sig1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_signature_usual_mark_issuing_officer_replacement(self):
+        """Test signature_usual_mark_issuing_officer Sig1 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark_issuing_officer": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark_issuing_officer"] == "base64_signature_data"
+
+    def test_picture_field_replacement(self):
+        """Test picture field Port1/Port2 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "picture": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["picture"] == "base64_portrait1_data"
+
+    def test_multiple_image_fields(self):
+        """Test multiple image-related fields with different values"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port1",
+            "image": "Port2",
+            "picture": "custom_base64_data",
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["image"] == "base64_portrait2_data"
+        assert result["picture"] == "custom_base64_data"
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_complex_nested_structure(self):
+        """Test complex nested structure with mixed dictionaries and lists"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][type]": "legal",
+            "capacities[0][codes][0][code]": "A1",
+            "capacities[0][codes][0][description]": "Admin",
+            "capacities[0][codes][1][code]": "B2",
+            "capacities[1][type]": "natural",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["capacities"][0]["type"] == "legal"
+        assert result["capacities"][0]["codes"][0]["code"] == "A1"
+        assert result["capacities"][0]["codes"][0]["description"] == "Admin"
+        assert result["capacities"][0]["codes"][1]["code"] == "B2"
+        assert result["capacities"][1]["type"] == "natural"
+
+    def test_issuing_country_and_authority_added(self):
+        """Test that issuing_country and issuing_authority are added"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_empty_form_data(self):
+        """Test handling of empty form data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {}
+
+        result = form_formatter(form_data)
+
+        # Should still have issuer-filled data
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_session_manager_called_correctly(self):
+        """Test that session_manager.get_session is called with correct session_id"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe"}
+
+        form_formatter(form_data)
+
+        # Should be called at least twice (for country and scope)
+        assert self.mock_get_session.call_count >= 2
+
+        # Check that all calls used the correct session_id
+        for call in self.mock_get_session.call_args_list:
+            # call is a tuple of (args, kwargs)
+            # session_id is passed as a keyword argument
+            assert len(call[0]) > 0 and call[0][0] == "test_session"
+
+
+# -----------------------
+# Test: Form Formatter Function
+# -----------------------
+class TestFormFormatter:
+    """Test class for form_formatter function"""
+
+    @pytest.fixture(autouse=True)
+    def setup_mocks(self):
+        """Setup common mocks for form formatter tests"""
+
+        # Mock cfgserv
+        class MockCfgServ:
+            portrait1 = "base64_portrait1_data"
+            portrait2 = "base64_portrait2_data"
+            signature_usual_mark_issuing_officer = "base64_signature_data"
+
+        patch("app.route_dynamic.cfgserv", MockCfgServ).start()
+
+        # Mock session_manager
+        mock_session = MagicMock()
+        mock_session.country = "EU"
+        mock_session.scope = "eu.europa.ec.eudi.pid_mdoc"
+
+        patcher_get_session = patch("app.route_dynamic.session_manager.get_session")
+        self.mock_get_session = patcher_get_session.start()
+        self.mock_get_session.return_value = mock_session
+
+        # Mock oidc_metadata
+        self.mock_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "issuer_config": {
+                        "issuing_authority": "Test Authority",
+                        "validity": 90,
+                    }
+                }
+            }
+        }
+        patch("app.route_dynamic.oidc_metadata", self.mock_metadata).start()
+
+        # Mock session dict
+        self.session_dict = {"session_id": "test_session"}
+        patch("app.route_dynamic.session", self.session_dict).start()
+
+        yield
+        patch.stopall()
+
+    def test_simple_key_value_pairs(self):
+        """Test handling of simple key-value pairs"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "given_name": "John",
+            "birth_date": "1990-01-01",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["family_name"] == "Doe"
+        assert result["given_name"] == "John"
+        assert result["birth_date"] == "1990-01-01"
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_skip_empty_values(self):
+        """Test that empty values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "given_name": "", "middle_name": None}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "given_name" not in result
+        assert "middle_name" not in result
+
+    def test_skip_control_buttons(self):
+        """Test that form control buttons are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+            "proceed": "Submit",
+            "Cancelled": "Cancel",
+            "NumberCategories": "5",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "proceed" not in result
+        assert "Cancelled" not in result
+        assert "NumberCategories" not in result
+
+    def test_skip_option_on_values(self):
+        """Test that radio button 'on' values are skipped"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe", "option1": "on", "option2": "selected_value"}
+
+        result = form_formatter(form_data)
+
+        assert "family_name" in result
+        assert "option1" not in result
+        assert result["option2"] == "selected_value"
+
+    @patch("app.route_dynamic.datetime")
+    def test_effective_from_date_formatting(self, mock_datetime):
+        """Test RFC3339 date formatting for effective_from_date"""
+        from app.route_dynamic import form_formatter
+
+        # Mock datetime behavior
+        mock_dt = MagicMock()
+        mock_dt.isoformat.return_value = "2024-01-01T00:00:00+00:00"
+        mock_datetime.strptime.return_value.replace.return_value = mock_dt
+
+        form_data = {"effective_from_date": "2024-01-01T12:00:00", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["effective_from_date"] == "2024-01-01T00:00:00Z"
+        assert result["family_name"] == "Doe"
+
+    def test_nested_list_structure(self):
+        """Test parsing of nested list structures like capacities[0][codes][1]"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][name]": "Manager",
+            "capacities[0][codes][0][code]": "MGR",
+            "capacities[0][codes][1][code]": "EXEC",
+            "capacities[1][name]": "Director",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "capacities" in result
+        assert isinstance(result["capacities"], list)
+        assert len(result["capacities"]) == 2
+        assert result["capacities"][0]["name"] == "Manager"
+        assert result["capacities"][0]["codes"][0]["code"] == "MGR"
+        assert result["capacities"][0]["codes"][1]["code"] == "EXEC"
+        assert result["capacities"][1]["name"] == "Director"
+
+    def test_places_of_work_aggregation(self):
+        """Test aggregation of places_of_work data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "places_of_work[0][no_fixed_place][0][country_code]": "PT",
+            "places_of_work[1][no_fixed_place][0][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "places_of_work" in result
+        assert isinstance(result["places_of_work"], list)
+        assert len(result["places_of_work"]) == 1
+        assert "no_fixed_place" in result["places_of_work"][0]
+        assert len(result["places_of_work"][0]["no_fixed_place"]) == 2
+
+    def test_nationality_transformation(self):
+        """Test nationality list transformation from dict to country codes"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationality[0][country_code]": "PT",
+            "nationality[1][country_code]": "ES",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationality" in result
+        assert isinstance(result["nationality"], list)
+        assert result["nationality"] == ["PT", "ES"]
+
+    def test_nationalities_transformation(self):
+        """Test nationalities (plural) list transformation"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "nationalities[0][country_code]": "FR",
+            "nationalities[1][country_code]": "DE",
+            "nationalities[2][country_code]": "IT",
+        }
+
+        result = form_formatter(form_data)
+
+        assert "nationalities" in result
+        assert isinstance(result["nationalities"], list)
+        assert result["nationalities"] == ["FR", "DE", "IT"]
+
+    def test_portrait_port1_replacement(self):
+        """Test portrait Port1 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"portrait": "Port1", "family_name": "Doe"}
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["family_name"] == "Doe"
+
+    def test_portrait_port2_replacement(self):
+        """Test portrait Port2 value replacement with base64 data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait2_data"
+
+    def test_portrait_custom_value(self):
+        """Test portrait custom base64 value is preserved"""
+        from app.route_dynamic import form_formatter
+
+        custom_portrait = "custom_base64_portrait_data"
+        form_data = {
+            "portrait": custom_portrait,
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == custom_portrait
+
+    def test_image_port1_replacement(self):
+        """Test image Port1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait1_data"
+
+    def test_image_port2_replacement(self):
+        """Test image Port2 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "image": "Port2",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["image"] == "base64_portrait2_data"
+
+    def test_signature_usual_mark_replacement(self):
+        """Test signature_usual_mark Sig1 value replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_signature_usual_mark_issuing_officer_replacement(self):
+        """Test signature_usual_mark_issuing_officer Sig1 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "signature_usual_mark_issuing_officer": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["signature_usual_mark_issuing_officer"] == "base64_signature_data"
+
+    def test_picture_field_replacement(self):
+        """Test picture field Port1/Port2 replacement"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "picture": "Port1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["picture"] == "base64_portrait1_data"
+
+    def test_multiple_image_fields(self):
+        """Test multiple image-related fields with different values"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "portrait": "Port1",
+            "image": "Port2",
+            "picture": "custom_base64_data",
+            "signature_usual_mark": "Sig1",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["portrait"] == "base64_portrait1_data"
+        assert result["image"] == "base64_portrait2_data"
+        assert result["picture"] == "custom_base64_data"
+        assert result["signature_usual_mark"] == "base64_signature_data"
+
+    def test_complex_nested_structure(self):
+        """Test complex nested structure with mixed dictionaries and lists"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "capacities[0][type]": "legal",
+            "capacities[0][codes][0][code]": "A1",
+            "capacities[0][codes][0][description]": "Admin",
+            "capacities[0][codes][1][code]": "B2",
+            "capacities[1][type]": "natural",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["capacities"][0]["type"] == "legal"
+        assert result["capacities"][0]["codes"][0]["code"] == "A1"
+        assert result["capacities"][0]["codes"][0]["description"] == "Admin"
+        assert result["capacities"][0]["codes"][1]["code"] == "B2"
+        assert result["capacities"][1]["type"] == "natural"
+
+    def test_issuing_country_and_authority_added(self):
+        """Test that issuing_country and issuing_authority are added"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            "family_name": "Doe",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_empty_form_data(self):
+        """Test handling of empty form data"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {}
+
+        result = form_formatter(form_data)
+
+        # Should still have issuer-filled data
+        assert result["issuing_country"] == "EU"
+        assert result["issuing_authority"] == "Test Authority"
+
+    def test_session_manager_called_correctly(self):
+        """Test that session_manager.get_session is called with correct session_id"""
+        from app.route_dynamic import form_formatter
+
+        form_data = {"family_name": "Doe"}
+
+        form_formatter(form_data)
+
+        # Should be called at least twice (for country and scope)
+        assert self.mock_get_session.call_count >= 2
+
+        # Check that all calls used the correct session_id
+        for call in self.mock_get_session.call_args_list:
+            # call is a tuple of (args, kwargs)
+            # session_id is passed as a keyword argument
+            assert len(call[0]) > 0 and call[0][0] == "test_session"
