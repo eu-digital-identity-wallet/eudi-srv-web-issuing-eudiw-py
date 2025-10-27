@@ -26,6 +26,8 @@ NOTE: You should only change it if you understand what you're doing.
 
 from .config_service import ConfService as cfgserv
 
+EIDAS_LOA_HIGH = "http://eidas.europa.eu/LoA/high"
+
 
 class ConfCountries:
     urlReturnEE = "https://pprpid.provider.eudiw.projj.eu/tara/redirect"
@@ -40,7 +42,7 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EU.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
             "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_EU_cert.der",
-            "loa": "http://eidas.europa.eu/LoA/high",
+            "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
@@ -176,7 +178,7 @@ class ConfCountries:
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0002_CZ.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_CZ_cert.der",
-            "loa": "http://eidas.europa.eu/LoA/high",
+            "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
@@ -190,7 +192,7 @@ class ConfCountries:
             "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_NL.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_NL_cert.der",
-            "loa": "http://eidas.europa.eu/LoA/high",
+            "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
@@ -204,7 +206,7 @@ class ConfCountries:
             "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_LU.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
             "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_LU_cert.der",
-            "loa": "http://eidas.europa.eu/LoA/high",
+            "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",

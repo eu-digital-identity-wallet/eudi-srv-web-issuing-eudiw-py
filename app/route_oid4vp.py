@@ -196,14 +196,6 @@ def openid4vp():
         },
     )
 
-    """ return render_template(
-        "openid/pid_login_qr_code.html",
-        url_data=deeplink_url,
-        qrcode=qr_img_base64,
-        presentation_id=response_cross["transaction_id"],
-        redirect_url=cfgservice.service_url,
-    ) """
-
 
 @oid4vp.route("/getpidoid4vp", methods=["GET"])
 def getpidoid4vp():

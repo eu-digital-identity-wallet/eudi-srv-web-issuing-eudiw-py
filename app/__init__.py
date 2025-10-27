@@ -173,16 +173,16 @@ IS_TEST_ENV = (
 )
 
 
-def setup_trusted_CAs():
+def setup_trusted_cas():
     global trusted_CAs
     if not IS_TEST_ENV:
         try:
             ec_keys = {}
             for file in os.listdir(cfgserv.trusted_CAs_path):
                 if file.endswith("pem"):
-                    CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
+                    ca_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
-                    with open(CA_path) as pem_file:
+                    with open(ca_path) as pem_file:
 
                         pem_data = pem_file.read()
 
@@ -249,7 +249,7 @@ def setup_trusted_CAs():
         trusted_CAs = ec_keys
 
 
-setup_trusted_CAs()
+setup_trusted_cas()
 
 
 def handle_exception(e):

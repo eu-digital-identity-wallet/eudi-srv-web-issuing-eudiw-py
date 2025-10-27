@@ -96,16 +96,14 @@ def dynamic_formatter(format, doctype, form_data, device_publickey, session_id):
 
 
 def formatter(data, un_distinguishing_sign, doctype, format):
-    credentialsSupported = oidc_metadata["credential_configurations_supported"]
     today = datetime.date.today()
 
+    requested_credential, pdata = get_requested_credential(data, doctype, format, today)
+    doctype_config = requested_credential["issuer_config"]
+    expiry = today + datetime.timedelta(days=doctype_config["validity"])
+
+    # Extract claim categories
     if format == "mso_mdoc":
-        requested_credential = doctype2credential(doctype, format)
-
-        doctype_config = requested_credential["issuer_config"]
-
-        expiry = today + datetime.timedelta(days=doctype_config["validity"])
-
         namescapes = getNamespaces(
             requested_credential["credential_metadata"]["claims"]
         )
@@ -113,24 +111,58 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             attributes_req = getMandatoryAttributes(
                 requested_credential["credential_metadata"]["claims"], namescape
             )
-
             attributes_req2 = getOptionalAttributes(
                 requested_credential["credential_metadata"]["claims"], namescape
             )
-
             issuer_claims = getIssuerFilledAttributes(
                 requested_credential["credential_metadata"]["claims"], namescape
             )
+    else:  # "dc+sd-jwt"
+        attributes_req = getMandatoryAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
+        attributes_req2 = getOptionalAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
+        issuer_claims = getIssuerFilledAttributesSDJWT(
+            requested_credential["credential_metadata"]["claims"]
+        )
 
-            pdata = {namescape: {}}
+    # Update special claims
+    update_dates_and_special_claims(
+        data,
+        issuer_claims,
+        un_distinguishing_sign,
+        today,
+        expiry,
+        requested_credential,
+        doctype_config,
+    )
 
-    elif format == "dc+sd-jwt":
-        requested_credential = doctype2credentialSDJWT(doctype, format)
+    # Normalize list and type fields
+    normalize_list_and_type_fields(data, attributes_req, attributes_req2)
 
-        doctype_config = requested_credential["issuer_config"]
+    # Populate pdata
+    populate_pdata(
+        data,
+        pdata,
+        format,
+        namescapes if format == "mso_mdoc" else None,
+        attributes_req,
+        attributes_req2,
+        issuer_claims,
+    )
 
-        expiry = today + datetime.timedelta(days=doctype_config["validity"])
+    return pdata, requested_credential
 
+
+def get_requested_credential(data, doctype, format, today):
+    if format == "mso_mdoc":
+        cred = doctype2credential(doctype, format)
+        pdata = {}
+    else:  # "dc+sd-jwt"
+        cred = doctype2credentialSDJWT(doctype, format)
+        doctype_config = cred["issuer_config"]
         pdata = {
             "evidence": [
                 {
@@ -144,176 +176,85 @@ def formatter(data, un_distinguishing_sign, doctype, format):
             ],
             "claims": {},
         }
+    return cred, pdata
 
-        attributes_req = getMandatoryAttributesSDJWT(
-            requested_credential["credential_metadata"]["claims"]
-        )
 
-        attributes_req2 = getOptionalAttributesSDJWT(
-            requested_credential["credential_metadata"]["claims"]
-        )
+def update_dates_and_special_claims(
+    data,
+    issuer_claims,
+    un_distinguishing_sign,
+    today,
+    expiry,
+    requested_credential,
+    doctype_config,
+):
+    # Age over 18
+    if "age_over_18" in issuer_claims and "birth_date" in data:
+        data["age_over_18"] = calculate_age(data["birth_date"]) >= 18
 
-        issuer_claims = getIssuerFilledAttributesSDJWT(
-            requested_credential["credential_metadata"]["claims"]
-        )
-
-        pdata["claims"] = {}
-
-    # add optional age_over_18 to mdl
-    """ if doctype == "org.iso.18013.5.1.mDL" or doctype == "eu.europa.ec.eudi.pid.1":
-        attributes_req.update({"age_over_18":"bool"}) """
-
-    if ("age_over_18" in issuer_claims) and "birth_date" in data:
-        data.update(
-            {
-                "age_over_18": (
-                    True if calculate_age(data["birth_date"]) >= 18 else False
-                )
-            }
-        )
-
-    if "age_over_18" in data:
-        attributes_req2.update({"age_over_18": data["age_over_18"]})
-
+    # Un-distinguishing sign
     if "un_distinguishing_sign" in issuer_claims:
-        data.update({"un_distinguishing_sign": un_distinguishing_sign})
+        data["un_distinguishing_sign"] = un_distinguishing_sign
 
-    if "issuance_date" in issuer_claims:
-        data.update({"issuance_date": today.strftime("%Y-%m-%d")})
+    # Dates
+    date_fields = {
+        "issuance_date": today,
+        "date_of_issuance": today,
+        "issue_date": today,
+        "expiry_date": expiry,
+        "date_of_expiry": expiry,
+    }
+    for field, value in date_fields.items():
+        if field in issuer_claims:
+            data[field] = value.strftime("%Y-%m-%d")
 
-    if "date_of_issuance" in issuer_claims:
-        data.update({"date_of_issuance": today.strftime("%Y-%m-%d")})
-
-    if "issue_date" in issuer_claims:
-        data.update({"issue_date": today.strftime("%Y-%m-%d")})
-
-    if "expiry_date" in issuer_claims:
-        data.update({"expiry_date": expiry.strftime("%Y-%m-%d")})
-
-    if "date_of_expiry" in issuer_claims:
-        data.update({"date_of_expiry": expiry.strftime("%Y-%m-%d")})
-
-    if (
-        "issuing_authority" in issuer_claims
-        and requested_credential["scope"] == "eu.europa.ec.eudi.ehic_sd_jwt_vc"
-    ):
-        data.update(
-            {
-                "issuing_authority": {
-                    "id": doctype_config["issuing_authority_id"],
-                    "name": doctype_config["issuing_authority"],
-                }
+    # Issuing authority
+    if "issuing_authority" in issuer_claims:
+        if requested_credential.get("scope") == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
+            data["issuing_authority"] = {
+                "id": doctype_config["issuing_authority_id"],
+                "name": doctype_config["issuing_authority"],
             }
-        )
-
-    elif "issuing_authority" in issuer_claims:
-        data.update({"issuing_authority": doctype_config["issuing_authority"]})
+        else:
+            data["issuing_authority"] = doctype_config["issuing_authority"]
 
     if "issuing_authority_unicode" in issuer_claims:
-        data.update({"issuing_authority_unicode": doctype_config["issuing_authority"]})
+        data["issuing_authority_unicode"] = doctype_config["issuing_authority"]
 
     if "credential_type" in issuer_claims:
-        data.update({"credential_type": doctype_config["credential_type"]})
-        attributes_req.update({"credential_type": ""})
+        data["credential_type"] = doctype_config["credential_type"]
 
-    """ attributes_req.update({
-        "expiry_date":"",
-        "issuing_authority":"",
-        "issuing_country":"",
-    })
 
-    if doctype == "org.iso.18013.5.1.mDL":
-        attributes_req.update({
-        "issue_date":"",
-        "un_distinguishing_sign":"",
-        })
-    else:
-        attributes_req.update({
-        "issuance_date":"",
-        }) """
+def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
+    list_fields = [
+        "driving_privileges",
+        "places_of_work",
+        "legislation",
+        "employment_details",
+        "competent_institution",
+        "credential_holder",
+        "subject",
+        "residence_address",
+    ]
 
-    if "at_least_one_of" in attributes_req:
-        attributes_req.pop("at_least_one_of")
+    for field in list_fields:
+        if field in attributes_req and field in data:
+            if isinstance(data[field], str):
+                data[field] = json.loads(data[field])
+            if isinstance(data[field], list):
+                data[field] = data[field][0]
 
-    if "driving_privileges" in attributes_req and not isinstance(
-        data.get("driving_privileges"), list
-    ):
-        json_priv = json.loads(data["driving_privileges"])
-        data.update({"driving_privileges": json_priv})
+        if field in attributes_req2 and field in data:
+            if isinstance(data[field], str):
+                data[field] = json.loads(data[field])
+            if isinstance(data[field], list):
+                data[field] = data[field][0]
 
-    if "places_of_work" in attributes_req and not isinstance(
-        data["places_of_work"], list
-    ):
-        json_priv = json.loads(data["places_of_work"])
-        data.update({"places_of_work": json_priv})
-
-    if "legislation" in attributes_req and not isinstance(data["legislation"], list):
-        json_priv = json.loads(data["legislation"])
-        data.update({"legislation": json_priv})
-
-    if "employment_details" in attributes_req and not isinstance(
-        data["employment_details"], list
-    ):
-        json_priv = json.loads(data["employment_details"])
-        data.update({"employment_details": json_priv})
-
-    if "competent_institution" in attributes_req and not isinstance(
-        data["competent_institution"], list
-    ):
-        json_priv = json.loads(data["competent_institution"])
-        data.update({"competent_institution": json_priv})
-
-    if "credential_holder" in attributes_req and isinstance(
-        data["credential_holder"], list
-    ):
-        data.update({"credential_holder": data["credential_holder"][0]})
-
-    if "credential_holder" in attributes_req2 and isinstance(
-        data["credential_holder"], list
-    ):
-        data.update({"credential_holder": data["credential_holder"][0]})
-
-    if "subject" in attributes_req and isinstance(data["subject"], list):
-        data.update({"subject": data["subject"][0]})
-
-    if "subject" in attributes_req2 and isinstance(data["subject"], list):
-        data.update({"subject": data["subject"][0]})
-
-    if "competent_institution" in attributes_req and isinstance(
-        data["competent_institution"], list
-    ):
-        data.update({"competent_institution": data["competent_institution"][0]})
-
-    if "competent_institution" in attributes_req2 and isinstance(
-        data["competent_institution"], list
-    ):
-        data.update({"competent_institution": data["competent_institution"][0]})
-
-    if "legislation" in attributes_req and isinstance(data["legislation"], list):
-        data.update({"legislation": data["legislation"][0]})
-
-    if "legislation" in attributes_req2 and isinstance(data["legislation"], list):
-        data.update({"legislation": data["legislation"][0]})
-
-    if "at_least_one_of" in attributes_req2:
-        attributes_req2.pop("at_least_one_of")
-
-    if "credential_holder" in attributes_req2 and not isinstance(
-        data["credential_holder"], list
-    ):
-        json_priv = json.loads(data["credential_holder"])
-        data.update({"credential_holder": json_priv})
-
-    if "subject" in attributes_req2 and not isinstance(data["subject"], list):
-        json_priv = json.loads(data["subject"])
-        data.update({"subject": json_priv})
-
+    # Numeric conversions
     if "age_in_years" in data and isinstance(data["age_in_years"], str):
-        data.update({"age_in_years": int(data["age_in_years"])})
-
+        data["age_in_years"] = int(data["age_in_years"])
     if "age_birth_year" in data and isinstance(data["age_birth_year"], str):
-        data.update({"age_birth_year": int(data["age_birth_year"])})
-
+        data["age_birth_year"] = int(data["age_birth_year"])
     if (
         "gender" in data
         and isinstance(data["gender"], str)
@@ -321,43 +262,19 @@ def formatter(data, un_distinguishing_sign, doctype, format):
     ):
         data["gender"] = int(data["gender"])
 
-    if "residence_address" in data and isinstance(data["residence_address"], list):
-        data.update({"residence_address": data["residence_address"][0]})
 
-    if "issuing_authority_logo" in issuer_claims:
-        data.update({"issuing_authority_logo": cfgserv.issuing_authority_logo})
-
-    if (
-        format == "dc+sd-jwt"
-        and "birthdate" not in data
-        and "birth_date" in data
-        and "birthdate" in attributes_req
-    ):
-        data["birthdate"] = data.pop("birth_date")
-
+def populate_pdata(
+    data, pdata, format, namescapes, attributes_req, attributes_req2, issuer_claims
+):
     if format == "mso_mdoc":
-        for attribute in attributes_req:
-            pdata[namescape].update({attribute: data[attribute]})
-
-        for attribute in attributes_req2:
-            if attribute in data:
-                pdata[namescape].update({attribute: data[attribute]})
-
-        for attribute in issuer_claims:
-            if attribute in data:
-                pdata[namescape].update({attribute: data[attribute]})
-
-    elif format == "dc+sd-jwt":
-        print("\nattributes_req", attributes_req)
-        for attribute in attributes_req:
-            pdata["claims"].update({attribute: data[attribute]})
-
-        for attribute in attributes_req2:
-            if attribute in data:
-                pdata["claims"].update({attribute: data[attribute]})
-
-        for attribute in issuer_claims:
-            if attribute in data:
-                pdata["claims"].update({attribute: data[attribute]})
-
-    return pdata, requested_credential
+        for namescape in namescapes:
+            pdata[namescape] = {}
+            for attr_group in (attributes_req, attributes_req2, issuer_claims):
+                for attr in attr_group:
+                    if attr in data:
+                        pdata[namescape][attr] = data[attr]
+    else:  # "dc+sd-jwt"
+        for attr_group in (attributes_req, attributes_req2, issuer_claims):
+            for attr in attr_group:
+                if attr in data:
+                    pdata["claims"][attr] = data[attr]
