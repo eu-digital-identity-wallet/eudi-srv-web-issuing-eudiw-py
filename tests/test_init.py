@@ -351,7 +351,7 @@ class TestSetupTrustedCAs:
 
         import app
 
-        app.setup_trusted_CAs()
+        app.setup_trusted_cas()
 
         # Verify CAs were loaded
         assert app.trusted_CAs is not None
@@ -366,7 +366,7 @@ class TestSetupTrustedCAs:
         import app
 
         app.trusted_CAs = {}
-        app.setup_trusted_CAs()
+        app.setup_trusted_cas()
 
         # Should remain empty in test environment
         assert app.trusted_CAs == {}
@@ -379,7 +379,7 @@ class TestSetupTrustedCAs:
         import app
 
         with pytest.raises(FileNotFoundError):
-            app.setup_trusted_CAs()
+            app.setup_trusted_cas()
 
     def test_setup_trusted_cas_invalid_cert(
         self, monkeypatch, tmp_path, mock_config_service
@@ -396,7 +396,7 @@ class TestSetupTrustedCAs:
         import app
 
         with pytest.raises(Exception):
-            app.setup_trusted_CAs()
+            app.setup_trusted_cas()
 
 
 # ============================================================================
