@@ -58,4 +58,5 @@ def run_scheduler():
     clear_par()
 
 
-run_scheduler()
+if __name__ == "__main__":
+    run_scheduler()
