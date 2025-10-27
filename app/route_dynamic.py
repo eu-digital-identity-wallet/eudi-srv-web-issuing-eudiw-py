@@ -25,33 +25,21 @@ This route_dynamic.py file is the blueprint for the route /dynamic of the PID Is
 from datetime import datetime, timezone
 from datetime import date
 from datetime import timedelta
-import io
 import json
 import base64
 import re
-import secrets
-from formatter_func import cbor2elems
-import threading
-import schedule
-import time
 from urllib.parse import urlencode
 from uuid import uuid4
-from PIL import Image
 from flask import (
     Blueprint,
-    Flask,
-    make_response,
     redirect,
     render_template,
     request,
     session,
-    jsonify,
-    url_for,
 )
 from flask_api import status
 from flask_cors import CORS
 import requests
-from app.validate_vp_token import validate_vp_token
 
 from boot_validate import (
     validate_mandatory_args,
@@ -63,27 +51,21 @@ from redirect_func import url_get
 from misc import (
     convert_png_to_jpeg,
     credential_error_resp,
-    generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
     post_redirect_with_payload,
-    scope2details,
     calculate_age,
-    validate_image,
     vct2doctype,
-    vct2id,
-    vct2scope,
 )
 from dynamic_func import dynamic_formatter
-from . import oidc_metadata
-from . import session_manager
+from app import oidc_metadata
+from app import session_manager
 
 # /pid blueprint
 dynamic = Blueprint("dynamic", __name__, url_prefix="/dynamic")
 CORS(dynamic)  # enable CORS on the blue print
 
 # secrets
-from app_config.config_secrets import flask_secret_key
 
 # app.config["SECRET_KEY"] = flask_secret_key
 # app.config["dynamic"] = {}
