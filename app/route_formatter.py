@@ -151,15 +151,6 @@ def cborformatter():
                     }
                 )
 
-    if not b:  # nota all mandatory args are present
-        return jsonify(
-            {
-                "error_code": 401,
-                "error_message": cfgservice.error_list["401"],
-                "mdoc": "",
-            }
-        )
-
     base64_mdoc = mdocFormatter(
         request.json["data"],
         request.json["credential_metadata"],

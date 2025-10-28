@@ -183,11 +183,11 @@ class SessionManager:
         self.default_expiry_minutes = default_expiry_minutes
 
         # Create a separate lock for each dictionary to enable fine-grained locking.
-        self._sessions_lock = threading.Lock()
-        self._sessions_by_preauth_code_lock = threading.Lock()
-        self._sessions_by_preauth_code_ref_lock = threading.Lock()
-        self._sessions_by_transaction_id_lock = threading.Lock()
-        self._sessions_by_notification_id_lock = threading.Lock()
+        self._sessions_lock = threading.RLock()
+        self._sessions_by_preauth_code_lock = threading.RLock()
+        self._sessions_by_preauth_code_ref_lock = threading.RLock()
+        self._sessions_by_transaction_id_lock = threading.RLock()
+        self._sessions_by_notification_id_lock = threading.RLock()
 
     def add_session(
         self,

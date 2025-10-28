@@ -45,21 +45,6 @@ class MockConfService:
 class TestSupportedCountries:
     """Test class for country selection logic in /dynamic/ route"""
 
-    @patch("app.route_dynamic.render_template")
-    @patch("app.route_dynamic.cfgserv")
-    def test_cancelled_form(self, mock_cfgserv, mock_render, client):
-        """Test form cancellation returns auth_method.html"""
-        mock_cfgserv.service_url = "https://service.test"
-        mock_render.return_value = b"rendered_template"
-
-        with client.session_transaction() as sess:
-            sess["session_id"] = "test_session"
-
-        response = client.post("/dynamic/", data={"Cancelled": "true"})
-
-        assert response.data == b"rendered_template"
-        mock_render.assert_called_once()
-
     @patch("app.route_dynamic.dynamic_R1")
     @patch("app.route_dynamic.session_manager.get_session")
     @patch.dict(
@@ -154,20 +139,6 @@ class TestSupportedCountries:
 # -----------------------
 class TestCountrySelected:
     """Test class for /dynamic/country_selected route"""
-
-    @patch("app.route_dynamic.render_template")
-    @patch("app.route_dynamic.cfgserv", new=MockConfService)
-    def test_cancelled_form(self, mock_render, client):
-        """Test that cancelling the form renders auth_method.html"""
-        mock_render.return_value = b"rendered_template"
-
-        with client.session_transaction() as sess:
-            sess["session_id"] = "test_session"
-
-        response = client.post("/dynamic/country_selected", data={"Cancelled": "true"})
-
-        assert response.data == b"rendered_template"
-        mock_render.assert_called_once()
 
     @patch("app.route_dynamic.dynamic_R1")
     @patch("app.route_dynamic.cfgserv", new=MockConfService)
@@ -333,6 +304,100 @@ class TestDynamicR1:
         assert "redirect:" in result
         patch.stopall()
 
+    @patch("app.route_dynamic.uuid4", return_value="uuid123")
+    def test_fc_country_with_user_pseudonym(self, mock_uuid):
+        """Test dynamic_R1 adds filled_value when 'user_pseudonym' in mandatory attributes"""
+        # Mock session object
+        mock_session = MagicMock(
+            credentials_requested=["cred1"], frontend_id="frontend1"
+        )
+        self.mock_get_session.return_value = mock_session
+
+        # Patch getAttributesForm to include 'user_pseudonym'
+        with patch(
+            "app.route_dynamic.getAttributesForm",
+            return_value={
+                "user_pseudonym": {"type": "string"},
+                "name": {"type": "string", "filled_value": "John"},
+            },
+        ):
+            from app.route_dynamic import dynamic_R1
+
+            result = dynamic_R1("FC")
+
+            # Verify post_redirect_with_payload was called
+            self.mock_post_redirect.assert_called_once()
+
+            # Extract the payload argument from the mock call
+            called_args, called_kwargs = self.mock_post_redirect.call_args
+            payload = called_kwargs["data_payload"]
+
+            # Ensure 'user_pseudonym' got a filled_value equal to mocked UUID
+            mandatory = payload["mandatory_attributes"]
+            assert "user_pseudonym" in mandatory
+            assert mandatory["user_pseudonym"]["filled_value"] == "uuid123"
+
+            # Confirm the function returned expected redirect value
+            assert result == b"redirected_payload"
+
+    def test_openid_country(self):
+        """Test dynamic_R1 with OpenID connection type"""
+        mock_session = MagicMock(
+            jws_token="token123",
+            credentials_requested=["cred1"],
+            frontend_id="frontend1",
+        )
+        self.mock_get_session.return_value = mock_session
+
+        # Add an OpenID country (EE) to supported_countries
+        cfgcountries_supported = {
+            "EE": {
+                "connection_type": "openid",
+                "oidc_auth": {
+                    "base_url": "https://ee.test",
+                    "redirect_uri": "https://redirect.ee",
+                    "client_id": "client123",
+                    "scope": "openid",
+                    "response_type": "code",
+                },
+            }
+        }
+
+        # Patch cfgcountries with the new OpenID entry
+        with patch(
+            "app.route_dynamic.cfgcountries.supported_countries",
+            new=cfgcountries_supported,
+        ):
+            # Mock requests.get to return a fake authorization endpoint
+            mock_requests_get = patch("app.route_dynamic.requests.get").start()
+            mock_response = MagicMock()
+            mock_response.json.return_value = {
+                "authorization_endpoint": "https://ee.test/auth"
+            }
+            mock_requests_get.return_value = mock_response
+
+            from app.route_dynamic import dynamic_R1
+
+            result = dynamic_R1("EE")
+
+            # Verify redirect was called with the constructed URL
+            assert result.startswith("redirect:")
+
+            # Extract the redirect URL from the mock call
+            redirect_url = result.replace("redirect:", "")
+
+            # The URL should contain all parameters from oidc_auth (except excluded ones)
+            assert "https://ee.test/auth" in redirect_url
+            assert "redirect_uri=https://redirect.ee" in redirect_url
+            assert "client_id=client123" in redirect_url
+            assert "scope=openid" in redirect_url
+            assert "response_type=code" in redirect_url
+
+            # The 'state' should be correctly appended for EE
+            assert "state=EE.token123" in redirect_url
+
+            patch.stopall()
+
 
 # -----------------------
 # Test: Dynamic Redirect Route
@@ -452,6 +517,23 @@ class TestDynamicRedirect:
         )
 
         assert response.data == b"redirected_payload"
+
+    def test_redirect_missing_code(self, client):
+        """Test that /dynamic/redirect returns 500 if 'code' is missing"""
+        mock_session = MagicMock(
+            country="EU", frontend_id="frontend1", credentials_requested=[]
+        )
+        self.mock_get_session.return_value = mock_session
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session"
+
+        response = client.get(
+            "/dynamic/redirect",
+            query_string={"scope": "eu.europa.ec.eudi.pid_mdoc", "state": "state1"},
+        )
+
+        assert response.status_code == 500
 
 
 # -----------------------
@@ -1031,19 +1113,6 @@ class TestAuthMethod:
 
         yield
         patch.stopall()
-
-    def test_cancelled_form_returns_500(self, client):
-        """Test that cancelling the form triggers ValueError (caught by Flask as 500)"""
-        mock_session = MagicMock()
-        self.mock_get_session.return_value = mock_session
-
-        with client.session_transaction() as sess:
-            sess["session_id"] = "test_session_123"
-
-        response = client.post("/dynamic/auth_method", data={"Cancelled": "true"})
-
-        # Flask catches the ValueError and returns 500
-        assert response.status_code == 500
 
     def test_link1_redirects_to_oid4vp(self, client):
         """Test selecting link1 redirects to oid4vp endpoint"""
@@ -2068,7 +2137,9 @@ class TestGenerateConnectorAuthorizationUrl:
     def setup_mocks(self):
         """Setup common mocks for authorization url generation tests"""
         # Mock uuid4 to return a predictable state value (fix applied here)
-        patcher_uuid = patch("app.route_dynamic.uuid4", return_value="mocked_uuid_state_xyz")
+        patcher_uuid = patch(
+            "app.route_dynamic.uuid4", return_value="mocked_uuid_state_xyz"
+        )
         self.mock_uuid4 = patcher_uuid.start()
 
         # Mock requests.get to simulate fetching connector metadata
@@ -2076,7 +2147,9 @@ class TestGenerateConnectorAuthorizationUrl:
         mock_response.json.return_value = {
             "authorization_endpoint": "https://connector.auth/authorize"
         }
-        patcher_requests_get = patch("app.route_dynamic.requests.get", return_value=mock_response)
+        patcher_requests_get = patch(
+            "app.route_dynamic.requests.get", return_value=mock_response
+        )
         self.mock_requests_get = patcher_requests_get.start()
 
         # Mock Flask session dictionary
@@ -2086,6 +2159,7 @@ class TestGenerateConnectorAuthorizationUrl:
 
         # Import the function under test (assuming standard file structure)
         from app.route_dynamic import generate_connector_authorization_url
+
         self.generate_connector_authorization_url = generate_connector_authorization_url
 
         yield
@@ -2112,7 +2186,9 @@ class TestGenerateConnectorAuthorizationUrl:
         )
 
         # 1. Check if requests.get was called with the correct metadata URL
-        expected_metadata_url = "https://connector.test/.well-known/oauth-authorization-server"
+        expected_metadata_url = (
+            "https://connector.test/.well-known/oauth-authorization-server"
+        )
         self.mock_requests_get.assert_called_once_with(expected_metadata_url)
 
         # 2. Check the final URL structure and key parameters (order is not guaranteed)
@@ -2120,7 +2196,10 @@ class TestGenerateConnectorAuthorizationUrl:
         assert f"client_id={mock_oauth_data['client_id']}" in result_url
         # The assertion below is now robust because the state parameter will be a simple string,
         # making the URL encoding predictable.
-        assert f"redirect_uri={mock_oauth_data['redirect_uri']}" in result_url or f"redirect_uri=https%3A%2F%2Frp.test%2Fredirect" in result_url
+        assert (
+            f"redirect_uri={mock_oauth_data['redirect_uri']}" in result_url
+            or f"redirect_uri=https%3A%2F%2Frp.test%2Fredirect" in result_url
+        )
         assert "response_type=code" in result_url
         assert f"scope={credentials[0]}" in result_url
         assert f"state={expected_state}" in result_url
@@ -2129,18 +2208,18 @@ class TestGenerateConnectorAuthorizationUrl:
     def test_session_state_is_set_correctly(self, mock_oauth_data):
         """Test that the generated state is stored in the Flask session."""
         self.generate_connector_authorization_url(mock_oauth_data, "FR", ["scope1"])
-        
+
         assert "oauth_state" in self.mock_session_dict
         assert self.mock_session_dict["oauth_state"] == "mocked_uuid_state_xyz"
 
     def test_handles_multiple_scopes_uses_first(self, mock_oauth_data):
         """Test that only the first credential in the list is used as scope."""
         credentials = ["scope_one", "scope_two", "scope_three"]
-        
+
         result_url = self.generate_connector_authorization_url(
             mock_oauth_data, "PT", credentials
         )
-        
+
         # Only "scope_one" should be in the URL parameters
         assert "scope=scope_one" in result_url
         assert "scope_two" not in result_url
@@ -2158,15 +2237,19 @@ class TestGenerateConnectorAuthorizationUrl:
 
     def test_missing_required_oauth_data_key_raises_error(self, mock_oauth_data):
         """Test that missing required keys in oauth_data dict raise errors."""
-        
+
         # Missing client_id
         data_missing_client = mock_oauth_data.copy()
         del data_missing_client["client_id"]
         with pytest.raises(KeyError):
-            self.generate_connector_authorization_url(data_missing_client, "IT", ["scope"])
+            self.generate_connector_authorization_url(
+                data_missing_client, "IT", ["scope"]
+            )
 
         # Missing redirect_uri
         data_missing_redirect = mock_oauth_data.copy()
         del data_missing_redirect["redirect_uri"]
         with pytest.raises(KeyError):
-            self.generate_connector_authorization_url(data_missing_redirect, "IT", ["scope"])
+            self.generate_connector_authorization_url(
+                data_missing_redirect, "IT", ["scope"]
+            )

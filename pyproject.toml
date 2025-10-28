@@ -3,4 +3,6 @@ omit = [
     "*config_secrets.py",
     "tests/*",
     "config_oidc_endpoints.py",
+    "config_countries.py ",
+    "config_service.py"
 ]

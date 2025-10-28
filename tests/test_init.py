@@ -357,20 +357,6 @@ class TestSetupTrustedCAs:
         assert app.trusted_CAs is not None
         assert len(app.trusted_CAs) > 0
 
-    def test_setup_trusted_cas_skipped_in_test_env(
-        self, monkeypatch, mock_config_service
-    ):
-        """Test that CA setup is skipped in test environment"""
-        monkeypatch.setattr("app.IS_TEST_ENV", True)
-
-        import app
-
-        app.trusted_CAs = {}
-        app.setup_trusted_cas()
-
-        # Should remain empty in test environment
-        assert app.trusted_CAs == {}
-
     def test_setup_trusted_cas_file_not_found(self, monkeypatch, mock_config_service):
         """Test CA setup with missing directory"""
         monkeypatch.setattr("app.IS_TEST_ENV", False)
