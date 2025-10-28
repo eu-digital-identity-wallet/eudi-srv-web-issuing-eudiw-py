@@ -77,11 +77,6 @@ def Supported_Countries():
     Loads country config information and renders pid_index.html so that the user can select the PID issuer country.
     """
 
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template(
-            "misc/auth_method.html", redirect_url=cfgserv.service_url
-        )
-
     session_id = session["session_id"]
 
     current_session = session_manager.get_session(session_id=session_id)
@@ -138,14 +133,6 @@ def Supported_Countries():
 def country_selected():
     # form_keys = request.form.keys()
     form_country = request.form.get("country")
-
-    # session["returnURL"] = cfgserv.OpenID_first_endpoint
-    # session["country"] = form_country
-
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template(
-            "misc/auth_method.html", redirect_url=cfgserv.service_url
-        )
 
     cfgserv.app_logger.info(
         ", Session ID: "
@@ -342,6 +329,8 @@ def red():
 
         response.raise_for_status()
         token_data = response.json()
+        print("\nstatus: ", response.status_code)
+        print("\ntoken_data: ", token_data)
         print("Access Token:", token_data.get("access_token"))
 
         access_token = token_data.get("access_token")
@@ -1256,9 +1245,6 @@ def Dynamic_form():
                 status.HTTP_400_BAD_REQUEST,
             )
 
-    if "Cancelled" in request.form.keys():  # Form request Cancelled
-        return render_template("misc/auth_method.html")
-
     # if submitted form is valid
     """  v = validate_params_getpid_or_mdl(
         request.form,
@@ -1369,64 +1355,3 @@ def generate_connector_authorization_url(
     full_url = f"{authorization_endpoint}?{urlencode(params)}"
 
     return full_url
-
-
-@dynamic.route("/connector_callback", methods=["GET", "POST"])
-def connector_callback():
-
-    state = request.args.get("state")
-    if state != session.get("oauth_state"):
-        return "State mismatch error", 400
-
-    auth_code = request.args.get("code")
-
-    if not auth_code:
-        return "Authorization code missing", 400
-
-    token_endpoint = "https://eidas.projj.eu/token"
-
-    user_info_endpoint = "https://eidas.projj.eu/api/me"
-
-    params = {
-        "grant_type": "authorization_code",
-        "code": auth_code,
-        "redirect_uri": f"{cfgserv.service_url}dynamic/connector_callback",
-    }
-
-    try:
-        response = requests.post(
-            token_endpoint,
-            data=params,
-            auth=(
-                "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
-            ),
-        )
-
-        response.raise_for_status()
-        token_data = response.json()
-        print("Access Token:", token_data.get("access_token"))
-
-        access_token = token_data.get("access_token")
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    try:
-        response = requests.get(user_info_endpoint, headers=headers)
-
-        response.raise_for_status()
-
-        user_data = response.json()
-
-        print("\nuser_data: ", user_data)
-
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred while fetching user data: {e}")
-        if response:
-            print("Response Body:", response.text)
-
-    print("\nsession_id", session["session_id"])
-
-    return ""

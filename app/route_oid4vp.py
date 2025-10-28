@@ -329,12 +329,19 @@ def getpidoid4vp():
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
 
-        return render_template(
-            "dynamic/form_authorize.html",
-            presentation_data=presentation_data,
-            user_id=session_id,
-            redirect_url=cfgservice.service_url + "dynamic/redirect_wallet",
+        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
+            "url"
+        ]
+
+        return post_redirect_with_payload(
+            target_url=f"{target_url}/display_authorization",
+            data_payload={
+                "presentation_data": presentation_data,
+                "redirect_url": f"{cfgservice.service_url}dynamic/redirect_wallet",
+                "session_id": session_id,
+            },
         )
+
     else:
 
         attributesForm = getAttributesForm(current_session.credentials_requested)
@@ -354,9 +361,16 @@ def getpidoid4vp():
 
         session_manager.update_country(session_id=session_id, country="FC")
 
-        return render_template(
-            "dynamic/dynamic-form.html",
-            mandatory_attributes=attributesForm,
-            optional_attributes=attributesForm2,
-            redirect_url=cfgservice.service_url + "dynamic/form",
+        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
+            "url"
+        ]
+
+        return post_redirect_with_payload(
+            target_url=f"{target_url}/display_form",
+            data_payload={
+                "mandatory_attributes": attributesForm,
+                "optional_attributes": attributesForm2,
+                "redirect_url": f"{cfgservice.service_url}dynamic/form",
+                "session_id": session_id,
+            },
         )
