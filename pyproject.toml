@@ -1,0 +1,6 @@
+[tool.coverage.run]
+omit = [
+    "*config_secrets.py",
+    "tests/*",
+    "config_oidc_endpoints.py",
+]
