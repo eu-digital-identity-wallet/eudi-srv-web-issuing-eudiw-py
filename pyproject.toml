@@ -2,14 +2,22 @@
 source = ["app"]
 branch = true
 omit = [
-    "app/config_secrets.py",
-    "app/config_oidc_endpoints.py",
-    "app/config_countries.py",
-    "app/config_service.py",
+    "config_secrets.py",
+    "config_oidc_endpoints.py",
+    "config_countries.py",
+    "config_service.py",
+    "revocation.py",
+    "config_oidc_endpoints.py",
+    "__config_secrets.py",
+    "app/app_config/config_oidc_endpoints.py",
+    "app/app_config/__config_secrets.py",
+    "app/static/fontawesome-free-5.15.4-web/attribution.js",
+    "app/static/bootstrap-3.4.1-dist/js/npm.js",
     "app/revocation.py",
-    "app/tests/*"
+    "app/static/issuer_guides/script.js",
+    "app/tests/*",
 ]
 
 [tool.coverage.report]
 show_missing = true
-skip_covered = true
+
