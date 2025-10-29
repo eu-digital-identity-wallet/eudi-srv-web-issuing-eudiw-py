@@ -4,5 +4,6 @@ omit = [
     "tests/*",
     "config_oidc_endpoints.py",
     "config_countries.py ",
-    "config_service.py"
+    "config_service.py",
+    "revocation.py"
 ]
