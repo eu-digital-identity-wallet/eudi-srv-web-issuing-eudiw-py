@@ -1,9 +1,15 @@
 [tool.coverage.run]
+source = ["app"]
+branch = true
 omit = [
-    "*config_secrets.py",
-    "tests/*",
-    "config_oidc_endpoints.py",
-    "config_countries.py ",
-    "config_service.py",
-    "revocation.py"
+    "app/config_secrets.py",
+    "app/config_oidc_endpoints.py",
+    "app/config_countries.py",
+    "app/config_service.py",
+    "app/revocation.py",
+    "app/tests/*"
 ]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
