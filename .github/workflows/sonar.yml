@@ -34,7 +34,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r app/requirements.txt pytest pytest-cov
       - name: Run tests and generate coverage.xml
-        run: pytest --cov=app --cov-report=xml:coverage.xml
+        run: |
+          pytest --cov=app --cov-config=pyproject.toml --cov-report=xml:coverage.xml
+          coverage report
       - name: setup projectkey
         run: echo "PROJECTKEY=${{ github.repository_owner}}_$(echo ${{ github.repository }} | sed 's/.*\///')" >> $GITHUB_ENV
       - name: SonarCloud Scan - Action
