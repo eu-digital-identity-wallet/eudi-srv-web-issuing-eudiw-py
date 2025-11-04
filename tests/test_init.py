@@ -17,14 +17,22 @@ from datetime import datetime, timedelta
 
 @pytest.fixture
 def mock_config_service(monkeypatch):
-    """Mock the config service"""
     mock_cfgserv = Mock()
     mock_cfgserv.service_url = "https://test-domain.com/"
     mock_cfgserv.trusted_CAs_path = "/fake/path/to/CAs"
     mock_cfgserv.app_logger = Mock()
     mock_cfgserv.oidc = True
+    mock_cfgserv.default_frontend = "test_frontend"
+
+    # Minimal mock frontend registry
+    from types import SimpleNamespace
+
+    mock_conf_frontend = SimpleNamespace(
+        registered_frontends={"test_frontend": {"url": "https://frontend.test"}}
+    )
 
     monkeypatch.setattr("app.cfgserv", mock_cfgserv)
+    monkeypatch.setattr("app.ConfFrontend", mock_conf_frontend)
     return mock_cfgserv
 
 
@@ -413,15 +421,15 @@ class TestErrorHandlers:
             with app.test_request_context():
                 result = handle_exception(error)
 
-        assert isinstance(result, tuple)
-        assert result[1] == 500
+        assert isinstance(result, str)
+        assert "internal_error" in result
 
     def test_page_not_found_handler(self, client, mock_config_service):
         """Test 404 error handler"""
         response = client.get("/nonexistent-route-12345")
 
-        assert response.status_code == 404
-        assert b"Page not found" in response.data
+        assert response.status_code == 200
+        assert b"error_404" in response.data
 
 
 # ============================================================================

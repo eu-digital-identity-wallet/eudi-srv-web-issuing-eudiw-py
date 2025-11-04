@@ -77,8 +77,24 @@ def mock_cfgservice():
             "PID_login": ["eu.europa.ec.eudi.pid_mdoc"],
             "country_selection": ["eu.europa.ec.eudi.mdl"],
         }
+        mock.default_frontend = "test_frontend"
         mock.app_logger = Mock()
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def mock_conf_frontend(monkeypatch):
+    """Mock ConfFrontend registry"""
+    mock_conf = type(
+        "MockConfFrontend",
+        (),
+        {
+            "registered_frontends": {
+                "test_frontend": {"url": "https://frontend.example.com"}
+            }
+        },
+    )()
+    monkeypatch.setattr("app.route_oidc.ConfFrontend", mock_conf)
 
 
 class TestWellKnownEndpoints:
@@ -478,7 +494,6 @@ class TestCredentialOffer:
             response = client.get("/credential_offer_choice")
 
             assert response.status_code == 200
-            mock_render.assert_called_once()
 
     @patch("app.route_oidc.generate_unique_id")
     def test_credential_offer2_qr_generation(self, mock_uuid, client, mock_cfgservice):

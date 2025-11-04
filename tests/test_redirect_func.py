@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from flask import Flask
+from flask import Flask, json
 from app import redirect_func as rf
 
 
@@ -83,3 +83,53 @@ class TestRedirectFunc:
             assert response.status_code == 302
             assert "error=999" in response.location
             assert "error_str=Unknown+error" in response.location
+
+    @patch("app.redirect_func.render_template_string")
+    def test_post_redirect_with_payload(self, mock_render):
+        target_url = "https://wallet.com/callback"
+        payload = {"key": "value"}
+
+        # Call the function
+        rf.post_redirect_with_payload(target_url, payload)
+
+        # Ensure render_template_string was called
+        assert mock_render.called
+
+        # Grab kwargs
+        args, kwargs = mock_render.call_args
+        data_passed = kwargs.get("data")
+
+        # Decode the payload passed to the template
+        decoded_payload = json.loads(data_passed)
+
+        # Check that the payload matches
+        assert decoded_payload["key"] == "value"
+
+        # Check that the URL was passed correctly (key is 'url', not 'target_url')
+        assert kwargs.get("url") == target_url
+
+    # ---------------------------
+    # Test post_redirect_with_payload edge cases
+    # ---------------------------
+    @patch("app.redirect_func.render_template_string")
+    def test_post_redirect_empty_payload(self, mock_render):
+        target_url = "https://wallet.com/callback"
+        payload = {}
+        rf.post_redirect_with_payload(target_url, payload)
+        args, kwargs = mock_render.call_args
+        data_passed = kwargs.get("data")
+        decoded_payload = json.loads(data_passed)
+        assert decoded_payload == {}
+        assert kwargs.get("url") == target_url
+
+    # -----------------------------
+    # post_redirect_with_payload empty string payload
+    # -----------------------------
+    @patch("app.redirect_func.render_template_string")
+    def test_post_redirect_with_payload_empty_string(self, mock_render):
+        target_url = "https://example.com"
+        payload = {"key": ""}
+        rf.post_redirect_with_payload(target_url, payload)
+        args, kwargs = mock_render.call_args
+        decoded_payload = json.loads(kwargs["data"])
+        assert decoded_payload["key"] == ""

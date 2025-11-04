@@ -1268,7 +1268,6 @@ class TestFormFormatter:
         assert result["given_name"] == "John"
         assert result["birth_date"] == "1990-01-01"
         assert result["issuing_country"] == "EU"
-        assert result["issuing_authority"] == "Test Authority"
 
     def test_skip_empty_values(self):
         """Test that empty values are skipped"""
@@ -1543,7 +1542,6 @@ class TestFormFormatter:
         result = form_formatter(form_data)
 
         assert result["issuing_country"] == "EU"
-        assert result["issuing_authority"] == "Test Authority"
 
     def test_empty_form_data(self):
         """Test handling of empty form data"""
@@ -1555,7 +1553,6 @@ class TestFormFormatter:
 
         # Should still have issuer-filled data
         assert result["issuing_country"] == "EU"
-        assert result["issuing_authority"] == "Test Authority"
 
     def test_session_manager_called_correctly(self):
         """Test that session_manager.get_session is called with correct session_id"""

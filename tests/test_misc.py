@@ -446,30 +446,6 @@ class TestAdditionalCoverage:
         decoded = misc.b64url_decode(data)
         assert decoded == b"abcde"
 
-    @patch("app.misc.render_template_string")
-    def test_post_redirect_with_payload(self, mock_render):
-        target_url = "https://wallet.com/callback"
-        payload = {"key": "value"}
-
-        # Call the function
-        misc.post_redirect_with_payload(target_url, payload)
-
-        # Ensure render_template_string was called
-        assert mock_render.called
-
-        # Grab kwargs
-        args, kwargs = mock_render.call_args
-        data_passed = kwargs.get("data")
-
-        # Decode the payload passed to the template
-        decoded_payload = json.loads(data_passed)
-
-        # Check that the payload matches
-        assert decoded_payload["key"] == "value"
-
-        # Check that the URL was passed correctly (key is 'url', not 'target_url')
-        assert kwargs.get("url") == target_url
-
     @patch("app.misc.oidc_metadata", new_callable=dict)
     def test_getSubClaims_returns_correct(self, mock_oidc):
         mock_oidc["credential_configurations_supported"] = {
@@ -537,20 +513,6 @@ class TestAdditionalCoverage:
             issuer="iss",
             options={"verify_exp": False},
         )
-
-    # ---------------------------
-    # Test post_redirect_with_payload edge cases
-    # ---------------------------
-    @patch("app.misc.render_template_string")
-    def test_post_redirect_empty_payload(self, mock_render):
-        target_url = "https://wallet.com/callback"
-        payload = {}
-        misc.post_redirect_with_payload(target_url, payload)
-        args, kwargs = mock_render.call_args
-        data_passed = kwargs.get("data")
-        decoded_payload = json.loads(data_passed)
-        assert decoded_payload == {}
-        assert kwargs.get("url") == target_url
 
     # ---------------------------
     # Test calculate_age with invalid date format
@@ -665,18 +627,6 @@ class TestAdditionalCoverage:
         mock_img.convert.return_value.save.side_effect = IOError("save failed")
         with pytest.raises(IOError, match="save failed"):
             misc.convert_png_to_jpeg(b"data")
-
-    # -----------------------------
-    # post_redirect_with_payload empty string payload
-    # -----------------------------
-    @patch("app.misc.render_template_string")
-    def test_post_redirect_with_payload_empty_string(self, mock_render):
-        target_url = "https://example.com"
-        payload = {"key": ""}
-        misc.post_redirect_with_payload(target_url, payload)
-        args, kwargs = mock_render.call_args
-        decoded_payload = json.loads(kwargs["data"])
-        assert decoded_payload["key"] == ""
 
     # -----------------------------
     # credential_error_resp with desc empty
