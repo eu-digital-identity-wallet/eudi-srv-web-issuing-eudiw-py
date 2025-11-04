@@ -41,11 +41,11 @@ import segno
 from app.route_dynamic import form_formatter, presentation_formatter
 from .app_config.config_service import ConfService as cfgservice
 from app_config.config_countries import ConfFrontend
+from app.redirect_func import post_redirect_with_payload
 from app.misc import (
     generate_unique_id,
     getAttributesForm,
     getAttributesForm2,
-    post_redirect_with_payload,
 )
 
 from . import session_manager
@@ -136,6 +136,8 @@ def preauth_form():
 
     form_data = request.form.to_dict()
 
+    cfgservice.app_logger.info(f"form_data: {form_data}")
+
     if "effective_from_date" in form_data:
         dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(
             tzinfo=timezone.utc
@@ -146,6 +148,8 @@ def preauth_form():
     session_id = session["session_id"]
 
     current_session = session_manager.get_session(session_id=session_id)
+
+    cfgservice.app_logger.info(f"session_id: {session_id}")
 
     form_data.pop("proceed")
 
@@ -163,7 +167,7 @@ def preauth_form():
 
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
 
-    print("\nPresentation Data: ", presentation_data)
+    print("\nPresentation Data: ", presentation_data, flush=True)
 
     target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
 
@@ -182,6 +186,7 @@ def form_authorize_generate():
 
     form_data = request.form.to_dict()
 
+    print("form_data: ", form_data, flush=True)
     user_id = form_data["user_id"]
     # data = form_dynamic_data[user_id]
 
@@ -216,6 +221,7 @@ def generate_offer(data):
         "credential_configuration_ids": current_session.credentials_requested,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
+                "issuer_state": session_id,
                 "pre-authorized_code": pre_auth_code,
                 "tx_code": {
                     "length": 5,
@@ -246,18 +252,23 @@ def generate_offer(data):
 
     wallet_url = cfgservice.wallet_test_url + "redirect_preauth"
 
-    return render_template(
-        "openid/credential_offer_qr_code.html",
-        wallet_dev=wallet_url
-        + "?code="
-        + transaction_id
-        + "&tx_code="
-        + str(tx_code)
-        + "&credential_offer="
-        + json.dumps(credential_offer),
-        url_data=uri,
-        tx_code=tx_code,
-        qrcode=qr_img_base64,
+    if "frontend_id" in session:
+        target_url = ConfFrontend.registered_frontends[session["frontend_id"]]["url"]
+    else:
+        target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+            "url"
+        ]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_credential_offer_qr_code",
+        data_payload={
+            "wallet_dev": wallet_url,
+            "credential_offer": credential_offer,
+            "url_data": uri,
+            "qrcode": qr_img_base64,
+            "tx_code": tx_code,
+            "code": transaction_id,
+        },
     )
 
 
@@ -321,6 +332,7 @@ def credentialOfferReq2():
                     "description": "Please provide the one-time code.",
                     "value": tx_code,
                 },
+                "issuer_state": session_id,
             }
         },
     }
@@ -355,6 +367,7 @@ def request_preauth_token(scope):
     session_manager.add_session(
         session_id=session_id,
         pre_authorized_code=preauth_code,
+        scope=scope,
         tx_code=tx_code,
         country="FC",
     )

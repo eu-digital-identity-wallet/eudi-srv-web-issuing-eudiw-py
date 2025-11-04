@@ -28,9 +28,9 @@ import re
 import time
 import uuid
 import urllib.parse
+from app.redirect_func import post_redirect_with_payload
 from app.misc import (
     generate_unique_id,
-    post_redirect_with_payload,
     scope2details,
     vct2id,
     verify_jwt_with_x5c,
@@ -256,6 +256,13 @@ def auth_choice():
 
     print("\nauth_choice 16: ", credentials_requested)
 
+    print("\nsession_id: ", session_id)
+    print("\ntoken: ", token)
+    print("\ncredential_configuration_id: ", credential_configuration_id)
+    print("\nauthorization_details: ", authorization_details)
+    print("\ncredentials_requested: ", credentials_requested)
+    print("\nfrontend_id: ", frontend_id)
+
     session_manager.add_session(
         session_id=session_id,
         jws_token=token,
@@ -316,16 +323,6 @@ def auth_choice():
             "session_id": session_id,
         },
     )
-
-    """ return render_template(
-        "misc/auth_method.html",
-        pid_auth=pid_auth,
-        country_selection=country_selection,
-        error=error,
-        redirect_url=cfgservice.service_url,
-    ) """
-
-    # return render_template("misc/auth_method.html")
 
 
 @oidc.route("/pid_authorization")
@@ -1051,6 +1048,10 @@ def credential_offer():
 
     # Loads credentials supported by EUDIW Issuer
 
+    frontend_id = request.args.get("frontend_id")
+
+    session["frontend_id"] = frontend_id
+
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     credentials = {"sd-jwt vc format": {}, "mdoc format": {}}
@@ -1080,11 +1081,20 @@ def credential_offer():
                     {cred: credential["credential_metadata"]["display"][0]["name"]}
                 )
 
-    return render_template(
-        "openid/credential_offer.html",
-        cred=credentials,
-        redirect_url=cfgservice.service_url,
-        credential_offer_URI="openid-credential-offer://",
+    if frontend_id:
+        target_url = ConfFrontend.registered_frontends[frontend_id]["url"]
+    else:
+        target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+            "url"
+        ]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_credential_offer",
+        data_payload={
+            "cred": credentials,
+            "redirect_url": cfgservice.service_url,
+            "credential_offer_URI": "openid-credential-offer://",
+        },
     )
 
 
@@ -1205,8 +1215,15 @@ def credentialOffer():
 
                 session_id = generate_unique_id()
 
+                if "frontend_id" in session:
+                    credential_issuer = ConfFrontend.registered_frontends[
+                        session["frontend_id"]
+                    ]["url"]
+                else:
+                    credential_issuer = cfgservice.service_url[:-1]
+
                 credential_offer = {
-                    "credential_issuer": cfgservice.service_url[:-1],
+                    "credential_issuer": credential_issuer,
                     "credential_configuration_ids": credentials_id,
                     "grants": {"authorization_code": {"issuer_state": session_id}},
                 }
@@ -1253,17 +1270,32 @@ def credentialOffer():
 
                 wallet_url = cfgservice.wallet_test_url + "credential_offer"
 
-                return render_template(
-                    "openid/credential_offer_qr_code.html",
-                    wallet_dev=wallet_url
-                    + "?credential_offer="
-                    + json.dumps(credential_offer),
-                    url_data=uri,
-                    qrcode=qr_img_base64,
+                if "frontend_id" in session:
+                    target_url = ConfFrontend.registered_frontends[
+                        session["frontend_id"]
+                    ]["url"]
+                else:
+                    target_url = ConfFrontend.registered_frontends[
+                        cfgservice.default_frontend
+                    ]["url"]
+
+                return post_redirect_with_payload(
+                    target_url=f"{target_url}/display_credential_offer_qr_code",
+                    data_payload={
+                        "wallet_dev": wallet_url,
+                        "credential_offer": credential_offer,
+                        "url_data": uri,
+                        "qrcode": qr_img_base64,
+                    },
                 )
 
     else:
-        return redirect(cfgservice.service_url + "credential_offer_choice")
+        if "frontend_id" in session:
+            redirect(
+                f"{cfgservice.service_url}credential_offer_choice?frontend_id={session['frontend_id']}"
+            )
+        else:
+            return redirect(cfgservice.service_url + "credential_offer_choice")
 
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])

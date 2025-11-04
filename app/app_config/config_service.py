@@ -48,6 +48,8 @@ class ConfService:
         "REVOKE_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/set"
     )
 
+    default_frontend = "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+
     # ---------------------------------------------------------------------------
     trusted_CAs_path = os.getenv("TRUSTED_CAS_PATH", "/etc/eudiw/pid-issuer-dev/cert/")
 

@@ -30,7 +30,7 @@ import sys
 sys.path.append(os.path.dirname(__file__))
 
 from app.session_manager import SessionManager
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, session
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -49,6 +49,8 @@ from cryptography.hazmat.primitives.asymmetric import (
 )
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
+from app_config.config_countries import ConfFrontend
+from app.redirect_func import post_redirect_with_payload
 
 # Log
 
@@ -258,26 +260,46 @@ def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
     cfgserv.app_logger.exception("- WARN - Error 500")
-    # now you're handling non-HTTP exceptions only
-    return (
-        render_template(
-            "misc/500.html",
-            error="Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
-            error_code="Internal Server Error",
-        ),
-        500,
+
+    target_url = ConfFrontend.registered_frontends[cfgserv.default_frontend]["url"]
+
+    session_id = session.get("session_id")
+    if session_id:
+        current_session = session_manager.get_session(session_id=session_id)
+        frontend_id = getattr(current_session, "frontend_id", None)
+
+        if frontend_id and frontend_id in ConfFrontend.registered_frontends:
+            target_url = ConfFrontend.registered_frontends[frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/internal_error",
+        data_payload={
+            "error": "Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
+            "error_code": "Internal Server Error",
+            "error_type": 500,
+        },
     )
 
 
 def page_not_found(e):
-    cfgserv.app_logger.exception("- WARN - Error 404")
-    return (
-        render_template(
-            "misc/500.html",
-            error_code="Page not found",
-            error="Page not found.We're sorry, we couldn't find the page you requested.",
-        ),
-        404,
+    cfgserv.app_logger.warning(f"- WARN - Error 404: {request.path} not found")
+
+    if "session_id" in session:
+        current_session = session_manager.get_session(session_id=session["session_id"])
+        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
+            "url"
+        ]
+
+    else:
+        target_url = ConfFrontend.registered_frontends[cfgserv.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/error_404",
+        data_payload={
+            "error": "Page not found.We're sorry, we couldn't find the page you requested.",
+            "error_code": "Page not found",
+            "error_type": 404,
+        },
     )
 
 
@@ -296,21 +318,11 @@ def create_app(test_config=None):
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
 
-    @app.route("/", methods=["GET"])
-    def initial_page():
-        return render_template(
-            "misc/initial_page.html", oidc=cfgserv.oidc, service_url=cfgserv.service_url
-        )
-
-    @app.route("/favicon.ico")
-    def favicon():
-        return send_from_directory("static/images", "favicon.ico")
-
-    @app.route("/ic-logo.png")
-    def logo():
-        return send_from_directory("static/images", "ic-logo.png")
-
     app.config.from_mapping(SECRET_KEY="dev")
+
+    @app.route("/", methods=["GET"])
+    def health_check():
+        return "OK", 200
 
     if test_config is None:
         # load the instance config (in instance directory), if it exists, when not testing

@@ -48,12 +48,12 @@ from boot_validate import (
 from app_config.config_service import ConfService as cfgserv
 from app_config.config_countries import ConfCountries as cfgcountries, ConfFrontend
 from redirect_func import url_get
+from app.redirect_func import post_redirect_with_payload
 from misc import (
     convert_png_to_jpeg,
     credential_error_resp,
     getAttributesForm,
     getAttributesForm2,
-    post_redirect_with_payload,
     calculate_age,
     vct2doctype,
 )
@@ -319,7 +319,7 @@ def red():
         "redirect_uri": country_config["oauth_auth"]["redirect_uri"],
     }
 
-    print("\ntoken_endpoint_request", params, "\n", token_endpoint_headers)
+    print("\ntoken_endpoint_request", params, "\n", token_endpoint_headers, flush=True)
     try:
         response = requests.post(
             token_endpoint,
@@ -327,15 +327,17 @@ def red():
             headers=token_endpoint_headers,
         )
 
+        print("\nstatus: ", response.status_code, flush=True)
+
         response.raise_for_status()
         token_data = response.json()
-        print("\nstatus: ", response.status_code)
-        print("\ntoken_data: ", token_data)
-        print("Access Token:", token_data.get("access_token"))
+
+        print("\ntoken_data: ", token_data, flush=True)
+        print("Access Token:", token_data.get("access_token"), flush=True)
 
         access_token = token_data.get("access_token")
 
-        print("\naccess_token", access_token)
+        print("\naccess_token", access_token, flush=True)
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
@@ -1054,21 +1056,8 @@ def form_formatter(form_data: dict) -> dict:
 
     # Add issuer-filled data
 
-    credentialsSupported = oidc_metadata["credential_configurations_supported"]
-
-    credentialMetadata = credentialsSupported[
-        session_manager.get_session(session["session_id"]).scope
-    ]
-
     final_data.update(
-        {
-            "issuing_country": session_manager.get_session(
-                session["session_id"]
-            ).country,
-            "issuing_authority": credentialMetadata["issuer_config"][
-                "issuing_authority"
-            ],
-        }
+        {"issuing_country": session_manager.get_session(session["session_id"]).country}
     )
 
     return final_data
@@ -1333,6 +1322,8 @@ def generate_connector_authorization_url(
     metadata_url = (
         f"{oauth_data.get('base_url')}/.well-known/oauth-authorization-server"
     )
+
+    print("\nmetadata_url: ", metadata_url, flush=True)
 
     metadata_json = requests.get(metadata_url).json()
 

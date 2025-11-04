@@ -27,7 +27,6 @@ from flask import (
     Blueprint,
     abort,
     jsonify,
-    render_template,
     request,
     session,
 )
@@ -52,6 +51,8 @@ import jwt
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.types import CertificatePublicKeyTypes
+from app_config.config_countries import ConfFrontend
+from app.redirect_func import post_redirect_with_payload
 
 revocation = Blueprint("revocation", __name__, url_prefix="/revocation")
 
@@ -72,16 +73,22 @@ def revocation_choice():
 
         if credential["format"] == "dc+sd-jwt":
             credentials["sd-jwt vc format"].update(
-                {cred: credential["display"][0]["name"]}
+                {cred: credential["credential_metadata"]["display"][0]["name"]}
             )
 
         if credential["format"] == "mso_mdoc":
-            credentials["mdoc format"].update({cred: credential["display"][0]["name"]})
+            credentials["mdoc format"].update(
+                {cred: credential["credential_metadata"]["display"][0]["name"]}
+            )
 
-    return render_template(
-        "openid/revocation_choice.html",
-        cred=credentials,
-        redirect_url=cfgservice.service_url + "revocation/oid4vp_call",
+    target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_revocation_choice",
+        data_payload={
+            "cred": credentials,
+            "redirect_url": f"{cfgservice.service_url}revocation/oid4vp_call",
+        },
     )
 
 
@@ -209,12 +216,16 @@ def oid4vp_call():
         "utf-8"
     )
 
-    return render_template(
-        "openid/revocation_qr_code.html",
-        url_data=deeplink_url,
-        qrcode=qr_img_base64,
-        presentation_id=response_cross["transaction_id"],
-        redirect_url=cfgservice.service_url,
+    target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_revocation_authorization",
+        data_payload={
+            "url_data": deeplink_url,
+            "redirect_url": cfgservice.service_url,
+            "qrcode": qr_img_base64,
+            "presentation_id": response_cross["transaction_id"],
+        },
     )
 
 
@@ -492,12 +503,16 @@ def oid4vp_get():
         }
     )
 
-    return render_template(
-        "misc/revocation_authorization.html",
-        display_list=display_list,
-        revocation_identifier=revocation_id,
-        redirect_url=cfgservice.service_url + "revocation/revoke",
-        revocation_choice_url=cfgservice.service_url + "revocation/revocation_choice",
+    target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_revocation_authorization",
+        data_payload={
+            "display_list": display_list,
+            "redirect_url": f"{cfgservice.service_url}revocation/revoke",
+            "revocation_identifier": revocation_id,
+            "revocation_choice_url": f"{cfgservice.service_url}revocation/revocation_choice",
+        },
     )
 
 
@@ -564,7 +579,11 @@ def revoke():
 
     revocation_requests.pop(revocation_identifier)
 
-    return render_template(
-        "misc/revocation_success.html",
-        redirect_url=cfgservice.service_url,
+    target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/display_revocation_success",
+        data_payload={
+            "redirect_url": cfgservice.service_url,
+        },
     )

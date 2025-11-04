@@ -32,11 +32,8 @@ from flask import Blueprint, jsonify, render_template, request, session
 from flask_cors import CORS
 import requests
 import segno
-from misc import (
-    getAttributesForm,
-    getAttributesForm2,
-    post_redirect_with_payload,
-)
+from app.redirect_func import post_redirect_with_payload
+from misc import getAttributesForm, getAttributesForm2
 from formatter_func import cbor2elems
 
 from app.validate_vp_token import validate_vp_token
