@@ -50,13 +50,3 @@ def clear_par():
             revocation_requests.pop(id)
 
     session_manager.clean_expired_sessions()
-
-
-def run_scheduler():
-    timer = threading.Timer(scheduler_call, run_scheduler)
-    timer.daemon = True  # Set as daemon thread
-    timer.start()
-    clear_par()
-
-
-run_scheduler()

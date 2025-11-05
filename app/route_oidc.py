@@ -861,8 +861,12 @@ def notification():
     return make_response("", 204)
 
 
+from app.data_management import clear_par
+
+
 @oidc.route("/nonce", methods=["POST"])
 def nonce():
+    clear_par()
     protected = {"type": "cnonce+jwt", "alg": "RSA-OAEP", "enc": "A256GCM"}
     with open(cfgservice.nonce_key, "rb") as f:
         key = f.read()
