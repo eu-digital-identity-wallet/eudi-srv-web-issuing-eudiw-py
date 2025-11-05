@@ -230,6 +230,9 @@ def oid4vp_call():
 
 
 def b64url_decode(data):
+    if not re.fullmatch(r"[A-Za-z0-9\-_]*", data):
+        raise ValueError("Invalid base64url characters in input")
+
     padding = "=" * (-len(data) % 4)
     try:
         return base64.urlsafe_b64decode(data + padding)

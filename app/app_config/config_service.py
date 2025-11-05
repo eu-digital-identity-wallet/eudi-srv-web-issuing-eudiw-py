@@ -24,7 +24,6 @@ This config_service.py contains configuration data for the PID Issuer Web servic
 NOTE: You should only change it if you understand what you're doing.
 """
 
-import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
