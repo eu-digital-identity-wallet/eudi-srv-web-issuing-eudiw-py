@@ -27,6 +27,7 @@ NOTE: You should only change it if you understand what you're doing.
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
+import sys
 
 
 class ConfService:
@@ -49,7 +50,9 @@ class ConfService:
         "REVOKE_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/set"
     )
 
-    default_frontend = "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+    default_frontend = os.getenv(
+        "DEFAULT_FRONTEND", "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+    )
 
     # ---------------------------------------------------------------------------
     trusted_CAs_path = os.getenv("TRUSTED_CAS_PATH", "/etc/eudiw/pid-issuer-dev/cert/")
@@ -69,8 +72,13 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # OpenID endpoints
 
-    OpenID_first_endpoint = service_url + "oidc/verify/user"
-    authorization_server_internal_url = "http://127.0.0.1:6005"
+    OpenID_first_endpoint = os.getenv(
+        "VERIFY_USER_ENDPOINT", service_url + "oidc/verify/user"
+    )
+
+    authorization_server_internal_url = os.getenv(
+        "AUTH_SERVER_INTERNAL_URL", "http://127.0.0.1:6005"
+    )
 
     dynamic_presentation_url = os.getenv(
         "DYNAMIC_PRESENTATION_URL",
@@ -253,7 +261,15 @@ class ConfService:
 
     formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
     log_handler_info.setFormatter(formatter)
+    log_handler_info.setLevel(logging.INFO)
+
+    # Console handler for stdout
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
 
     app_logger = logging.getLogger("app_logger")
     app_logger.addHandler(log_handler_info)
+    app_logger.addHandler(console_handler)
     app_logger.setLevel(logging.INFO)
+    app_logger.propagate = False

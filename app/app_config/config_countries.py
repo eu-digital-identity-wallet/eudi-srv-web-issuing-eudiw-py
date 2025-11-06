@@ -29,6 +29,46 @@ from .config_service import ConfService as cfgserv
 
 EIDAS_LOA_HIGH = "http://eidas.europa.eu/LoA/high"
 
+eidas_node_connector_url = os.getenv(
+    "EIDAS_NODE_CONNECTOR_URL",
+    "test",
+)
+
+eidas_node_client_id = os.getenv(
+    "EIDAS_NODE_CLIENT_ID",
+    "test",
+)
+
+eidas_node_client_secret = os.getenv(
+    "EIDAS_NODE_CLIENT_SECRET",
+    "test",
+)
+
+pt_client_id = os.getenv(
+    "PT_CLIENT_ID",
+    "test",
+)
+
+pt_client_secret = os.getenv(
+    "PT_CLIENT_SECRET",
+    "test",
+)
+
+ee_client_id = os.getenv(
+    "EE_CLIENT_ID",
+    "test",
+)
+
+ee_auth_header = os.getenv(
+    "EE_BASIC_AUTHORIZATION_HEADER",
+    "test",
+)
+
+ee_redirect_uri = os.getenv(
+    "EE_REDIRECT_URI",
+    "test",
+)
+
 
 class ConfCountries:
     urlReturnEE = "https://pprpid.provider.eudiw.projj.eu/tara/redirect"
@@ -56,13 +96,13 @@ class ConfCountries:
             },
             "connection_type": "oauth",
             "oauth_auth": {
-                "base_url": "https://eidas.projj.eu",
+                "base_url": eidas_node_connector_url,
                 "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
                 "scope": "profile",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+                "client_id": eidas_node_client_id,
+                "client_secret": eidas_node_client_secret,
             },
         },
         formCountry: {
@@ -131,8 +171,8 @@ class ConfCountries:
                 "scope": "profile",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "F7n9pW6kQ2xJz1H8mR5bL4cD3aT9eS2uX7qP0yZ6hK5nV1mC8dA2oG7",
+                "client_id": pt_client_id,
+                "client_secret": pt_client_secret,
             },
         },
         "EE": {
@@ -152,7 +192,7 @@ class ConfCountries:
                 "scope": "openid",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "eu_europa_ec_eudiw_pid_provider_1_ppr",
+                "client_id": ee_client_id,
             },
             "attribute_request": {
                 "header": {"Host": "tara-test.ria.ee"},
@@ -164,10 +204,10 @@ class ConfCountries:
                 "headers": {
                     "Host": "tara-test.ria.ee",
                     "Content-Type": "application/x-www-form-urlencoded",
-                    "Authorization": "Basic ZXVfZXVyb3BhX2VjX2V1ZGl3X3BpZF9wcm92aWRlcl8xX3BwcjpINUVpVjdPaGZMTUs1TFBvcXB0NG5WT1FJeEdicEZ3MQ==",
+                    "Authorization": ee_auth_header,
                 },
                 "grant_type": "authorization_code",
-                "redirect_uri": "https://pprpid.provider.eudiw.projj.eu/tara/redirect",
+                "redirect_uri": ee_redirect_uri,
             },
         },
         "CZ": {
@@ -182,15 +222,20 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
+            "custom_modifiers": {
+                "family_name": "CurrentFamilyName",
+                "given_name": "CurrentGivenName",
+                "birth_date": "DateOfBirth",
+            },
             "connection_type": "oauth",
             "oauth_auth": {
-                "base_url": "https://eidas.projj.eu",
+                "base_url": eidas_node_connector_url,
                 "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
                 "scope": "profile",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+                "client_id": eidas_node_client_id,
+                "client_secret": eidas_node_client_secret,
             },
         },
         "NL": {
@@ -204,15 +249,20 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
+            "custom_modifiers": {
+                "family_name": "CurrentFamilyName",
+                "given_name": "CurrentGivenName",
+                "birth_date": "DateOfBirth",
+            },
             "connection_type": "oauth",
             "oauth_auth": {
-                "base_url": "https://eidas.projj.eu",
+                "base_url": eidas_node_connector_url,
                 "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
                 "scope": "profile",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+                "client_id": eidas_node_client_id,
+                "client_secret": eidas_node_client_secret,
             },
         },
         "LU": {
@@ -233,13 +283,13 @@ class ConfCountries:
             },
             "connection_type": "oauth",
             "oauth_auth": {
-                "base_url": "https://eidas.projj.eu",
+                "base_url": eidas_node_connector_url,
                 "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
                 "scope": "profile",
                 "state": "hkMVY7vjuN7xyLl5",
                 "response_type": "code",
-                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
-                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+                "client_id": eidas_node_client_id,
+                "client_secret": eidas_node_client_secret,
             },
         },
     }
