@@ -248,7 +248,6 @@ def getpidoid4vp():
         raise ValueError(f"invalid_request. Session ID: {session_id}")
 
     mdoc_json = cbor2elems(response.json()["vp_token"]["query_0"][0] + "==")
-    is_ageOver18 = False
     attributesForm = {}
 
     if current_session.authorization_details:
@@ -270,76 +269,6 @@ def getpidoid4vp():
                         == "urn:eu.europa.ec.eudi:pseudonym_age_over_18:1"
                     ):
                         attributesForm.update({"user_pseudonym": str(uuid4())})
-
-    elif current_session.scope:
-        cred_scopes = current_session.scope
-        if (
-            "eu.europa.ec.eudi.pseudonym.age_over_18.1" in cred_scopes
-            or "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint"
-            in cred_scopes
-        ):
-            is_ageOver18 = True
-            attributesForm.update({"user_pseudonym": str(uuid4())})
-
-    if is_ageOver18 == True:
-        for doctype in mdoc_json:
-            for attribute, value in mdoc_json[doctype]:
-                if attribute == "age_over_18":
-                    attributesForm.update({attribute: value})
-
-        doctype_config = cfgservice.config_doctype[
-            "eu.europa.ec.eudi.pseudonym.age_over_18.1"
-        ]
-
-        attributesForm.update({"issuing_country": "FC"})
-        attributesForm.update(
-            {"issuing_authority": doctype_config["issuing_authority"]}
-        )
-        if "credential_type" in doctype_config:
-            attributesForm.update(
-                {"credential_type": doctype_config["credential_type"]}
-            )
-
-        """ user_id = generate_unique_id()
-        form_dynamic_data[user_id] = attributesForm.copy()
-
-        form_dynamic_data[user_id].update(
-            {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
-        ) """
-
-        session_manager.update_user_data(
-            session_id=session_id, user_data=attributesForm
-        )
-        session_manager.update_country(session_id=session_id, country="FC")
-
-        presentation_data = {}
-
-        presentation_data["Age over 18 Pseudonym"] = attributesForm.copy()
-
-        today = date.today()
-        expiry = today + timedelta(days=doctype_config["validity"])
-
-        presentation_data["Age over 18 Pseudonym"].update(
-            {"estimated_issuance_date": today.strftime("%Y-%m-%d")}
-        )
-        presentation_data["Age over 18 Pseudonym"].update(
-            {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
-        )
-
-        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
-            "url"
-        ]
-
-        return post_redirect_with_payload(
-            target_url=f"{target_url}/display_authorization",
-            data_payload={
-                "presentation_data": presentation_data,
-                "redirect_url": f"{cfgservice.service_url}dynamic/redirect_wallet",
-                "session_id": session_id,
-            },
-        )
-
-    else:
 
         attributesForm = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in attributesForm:

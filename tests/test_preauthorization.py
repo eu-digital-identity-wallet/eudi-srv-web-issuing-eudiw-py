@@ -65,6 +65,7 @@ def mock_config():
         mock_cfg.form_expiry = 30
         mock_cfg.wallet_test_url = "http://test-wallet.com/"
         mock_cfg.default_frontend = "default"
+        mock_cfg.authorization_server_internal_url = "http://127.0.0.1:6005"
         mock_cfg.app_logger = Mock()
 
         mock_frontend.registered_frontends = {
@@ -433,6 +434,9 @@ class TestRequestPreauthToken:
     ):
         """Test successful preauth token request."""
         # Setup
+
+        mock_cfg, mock_frontend = mock_config
+
         mock_response = Mock()
         mock_response.json.return_value = {
             "preauth_code": "test_code_123",
@@ -446,9 +450,12 @@ class TestRequestPreauthToken:
 
         # Assert
         assert result == "test_session_id"
+
+        expected_url = f"{mock_cfg.authorization_server_internal_url}/preauth_generate"
+
         mock_requests.assert_called_once_with(
             "POST",
-            "http://127.0.0.1:6005/preauth_generate",
+            expected_url,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             data="scope=credential_1 credential_2",
         )

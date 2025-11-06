@@ -196,7 +196,7 @@ def dynamic_R1(country):
             },
         )
 
-    elif country == "sample":
+        """ elif country == "sample":
 
         session_manager.update_user_data(
             session_id=session_id, user_data=cfgserv.sample_data.copy()
@@ -212,7 +212,7 @@ def dynamic_R1(country):
                     "username": session_id,
                 },
             )
-        )
+        ) """
 
         # return redirect(cfgcountries.supported_countries[country]["pid_url_oidc"])
 
@@ -734,7 +734,6 @@ def credentialCreation(credential_request, data, country, session_id):
     """
 
     credentials_supported = oidc_metadata["credential_configurations_supported"]
-    document_mappings = cfgserv.document_mappings
 
     credential_response = {"credentials": []}
 

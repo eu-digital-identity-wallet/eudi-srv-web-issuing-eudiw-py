@@ -43,6 +43,8 @@ class ConfService:
         "REVOCATION_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/take"
     )
 
+    revocation_api_key = os.getenv("REVOCATION_API_KEY", "test")
+
     revoke_service_url = os.getenv(
         "REVOKE_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/set"
     )
@@ -54,23 +56,6 @@ class ConfService:
 
     privKey_path = os.getenv("PRIVKEY_PATH", "/etc/eudiw/pid-issuer-dev/privKey/")
 
-    # ------------------------------------------------------------------------------------------------
-    # eIDAS Node base href (used in lightrequest)
-    eidasnode_url = os.getenv(
-        "EIDAS_NODE_URL", "https://preprod.issuer.eudiw.dev/EidasNode/"
-    )
-
-    # Number of Tries for login in eidas node
-    eidasnode_retry = 3
-
-    # openid endpoint in case of eidas node login error
-    eidasnode_openid_error_endpoint = service_url + "error_redirect"
-
-    # eIDAS node connector endpoint (for lightrequest)
-    eidasnode_lightToken_connectorEndpoint = (
-        service_url + "EidasNode/SpecificConnectorRequest"
-    )
-
     # Nonce endpoint
     nonce_key = os.getenv(
         "NOUNCE_KEY", "/etc/eudiw/pid-issuer/privKey/nonce_rsa2048.pem"
@@ -80,15 +65,17 @@ class ConfService:
     credential_request_priv_key = os.getenv(
         "CREDENTIAL_KEY", "/etc/eudiw/pid-issuer/privKey/credential_request.pem"
     )
-    # eIDAS node PID attributes
-    eidasnode_pid_attributes = ["CurrentFamilyName", "CurrentGivenName", "DateOfBirth"]
 
     # ------------------------------------------------------------------------------------------------
     # OpenID endpoints
 
     OpenID_first_endpoint = service_url + "oidc/verify/user"
-    # OpenID_first_endpoint = "https://preprod.issuer.eudiw.dev:4443/verify/user"
-    # OpenID_first_endpoint = "https://127.0.0.1:5000/verify/user"
+    authorization_server_internal_url = "http://127.0.0.1:6005"
+
+    dynamic_presentation_url = os.getenv(
+        "DYNAMIC_PRESENTATION_URL",
+        "https://dev.verifier-backend.eudiw.dev/ui/presentations/",
+    )
 
     # Deferred endpoint expiry time (minutes)
     deffered_expiry = 60
@@ -101,54 +88,6 @@ class ConfService:
 
     # Form data expiry time (minutes)
     form_expiry = 1440
-
-    # ------------------------------------------------------------------------------------------------
-    # PID namespace
-    pid_namespace = "eu.europa.ec.eudi.pid.1"
-
-    # PID doctype
-    pid_doctype = "eu.europa.ec.eudi.pid.1"
-
-    # PID validity in days
-    pid_validity = 90
-
-    # PID issuing Authority
-    pid_issuing_authority = "Test PID issuer"
-
-    # PID Organization ID
-    pid_organization_id = "EUDI Wallet Reference Implementation"
-
-    # mDL namespace
-    mdl_namespace = "org.iso.18013.5.1"
-
-    # mDLdoctype
-    mdl_doctype = "org.iso.18013.5.1.mDL"
-
-    # mDL validity in days
-    mdl_validity = 7
-
-    # MDL issuing Authority
-    mdl_issuing_authority = "Test MDL issuer"
-
-    # QEAA namespace
-    qeaa_namespace = "eu.europa.ec.eudiw.qeaa.1"
-
-    # QEAA validity in days
-    qeaa_validity = 90
-
-    # QEAA issuing Authority
-    qeaa_issuing_authority = "Test QEAA issuer"
-
-    # QEAA doctype
-    qeaa_doctype = "eu.europa.ec.eudiw.qeaa.1"
-
-    # OIDC4VC URL for initial page
-    oidc = service_url + ".well-known/openid-credential-issuer"
-    # oidc = "https://preprod.issuer.eudiw.dev:4443/.well-known/openid-credential-issuer"
-
-    # ------------------------------------------------------------------------------------------------
-    # current version
-    current_version = "0.6"
 
     # IANA registered claims
     Registered_claims = {
@@ -171,232 +110,6 @@ class ConfService:
         "portrait": "picture",
         "mobile_phone_number": "phone_number",
         "email_address": "email",
-    }
-    # route /pid/getpid response fields per API version
-    getpid_or_mdl_response_field = {
-        "0.1": [
-            "mdoc",
-            "mdoc_nonce",
-            "mdoc_authTag",
-            "mdoc_ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],  # doesn't cipher the returned mdoc
-        "0.2": [
-            "mdoc",
-            "mdoc_nonce",
-            "mdoc_authTag",
-            "mdoc_ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],
-        "0.3": [
-            "mdoc",
-            "nonce",
-            "authTag",
-            "ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],
-        "0.4": [
-            "mdoc",
-            "nonce",
-            "authTag",
-            "ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],
-        "0.5": [
-            "mdoc",
-            "nonce",
-            "authTag",
-            "ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],
-        "0.6": [
-            "mdoc",
-            "nonce",
-            "authTag",
-            "ciphertextPubKey",
-            "sd_jwt",
-            "error",
-            "error_str",
-        ],
-    }
-
-    document_mappings = {
-        "eu.europa.ec.eudi.pid.1": {
-            "fields": ["CurrentGivenName", "CurrentFamilyName", "DateOfBirth"],
-            "formatting_functions": {
-                "mso_mdoc": {"formatting_function": "pid_mdoc"},
-                "vc+sd-jwt": {"formatting_function": "pid_sd_jwt"},
-            },
-        },
-        "eu.europa.ec.eudiw.qeaa.1": {
-            "formatting_functions": {
-                "mso_mdoc": {"formatting_function": "qeaa_18_mdoc"},
-                "vc+sd-jwt": {"formatting_function": "qeaa_18_sd_jwt"},
-            },
-        },
-        "eu.europa.ec.eudi.pseudonym.1": {
-            "fields": ["user_pseudonym"],
-            "formatting_functions": {
-                "mso_mdoc": {"formatting_function": "pseudonym_mdoc"},
-                "vc+sd-jwt": {"formatting_function": "pseudonym_mdoc_sd_jwt"},
-            },
-        },
-        "org.iso.18013.5.1.mDL": {
-            "fields": [
-                "CurrentGivenName",
-                "CurrentFamilyName",
-                "DateOfBirth",
-                "IssuingAuthority",
-                "DocumentNumber",
-                "Portrait",
-                "DrivingPrivileges",
-            ],
-            "formatting_functions": {
-                "mso_mdoc": {"formatting_function": "mdl_mdoc"},
-                "vc+sd-jwt": {"formatting_function": "mdl_sd_jwt"},
-            },
-        },
-    }
-
-    common_name = {
-        "eu.europa.ec.eudi.pid.1": "National ID",
-        "org.iso.18013.5.1.mDL": "Driving License",
-        "eu.europa.ec.eudi.pseudonym.age_over_18.1": "Age Verification ",
-    }
-
-    config_doctype = {
-        "eu.europa.ec.eudi.pid.1": {
-            "issuing_authority": pid_issuing_authority,
-            "organization_id": pid_organization_id,
-            "validity": pid_validity,
-            "organization_name": pid_issuing_authority,
-            "namespace": pid_namespace,
-        },
-        "eu.europa.ec.eudiw.qeaa.1": {
-            "issuing_authority": qeaa_issuing_authority,
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": qeaa_issuing_authority,
-            "namespace": qeaa_namespace,
-        },
-        "org.iso.18013.5.1.mDL": {
-            "issuing_authority": mdl_issuing_authority,
-            "organization_id": pid_organization_id,
-            "validity": mdl_validity,
-            "organization_name": mdl_issuing_authority,
-            "namespace": mdl_namespace,
-        },
-        "eu.europa.ec.eudi.pseudonym.age_over_18.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.pseudonym.age_over_18.1",
-        },
-        "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.pseudonym.age_over_18.deferred_endpoint",
-        },
-        "eu.europa.ec.eudi.loyalty.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.loyalty.1",
-        },
-        "teste": {
-            "issuing_authority": "Test EUDIW Issuer",
-            "organization_id": pid_organization_id,
-            "validity": pid_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "teste",
-        },
-        "org.iso.23220.photoID.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "org.iso.23220.1",
-        },
-        "eu.europa.ec.eudi.por.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.por.1",
-        },
-        "eu.europa.ec.eudi.iban.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.iban.1",
-            "credential_type": "IBAN",
-        },
-        "eu.europa.ec.eudi.hiid.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.hiid.1",
-        },
-        "eu.europa.ec.eudi.tax.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.tax.1",
-            "credential_type": "Tax Number",
-        },
-        "eu.europa.ec.eudi.msisdn.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.msisdn.1",
-            "credential_type": "MSISDN",
-        },
-        "org.iso.18013.5.1.reservation": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "org.iso.18013.5.reservation.1",
-        },
-        "eu.europa.ec.eudi.ehic.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.ehic.1",
-        },
-        "eu.europa.ec.eudi.pda1.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.pda1.1",
-        },
-        "eu.europa.ec.eudi.cor.1": {
-            "issuing_authority": "Test QEAA issuer",
-            "organization_id": pid_organization_id,
-            "validity": qeaa_validity,
-            "organization_name": "Test QEAA issuer",
-            "namespace": "eu.europa.ec.eudi.cor.1",
-        },
     }
 
     auth_method_supported_credencials = {
@@ -441,95 +154,6 @@ class ConfService:
             "eu.europa.ec.eudi.pid_mdoc_deferred",
         ],
     }
-
-    # eudi_openid4vp_url = "dev.verifier-backend.eudiw.dev"
-    dynamic_presentation_url = os.getenv(
-        "DYNAMIC_PRESENTATION_URL",
-        "https://dev.verifier-backend.eudiw.dev/ui/presentations/",
-    )
-    dynamic_issuing = {
-        "eu.europa.ec.eudi.pseudonym_over18_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {"eu.europa.ec.eudi.pid.1": ["age_over_18"]}
-        },
-        "eu.europa.ec.eudi.pseudonym_over18_mdoc_deferred_endpoint": {
-            "eu.europa.ec.eudi.pid.1": {"eu.europa.ec.eudi.pid.1": ["age_over_18"]}
-        },
-        "eu.europa.ec.eudi.por_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-        "eu.europa.ec.eudi.iban_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-        "eu.europa.ec.eudi.hiid_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-        "eu.europa.ec.eudi.tax_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-        "eu.europa.ec.eudi.msisdn_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-        "eu.europa.ec.eudi.ehic_mdoc": {
-            "eu.europa.ec.eudi.pid.1": {
-                "eu.europa.ec.eudi.pid.1": [
-                    "family_name",
-                    "given_name",
-                    "birth_date",
-                    "age_over_18",
-                    "issuing_authority",
-                    "issuing_country",
-                ]
-            }
-        },
-    }
-
-    # Supported certificate algorithms and curves
-    cert_algo_list = {"ecdsa-with-SHA256": ["secp256r1"]}
 
     # ------------------------------------------------------------------------------------------------
     # Error list (error number, error string)
@@ -633,10 +257,3 @@ class ConfService:
     app_logger = logging.getLogger("app_logger")
     app_logger.addHandler(log_handler_info)
     app_logger.setLevel(logging.INFO)
-
-    """  logger_error = logging.getLogger("error")
-    logger_error.addHandler(log_handler_info)
-    logger_error.setLevel(logging.INFO) """
-
-    max_time_data = 5  # maximum minutes allowed for saved information
-    schedule_check = 5  # minutes, where every x time the code runs to check the time the data was created

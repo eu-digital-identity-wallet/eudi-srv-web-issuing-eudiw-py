@@ -24,6 +24,7 @@ segno==1.6.1
 qrcode-artistic==3.0.2
 gunicorn
 Authlib>=1.5.1
+dotenv
 pytest
 pytest-cov
 git+https://github.com/niscy-eudiw/pyMDOC-CBOR.git@branch-development

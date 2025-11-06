@@ -29,6 +29,10 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from app.session_manager import SessionManager
 from flask import Flask, render_template, request, send_from_directory, session
 from flask_session import Session

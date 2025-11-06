@@ -24,6 +24,7 @@ This config_countries.py contains configuration data related to the countries su
 NOTE: You should only change it if you understand what you're doing.
 """
 
+import os
 from .config_service import ConfService as cfgserv
 
 EIDAS_LOA_HIGH = "http://eidas.europa.eu/LoA/high"
@@ -63,7 +64,6 @@ class ConfCountries:
                 "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
                 "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
             },
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
         },
         formCountry: {
             "name": "FormEU",
@@ -104,7 +104,6 @@ class ConfCountries:
                 "eu.europa.ec.eudi.employee_mdoc",
                 "eu.europa.ec.eudi.pid_mdoc_deferred",
             ],
-            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
         },
         "PT": {
             "name": "Portugal",
@@ -183,8 +182,16 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
-            "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "connection_type": "oauth",
+            "oauth_auth": {
+                "base_url": "https://eidas.projj.eu",
+                "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
+                "scope": "profile",
+                "state": "hkMVY7vjuN7xyLl5",
+                "response_type": "code",
+                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            },
         },
         "NL": {
             "name": "Netherland",
@@ -197,8 +204,16 @@ class ConfCountries:
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
             ],
-            "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "connection_type": "oauth",
+            "oauth_auth": {
+                "base_url": "https://eidas.projj.eu",
+                "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
+                "scope": "profile",
+                "state": "hkMVY7vjuN7xyLl5",
+                "response_type": "code",
+                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            },
         },
         "LU": {
             "name": "Luxembourg",
@@ -216,15 +231,23 @@ class ConfCountries:
                 "given_name": "CurrentGivenName",
                 "birth_date": "DateOfBirth",
             },
-            "connection_type": "eidasnode",
-            "dynamic_R2": cfgserv.service_url + "eidasnode/dynamic_R2",
+            "connection_type": "oauth",
+            "oauth_auth": {
+                "base_url": "https://eidas.projj.eu",
+                "redirect_uri": f"{cfgserv.service_url}dynamic/redirect",
+                "scope": "profile",
+                "state": "hkMVY7vjuN7xyLl5",
+                "response_type": "code",
+                "client_id": "9ztCyAEB3CFwJVhjBoQ2U2fu",
+                "client_secret": "BH2tXs26hD5wba6xpiPIHE6NqH3m4DnaKAoG5bFHqM805kvh",
+            },
         },
     }
 
 
 class ConfFrontend:
     registered_frontends = {
-        "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {
-            "url": "https://ec.dev.issuer.eudiw.dev"
+        cfgserv.default_frontend: {
+            "url": os.getenv("DEFAULT_FRONTEND_URL", "https://ec.dev.issuer.eudiw.dev")
         }
     }

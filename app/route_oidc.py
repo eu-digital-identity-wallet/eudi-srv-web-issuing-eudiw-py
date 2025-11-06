@@ -355,7 +355,7 @@ def pid_authorization_get():
 
 
 def verify_introspection(bearer_token):
-    introspection_url = "http://127.0.0.1:6005/introspection"
+    introspection_url = f"{cfgservice.authorization_server_internal_url}/introspection"
 
     payload = f"token={bearer_token}"
 

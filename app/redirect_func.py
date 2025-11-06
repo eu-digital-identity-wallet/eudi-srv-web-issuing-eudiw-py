@@ -29,31 +29,6 @@ from flask import json, redirect, render_template_string, session
 from app_config.config_service import ConfService as cfgserv
 
 
-def redirect_getpid_or_mdl(version, returnURL, error_num: int, l):
-    """Redirect to the returnURL, with error error_num, when the request was made to route pid/getpid or to route mdl/getmdl.
-
-    Keyword arguments:
-    + version -- API version
-    + returnURL -- URL to redirect
-    + error_num -- error number (integer)
-    + l -- list with pair of (return fields, value), if the value is not empty/default)
-
-    Return: Redirect to returnURL with error
-    """
-    rlist = {}
-    for field in cfgserv.getpid_or_mdl_response_field[version]:
-        rlist[field] = ""
-    rlist["error"] = str(error_num)
-    if str(error_num) in cfgserv.error_list.keys():
-        rlist["error_str"] = cfgserv.error_list[str(error_num)]
-    else:
-        rlist["error_str"] = cfgserv.error_list["-1"]
-    for r, v in l:
-        rlist[r] = v
-
-    return redirect(url_get(returnURL, rlist))
-
-
 def url_get(url_path: str, args: dict):
     """Returns the URL for a HTTP GET query
 

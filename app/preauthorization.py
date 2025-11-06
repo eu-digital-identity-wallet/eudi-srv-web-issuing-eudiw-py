@@ -349,7 +349,7 @@ def credentialOfferReq2():
 
 
 def request_preauth_token(scope):
-    url = "http://127.0.0.1:6005/preauth_generate"
+    url = f"{cfgservice.authorization_server_internal_url}/preauth_generate"
 
     payload = f"scope={scope}"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}

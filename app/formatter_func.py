@@ -47,7 +47,6 @@ import jwt
 from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
 from app_config.config_countries import ConfCountries as cfgcountries
 from app_config.config_service import ConfService as cfgservice
-from app_config.config_secrets import revocation_api_key
 
 from app import session_manager
 
@@ -135,7 +134,7 @@ def mdocFormatter(
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
     revocation_json = None
-    if revocation_api_key:
+    if cfgservice.revocation_api_key:
         payload = (
             "doctype="
             + credential_metadata["doctype"]
@@ -146,7 +145,7 @@ def mdocFormatter(
         )
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "X-Api-Key": revocation_api_key,
+            "X-Api-Key": cfgservice.revocation_api_key,
         }
 
         response = requests.post(
@@ -300,13 +299,13 @@ def sdjwtFormatter(PID, country):
 
     revocation_json = None
 
-    if revocation_api_key:
+    if cfgservice.revocation_api_key:
         payload = (
             "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
         )
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "X-Api-Key": revocation_api_key,
+            "X-Api-Key": cfgservice.revocation_api_key,
         }
 
         response = requests.post(

@@ -35,7 +35,6 @@ from urllib.parse import quote_plus
 import requests
 import segno
 from .app_config.config_service import ConfService as cfgservice
-from app_config.config_secrets import revocation_api_key
 from app.data_management import revocation_requests
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519, ed448
 from . import oidc_metadata
@@ -534,7 +533,7 @@ def revoke():
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
-        "X-Api-Key": revocation_api_key,
+        "X-Api-Key": cfgservice.revocation_api_key,
     }
 
     print("\nresp: ", status_lists)
