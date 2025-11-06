@@ -343,10 +343,6 @@ def red():
 
     session["access_token"] = access_token
 
-    cfgserv.app_logger.info(
-        f" - INFO - /dynamic/redicret - Version:{cfgserv.current_version} - Country: {current_session.country} - Code: {request.args.get('code')} - entered the route"
-    )
-
     data = dynamic_R2_data_collect(
         country=current_session.country,
         session_id=session_id,
@@ -491,10 +487,6 @@ def dynamic_R2():
 
     credential_request = json_request["credential_requests"]
 
-    # session["country"] = country
-    # session["version"] = cfgserv.current_version
-    # session["route"] = "/dynamic/form_R2"
-
     data = (
         current_session.user_data
     )  # dynamic_R2_data_collect(country=country, user_id=user_id)
@@ -533,18 +525,12 @@ def dynamic_R2_data_collect(country, session_id, access_token):
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
 
-        # session["version"] = cfgserv.current_version
-        # session["country"] = data["issuing_country"]
-
         print("\ndynamic_R2_data_collect user_data: ", data)
         return data
 
     if country == "sample":
         """if data == "Data not found":
         return {"error": "error", "error_description": "Data not found"}"""
-
-        # session["version"] = cfgserv.current_version
-        # session["country"] = data["issuing_country"]
 
         current_session = session_manager.get_session(session_id=session_id)
 
@@ -1344,4 +1330,5 @@ def generate_connector_authorization_url(
 
     full_url = f"{authorization_endpoint}?{urlencode(params)}"
 
+    print("\nauthorization_full_url", full_url, flush=True)
     return full_url
