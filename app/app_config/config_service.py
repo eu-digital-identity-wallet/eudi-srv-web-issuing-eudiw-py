@@ -61,12 +61,12 @@ class ConfService:
 
     # Nonce endpoint
     nonce_key = os.getenv(
-        "NOUNCE_KEY", "/etc/eudiw/pid-issuer/privKey/nonce_rsa2048.pem"
+        "NONCE_KEY", "/etc/eudiw/pid-issuer-dev/privKey/nonce_rsa2048.pem"
     )
 
     # credential request key
     credential_request_priv_key = os.getenv(
-        "CREDENTIAL_KEY", "/etc/eudiw/pid-issuer/privKey/credential_request.pem"
+        "CREDENTIAL_KEY", "/etc/eudiw/pid-issuer-dev/privKey/credential_request.pem"
     )
 
     # ------------------------------------------------------------------------------------------------
@@ -252,24 +252,27 @@ class ConfService:
     except FileExistsError:
         pass
 
-    log_handler_info = TimedRotatingFileHandler(
-        filename=f"{log_dir}/{log_file_info}",
-        when="midnight",  # Rotation midnight
-        interval=1,  # new file each day
-        backupCount=backup_count,
-    )
-
-    formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
-    log_handler_info.setFormatter(formatter)
-    log_handler_info.setLevel(logging.INFO)
-
-    # Console handler for stdout
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(logging.INFO)
-
     app_logger = logging.getLogger("app_logger")
-    app_logger.addHandler(log_handler_info)
-    app_logger.addHandler(console_handler)
-    app_logger.setLevel(logging.INFO)
-    app_logger.propagate = False
+
+    if not app_logger.handlers:
+        log_handler_info = TimedRotatingFileHandler(
+            filename=f"{log_dir}/{log_file_info}",
+            when="midnight",  # Rotation midnight
+            interval=1,  # new file each day
+            backupCount=backup_count,
+        )
+
+        formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
+        log_handler_info.setFormatter(formatter)
+        log_handler_info.setLevel(logging.INFO)
+
+        # Console handler for stdout
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(logging.INFO)
+
+        app_logger = logging.getLogger("app_logger")
+        app_logger.addHandler(log_handler_info)
+        app_logger.addHandler(console_handler)
+        app_logger.setLevel(logging.INFO)
+        app_logger.propagate = False
