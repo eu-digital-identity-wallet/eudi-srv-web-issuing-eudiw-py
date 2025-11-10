@@ -112,6 +112,8 @@ def openid4vp():
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "request_uri_method": "post",
             "dcql_query": dcql_query,
+            "request_uri_method": "post",
+            "dcql_query": dcql_query,
             "wallet_response_redirect_uri_template": cfgservice.service_url
             + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
             + session_id,

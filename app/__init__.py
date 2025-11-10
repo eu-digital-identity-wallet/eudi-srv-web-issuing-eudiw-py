@@ -170,7 +170,6 @@ def setup_metadata():
         Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain)
     )
 
-
 setup_metadata()
 
 IS_TEST_ENV = (

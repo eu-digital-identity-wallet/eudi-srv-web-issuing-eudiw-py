@@ -89,6 +89,7 @@ def validate_vp_token(response_json, credentials_requested):
     print("\nmdoc_cbor: ", mdoc_cbor)
 
     error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
+    error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
 
     if error == False:
     if error == False:
