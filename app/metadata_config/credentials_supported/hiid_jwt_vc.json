@@ -27,9 +27,11 @@
            ]
         }
      },
+     "vct":"urn:eu.europa.ec.eudi:hiid:1",
+     "credential_metadata": {
      "display":[
         {
-           "name":"Health ID (sd-jwt-vc)",
+           "name":"Health ID (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",
@@ -37,7 +39,6 @@
            }
         }
      ],
-     "vct":"urn:eu.europa.ec.eudi:hiid:1",
      "claims":[
         {
            "path":[
@@ -291,12 +292,13 @@
               ]
            }
         }
-     ],
+     ]
+   },
      "issuer_config":{
-        "issuing_authority":"Test PID issuer",
+        "issuing_authority":"Test QEAA Issuer",
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
-        "organization_name":"Test PID issuer",
+        "organization_name":"Test QEAA Issuer",
         "doctype":"eu.europa.ec.eudi.hiid.1"
      }
   }

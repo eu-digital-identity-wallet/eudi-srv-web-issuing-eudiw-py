@@ -1,41 +1,66 @@
 {
-  "credential_issuer": "https://issuer.eudiw.dev",
-  "credential_endpoint": "https://issuer.eudiw.dev/credential",
-  "notification_endpoint": "https://issuer.eudiw.dev/notification",
-  "deferred_credential_endpoint": "https://issuer.eudiw.dev/deferred_credential",
-  "nonce_endpoint":"https://issuer.eudiw.dev/nonce",
-  "batch_credential_issuance": {
-      "batch_size": 100
-    },
-  "credential_response_encryption": {
-    "alg_values_supported": [
-      "RSA1_5",
-      "RSA-OAEP",
-      "RSA-OAEP-256",
-      "ECDH-ES"
-    ],
-    "enc_values_supported": [
-      "A128CBC-HS256",
-      "A192CBC-HS384",
-      "A256CBC-HS512",
-      "A128GCM",
-      "A192GCM",
-      "A256GCM"
-    ],
-    "encryption_required": false
-  },
-  "display": [
-    {
-    "name": "Digital Credentials Issuer",
-    "locale": "en",
-    "logo": {
-        "uri": "https://issuer.eudiw.dev/ic-logo.png",
-        "alt_text": "EU Digital Identity Wallet Logo"
-    }
-    }
-  ],
-  "credential_configurations_supported": {
-    
-
-  }
+   "credential_issuer":"https://dev.issuer.eudiw.dev",
+   "authorization_servers":[
+      "https://dev.issuer.eudiw.dev/oidc"
+   ],
+   "credential_endpoint":"https://dev.issuer.eudiw.dev/credential",
+   "nonce_endpoint":"https://dev.issuer.eudiw.dev/nonce",
+   "deferred_credential_endpoint":"https://dev.issuer.eudiw.dev/deferred_credential",
+   "notification_endpoint":"https://dev.issuer.eudiw.dev/notification",
+   "batch_credential_issuance":{
+      "batch_size":100
+   },
+   "credential_response_encryption":{
+      "alg_values_supported":[
+         "RSA1_5",
+         "RSA-OAEP",
+         "RSA-OAEP-256",
+         "ECDH-ES"
+      ],
+      "enc_values_supported":[
+         "A128CBC-HS256",
+         "A192CBC-HS384",
+         "A256CBC-HS512",
+         "A128GCM",
+         "A192GCM",
+         "A256GCM"
+      ],
+      "encryption_required":false
+   },
+   "credential_request_encryption":{
+      "jwks":{
+         "keys":[
+            {
+               "kty":"EC",
+               "use":"enc",
+               "alg":"ECDH-ES",
+               "crv":"P-256",
+               "x":"xuUPSgobyy2Pxw-rUgmYHe92K4JuuFIAKu1vbIw6pgo",
+               "y":"HoYHVVdZdEdVYZWf_ryHhgd4ak5-6xykpvFgZaK_Z8Q",
+               "kid":"D6KSZ43BrxnLwBAajruJpB1t7TrsWuE-mAn6ihHqT8w"
+            }
+         ]
+      },
+      "enc_values_supported":[
+         "A128GCM",
+         "A256GCM",
+         "A128CBC-HS256",
+         "A256CBC-HS512",
+         "ECDH-ES"
+      ],
+      "encryption_required":false
+   },
+   "display":[
+      {
+         "name":"Digital Credentials Issuer",
+         "locale":"en",
+         "logo":{
+            "uri":"https://dev.issuer.eudiw.dev/ic-logo.png",
+            "alt_text":"EU Digital Identity Wallet Logo"
+         }
+      }
+   ],
+   "credential_configurations_supported":{
+      
+   }
 }

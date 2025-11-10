@@ -11,14 +11,8 @@
         "jwk",
         "cose_key"
      ],
-     "credential_alg_values_supported":[
-        -7
-     ],
-     "credential_crv_values_supported":[
-        1
-     ],
      "credential_signing_alg_values_supported":[
-        "ES256"
+        -7
      ],
      "proof_types_supported":{
         "jwt":{
@@ -38,9 +32,10 @@
            ]
         }
      },
+     "credential_metadata": {
      "display":[
         {
-           "name":"Power Of Representation",
+           "name":"Power Of Representation (MSO Mdoc)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/por.png",
@@ -208,12 +203,13 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
-        "issuing_authority":"Test PID issuer",
+        "issuing_authority":"Test QEAA Issuer",
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
-        "organization_name":"Test PID issuer",
+        "organization_name":"Test QEAA Issuer",
         "namespace":"eu.europa.ec.eudi.por.1"
      }
   }

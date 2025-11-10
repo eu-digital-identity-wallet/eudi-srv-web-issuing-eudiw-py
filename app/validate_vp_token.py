@@ -19,8 +19,6 @@
 This validate_vp_token.py file contains functions related to validate VP Token.
 
 """
-import re
-import cryptography
 from pycose.messages import Sign1Message
 from pycose.headers import X5chain
 import base64
@@ -29,13 +27,11 @@ import cbor2
 from pycose.keys import EC2Key
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding, ec
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography import x509
 import datetime
 import hashlib
 from . import trusted_CAs
-from .app_config.config_service import ConfService as cfgservice
 
 
 def validate_vp_token(response_json, credentials_requested):
@@ -60,28 +56,82 @@ def validate_vp_token(response_json, credentials_requested):
         return True, "The path value from presentation_submission is not valid."
 
     if "query_0" not in response_json["vp_token"]:
+    if "vp_token" not in response_json:
         return True, "The path value from presentation_submission is not valid."
 
+    if "query_0" not in response_json["vp_token"]:
+        return True, "The path value from presentation_submission is not valid."
+
+    mdoc = response_json["vp_token"]["query_0"][0]
+    mdoc_ver = None
     mdoc = response_json["vp_token"]["query_0"][0]
     mdoc_ver = None
 
     try:
         mdoc_ver = base64.urlsafe_b64decode(mdoc)
+    try:
+        mdoc_ver = base64.urlsafe_b64decode(mdoc)
 
+    except:
+        mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
     except:
         mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
 
     mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
+    mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
 
+    if mdoc_cbor["status"] != 0:
     if mdoc_cbor["status"] != 0:
 
         return True, "Status invalid:" + str(mdoc_cbor["status"])
+        return True, "Status invalid:" + str(mdoc_cbor["status"])
 
+    print("\nmdoc_cbor: ", mdoc_cbor)
+
+    error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
     error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
 
     if error == False:
+    if error == False:
 
         return True, errorMsg
+        return True, errorMsg
+
+    # Validate values received are the same values requested
+    # namespaces = mdoc_cbor["documents"][0]["issuerSigned"]["nameSpaces"]
+
+    # attributes_requested = []
+
+    """ for id in credentials_requested:
+        for doctype in cfgservice.dynamic_issuing[id]:
+            for namespace in cfgservice.dynamic_issuing[id][doctype]:
+                for attribute in cfgservice.dynamic_issuing[id][doctype][namespace]:
+                    attributes_requested.append(attribute) """
+
+    # attributes_requested = auth_request_values["input_descriptor"]
+    """ attributes_received = []
+
+    for n in namespaces.keys():
+        l = []
+        for e in namespaces[n]:  # e is a CBORTag
+            val = cbor2.decoder.loads(e.value)
+            id = val["elementIdentifier"]
+            attributes_received.append(id)
+
+    if len(attributes_received) != len(attributes_requested):
+
+        if set(attributes_received).issubset(set(attributes_requested)):
+
+            # missing_attributes = list(set(attributes_requested) - set(attributes_received))
+            return True, "Missing attributes"  # missing_attributes
+        else:
+            return True, "There are values that weren't requested."
+
+    if all(x in attributes_requested for x in attributes_received) and all(
+        x in attributes_received for x in attributes_requested
+    ):
+
+        return False, "" """
 
     return False, ""
 

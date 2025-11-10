@@ -27,6 +27,7 @@
            ]
         }
      },
+     "credential_metadata": {
      "display":[
         {
            "name":"Reservation",
@@ -233,12 +234,13 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
-        "issuing_authority":"Test PID issuer",
+        "issuing_authority":"Test QEAA Issuer",
         "organization_id":"EUDI Wallet Reference Implementation",
         "validity":90,
-        "organization_name":"Test PID issuer",
+        "organization_name":"Test QEAA Issuer",
         "namespace":"org.iso.18013.5.reservation.1"
      }
   }

@@ -68,12 +68,18 @@ def validate_cert_algo(certificate, lalgo):
         cert = x509.load_pem_x509_certificate(certificate)
     except Exception as e:
         return (False, str(e), "unknown")
-    algname = cert.signature_algorithm_oid._name
-    curvname = cert.public_key().curve.name
 
-    if algname not in lalgo:  # validate certificate algorithm
+    algname = cert.signature_algorithm_oid._name
+
+    # Handle RSA or other algorithms without a curve
+    try:
+        curvname = cert.public_key().curve.name
+    except AttributeError:
+        curvname = "unknown"
+
+    if algname not in lalgo:
         return (False, algname, curvname)
-    if curvname not in lalgo[algname]:  # validate public key curve
+    if curvname not in lalgo[algname] and curvname != "unknown":
         return (False, algname, curvname)
 
     return (True, algname, curvname)

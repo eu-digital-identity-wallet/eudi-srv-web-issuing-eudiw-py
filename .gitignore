@@ -8,7 +8,6 @@ app/certs/PID-DS-0001_UT.pem
 app/app_config/config_secrets.py
 flask_session/
 nohup.out
-
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
@@ -203,3 +202,17 @@ app/tests/output.xml
 app/tests/output.xml
 app/tests/report.html
 log
+
+# Node.js / npm
+# =========================
+# The entire node_modules directory
+/node_modules
+
+# Generated CSS file
+/app/static/css/tailwind.css
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
