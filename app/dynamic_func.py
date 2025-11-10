@@ -32,18 +32,6 @@ from misc import (
     getOptionalAttributes,
     getOptionalAttributesSDJWT,
 )
-from misc import (
-    calculate_age,
-    doctype2credential,
-    doctype2credentialSDJWT,
-    getIssuerFilledAttributes,
-    getIssuerFilledAttributesSDJWT,
-    getMandatoryAttributes,
-    getMandatoryAttributesSDJWT,
-    getNamespaces,
-    getOptionalAttributes,
-    getOptionalAttributesSDJWT,
-)
 from redirect_func import json_post
 import base64
 from flask import session
@@ -180,7 +168,6 @@ def get_requested_credential(data, doctype, format, today):
                 {
                     "type": doctype,
                     "source": {
-                        "organization_name": doctype_config["organization_name"],
                         "organization_name": doctype_config["organization_name"],
                         "organization_id": doctype_config["organization_id"],
                         "country_code": data["issuing_country"],

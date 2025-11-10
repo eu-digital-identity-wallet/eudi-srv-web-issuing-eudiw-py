@@ -17,7 +17,6 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
-The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -121,9 +120,6 @@ def mdocFormatter(
         data[credential_metadata["doctype"]]["user_pseudonym"] = data[
             credential_metadata["doctype"]
         ]["user_pseudonym"].encode("utf-8")
-        data[credential_metadata["doctype"]]["user_pseudonym"] = data[
-            credential_metadata["doctype"]
-        ]["user_pseudonym"].encode("utf-8")
 
     # Construct the COSE private key
     cose_pkey = {
@@ -155,9 +151,6 @@ def mdocFormatter(
         response = requests.post(
             cfgservice.revocation_service_url, headers=headers, data=payload
         )
-        response = requests.post(
-            cfgservice.revocation_service_url, headers=headers, data=payload
-        )
 
         if response.status_code == 200:
             revocation_json = response.json()
@@ -170,12 +163,7 @@ def mdocFormatter(
         cert_path=cfgcountries.supported_countries[country]["pid_mdoc_cert"],
         revocation=revocation_json,
     )
-        revocation=revocation_json,
-    )
 
-    return urlsafe_b64encode_nopad(
-        mdoci.dump()
-    )  # base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
     return urlsafe_b64encode_nopad(
         mdoci.dump()
     )  # base64.urlsafe_b64encode(mdoci.dump()).decode("utf-8")
@@ -306,7 +294,6 @@ def sdjwtFormatter(PID, country):
     device_key = PID["device_publickey"]
 
     vct = PID["credential_metadata"]["vct"]  # doctype2vct(doctype)
-    vct = PID["credential_metadata"]["vct"]  # doctype2vct(doctype)
 
     doctype = vct2doctype(vct)
 
@@ -324,9 +311,6 @@ def sdjwtFormatter(PID, country):
         response = requests.post(
             cfgservice.revocation_service_url, headers=headers, data=payload
         )
-        response = requests.post(
-            cfgservice.revocation_service_url, headers=headers, data=payload
-        )
 
         if response.status_code == 200:
             revocation_json = response.json()
@@ -339,7 +323,6 @@ def sdjwtFormatter(PID, country):
     }
 
     if revocation_json:
-        claims.update({"status": revocation_json})
         claims.update({"status": revocation_json})
 
     datafinal = {}
@@ -357,10 +340,6 @@ def sdjwtFormatter(PID, country):
     with open(
         cfgcountries.supported_countries[country]["pid_mdoc_cert"], "rb"
     ) as certificate:
-        certificate_data = certificate.read()
-
-    certificate_base64 = base64.b64encode(certificate_data).decode("utf-8")
-    x5c = {"x5c": []}
         certificate_data = certificate.read()
 
     certificate_base64 = base64.b64encode(certificate_data).decode("utf-8")
@@ -415,13 +394,11 @@ def sdjwtFormatter(PID, country):
     ### Produce SD-JWT and SVC for selected example
     SDJWTIssuer.unsafe_randomness = False
     SDJWTIssuer.SD_JWT_HEADER = "dc+sd-jwt"
-    SDJWTIssuer.SD_JWT_HEADER = "dc+sd-jwt"
     sdjwt_at_issuer = SDJWTIssuer(
         claims,
         keys["issuer_key"],
         keys["holder_key"],
         add_decoy_claims=False,
-        extra_header_parameters=x5c,
         extra_header_parameters=x5c,
     )
 
@@ -441,9 +418,6 @@ def DATA_sd_jwt(PID):
     age_equal_or_over = {}
     place_of_birth = {}
     address_dict = {}
-    age_equal_or_over = {}
-    place_of_birth = {}
-    address_dict = {}
     for i in PID:
         if i in cfgservice.Registered_claims:
 
@@ -452,18 +426,12 @@ def DATA_sd_jwt(PID):
             if "age_equal_or_over" in r:
                 subAge = r.split(".")
                 age_equal_or_over.update({subAge[1]: PID[i]})
-                subAge = r.split(".")
-                age_equal_or_over.update({subAge[1]: PID[i]})
 
             elif "place_of_birth" in r:
                 place_Birth = r.split(".")
                 place_of_birth.update({place_Birth[1]: PID[i]})
-                place_Birth = r.split(".")
-                place_of_birth.update({place_Birth[1]: PID[i]})
 
             elif "address" in r:
-                address = r.split(".")
-                address_dict.update({address[1]: PID[i]})
                 address = r.split(".")
                 address_dict.update({address[1]: PID[i]})
 
@@ -478,18 +446,11 @@ def DATA_sd_jwt(PID):
     if age_equal_or_over:
         data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
         Data.update(data)
-        data = {SDObj(value="age_equal_or_over"): recursive(age_equal_or_over)}
-        Data.update(data)
 
     if place_of_birth:
         data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
         Data.update(data)
-        data = {SDObj(value="place_of_birth"): recursive(place_of_birth)}
-        Data.update(data)
     if address_dict:
-        data = {SDObj(value="address"): recursive(address_dict)}
-        Data.update(data)
-
         data = {SDObj(value="address"): recursive(address_dict)}
         Data.update(data)
 
@@ -498,13 +459,10 @@ def DATA_sd_jwt(PID):
 
 def recursive(dict):
     temp_dic = {}
-    temp_dic = {}
     for f in dict:
         recursive = {SDObj(value=f): dict[f]}
         temp_dic.update(recursive)
     return temp_dic
-    return temp_dic
-
 
 
 def DatestringFormatter(date):
@@ -537,25 +495,7 @@ def KeyData(key, type):
             )
             .rjust(32, b"\x00")
         )
-        x = (
-            key.public_numbers()
-            .x.to_bytes(
-                (key.public_numbers().x.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
-            .rjust(32, b"\x00")
-        )
 
-        y = (
-            key.public_numbers()
-            .y.to_bytes(
-                (key.public_numbers().y.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
-            .rjust(32, b"\x00")
-        )
         y = (
             key.public_numbers()
             .y.to_bytes(
@@ -576,25 +516,7 @@ def KeyData(key, type):
             )
             .rjust(32, b"\x00")
         )
-        x = (
-            key.private_numbers()
-            .public_numbers.x.to_bytes(
-                (key.private_numbers().public_numbers.x.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
-            .rjust(32, b"\x00")
-        )
 
-        y = (
-            key.private_numbers()
-            .public_numbers.y.to_bytes(
-                (key.private_numbers().public_numbers.y.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
-            .rjust(32, b"\x00")
-        )
         y = (
             key.private_numbers()
             .public_numbers.y.to_bytes(

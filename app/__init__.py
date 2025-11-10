@@ -17,7 +17,6 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
-The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
@@ -353,7 +352,6 @@ def create_app(test_config=None):
         route_dynamic,
         route_oid4vp,
         preauthorization,
-        revocation,
         revocation,
     )
 

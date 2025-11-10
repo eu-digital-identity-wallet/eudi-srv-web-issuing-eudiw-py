@@ -18,7 +18,6 @@
 """
 This route simulates a pre-authorization flow.
 Currently the libraries used do not support pre-authorization.
-Currently the libraries used do not support pre-authorization.
 This route generates a client registration capable of using a pre-authorization code for testing purposes.
 """
 
@@ -56,7 +55,6 @@ preauth = Blueprint("preauth", __name__, url_prefix="/")
 CORS(preauth)  # enable CORS on the blue print
 
 
-
 @preauth.route("/preauth", methods=["GET"])
 def preauthRed():
 
@@ -71,7 +69,6 @@ def preauthRed():
     session["session_id"] = session_id
     print("\nsession_id")
 
-    authorization_details = []
     authorization_details = []
 
     for credential in credential_list:
@@ -231,24 +228,15 @@ def generate_offer(data):
                     "input_mode": "numeric",
                     "description": "Please provide the one-time code.",
                 },
-                    "description": "Please provide the one-time code.",
-                },
             }
         },
-        },
     }
-
 
     # create URI
     json_string = json.dumps(credential_offer)
 
-
     credential_offer_URI = session["credential_offer_URI"]
 
-    uri = (
-        f"{credential_offer_URI}credential_offer?credential_offer="
-        + urllib.parse.quote(json_string, safe=":/")
-    )
     uri = (
         f"{credential_offer_URI}credential_offer?credential_offer="
         + urllib.parse.quote(json_string, safe=":/")
@@ -257,11 +245,7 @@ def generate_offer(data):
     qrcode = segno.make(uri)
     out = io.BytesIO()
     qrcode.save(out, kind="png", scale=2)
-    qrcode.save(out, kind="png", scale=2)
 
-    qr_img_base64 = "data:image/png;base64," + base64.b64encode(out.getvalue()).decode(
-        "utf-8"
-    )
     qr_img_base64 = "data:image/png;base64," + base64.b64encode(out.getvalue()).decode(
         "utf-8"
     )
@@ -292,19 +276,14 @@ def generate_offer(data):
 def credentialOfferReq2():
 
     json_token = request.form.get("request")
-    json_token = request.form.get("request")
 
     header, payload, signature = json_token.split(".")
-    header, payload, signature = json_token.split(".")
 
-    payload += "=" * (-len(payload) % 4)
-    decoded_payload = base64.urlsafe_b64decode(payload).decode("utf-8")
     payload += "=" * (-len(payload) % 4)
     decoded_payload = base64.urlsafe_b64decode(payload).decode("utf-8")
 
     json_payload = json.loads(decoded_payload)
 
-    authorization_details = []
     authorization_details = []
     credential_ids = []
 
@@ -317,17 +296,8 @@ def credentialOfferReq2():
                 ],
             }
         )
-        authorization_details.append(
-            {
-                "type": "openid_credential",
-                "credential_configuration_id": credential[
-                    "credential_configuration_id"
-                ],
-            }
-        )
         if credential["credential_configuration_id"] not in credential_ids:
             credential_ids.append(credential["credential_configuration_id"])
-
 
     data = json_payload["credentials"][0]["data"]
 
@@ -365,15 +335,10 @@ def credentialOfferReq2():
                 "issuer_state": session_id,
             }
         },
-        },
     }
 
     json_string = json.dumps(credential_offer)
 
-    uri = (
-        f"openid-credential-offer://credential_offer?credential_offer="
-        + urllib.parse.quote(json_string, safe=":/")
-    )
     uri = (
         f"openid-credential-offer://credential_offer?credential_offer="
         + urllib.parse.quote(json_string, safe=":/")

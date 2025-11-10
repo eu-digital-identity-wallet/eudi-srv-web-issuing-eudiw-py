@@ -11,4 +11,3 @@ omit = [
 
 [tool.coverage.report]
 show_missing = true
-
