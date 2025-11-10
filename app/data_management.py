@@ -17,6 +17,7 @@
 ###############################################################################
 """
 This manages necessary data and it's removal
+This manages necessary data and it's removal
 
 """
 
@@ -31,6 +32,7 @@ from app import session_manager
 
 credential_offer_references = {}
 revocation_requests = {}
+
 
 ################################################
 ## To be moved to a file with scheduled jobs

@@ -459,6 +459,10 @@ def oid4vp_get():
                 credentials["mso_mdoc"].append(response_json["vp_token"][index])
             elif format == "dc+sd-jwt":
                 credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
+            if format == "mso_mdoc":
+                credentials["mso_mdoc"].append(response_json["vp_token"][index])
+            elif format == "dc+sd-jwt":
+                credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
 
     print("\ncredentials: ", credentials)
     print("\nmso_mdoc len: ", len(credentials["mso_mdoc"]))

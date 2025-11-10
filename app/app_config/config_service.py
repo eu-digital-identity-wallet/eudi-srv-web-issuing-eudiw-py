@@ -17,8 +17,10 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
+This config_service.py contains configuration data for the PID Issuer Web service.
 This config_service.py contains configuration data for the PID Issuer Web service.
 
 NOTE: You should only change it if you understand what you're doing.
@@ -202,7 +204,25 @@ class ConfService:
         "document_id": "doc12345",
         "institution_id": "inst1234",
         "country_code": "FC",
+        "social_security_pin": "12345678",
+        "starting_date": "2025-01-20",
+        "ending_date": "2026-01-20",
+        "document_id": "doc12345",
+        "institution_id": "inst1234",
+        "country_code": "FC",
         "birth_place": "Utopia",
+        "nationality": ["FC"],
+        "place_of_birth": [
+            {"locality": "Locality", "region": "Region", "country": "Country"}
+        ],
+        "nationalities": ["FC"],
+        "credential_holder": '{"given_name": "Sample_Given_name", "family_name": "Sample_Family_Name", "birth_date": "1111-11-11"}',
+        "subject": '{"given_name": "John", "family_name": "Smith", "birth_date": "2020-11-11"}',
+        "employment_details": '[{"employment_type":"01", "name":"Danube Constructions", "employer_id":"889900", "id_type":"02", "street":"someStreet", "town":"someTown", "postal_code":"somePostal", "country_code":"FC"}]',
+        "places_of_work": '[{"company":"Construction Site Bauschon", "town":"Berlin", "postal_code":"33295", "country_code":"DE"}]',
+        "legislation": '{"member_state": "AT", "transitional_rules_apply": true, "starting_date":"2025-01-20", "ending_date":"2026-01-20"}',
+        "competent_institution": '{"institution_id": "1X00", "institution_name": "Sample Institution", "country_code":"AT"}',
+        "status_confirmation": "01",
         "nationality": ["FC"],
         "place_of_birth": [
             {"locality": "Locality", "region": "Region", "country": "Country"}
@@ -245,9 +265,11 @@ class ConfService:
 
         logger = logging.getLogger("app_logger")
 
-        if logger.handlers and any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
+        if logger.handlers and any(
+            isinstance(h, TimedRotatingFileHandler) for h in logger.handlers
+        ):
             return logger
-        
+
         # Clear any broken handlers
         logger.handlers.clear()
 
@@ -284,7 +306,6 @@ class ConfService:
         app_logger.setLevel(logging.INFO)
         app_logger.propagate = False
 
-
         return app_logger
-        
+
     app_logger = _setup_app_logger()
