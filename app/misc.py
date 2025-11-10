@@ -17,7 +17,6 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
-The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -140,15 +139,12 @@ def urlsafe_b64encode_nopad(data: bytes) -> str:
     """
     Encodes bytes using URL-safe base64 and removes padding.
 
-
     Args:
         data (bytes): The data to encode.
 
     Returns:
         str: Base64 URL-safe encoded string without padding.
     """
-    return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")
-
     return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")
 
 
@@ -184,14 +180,12 @@ def convert_png_to_jpeg(png_bytes):
     return jpeg_bytes
 
 
-
 def getNamespaces(claims):
     namespaces = []
     for claim in claims:
         if "path" in claim:
             if claim["path"][0] not in namespaces:
                 namespaces.append(claim["path"][0])
-
 
     return namespaces
 
@@ -207,7 +201,6 @@ def getAttributesForm(credentials_requested):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     attributes = {}
-
 
     for request in credentials_requested:
         format = credentialsSupported[request]["format"]
@@ -238,9 +231,6 @@ def getAttributesForm(credentials_requested):
 
         if "birth_date" in attributes and "birthdate" in attributes:
             attributes.pop("birthdate")
-
-        if "nationality" in attributes and "nationalities" in attributes:
-            attributes.pop("nationalities")
 
         if "nationality" in attributes and "nationalities" in attributes:
             attributes.pop("nationalities")
@@ -290,7 +280,6 @@ def getMandatoryAttributes(claims, namespace):
     return attributes_form
 
 
-
 def getMandatoryAttributesSDJWT(claims):
     """
     Function to get mandatory attributes from credential in sd-jwt vc format
@@ -305,11 +294,8 @@ def getMandatoryAttributesSDJWT(claims):
         if "overall_issuer_conditions" in claim:
             for key, value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key: value})
-            for key, value in claim["overall_issuer_conditions"].items():
-                attributes_form.update({key: value})
 
         else:
-
 
             claim_depth = len(claim["path"])
 
@@ -380,10 +366,6 @@ def getMandatoryAttributesSDJWT(claims):
             "nationalities",
             "place_of_birth",
         ):
-        if "issuer_conditions" in claim and attribute_name not in (
-            "nationalities",
-            "place_of_birth",
-        ):
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim[
                     "issuer_conditions"
@@ -397,7 +379,6 @@ def getMandatoryAttributesSDJWT(claims):
 
     for claim in level2_claims:
         attribute_name = claim["path"][0]
-
 
         if attribute_name not in attributes_form:
             continue
@@ -471,8 +452,6 @@ def getOptionalAttributesSDJWT(claims):
         if "overall_issuer_conditions" in claim:
             for key, value in claim["overall_issuer_conditions"].items():
                 attributes_form.update({key: value})
-            for key, value in claim["overall_issuer_conditions"].items():
-                attributes_form.update({key: value})
 
         else:
             claim_depth = len(claim["path"])
@@ -506,28 +485,19 @@ def getOptionalAttributesSDJWT(claims):
             attributes_form.update(
                 {attribute_name: {"type": claim["value_type"], "filled_value": None}}
             )
-            attributes_form.update(
-                {attribute_name: {"type": claim["value_type"], "filled_value": None}}
-            )
 
         if "issuer_conditions" in claim and attribute_name != "nationalities":
             if "cardinality" in claim["issuer_conditions"]:
                 attributes_form[attribute_name]["cardinality"] = claim[
                     "issuer_conditions"
                 ]["cardinality"]
-                attributes_form[attribute_name]["cardinality"] = claim[
-                    "issuer_conditions"
-                ]["cardinality"]
 
-    for claim in level2_claims:
     for claim in level2_claims:
         attributes = {}
         attribute_name = claim["path"][0]
 
-
         if attribute_name not in attributes_form:
             continue
-
 
         attributes_form[attribute_name]["type"] = "list"
 
@@ -544,7 +514,6 @@ def getOptionalAttributesSDJWT(claims):
             if "not_used_if" in claim["issuer_conditions"]:
                 attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
 
-
         if "attributes" in attributes_form[attribute_name]:
             if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
                 attributes_form[attribute_name]["attributes"].append(attributes)
@@ -553,7 +522,6 @@ def getOptionalAttributesSDJWT(claims):
         else:
             attributes_form[attribute_name]["attributes"] = [attributes]
 
-    for claim in level3_claims:
     for claim in level3_claims:
 
         attribute_name = claim["path"][0]
@@ -577,7 +545,6 @@ def getOptionalAttributesSDJWT(claims):
                 )
 
     return attributes_form
-
 
 
 def getAttributesForm2(credentials_requested):
@@ -662,7 +629,6 @@ def getOptionalAttributes(claims, namespace):
     return attributes_form
 
 
-
 def getIssuerFilledAttributes(claims, namespace):
     """
     Function to get mandatory attributes from credential
@@ -677,15 +643,8 @@ def getIssuerFilledAttributes(claims, namespace):
             and claim["path"][0] == namespace
         ):
             attributes_form.update({claim["path"][1]: ""})
-        if (
-            "source" in claim
-            and claim["source"] == "issuer"
-            and claim["path"][0] == namespace
-        ):
-            attributes_form.update({claim["path"][1]: ""})
 
     return attributes_form
-
 
 
 def getIssuerFilledAttributesSDJWT(claims):
@@ -698,10 +657,8 @@ def getIssuerFilledAttributesSDJWT(claims):
     for claim in claims:
         if "source" in claim and claim["source"] == "issuer":
             attributes_form.update({claim["path"][0]: ""})
-            attributes_form.update({claim["path"][0]: ""})
 
     return attributes_form
-
 
 
 def generate_unique_id():
@@ -729,7 +686,6 @@ def validate_image(file):
     return True, None
 
 
-
 def getSubClaims(claimLv1, vct):
     subclaims = []
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
@@ -747,18 +703,12 @@ def getSubClaims(claimLv1, vct):
 
 # Searches for credential metadata from doctype and format
 def doctype2credential(doctype, format):
-# Searches for credential metadata from doctype and format
-def doctype2credential(doctype, format):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential_id, credential in credentialsSupported.items():
         if credential["format"] != format or credential["doctype"] != doctype:
             continue
         else:
             return credential
-
-
-# Searches for credential metadata from doctype and format
-def doctype2credentialSDJWT(doctype, format):
 
 
 # Searches for credential metadata from doctype and format
@@ -775,7 +725,6 @@ def doctype2credentialSDJWT(doctype, format):
             continue
 
 
-
 def vct2scope(vct: str):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential in credentialsSupported:
@@ -783,12 +732,7 @@ def vct2scope(vct: str):
             "vct" in credentialsSupported[credential]
             and credentialsSupported[credential]["vct"] == vct
         ):
-        if (
-            "vct" in credentialsSupported[credential]
-            and credentialsSupported[credential]["vct"] == vct
-        ):
             return credentialsSupported[credential]["scope"]
-
 
 
 def vct2doctype(vct: str):
@@ -816,7 +760,6 @@ def vct2doctype(vct: str):
             return credentialsSupported[credential]["issuer_config"]["doctype"] """
 
 
-
 def vct2id(vct):
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     for credential in credentialsSupported:
@@ -824,12 +767,7 @@ def vct2id(vct):
             "vct" in credentialsSupported[credential]
             and credentialsSupported[credential]["vct"] == vct
         ):
-        if (
-            "vct" in credentialsSupported[credential]
-            and credentialsSupported[credential]["vct"] == vct
-        ):
             return credential
-
 
 
 def doctype2vct(doctype: str):
@@ -839,12 +777,7 @@ def doctype2vct(doctype: str):
             "vct" in credentialsSupported[credential]
             and credentialsSupported[credential]["scope"] == doctype
         ):
-        if (
-            "vct" in credentialsSupported[credential]
-            and credentialsSupported[credential]["scope"] == doctype
-        ):
             return credentialsSupported[credential]["vct"]
-
 
 
 # Generates authorization details from a scope

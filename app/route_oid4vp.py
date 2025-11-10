@@ -101,8 +101,6 @@ def openid4vp():
             "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
             "dcql_query": dcql_query,
             "request_uri_method": "post",
-            "dcql_query": dcql_query,
-            "request_uri_method": "post",
         }
     )
 
@@ -127,9 +125,6 @@ def openid4vp():
     response_cross = requests.request(
         "POST", url[:-1], headers=headers, data=payload_cross_device
     ).json()
-    response_cross = requests.request(
-        "POST", url[:-1], headers=headers, data=payload_cross_device
-    ).json()
 
     response_same = requests.request(
         "POST", url[:-1], headers=headers, data=payload_same_device
@@ -145,7 +140,6 @@ def openid4vp():
     domain = urlparse(url).netloc
 
     deeplink_url = (
-        "eudi-openid4vp://" + domain + "?client_id="
         "eudi-openid4vp://"
         + domain
         + "?client_id="
@@ -155,7 +149,6 @@ def openid4vp():
     )
 
     qr_code_url = (
-        "eudi-openid4vp://" + domain + "?client_id="
         "eudi-openid4vp://"
         + domain
         + "?client_id="
@@ -170,7 +163,6 @@ def openid4vp():
 
     qrcode = segno.make(qr_code_url)
     out = io.BytesIO()
-    qrcode.save(out, kind="png", scale=3)
     qrcode.save(out, kind="png", scale=3)
 
     """ qrcode.to_artistic(
@@ -280,9 +272,6 @@ def getpidoid4vp():
 
         attributesForm = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in attributesForm:
-            attributesForm.update(
-                {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
-            )
             attributesForm.update(
                 {"user_pseudonym": {"type": "string", "filled_value": str(uuid4())}}
             )

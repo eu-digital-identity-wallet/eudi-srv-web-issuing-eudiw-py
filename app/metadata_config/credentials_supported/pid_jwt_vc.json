@@ -60,7 +60,6 @@
         {
            "path":[
               "birthdate"
-              "birthdate"
            ],
            "mandatory":true,
            "value_type":"full-date",
@@ -77,7 +76,6 @@
               "place_of_birth"
            ],
            "mandatory":true,
-           "value_type":"list",
            "value_type":"list",
            "source":"user",
            "display":[

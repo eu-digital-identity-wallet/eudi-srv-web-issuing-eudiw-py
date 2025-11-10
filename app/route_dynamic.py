@@ -17,13 +17,11 @@
 ###############################################################################
 """
 The Dynamic Issuer Web service is a component of the Dynamic Provider backend.
-The Dynamic Issuer Web service is a component of the Dynamic Provider backend.
 Its main goal is to issue the credentials in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
 This route_dynamic.py file is the blueprint for the route /dynamic of the PID Issuer Web service.
 """
-from datetime import datetime, timezone
 from datetime import datetime, timezone
 from datetime import date
 from datetime import timedelta
@@ -354,7 +352,6 @@ def red():
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     presentation_data = dict()
-    presentation_data = dict()
 
     for credential_requested in current_session.credentials_requested:
 
@@ -371,9 +368,7 @@ def red():
         ][0]["name"]
 
         presentation_data.update({credential: {}})
-        presentation_data.update({credential: {}})
 
-        credential_atributes_form = list()
         credential_atributes_form = list()
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
@@ -381,9 +376,7 @@ def red():
         for attribute in data.keys():
             if attribute in attributesForm:
                 presentation_data[credential][attribute] = data[attribute]
-                presentation_data[credential][attribute] = data[attribute]
 
-        doctype_config = credentialsSupported[credential_requested]["issuer_config"]
         doctype_config = credentialsSupported[credential_requested]["issuer_config"]
 
         today = date.today()
@@ -417,9 +410,6 @@ def red():
             presentation_data[doctype].update(
                 {"credential_type": doctype_config["credential_type"]}
             )
-            presentation_data[doctype].update(
-                {"credential_type": doctype_config["credential_type"]}
-            )
 
         if "driving_privileges" in presentation_data[credential] and isinstance(
             presentation_data[credential]["driving_privileges"], str
@@ -447,9 +437,6 @@ def red():
 
         if "NumberCategories" in presentation_data[credential]:
             for i in range(int(presentation_data[credential]["NumberCategories"])):
-                f = str(i + 1)
-                presentation_data[credential].pop("IssueDate" + f)
-                presentation_data[credential].pop("ExpiryDate" + f)
                 f = str(i + 1)
                 presentation_data[credential].pop("IssueDate" + f)
                 presentation_data[credential].pop("ExpiryDate" + f)
@@ -566,7 +553,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
             print("\njson_response", json_response)
             for attribute in json_response:
                 if attribute["state"] == "Pending":
-                    return {"error": "Pending", "response": json_response}
                     return {"error": "Pending", "response": json_response}
 
             data = json_response
@@ -706,15 +692,10 @@ def dynamic_R2_data_collect(country, session_id, access_token):
                 "CZ": "Prague",
                 "NL": "Amsterdam",
                 "LU": "Luxembourg",
-                "EE": "Tallinn",
-                "CZ": "Prague",
-                "NL": "Amsterdam",
-                "LU": "Luxembourg",
             }
 
             if country in birth_places:
                 data["birth_place"] = birth_places[country]
-                data["place_of_birth"] = [{"locality": birth_places[country]}]
                 data["place_of_birth"] = [{"locality": birth_places[country]}]
 
             return data
@@ -748,9 +729,6 @@ def credentialCreation(credential_request, data, country, session_id):
             doctype = credentials_supported[
                 credential_request["credential_identifier"]
             ]["scope"]
-            doctype = credentials_supported[
-                credential_request["credential_identifier"]
-            ]["scope"]
             format = credentials_supported[credential_request["credential_identifier"]][
                 "format"
             ]
@@ -768,28 +746,10 @@ def credentialCreation(credential_request, data, country, session_id):
                         credential_request["credential_configuration_id"]
                     ]["vct"]
                 )
-            if (
-                "vct"
-                in credentials_supported[
-                    credential_request["credential_configuration_id"]
-                ]
-            ):
-                doctype = vct2doctype(
-                    credentials_supported[
-                        credential_request["credential_configuration_id"]
-                    ]["vct"]
-                )
             else:
                 doctype = credentials_supported[
                     credential_request["credential_configuration_id"]
                 ]["doctype"]
-                doctype = credentials_supported[
-                    credential_request["credential_configuration_id"]
-                ]["doctype"]
-
-            format = credentials_supported[
-                credential_request["credential_configuration_id"]
-            ]["format"]
 
             format = credentials_supported[
                 credential_request["credential_configuration_id"]
@@ -858,7 +818,6 @@ def credentialCreation(credential_request, data, country, session_id):
                 form_data["nationalities"] = ["PT"]
 
                 form_data["birth_place"] = "Lisboa"
-                form_data["place_of_birth"] = [{"locality": "Lisboa"}]
                 form_data["place_of_birth"] = [{"locality": "Lisboa"}]
 
             else:"""
@@ -1094,7 +1053,6 @@ def presentation_formatter(cleaned_data: dict) -> dict:
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
     presentation_data = dict()
-    presentation_data = dict()
 
     session_id = session["session_id"]
 
@@ -1115,9 +1073,7 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         ][0]["name"]
 
         presentation_data.update({credential: {}})
-        presentation_data.update({credential: {}})
 
-        credential_atributes_form = list()
         credential_atributes_form = list()
         credential_atributes_form.append(credential_requested)
         attributesForm = getAttributesForm(credential_atributes_form).keys()
@@ -1128,11 +1084,7 @@ def presentation_formatter(cleaned_data: dict) -> dict:
             if attribute in attributesForm:
                 presentation_data[credential][attribute] = cleaned_data[attribute]
 
-                presentation_data[credential][attribute] = cleaned_data[attribute]
-
             if attribute in attributesForm2:
-                presentation_data[credential][attribute] = cleaned_data[attribute]
-
                 presentation_data[credential][attribute] = cleaned_data[attribute]
 
         if "issuer_config" in credentialsSupported[credential_requested]:
@@ -1193,39 +1145,9 @@ def presentation_formatter(cleaned_data: dict) -> dict:
                     )
                 }
             )
-            presentation_data[credential].update(
-                {"credential_type": doctype_config["credential_type"]}
-            )
-
-        if (
-            "birth_date" in presentation_data[credential]
-            and "age_over_18" in presentation_data[credential]
-        ):
-            presentation_data[credential].update(
-                {
-                    "age_over_18": (
-                        True
-                        if calculate_age(presentation_data[credential]["birth_date"])
-                        >= 18
-                        else False
-                    )
-                }
-            )
 
         if scope == "org.iso.18013.5.1.mDL":
             if "birth_date" in presentation_data[credential]:
-                presentation_data[credential].update(
-                    {
-                        "age_over_18": (
-                            True
-                            if calculate_age(
-                                presentation_data[credential]["birth_date"]
-                            )
-                            >= 18
-                            else False
-                        )
-                    }
-                )
                 presentation_data[credential].update(
                     {
                         "age_over_18": (
@@ -1267,9 +1189,6 @@ def presentation_formatter(cleaned_data: dict) -> dict:
 
         if "NumberCategories" in presentation_data[credential]:
             for i in range(int(presentation_data[credential]["NumberCategories"])):
-                f = str(i + 1)
-                presentation_data[credential].pop("IssueDate" + f)
-                presentation_data[credential].pop("ExpiryDate" + f)
                 f = str(i + 1)
                 presentation_data[credential].pop("IssueDate" + f)
                 presentation_data[credential].pop("ExpiryDate" + f)

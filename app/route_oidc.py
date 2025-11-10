@@ -17,7 +17,6 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
-The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID and MDL in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 
@@ -1234,15 +1233,6 @@ def credentialOffer():
                 }
 
                 reference_id = str(uuid.uuid4())
-                credential_offer_references.update(
-                    {
-                        reference_id: {
-                            "credential_offer": credential_offer,
-                            "expires": datetime.now()
-                            + timedelta(minutes=cfgservice.form_expiry),
-                        }
-                    }
-                )
                 credential_offer_references.update(
                     {
                         reference_id: {

@@ -56,34 +56,21 @@ def validate_vp_token(response_json, credentials_requested):
         return True, "The path value from presentation_submission is not valid."
 
     if "query_0" not in response_json["vp_token"]:
-    if "vp_token" not in response_json:
         return True, "The path value from presentation_submission is not valid."
 
-    if "query_0" not in response_json["vp_token"]:
-        return True, "The path value from presentation_submission is not valid."
-
-    mdoc = response_json["vp_token"]["query_0"][0]
-    mdoc_ver = None
     mdoc = response_json["vp_token"]["query_0"][0]
     mdoc_ver = None
 
     try:
         mdoc_ver = base64.urlsafe_b64decode(mdoc)
-    try:
-        mdoc_ver = base64.urlsafe_b64decode(mdoc)
 
-    except:
-        mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
     except:
         mdoc_ver = base64.urlsafe_b64decode(mdoc + "==")
 
     mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
-    mdoc_cbor = cbor2.decoder.loads(mdoc_ver)
 
     if mdoc_cbor["status"] != 0:
-    if mdoc_cbor["status"] != 0:
 
-        return True, "Status invalid:" + str(mdoc_cbor["status"])
         return True, "Status invalid:" + str(mdoc_cbor["status"])
 
     print("\nmdoc_cbor: ", mdoc_cbor)
@@ -91,9 +78,7 @@ def validate_vp_token(response_json, credentials_requested):
     error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
 
     if error == False:
-    if error == False:
 
-        return True, errorMsg
         return True, errorMsg
 
     # Validate values received are the same values requested
