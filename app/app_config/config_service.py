@@ -241,20 +241,27 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
-    log_dir = "/tmp/log_dev"
-    # log_dir = "../../log"
-    log_file_info = "logs.log"
+    def _setup_app_logger():
 
-    backup_count = 7
+        logger = logging.getLogger("app_logger")
 
-    try:
-        os.makedirs(log_dir)
-    except FileExistsError:
-        pass
+        if logger.handlers and any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
+            return logger
+        
+        # Clear any broken handlers
+        logger.handlers.clear()
 
-    app_logger = logging.getLogger("app_logger")
+        log_dir = "/tmp/log_dev"
+        # log_dir = "../../log"
+        log_file_info = "logs.log"
 
-    if not app_logger.handlers:
+        backup_count = 7
+
+        try:
+            os.makedirs(log_dir)
+        except FileExistsError:
+            pass
+
         log_handler_info = TimedRotatingFileHandler(
             filename=f"{log_dir}/{log_file_info}",
             when="midnight",  # Rotation midnight
@@ -276,3 +283,8 @@ class ConfService:
         app_logger.addHandler(console_handler)
         app_logger.setLevel(logging.INFO)
         app_logger.propagate = False
+
+
+        return app_logger
+        
+    app_logger = _setup_app_logger()
