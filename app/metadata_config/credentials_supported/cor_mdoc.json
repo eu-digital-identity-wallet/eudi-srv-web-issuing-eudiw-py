@@ -27,9 +27,10 @@
              ]
           }
        },
+       "credential_metadata": {
        "display":[
           {
-             "name":"Certificate of Residence",
+             "name":"Certificate of Residence (MSO Mdoc)",
              "locale":"en",
              "logo":{
                 "uri":"https://examplestate.com/public/cor.png",
@@ -169,6 +170,51 @@
           {
              "path":[
                 "eu.europa.ec.eudi.cor.1",
+                "birth_place"
+             ],
+             "mandatory":false,
+             "value_type":"string",
+             "source":"user",
+             "display":[
+                {
+                   "name":"Birth Place",
+                   "locale":"en"
+                }
+             ]
+          },
+          {
+             "path":[
+                "eu.europa.ec.eudi.cor.1",
+                "nationality"
+             ],
+             "mandatory":false,
+             "value_type":"string",
+             "source":"user",
+             "display":[
+                {
+                   "name":"Nationality",
+                   "locale":"en"
+                }
+             ]
+          },
+          {
+             "path":[
+                "eu.europa.ec.eudi.cor.1",
+                "arrival_date"
+             ],
+             "mandatory":false,
+             "value_type":"full-date",
+             "source":"user",
+             "display":[
+                {
+                   "name":"Arrival Date",
+                   "locale":"en"
+                }
+             ]
+          },
+          {
+             "path":[
+                "eu.europa.ec.eudi.cor.1",
                 "expiry_date"
              ],
              "mandatory":true,
@@ -222,12 +268,13 @@
                 }
              ]
           }
-       ],
+       ]
+      },
        "issuer_config":{
-          "issuing_authority":"Test PID issuer",
+          "issuing_authority":"Test QEAA Issuer",
           "organization_id":"EUDI Wallet Reference Implementation",
           "validity":90,
-          "organization_name":"Test PID issuer",
+          "organization_name":"Test QEAA Issuer",
           "namespace":"eu.europa.ec.eudi.cor.1"
        }
     }

@@ -1,0 +1,14 @@
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "config_secrets.py",
+    "app/static/fontawesome-free-5.15.4-web/attribution.js",
+    "app/static/bootstrap-3.4.1-dist/js/npm.js",
+    "app/static/issuer_guides/script.js",
+    "app/tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+

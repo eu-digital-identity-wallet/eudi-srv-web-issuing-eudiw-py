@@ -17,6 +17,7 @@
 ###############################################################################
 """
 The PID Issuer Web service is a component of the PID Provider backend.
+The PID Issuer Web service is a component of the PID Provider backend.
 Its main goal is to issue the PID in cbor/mdoc (ISO 18013-5 mdoc) and SD-JWT format.
 
 This __init__.py serves double duty: it will contain the application factory, and it tells Python that the flask directory should be treated as a package.
@@ -29,7 +30,12 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 
-from flask import Flask, render_template, request, send_from_directory
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from app.session_manager import SessionManager
+from flask import Flask, render_template, request, send_from_directory, session
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
@@ -39,22 +45,26 @@ from idpyoidc.configure import create_from_config_file
 from idpyoidc.server.configure import OPConfiguration
 from idpyoidc.server import Server
 from urllib.parse import urlparse
-from pycose.keys import EC2Key
+from pycose.keys.ec2 import EC2Key
+from typing import Dict, Any, List, Union, cast
 
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import (
+    ec,
+)
 from cryptography import x509
 from app_config.config_service import ConfService as cfgserv
-
+from app_config.config_countries import ConfFrontend
+from app.redirect_func import post_redirect_with_payload
 
 # Log
-from .app_config.config_service import ConfService as log
 
-
-oidc_metadata = {}
-oidc_metadata_clean = {}
-openid_metadata = {}
-oauth_metadata = {}
-trusted_CAs = {}
+session_manager = SessionManager(default_expiry_minutes=3600)
+oidc_metadata: Dict[str, Any] = {}
+oidc_metadata_clean: Dict[str, Any] = {}
+openid_metadata: Dict[str, Any] = {}
+oauth_metadata: Dict[str, Any] = {}
+trusted_CAs: Dict[str, Any] = {}
 
 
 def remove_keys(obj, keys_to_remove):
@@ -73,7 +83,9 @@ def remove_keys(obj, keys_to_remove):
         return obj
 
 
-def replace_domain(obj, old, new):
+def replace_domain(
+    obj: Union[Dict[str, Any], List[Any], str, Any], old: str, new: str
+) -> Union[Dict[str, Any], List[Any], str, Any]:
     if isinstance(obj, dict):
         return {k: replace_domain(v, old, new) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -90,19 +102,16 @@ def setup_metadata():
     global openid_metadata
     global oauth_metadata
 
+    credentials_supported: Dict[str, Any] = {}
+
     try:
-        credentials_supported = {}
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        with open(
-            dir_path + "/metadata_config/openid-configuration.json"
-        ) as openid_metadata:
-            openid_metadata = json.load(openid_metadata)
+        with open(dir_path + "/metadata_config/openid-configuration.json") as f:
+            openid_metadata = json.load(f)
 
-        with open(
-            dir_path + "/metadata_config/oauth-authorization-server.json"
-        ) as oauth_metadata:
-            oauth_metadata = json.load(oauth_metadata)
+        with open(dir_path + "/metadata_config/oauth-authorization-server.json") as f:
+            oauth_metadata = json.load(f)
 
         with open(dir_path + "/metadata_config/metadata_config.json") as metadata:
             oidc_metadata = json.load(metadata)
@@ -119,45 +128,68 @@ def setup_metadata():
 
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"Metadata Error: file not found. \n{e}")
+        raise
     except json.JSONDecodeError as e:
         cfgserv.app_logger.exception(
             f"Metadata Error: Metadata Unable to decode JSON. \n{e}"
         )
+        raise
     except Exception as e:
         cfgserv.app_logger.exception(
             f"Metadata Error: An unexpected error occurred. \n{e}"
         )
+        raise
 
     oidc_metadata["credential_configurations_supported"] = credentials_supported
 
     oidc_metadata_clean["credential_configurations_supported"] = remove_keys(
         copy.deepcopy(credentials_supported),
-        {"issuer_conditions", "issuer_config", "overall_issuer_conditions", "source"},
+        {
+            "issuer_conditions",
+            "issuer_config",
+            "overall_issuer_conditions",
+            "source",
+            "selective_disclosure",
+        },
     )
 
     old_domain = oidc_metadata["credential_issuer"]
 
     new_domain = cfgserv.service_url[:-1]
 
-    openid_metadata = replace_domain(openid_metadata, old_domain, new_domain)
-    oauth_metadata = replace_domain(oauth_metadata, old_domain, new_domain)
-    oidc_metadata_clean = replace_domain(oidc_metadata_clean, old_domain, new_domain)
-    oidc_metadata = replace_domain(oidc_metadata, old_domain, new_domain)
+    openid_metadata = cast(
+        Dict[str, Any], replace_domain(openid_metadata, old_domain, new_domain)
+    )
+    oauth_metadata = cast(
+        Dict[str, Any], replace_domain(oauth_metadata, old_domain, new_domain)
+    )
+    oidc_metadata_clean = cast(
+        Dict[str, Any], replace_domain(oidc_metadata_clean, old_domain, new_domain)
+    )
+    oidc_metadata = cast(
+        Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain)
+    )
 
 
 setup_metadata()
 
+IS_TEST_ENV = (
+    "pytest" in sys.modules
+    or any("pytest" in arg for arg in sys.argv)
+    or os.getenv("CI") == "true"
+    or os.getenv("SONARCLOUD") == "true"
+)
 
-def setup_trusted_CAs():
+
+def setup_trusted_cas():
     global trusted_CAs
-
     try:
         ec_keys = {}
         for file in os.listdir(cfgserv.trusted_CAs_path):
             if file.endswith("pem"):
-                CA_path = os.path.join(cfgserv.trusted_CAs_path, file)
+                ca_path = os.path.join(cfgserv.trusted_CAs_path, file)
 
-                with open(CA_path) as pem_file:
+                with open(ca_path) as pem_file:
 
                     pem_data = pem_file.read()
 
@@ -175,17 +207,21 @@ def setup_trusted_CAs():
 
                     not_valid_after = certificate.not_valid_after
 
-                    x = public_key.public_numbers().x.to_bytes(
-                        (public_key.public_numbers().x.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        public_numbers = public_key.public_numbers()
+                        x = public_numbers.x.to_bytes(
+                            (public_numbers.x.bit_length() + 7) // 8,
+                            "big",
+                        )
+                        y = public_numbers.y.to_bytes(
+                            (public_numbers.y.bit_length() + 7) // 8,
+                            "big",
+                        )
 
-                    y = public_key.public_numbers().y.to_bytes(
-                        (public_key.public_numbers().y.bit_length() + 7)
-                        // 8,  # Number of bytes needed
-                        "big",  # Byte order
-                    )
+                    else:
+                        raise ValueError(
+                            "Only elliptic curve keys supported for EC2Key"
+                        )
 
                     ec_key = EC2Key(
                         x=x, y=y, crv=1
@@ -205,19 +241,23 @@ def setup_trusted_CAs():
 
     except FileNotFoundError as e:
         cfgserv.app_logger.exception(f"TrustedCA Error: file not found.\n {e}")
+        raise
     except json.JSONDecodeError as e:
         cfgserv.app_logger.exception(
             f"TrustedCA Error: Metadata Unable to decode JSON.\n {e}"
         )
+        raise
     except Exception as e:
         cfgserv.app_logger.exception(
             f"TrustedCA Error: An unexpected error occurred.\n {e}"
         )
+        raise
 
     trusted_CAs = ec_keys
 
 
-setup_trusted_CAs()
+if not IS_TEST_ENV:
+    setup_trusted_cas()
 
 
 def handle_exception(e):
@@ -225,51 +265,69 @@ def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
     cfgserv.app_logger.exception("- WARN - Error 500")
-    # now you're handling non-HTTP exceptions only
-    return (
-        render_template(
-            "misc/500.html",
-            error="Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
-            error_code="Internal Server Error",
-        ),
-        500,
+
+    target_url = ConfFrontend.registered_frontends[cfgserv.default_frontend]["url"]
+
+    session_id = session.get("session_id")
+    if session_id:
+        current_session = session_manager.get_session(session_id=session_id)
+        frontend_id = getattr(current_session, "frontend_id", None)
+
+        if frontend_id and frontend_id in ConfFrontend.registered_frontends:
+            target_url = ConfFrontend.registered_frontends[frontend_id]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/internal_error",
+        data_payload={
+            "error": "Sorry, an internal server error has occurred. Our team has been notified and is working to resolve the issue. Please try again later.",
+            "error_code": "Internal Server Error",
+            "error_type": 500,
+        },
     )
 
 
 def page_not_found(e):
-    cfgserv.app_logger.exception("- WARN - Error 404")
-    return (
-        render_template(
-            "misc/500.html",
-            error_code="Page not found",
-            error="Page not found.We're sorry, we couldn't find the page you requested.",
-        ),
-        404,
+    cfgserv.app_logger.warning(f"- WARN - Error 404: {request.path} not found")
+
+    if "session_id" in session:
+        current_session = session_manager.get_session(session_id=session["session_id"])
+        target_url = ConfFrontend.registered_frontends[current_session.frontend_id][
+            "url"
+        ]
+
+    else:
+        target_url = ConfFrontend.registered_frontends[cfgserv.default_frontend]["url"]
+
+    return post_redirect_with_payload(
+        target_url=f"{target_url}/error_404",
+        data_payload={
+            "error": "Page not found.We're sorry, we couldn't find the page you requested.",
+            "error_code": "Page not found",
+            "error_type": 404,
+        },
     )
+
+
+from typing import Optional
+
+
+class FlaskIssuer(Flask):
+    srv_config: Optional[OPConfiguration] = None
+    server: Optional[Server] = None
 
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = FlaskIssuer(__name__, instance_relative_config=True)
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)
 
-    @app.route("/", methods=["GET"])
-    def initial_page():
-        return render_template(
-            "misc/initial_page.html", oidc=cfgserv.oidc, service_url=cfgserv.service_url
-        )
-
-    @app.route("/favicon.ico")
-    def favicon():
-        return send_from_directory("static/images", "favicon.ico")
-
-    @app.route("/ic-logo.png")
-    def logo():
-        return send_from_directory("static/images", "ic-logo.png")
-
     app.config.from_mapping(SECRET_KEY="dev")
+
+    @app.route("/", methods=["GET"])
+    def health_check():
+        return "OK", 200
 
     if test_config is None:
         # load the instance config (in instance directory), if it exists, when not testing
@@ -291,16 +349,15 @@ def create_app(test_config=None):
 
     # register blueprint for the /pid route
     from . import (
-        route_eidasnode,
         route_formatter,
         route_oidc,
         route_dynamic,
         route_oid4vp,
         preauthorization,
         revocation,
+        revocation,
     )
 
-    app.register_blueprint(route_eidasnode.eidasnode)
     app.register_blueprint(route_formatter.formatter)
     app.register_blueprint(route_oidc.oidc)
     app.register_blueprint(revocation.revocation)
@@ -320,7 +377,7 @@ def create_app(test_config=None):
 
     cfgserv.app_logger.info(" - DEBUG - FLASK started")
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    """ dir_path = os.path.dirname(os.path.realpath(__file__))
 
     config = create_from_config_file(
         Configuration,
@@ -333,7 +390,10 @@ def create_app(test_config=None):
 
     app.srv_config = config.op
 
-    server = Server(config.op, cwd=dir_path)
+    if config.op is not None:
+        server = Server(config.op, cwd=dir_path)
+    else:
+        raise ValueError("config.op is None — cannot initialize Server.")
 
     for endp in server.endpoint.values():
         p = urlparse(endp.endpoint_path)
@@ -343,7 +403,7 @@ def create_app(test_config=None):
         else:
             endp.vpath = _vpath
 
-    app.server = server
+    app.server = server """
 
     return app
 

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'PF Square Sans Pro';
+  src: url('/static/fonts/PFSquareSansProRegular_35489.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'PF Square Sans Pro';
+  src: url('/static/fonts/PFSquareSansProBold_35480.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* remove markers */
+.list-item {
+  list-style-type: none;
+}

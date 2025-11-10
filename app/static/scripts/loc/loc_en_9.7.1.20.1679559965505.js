@@ -1,1 +1,0 @@
-"use strict";var ecas_context_path="/cas";var ecas_url_prefix="https://webgate.ec.europa.eu/cas";var locval_url="/cas/locval";(function(a){a.ajax_error_xhr="Your browser does not support XMLHTTPRequest...";a.getAjaxErrorXhr=function(){return a.ajax_error_xhr}})(window.ECAS=window.ECAS||{});
