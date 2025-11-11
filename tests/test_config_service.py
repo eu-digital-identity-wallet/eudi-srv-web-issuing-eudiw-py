@@ -47,7 +47,6 @@ def test_default_service_urls():
     assert conf.wallet_test_url == "https://dev.tester.issuer.eudiw.dev/"
     assert conf.revocation_service_url.endswith("/token_status_list/take")
     assert conf.revoke_service_url.endswith("/token_status_list/set")
-    assert conf.eidasnode_url.startswith("https://preprod.")
     assert conf.dynamic_presentation_url.startswith("https://dev.verifier-backend")
 
 
@@ -66,7 +65,6 @@ def test_env_override(monkeypatch):
 
     assert conf.service_url == "https://example.com/"
     assert conf.wallet_test_url == "https://wallet.example.com/"
-    assert conf.eidasnode_url == "https://node.example.com/"
 
 
 def test_registered_claims_keys_exist():

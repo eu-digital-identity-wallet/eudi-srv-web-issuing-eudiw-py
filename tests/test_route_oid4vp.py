@@ -45,7 +45,9 @@ def mock_session_data():
     mock.frontend_id = "test_frontend"
     mock.oid4vp_transaction_id = "tx123"
     mock.credentials_requested = ["eu.europa.ec.eudi.pid_mdoc"]
-    mock.authorization_details = []
+    mock.authorization_details = (
+        [{"credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc"}],
+    )
     mock.scope = []
     return mock
 
@@ -59,8 +61,10 @@ class TestOid4vpRouteSuccess:
     @patch("app.route_oid4vp.ConfFrontend")
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.segno.make")
+    @patch("app.route_oid4vp.oidc_metadata")
     def test_openid4vp_success(
         self,
+        mock_oidc_metadata,
         mock_segno,
         mock_post_redirect,
         mock_conf_frontend,
@@ -77,6 +81,19 @@ class TestOid4vpRouteSuccess:
 
         # Mock session manager
         mock_get_session.return_value = mock_session_data
+
+        # Mock oidc_metadata
+        mock_oidc_metadata.__getitem__ = MagicMock(
+            return_value={
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "doctype": "eu.europa.ec.eudi.pid.1",
+                    "credential_metadata": {
+                        "claims": [{"path": ["family_name"]}, {"path": ["given_name"]}]
+                    },
+                }
+            }
+        )
 
         # Mock config
         mock_cfgservice.dynamic_presentation_url = "https://example.com/"
@@ -131,8 +148,10 @@ class TestOid4vpRouteRequestError:
     @patch("app.route_oid4vp.requests.request")
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.cfgservice")
+    @patch("app.route_oid4vp.oidc_metadata")
     def test_requests_fail(
         self,
+        mock_oidc_metadata,
         mock_cfgservice,
         mock_get_session,
         mock_requests,
@@ -144,6 +163,18 @@ class TestOid4vpRouteRequestError:
 
         mock_get_session.return_value = mock_session_data
         mock_cfgservice.dynamic_presentation_url = "https://example.com/"
+
+        # Mock oidc_metadata
+        mock_oidc_metadata.__getitem__ = MagicMock(
+            return_value={
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "doctype": "eu.europa.ec.eudi.pid.1",
+                    "credential_metadata": {"claims": []},
+                }
+            }
+        )
+
         mock_requests.side_effect = Exception("Request failed")
 
         resp = client.get("/oid4vp")
@@ -152,20 +183,26 @@ class TestOid4vpRouteRequestError:
 
 class TestGetPidOid4vp:
     @patch("app.route_oid4vp.session_manager.get_session")
+    @patch("app.route_oid4vp.session_manager.update_country")
     @patch("app.route_oid4vp.requests.request")
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.cfgservice")
     @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.getAttributesForm")
+    @patch("app.route_oid4vp.getAttributesForm2")
     def test_same_device_flow(
         self,
+        mock_getAttributesForm2,
+        mock_getAttributesForm,
         mock_conf_frontend,
         mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
         mock_requests,
+        mock_update_country,
         mock_get_session,
         client,
         mock_session_data,
@@ -174,6 +211,9 @@ class TestGetPidOid4vp:
         with client.session_transaction() as sess:
             sess["session_id"] = "123"
 
+        mock_session_data.authorization_details = [
+            {"credential_configuration_id": "dummy"}
+        ]
         mock_get_session.return_value = mock_session_data
 
         # Configs
@@ -205,13 +245,17 @@ class TestGetPidOid4vp:
             "eu.europa.ec.eudi.pseudonym.age_over_18.1": [("age_over_18", True)]
         }
 
+        # Mock getAttributesForm functions - these WILL be called since authorization_details is empty
+        mock_getAttributesForm.return_value = {"age_over_18": {"type": "boolean"}}
+        mock_getAttributesForm2.return_value = {"optional1": {"type": "string"}}
+
         mock_post_redirect.return_value = "REDIRECT_CALLED"
 
         resp = client.get("/getpidoid4vp?response_code=resp123&session_id=123")
         assert resp.data == b"REDIRECT_CALLED"
         mock_get_session.assert_called()
         mock_requests.assert_called()
-        mock_post_redirect.assert_called()
+        mock_post_redirect.assert_called_once()
 
     def test_missing_params(self, client):
         # If neither presentation_id nor response_code is present
@@ -238,20 +282,26 @@ class TestGetPidOid4vp:
 
 class TestGetPidOid4vpAdditional:
     @patch("app.route_oid4vp.session_manager.get_session")
+    @patch("app.route_oid4vp.session_manager.update_country")
     @patch("app.route_oid4vp.requests.request")
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.cfgservice")
     @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.getAttributesForm")
+    @patch("app.route_oid4vp.getAttributesForm2")
     def test_cross_device_flow(
         self,
+        mock_getAttributesForm2,
+        mock_getAttributesForm,
         mock_conf_frontend,
         mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
         mock_requests,
+        mock_update_country,
         mock_get_session,
         client,
         mock_session_data,
@@ -260,6 +310,9 @@ class TestGetPidOid4vpAdditional:
         with client.session_transaction() as sess:
             sess["session_id"] = "123"
 
+        mock_session_data.authorization_details = [
+            {"credential_configuration_id": "dummy"}
+        ]
         mock_get_session.return_value = mock_session_data
 
         mock_cfgservice.dynamic_presentation_url = "https://example.com/"
@@ -275,14 +328,20 @@ class TestGetPidOid4vpAdditional:
 
         mock_validate_vp_token.return_value = (False, "")
         mock_cbor2elems.return_value = {"doctype1": [("attr1", "val1")]}
+
+        # Mock getAttributesForm functions
+        mock_getAttributesForm.return_value = {"attr1": {"type": "string"}}
+        mock_getAttributesForm2.return_value = {"optional1": {"type": "string"}}
+
         mock_post_redirect.return_value = "REDIRECT_CALLED"
 
         resp = client.get("/getpidoid4vp?presentation_id=validID123")
         assert resp.data == b"REDIRECT_CALLED"
         mock_requests.assert_called()
-        mock_post_redirect.assert_called()
+        mock_post_redirect.assert_called_once()
 
     @patch("app.route_oid4vp.session_manager.get_session")
+    @patch("app.route_oid4vp.session_manager.update_country")
     @patch("app.route_oid4vp.requests.request")
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
@@ -301,6 +360,7 @@ class TestGetPidOid4vpAdditional:
         mock_cbor2elems,
         mock_validate_vp_token,
         mock_requests,
+        mock_update_country,
         mock_get_session,
         client,
         mock_session_data,
@@ -309,6 +369,9 @@ class TestGetPidOid4vpAdditional:
         with client.session_transaction() as sess:
             sess["session_id"] = "123"
 
+        mock_session_data.authorization_details = [
+            {"credential_configuration_id": "dummy"}
+        ]
         mock_get_session.return_value = mock_session_data
         mock_cfgservice.dynamic_presentation_url = "https://example.com/"
         mock_cfgservice.service_url = "https://service.com/"
@@ -329,7 +392,7 @@ class TestGetPidOid4vpAdditional:
 
         resp = client.get("/getpidoid4vp?response_code=resp123&session_id=123")
         assert resp.data == b"REDIRECT_CALLED"
-        mock_post_redirect.assert_called()
+        mock_post_redirect.assert_called_once()
 
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.requests.request")
@@ -379,20 +442,26 @@ class TestGetPidOid4vpAdditional:
         assert b"500" in resp.data
 
     @patch("app.route_oid4vp.session_manager.get_session")
+    @patch("app.route_oid4vp.session_manager.update_country")
     @patch("app.route_oid4vp.requests.request")
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.cfgservice")
     @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.getAttributesForm")
+    @patch("app.route_oid4vp.getAttributesForm2")
     def test_authorization_details_age_over18(
         self,
+        mock_getAttributesForm2,
+        mock_getAttributesForm,
         mock_conf_frontend,
         mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
         mock_requests,
+        mock_update_country,
         mock_get_session,
         client,
     ):
@@ -400,7 +469,9 @@ class TestGetPidOid4vpAdditional:
         mock_session_data = MagicMock()
         mock_session_data.frontend_id = "test_frontend"
         mock_session_data.oid4vp_transaction_id = "tx123"
-        mock_session_data.credentials_requested = ["cred1"]
+        mock_session_data.credentials_requested = [
+            "eu.europa.ec.eudi.pseudonym_over18_mdoc"
+        ]
         mock_session_data.authorization_details = [
             {"credential_configuration_id": "eu.europa.ec.eudi.pseudonym_over18_mdoc"}
         ]
@@ -432,7 +503,14 @@ class TestGetPidOid4vpAdditional:
         mock_cbor2elems.return_value = {
             "eu.europa.ec.eudi.pseudonym.age_over_18.1": [("age_over_18", True)]
         }
+
+        # Even though authorization_details has age_over_18, the code STILL calls getAttributesForm
+        # So we need to mock it to return something valid
+        mock_getAttributesForm.return_value = {"age_over_18": {"type": "boolean"}}
+        mock_getAttributesForm2.return_value = {}
+
         mock_post_redirect.return_value = "REDIRECT_CALLED"
 
         resp = client.get("/getpidoid4vp?response_code=resp123&session_id=123")
         assert resp.data == b"REDIRECT_CALLED"
+        mock_post_redirect.assert_called_once()

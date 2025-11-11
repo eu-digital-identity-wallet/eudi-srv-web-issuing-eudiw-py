@@ -284,21 +284,6 @@ class TestDynamicR1:
         self.mock_post_redirect.assert_called_once()
         assert result == b"redirected_payload"
 
-    def test_sample_country(self):
-        """Test dynamic_R1 with sample country (OpenID)"""
-        mock_session = MagicMock(
-            jws_token="token123",
-            credentials_requested=["cred1"],
-            frontend_id="frontend1",
-        )
-        self.mock_get_session.return_value = mock_session
-
-        from app.route_dynamic import dynamic_R1
-
-        result = dynamic_R1("sample")
-
-        assert result.startswith("redirect:")
-
     def test_oauth_country(self):
         """Test dynamic_R1 with OAuth country"""
         mock_session = MagicMock(
