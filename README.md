@@ -8,7 +8,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 
 ### Overview
 
-The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service This service is currently undergoing a transition from OpenId4VCI draft 13 to draft 15 of the specification. Check the table below to see which components support which draft version.
+The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service.
 
 The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats, for various credentials.
 
@@ -17,33 +17,33 @@ For authenticating the user, it requires the use of eIDAS node, OAUTH2 server or
 
 ### OpenId4VCI coverage
 
-This version of the EUDIW Issuer has partial support for the [OpenId for Verifiable Credential Issuance (draft 15)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
+This version of the EUDIW Issuer has support for the [OpenId for Verifiable Credential Issuance (Version 1.0)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
 
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow draft](api_docs/authorization.md)              | ✅ Support for credential configuration id, scope, (draft 13)               |
-| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅ (draft 13)                                                       |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`    (draft 13)          |
-| Dynamic Credential Request                                        | ✅ (draft 13)                                                             |
+| [Authorization Code flow draft](api_docs/authorization.md)        | ✅ Support for scoped                                           |
+| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅                                                              |
+| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
+| Dynamic Credential Request                                        | ✅                                                              |
 | mso_mdoc format                                                   | ✅                                                              |
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
-| [Token Endpoint](api_docs/token.md)                               | ✅ (draft 13)                                                             |
-| [Credential Endpoint](api_docs/credential.md)                     | ✅ Including proofs and repeatable invocations, (draft 15)               |
-| Credential Issuer MetaData                                        | ✅ Unsigned metadata, (draft 15)                                            | 
-| [Nonce endpoint](api_docs/nonce_endpoint.md)                    | ✅ (draft 15)                                                             | 
-| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ (draft 15)                                                              |
-| Proof                                                             | ✅ JWT                                                 |
-| Credential response encryption                                    | ✅ (draft 15)                                                             |
+| [Token Endpoint](api_docs/token.md)                               | ✅                                                              |
+| [Credential Endpoint](api_docs/credential.md)                     | ✅                                                              |
+| Credential Issuer MetaData                                        | ✅ Unsigned metadata                                            | 
+| [Nonce endpoint](api_docs/nonce_endpoint.md)                      | ✅                                                              | 
+| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ Encryption support                                           |
+| Proof                                                             | ✅ JWT, Key Attestations                                        |
+| Credential response encryption                                    | ✅                                                              |
+| Credential request encryption                                     | ✅                                                              |
 | [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
 | Pushed authorization request                                      | ✅                                                              |
-| Wallet authentication                                             | ✅ public client                                                |
-| Demonstrating Proof of Possession (DPoP)                          | ❌                                                              |
+| Wallet authentication                                             | ✅ public client, Wallet client attestations                    |
+| Demonstrating Proof of Possession (DPoP)                          | ✅                                                              |
 | PKCE                                                              | ✅                                                              |
 
-
-You can use the EUDIW Issuer at https://issuer.eudiw.dev/, or install it locally.
+You can use the EUDIW Issuer at https://ec.issuer.eudiw.dev/, or install it locally.
 
 
 ## :heavy_exclamation_mark: Disclaimer

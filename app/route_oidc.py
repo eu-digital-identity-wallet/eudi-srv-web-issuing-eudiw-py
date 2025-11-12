@@ -24,6 +24,7 @@ This route_oidc.py file is the blueprint for the route /oidc of the PID Issuer W
 """
 import base64
 import io
+import os
 import re
 import time
 import uuid
@@ -1133,7 +1134,8 @@ def get_logs_by_session():
     if not session_id:
         return jsonify({"error": "Missing required parameter: session_id"}), 400
 
-    LOG_FILES = ["/tmp/oidc_log_dev/logs.log", "/tmp/log_dev/logs.log"]
+    LOG_FILES = [path.strip() for path in cfgservice.LOG_FILES.split(",")]
+
     matches = []
     seen_lines = set()
     successful = False
@@ -1166,19 +1168,22 @@ def get_logs_by_session():
     )
 
 
-@oidc.route("/credential_offer2", methods=["GET", "POST"])
+@oidc.route("/credential_offer2", methods=["GET"])
 def credentialOffer2():
     session_id = generate_unique_id()
     print("\nCredential_offer2 session_id:", session_id)
 
+    credential_configuration_id = request.args.get(
+        "credential_configuration_id", "eu.europa.ec.eudi.pid_mdoc"
+    )
+
     credential_offer = {
         "credential_issuer": cfgservice.service_url[:-1],
-        "credential_configuration_ids": ["eu.europa.ec.eudi.pid_mdoc"],
+        "credential_configuration_ids": [credential_configuration_id],
         "grants": {"authorization_code": {"issuer_state": session_id}},
     }
 
     json_string = json.dumps(credential_offer)
-
     uri = f"openid-credential-offer://credential_offer?credential_offer={urllib.parse.quote(json_string, safe=':/')}"
 
     qrcode = segno.make(uri)

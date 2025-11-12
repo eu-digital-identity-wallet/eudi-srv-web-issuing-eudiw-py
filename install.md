@@ -66,15 +66,25 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     pip install -r app/requirements.txt
     ```
 
-6. Setup secrets
+6. Setup env
    
-   -  Copy ```app/app_config/__config_secrets.py``` to ```app/app_config/config_secrets.py``` and modify secrets.
+   -  Copy ```app/.env.example``` to ```app/.env``` and modify variables.
+
+   ```shell
+   cp app/.env.example app/.env
+   ```
 
 7. Service Configuration
 
    - Configure the service according to [documentation](api_docs/configuration.md)  
 
-8. Run the EUDIW Issuer 
+8. Install Authorization Server
+    - Install the service according to [Issuer Authorization Server]()
+
+9. Install Issuer Front End
+    - Install the service according to [Issuer Front End]()
+
+10. Run the EUDIW Issuer 
 
     On the root directory of the clone repository, insert one of the following command lines to run the EUDIW Issuer.
 

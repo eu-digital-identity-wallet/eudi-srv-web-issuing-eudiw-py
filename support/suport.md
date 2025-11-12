@@ -38,10 +38,11 @@ On this page, there are two options:
 The Country form consists of only one step, and unlike all the others, it does not require authentication and you can enter your own PID information.
 
 When you select this option, a page will be displayed, with a form that you need to fill in with the necessary data to make the PID request:
-+ First Name
++ Given Name
 + Family Name
-+ Date of Birth
-+ National Identifier
++ Birth Date
++ Nationality
++ Place Of Birth
 
 In the end, simply click the "Submit" button.
 

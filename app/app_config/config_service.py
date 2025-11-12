@@ -85,6 +85,11 @@ class ConfService:
         "https://dev.verifier-backend.eudiw.dev/ui/presentations/",
     )
 
+    LOG_FILES = os.getenv(
+        "LOG_FILES",
+        "/tmp/oidc_log_dev/logs.log,/tmp/log_dev/logs.log",
+    )
+
     # Deferred endpoint expiry time (minutes)
     deffered_expiry = 60
 
@@ -245,9 +250,11 @@ class ConfService:
 
         logger = logging.getLogger("app_logger")
 
-        if logger.handlers and any(isinstance(h, TimedRotatingFileHandler) for h in logger.handlers):
+        if logger.handlers and any(
+            isinstance(h, TimedRotatingFileHandler) for h in logger.handlers
+        ):
             return logger
-        
+
         # Clear any broken handlers
         logger.handlers.clear()
 
@@ -284,7 +291,6 @@ class ConfService:
         app_logger.setLevel(logging.INFO)
         app_logger.propagate = False
 
-
         return app_logger
-        
+
     app_logger = _setup_app_logger()
