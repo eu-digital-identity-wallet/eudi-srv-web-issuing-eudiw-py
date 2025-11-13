@@ -105,11 +105,11 @@ Yes. Please follow the instructions in [api_docs/configuration.md](api_docs/conf
 
 ### E. How can I create a credential offer to issue a credential?
 
-Please see detailed instructions in [api_docs/credential_offer.md](api_docs/credential_offer.md).
+Please see detailed instructions in [api_docs/credential_offer.md](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/credential_offer.md).
 
 ### F. Can I test the pre-authorized flow?
 
-Yes. Please see how in [api_docs/pre-authorized.md](api_docs/pre-authorized.md).
+Yes. Please see how in [api_docs/pre-authorized.md](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/pre-authorized.md).
 
 ### H. Can I run the issuer in a Docker container?
 
