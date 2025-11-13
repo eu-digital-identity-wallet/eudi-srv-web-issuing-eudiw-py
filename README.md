@@ -22,14 +22,14 @@ This version of the EUDIW Issuer has support for the [OpenId for Verifiable Cred
 
 | Feature                                                   | Coverage                                                        |
 |-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow draft](api_docs/authorization.md)        | ✅ Support for scoped                                           |
-| [Pre-authorized code flow](api_docs/pre-authorized.md)            | ✅                                                              |
-| [Credential Offer](api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
+| [Authorization Code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/authorization.md)        | ✅ Support for scoped                                           |
+| [Pre-authorized code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/pre-authorized.md)            | ✅                                                              |
+| [Credential Offer](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
 | Dynamic Credential Request                                        | ✅                                                              |
 | mso_mdoc format                                                   | ✅                                                              |
 | SD-JWT-VC format                                                  | ✅                                                              |
 | W3C VC DM                                                         | ❌                                                              |
-| [Token Endpoint](api_docs/token.md)                               | ✅                                                              |
+| [Token Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/token.md)                               | ✅                                                              |
 | [Credential Endpoint](api_docs/credential.md)                     | ✅                                                              |
 | Credential Issuer MetaData                                        | ✅ Unsigned metadata                                            | 
 | [Nonce endpoint](api_docs/nonce_endpoint.md)                      | ✅                                                              | 
@@ -43,7 +43,7 @@ This version of the EUDIW Issuer has support for the [OpenId for Verifiable Cred
 | Demonstrating Proof of Possession (DPoP)                          | ✅                                                              |
 | PKCE                                                              | ✅                                                              |
 
-You can use the EUDIW Issuer at https://ec.issuer.eudiw.dev/, or install it locally.
+You can use the EUDIW Issuer at [https://issuer.eudiw.dev/](https://issuer.eudiw.dev/), or install it locally.
 
 
 ## :heavy_exclamation_mark: Disclaimer
