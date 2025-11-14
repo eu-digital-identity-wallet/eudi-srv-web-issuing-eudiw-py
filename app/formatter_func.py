@@ -215,6 +215,8 @@ def sdjwtNestedClaims(claims, credential_metadata):
     ):
         for claim_meta in credential_metadata["credential_metadata"]["claims"]:
             # Use the last part of the 'path' as the claim name
+            if "overall_issuer_conditions" in claim_meta:
+                continue
             claim_name = claim_meta["path"][-1]
             sd_map[claim_name] = claim_meta.get("selective_disclosure", True)
 
