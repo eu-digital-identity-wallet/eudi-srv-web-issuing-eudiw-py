@@ -33,21 +33,19 @@ import sys
 class ConfService:
     # ------------------------------------------------------------------------------------------------
     # PID issuer service URL
-    service_url = os.getenv("SERVICE_URL", "https://dev.issuer.eudiw.dev/")
+    service_url = os.getenv("SERVICE_URL", "https://backend.issuer.eudiw.dev/")
     # service_url = "https://127.0.0.1:5000/"
 
-    wallet_test_url = os.getenv(
-        "WALLET_TEST_URL", "https://dev.tester.issuer.eudiw.dev/"
-    )
+    wallet_test_url = os.getenv("WALLET_TEST_URL", "https://tester.issuer.eudiw.dev/")
 
     revocation_service_url = os.getenv(
-        "REVOCATION_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/take"
+        "REVOCATION_SERVICE_URL", "https://issuer.eudiw.dev/token_status_list/take"
     )
 
     revocation_api_key = os.getenv("REVOCATION_API_KEY", "test")
 
     revoke_service_url = os.getenv(
-        "REVOKE_SERVICE_URL", "https://dev.issuer.eudiw.dev/token_status_list/set"
+        "REVOKE_SERVICE_URL", "https://issuer.eudiw.dev/token_status_list/set"
     )
 
     default_frontend = os.getenv(
@@ -55,9 +53,9 @@ class ConfService:
     )
 
     # ---------------------------------------------------------------------------
-    trusted_CAs_path = os.getenv("TRUSTED_CAS_PATH", "/etc/eudiw/pid-issuer-dev/cert/")
+    trusted_CAs_path = os.getenv("TRUSTED_CAS_PATH", "/etc/eudiw/pid-issuer/cert/")
 
-    privKey_path = os.getenv("PRIVKEY_PATH", "/etc/eudiw/pid-issuer-dev/privKey/")
+    privKey_path = os.getenv("PRIVKEY_PATH", "/etc/eudiw/pid-issuer/privKey/")
 
     # Nonce endpoint
     nonce_key = os.getenv(
@@ -82,12 +80,12 @@ class ConfService:
 
     dynamic_presentation_url = os.getenv(
         "DYNAMIC_PRESENTATION_URL",
-        "https://dev.verifier-backend.eudiw.dev/ui/presentations/",
+        "https://verifier-backend.eudiw.dev/ui/presentations/",
     )
 
     LOG_FILES = os.getenv(
         "LOG_FILES",
-        "/tmp/oidc_log_dev/logs.log,/tmp/log_dev/logs.log",
+        "/tmp/oidc_log/logs.log,/tmp/log/logs.log",
     )
 
     # Deferred endpoint expiry time (minutes)
@@ -246,6 +244,10 @@ class ConfService:
     # ------------------------------------------------------------------------------------------------
     # LOGS
 
+    log_file = os.getenv("LOG_FILE", "/tmp/log/logs.log")
+
+    auth_log_file = os.getenv("AUTH_LOG_FILE", "/tmp/oidc_log/logs.log")
+
     def _setup_app_logger():
 
         logger = logging.getLogger("app_logger")
@@ -265,7 +267,8 @@ class ConfService:
         backup_count = 7
 
         try:
-            os.makedirs(log_dir)
+            log_dir = os.path.dirname(os.getenv("LOG_FILE", "/tmp/log_dev/logs.log"))
+            os.makedirs(log_dir, exist_ok=True)
         except FileExistsError:
             pass
 

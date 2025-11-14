@@ -173,9 +173,6 @@ def dynamic_R1(country):
             current_session.credentials_requested
         )
 
-        print("\nMandatory: ", mandatory_attributes)
-        print("\nOptional: ", optional_attributes_raw)
-
         optional_attributes_filtered = {
             key: value
             for key, value in optional_attributes_raw.items()
@@ -268,7 +265,6 @@ def red():
     # session["route"] = "/dynamic/redirect"
 
     session_id = session["session_id"]
-    print("\nsession_id ", session_id)
     current_session = session_manager.get_session(session_id=session_id)
 
     (v, l) = validate_mandatory_args(request.args, ["code"])
@@ -276,8 +272,6 @@ def red():
         raise ValueError(f"Missing mandatory IdP fields: {l}")
 
     auth_code = request.args.get("code")
-
-    print("\nauth_code", auth_code)
 
     country_config = cfgcountries.supported_countries[current_session.country]
 
@@ -289,8 +283,6 @@ def red():
     metadata_json = requests.get(metadata_url).json()
 
     token_endpoint = metadata_json["token_endpoint"]
-
-    print("\ntoken_endpoint", token_endpoint)
 
     token_endpoint_headers = {}
     if (
@@ -319,7 +311,6 @@ def red():
         "redirect_uri": country_config["oauth_auth"]["redirect_uri"],
     }
 
-    print("\ntoken_endpoint_request", params, "\n", token_endpoint_headers, flush=True)
     try:
         response = requests.post(
             token_endpoint,
@@ -327,17 +318,11 @@ def red():
             headers=token_endpoint_headers,
         )
 
-        print("\nstatus: ", response.status_code, flush=True)
-
         response.raise_for_status()
         token_data = response.json()
 
-        print("\ntoken_data: ", token_data, flush=True)
-        print("Access Token:", token_data.get("access_token"), flush=True)
-
         access_token = token_data.get("access_token")
 
-        print("\naccess_token", access_token, flush=True)
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
@@ -444,8 +429,6 @@ def red():
 
     user_id = current_session.country + "." + session["access_token"]
 
-    print("\npresentation_data: ", presentation_data)
-
     target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
 
     return post_redirect_with_payload(
@@ -491,7 +474,6 @@ def dynamic_R2():
         current_session.user_data
     )  # dynamic_R2_data_collect(country=country, user_id=user_id)
 
-    print("\ndynamic_r2 data: ", data)
     """ if "error" in data:
         return data """
 
@@ -525,7 +507,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
         if data == "Data not found":
             return {"error": "error", "error_description": "Data not found"}
 
-        print("\ndynamic_R2_data_collect user_data: ", data)
         return data
 
     if country == "sample":
@@ -581,8 +562,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
 
             user_data = response.json()
 
-            print("\nbefore_user_data: ", user_data)
-
         except requests.exceptions.RequestException as e:
             print(f"An error occurred while fetching user data: {e}")
             if response:
@@ -616,10 +595,6 @@ def dynamic_R2_data_collect(country, session_id, access_token):
                             attribute["name"]
                         ]
                     ] = attribute["value"]
-
-        print("\nafter_user_data: ", cleaned_user_data)
-
-        print("\nsession_id", session_id)
 
         cleaned_user_data["nationality"] = [country]
         cleaned_user_data["nationalities"] = [country]
@@ -1233,16 +1208,11 @@ def Dynamic_form():
 
     form_data.pop("proceed")
 
-    print("\nform_data: ", form_data)
-
     cleaned_data = form_formatter(form_data)
-    print("\nCleaned Data: ", cleaned_data)
 
     session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
-
-    print("\nPresentation Data: ", presentation_data)
 
     target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
 
@@ -1265,9 +1235,6 @@ def redirect_wallet():
     session_id = session["session_id"]
 
     current_session = session_manager.get_session(session_id=session_id)
-
-    print("\ntoken: ", current_session.jws_token)
-    print("\nsession_id: ", session_id)
 
     return redirect(
         url_get(
@@ -1308,8 +1275,6 @@ def generate_connector_authorization_url(
         f"{oauth_data.get('base_url')}/.well-known/oauth-authorization-server"
     )
 
-    print("\nmetadata_url: ", metadata_url, flush=True)
-
     metadata_json = requests.get(metadata_url).json()
 
     authorization_endpoint = metadata_json["authorization_endpoint"]
@@ -1330,5 +1295,4 @@ def generate_connector_authorization_url(
 
     full_url = f"{authorization_endpoint}?{urlencode(params)}"
 
-    print("\nauthorization_full_url", full_url, flush=True)
     return full_url

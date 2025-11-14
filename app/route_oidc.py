@@ -185,31 +185,18 @@ def well_known(service):
 @oidc.route("/auth_choice", methods=["GET"])
 def auth_choice():
 
-    print("\nauth_choice: ", request.args)
-
     token = request.args.get("token")
-    print("\nauth_choice 1")
     session_id = request.args.get("session_id")
-    print("\nauth_choice 2")
     scope = request.args.get("scope")
-    print("\nauth_choice 3")
     authorization_details_str = request.args.get("authorization_details")
-    print("\nauth_choice 4")
     frontend_id = request.args.get("frontend_id")
 
-    print("\nauth_choice 5")
-
     if not frontend_id:
-        frontend_id = "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+        frontend_id = cfgservice.default_frontend
 
-    print("\nauth_choice 6")
     session["session_id"] = session_id
 
-    print("\nauth_choice 7")
-
     supported_credencials = cfgservice.auth_method_supported_credencials
-
-    print("\nauth_choice 8")
 
     pid_auth = True
     country_selection = True
@@ -217,7 +204,6 @@ def auth_choice():
     authorization_details = []
 
     if authorization_details_str:
-        print("\nauth_choice 9")
         try:
             decoded_string = urllib.parse.unquote(authorization_details_str)
 
@@ -226,10 +212,8 @@ def auth_choice():
             print(f"Error parsing authorization_details JSON: {e}")
             return jsonify({"error": "Invalid authorization_details parameter"}), 400
 
-    print("\nauth_choice 10")
     credential_configuration_id = None
     if scope:  # "scope" in authorization_params:
-        print("\nauth_choice 11")
         scope_elements = scope.split()
         authorization_details.extend(
             scope2details(scope_elements)
@@ -237,15 +221,11 @@ def auth_choice():
 
         credential_configuration_id = scope.replace("openid", "").strip()
 
-    print("\nauth_choice 12")
     if not authorization_details:
-        print("\nauth_choice 3")
         raise ValueError(f"invalid authentication. Session ID: {session_id}")
 
-    print("\nauth_choice 14")
     credentials_requested = []
 
-    print("\nauth_choice 15")
     for cred in authorization_details:
         if "credential_configuration_id" in cred:
             if cred["credential_configuration_id"] not in credentials_requested:
@@ -255,15 +235,6 @@ def auth_choice():
             if cred["vct"] not in credentials_requested:
                 credentials_requested.append(vct2id(cred["vct"]))
 
-    print("\nauth_choice 16: ", credentials_requested)
-
-    print("\nsession_id: ", session_id)
-    print("\ntoken: ", token)
-    print("\ncredential_configuration_id: ", credential_configuration_id)
-    print("\nauthorization_details: ", authorization_details)
-    print("\ncredentials_requested: ", credentials_requested)
-    print("\nfrontend_id: ", frontend_id)
-
     session_manager.add_session(
         session_id=session_id,
         jws_token=token,
@@ -272,8 +243,6 @@ def auth_choice():
         credentials_requested=credentials_requested,
         frontend_id=frontend_id,
     )
-
-    print("\nauth_choice 16")
 
     for cred in credentials_requested:
         if (
@@ -295,26 +264,17 @@ def auth_choice():
             country_selection = False
             pid_auth = False
 
-    print("\nauth_choice 18")
     if country_selection == False and pid_auth == True:
-        print("\nauth_choice 19")
         return redirect(cfgservice.service_url + "oid4vp")
     elif country_selection == True and pid_auth == False:
-        print("\nauth_choice 20")
         return redirect(cfgservice.service_url + "dynamic/")
 
-    print("\nauth_choice 21")
     error = ""
     if pid_auth == False and country_selection == False:
         error = "Combination of requested credentials is not valid!"
 
-    print("\npid_auth: ", pid_auth)
-    print("\ncountry_selection: ", country_selection)
-
-    print("\nauth_choice 22")
     target_url = ConfFrontend.registered_frontends[frontend_id]["url"]
 
-    print("\nauth_choice 23: ", pid_auth, "\n", country_selection)
     return post_redirect_with_payload(
         target_url=f"{target_url}/display_auth_method",
         data_payload={
@@ -501,7 +461,6 @@ from authlib.jose import JsonWebKey
 def decode_verify_attestation(jwt_raw):
     claims = verify_jwt_with_x5c(jwt_raw=jwt_raw)
 
-    print("\nclaims: ", claims)
     return claims
 
 
@@ -578,12 +537,9 @@ def generate_credentials(credential_request, session_id):
 
 
 def encrypt_response(credential_request, credential_response):
-    print("\n--------------------Starting Encryption")
     encryption_config = credential_request.get("credential_response_encryption", {})
-    print("\nencryption_config: ", encryption_config)
 
     if not encryption_config or not all(k in encryption_config for k in ["jwk", "enc"]):
-        print("\nMissing required fields in credential_response_encryption.")
         return make_response(
             jsonify(
                 {
@@ -617,16 +573,12 @@ def encrypt_response(credential_request, credential_response):
         "enc": encryption_config["enc"],
     }
 
-    print("\nprotected_header:", protected_header)
-
     try:
         public_key = JsonWebKey.import_key(encryption_config["jwk"])
-        print("\npublic_key:", public_key)
         jwe = JsonWebEncryption()
         jwe_token = jwe.serialize_compact(
             protected_header, json.dumps(credential_response), public_key
         )
-        print("\njwe_token:", jwe_token)
     except:
         return make_response(
             jsonify(
@@ -788,15 +740,12 @@ def credential():
         f", Session ID: {session_id}, Credential response, Payload: {_response}"
     )
 
-    print("\nis_deferred: ", is_deferred)
-
     if "credential_response_encryption" in validated_credential_request:
         _response = encrypt_response(
             credential_request=validated_credential_request,
             credential_response=_response,
         )
 
-        print("\nresponse: ", _response)
         cfgservice.app_logger.info(
             f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
         )
@@ -1134,7 +1083,7 @@ def get_logs_by_session():
     if not session_id:
         return jsonify({"error": "Missing required parameter: session_id"}), 400
 
-    LOG_FILES = [path.strip() for path in cfgservice.LOG_FILES.split(",")]
+    LOG_FILES = [cfgservice.auth_log_file, cfgservice.log_file]
 
     matches = []
     seen_lines = set()
@@ -1171,14 +1120,17 @@ def get_logs_by_session():
 @oidc.route("/credential_offer2", methods=["GET"])
 def credentialOffer2():
     session_id = generate_unique_id()
-    print("\nCredential_offer2 session_id:", session_id)
 
     credential_configuration_id = request.args.get(
         "credential_configuration_id", "eu.europa.ec.eudi.pid_mdoc"
     )
 
+    credential_issuer = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+        "url"
+    ]
+
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": credential_issuer,
         "credential_configuration_ids": [credential_configuration_id],
         "grants": {"authorization_code": {"issuer_state": session_id}},
     }
@@ -1229,7 +1181,9 @@ def credentialOffer():
                         session["frontend_id"]
                     ]["url"]
                 else:
-                    credential_issuer = cfgservice.service_url[:-1]
+                    credential_issuer = ConfFrontend.registered_frontends[
+                        cfgservice.default_frontend
+                    ]["url"]
 
                 credential_offer = {
                     "credential_issuer": credential_issuer,

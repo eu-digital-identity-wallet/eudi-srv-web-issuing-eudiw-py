@@ -76,7 +76,6 @@ class TestCredentialEndpoint:
         """Test successful credential request with JSON content type"""
         # Setup
 
-        print("\nRegistered routes:")
         for rule in client.application.url_map.iter_rules():
             print(rule)
 
@@ -174,8 +173,6 @@ class TestCredentialEndpoint:
                 content_type="application/jwt",
                 headers={"Authorization": "Bearer valid_token"},
             )
-
-        print("response: ", response)
 
         # Assert
         assert response.status_code == 200
