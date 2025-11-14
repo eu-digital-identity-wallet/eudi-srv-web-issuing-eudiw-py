@@ -159,3 +159,16 @@ _14 Jul 2025_
 - Cannot add PID due to bracket error
 - SD-JWT VC PID contains improperly disclosed elements in nationalities
 - Unable to issue PoR Credential through wallet tester
+
+## [0.9]
+
+_11 Nov 2025_
+
+### Added:
+- Support for Credential Request encryption
+- Key attestations proof type
+- Pytest tests
+
+### Changed
+- Separated Issuer Back end, front end and authorization server into multiple services.
+- Updated PID to latest version

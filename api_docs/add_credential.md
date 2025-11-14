@@ -13,111 +13,135 @@ Example loyalty card metadata for mso_mdoc format (ISO 18013-5), with namespace 
 
 ```json
 {
-  "eu.europa.ec.eudi.loyalty_mdoc": {
-      "format": "mso_mdoc",
-      "doctype": "eu.europa.ec.eudi.loyalty.1",
-      "scope": "eu.europa.ec.eudi.loyalty_mdoc",
-      "cryptographic_binding_methods_supported": [
-        "jwk", "cose_key"
+   "eu.europa.ec.eudi.loyalty_mdoc":{
+      "format":"mso_mdoc",
+      "doctype":"eu.europa.ec.eudi.loyalty.1",
+      "scope":"eu.europa.ec.eudi.loyalty_mdoc",
+      "cryptographic_binding_methods_supported":[
+         "jwk",
+         "cose_key"
       ],
-      "credential_signing_alg_values_supported": [
-        "ES256"
+      "credential_signing_alg_values_supported":[
+         "ES256"
       ],
-      "proof_types_supported": {
-        "jwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ]
-        }
+      "proof_types_supported":{
+         "jwt":{
+            "proof_signing_alg_values_supported":[
+               "ES256"
+            ]
+         }
       },
-      "display": [
-        {
-          "name": "Loyalty",
-          "locale": "en",
-          "logo": {
-            "uri": "https://examplestate.com/public/pid.png",
-            "alt_text": "A square figure of a PID"
-          }
-        }
-      ],
-      "claims": [
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","given_name"],
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Given Name",
-                "locale": "en"
-              }
-            ]
-          },
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","family_name"],
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Family Name",
-                "locale": "en"              }
-            ]
-          },
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","company"],
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Loyalty Card Company",
-                "locale": "en"              }
-            ]
-          },
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","client_id"],
-            "mandatory": true,
-            "value_type":"string",
-            "source":"user",
-            "display": [
-              {
-                "name": "Client ID",
-                "locale": "en"              }
-            ]
-          },
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","issuance_date"],
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
-              {
-                "name": "Issuance Date",
-                "locale": "en"
-              }
-            ]
-          },
-          {
-            "path":["eu.europa.ec.eudi.loyalty.1","expiry_date"],
-            "mandatory": true,
-            "source":"issuer",
-            "display": [
-              {
-                "name": "Expiry Date",
-                "locale": "en"
-              }
-            ]
-          }
-      ],
+      "credential_metadata":{
+         "display":[
+            {
+               "name":"Loyalty",
+               "locale":"en",
+               "logo":{
+                  "uri":"https://examplestate.com/public/pid.png",
+                  "alt_text":"A square figure of a PID"
+               }
+            }
+         ],
+         "claims":[
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "given_name"
+               ],
+               "mandatory":true,
+               "value_type":"string",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Given Name",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "family_name"
+               ],
+               "mandatory":true,
+               "value_type":"string",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Family Name",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "company"
+               ],
+               "mandatory":true,
+               "value_type":"string",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Loyalty Card Company",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "client_id"
+               ],
+               "mandatory":true,
+               "value_type":"string",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Client ID",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "issuance_date"
+               ],
+               "mandatory":true,
+               "source":"issuer",
+               "display":[
+                  {
+                     "name":"Issuance Date",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.eudi.loyalty.1",
+                  "expiry_date"
+               ],
+               "mandatory":true,
+               "source":"issuer",
+               "display":[
+                  {
+                     "name":"Expiry Date",
+                     "locale":"en"
+                  }
+               ]
+            }
+         ]
+      },
       "issuer_config":{
-            "issuing_authority":"Test PID issuer",
-            "organization_id":"EUDI Wallet Reference Implementation",
-            "validity":90,
-            "organization_name":"Test PID issuer",
-            "namespace": "eu.europa.ec.eudi.loyalty.1"
-        }
-    }
-  }
+         "issuing_authority":"Test PID issuer",
+         "organization_id":"EUDI Wallet Reference Implementation",
+         "validity":90,
+         "organization_name":"Test PID issuer",
+         "namespace":"eu.europa.ec.eudi.loyalty.1"
+      }
+   }
+}
 ```
 
 If you want to issue a different attestation/credential using this example as a template, please choose a different namespace, doctype, and scope, and modify the claims to include the required attributes.

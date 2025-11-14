@@ -80,9 +80,7 @@ class TestConfCountries:
         oidc_redirect = ee_conf["oidc_redirect"]
         assert "headers" in oidc_redirect
         assert "redirect_uri" in oidc_redirect
-        assert (
-            oidc_redirect["redirect_uri"] == config_countries.ConfCountries.urlReturnEE
-        )
+        assert oidc_redirect["redirect_uri"] == config_countries.ee_redirect_uri
 
 
 class TestConfFrontend:

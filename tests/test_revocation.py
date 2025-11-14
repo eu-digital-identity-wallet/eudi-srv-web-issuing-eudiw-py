@@ -66,6 +66,7 @@ def mock_config():
         mock.deffered_expiry = 15
         mock.revocation_code_expiry = 10
         mock.revoke_service_url = "http://test.com/revoke"
+        mock.revocation_api_key = "test_api_key"
         mock.app_logger = MagicMock()
         yield mock
 
@@ -466,9 +467,7 @@ class TestOid4vpCall:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.return_value.status_code = 200
             mock_redirect.return_value = "redirect_response"
@@ -524,9 +523,7 @@ class TestOid4vpCall:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.return_value.status_code = 500
             mock_post.return_value.text = "Server error"
@@ -563,9 +560,7 @@ class TestOid4vpCall:
             },
         ) as mock_revoc_req, patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.side_effect = Exception("Connection error")
             mock_redirect.return_value = "redirect_response"
@@ -606,9 +601,7 @@ class TestOid4vpCall:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.return_value.status_code = 200
             mock_redirect.return_value = "redirect_response"
@@ -659,9 +652,7 @@ class TestOid4vpCall:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.return_value.status_code = 200
             mock_redirect.return_value = "redirect_response"
@@ -693,9 +684,7 @@ class TestOid4vpCall:
             "app.revocation.requests.post"
         ) as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_post.return_value.status_code = 200
             mock_redirect.return_value = "redirect_response"
@@ -800,9 +789,7 @@ class TestEdgeCases:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
+        ) as mock_redirect:
 
             mock_redirect.return_value = "redirect_response"
 
@@ -839,10 +826,8 @@ class TestEdgeCases:
             },
         ), patch("app.revocation.requests.post") as mock_post, patch(
             "app.revocation.post_redirect_with_payload"
-        ) as mock_redirect, patch(
-            "app.revocation.revocation_api_key", "test_api_key"
-        ):
-
+        ) as mock_redirect:
+            # no need to patch revocation_api_key separately
             mock_post.return_value.status_code = 200
             mock_redirect.return_value = "redirect_response"
 
@@ -850,13 +835,18 @@ class TestEdgeCases:
                 "/revocation/revoke", data={"revocation_identifier": revocation_id}
             )
 
-            # Verify URI was properly encoded
+            # Ensure the endpoint worked
+            assert response.status_code in (200, 302)
+
+            # Verify that the request payload properly encoded the URI
             call_args = mock_post.call_args
-            payload = call_args[1]["data"]
+            assert call_args is not None, "requests.post was not called"
+            payload = call_args.kwargs.get("data") or call_args[1]["data"]
+
+            # Make sure the payload contains a properly encoded URI
             assert "uri=" in payload
-            assert (
-                "%3F" in payload or "param" in payload
-            )  # Encoded ? or the param itself
+            # Either encoded '?' (%3F) or at least the param=value pair appears
+            assert "%3F" in payload or "param=value" in payload
 
     def test_qr_code_generation(
         self, client, mock_config, mock_oidc_metadata, mock_frontend_config

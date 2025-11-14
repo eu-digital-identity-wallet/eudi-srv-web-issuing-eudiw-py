@@ -66,15 +66,25 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     pip install -r app/requirements.txt
     ```
 
-6. Setup secrets
+6. Setup env
    
-   -  Copy ```app/app_config/__config_secrets.py``` to ```app/app_config/config_secrets.py``` and modify secrets.
+   -  Copy ```app/.env.example``` to ```app/.env``` and modify variables.
+
+   ```shell
+   cp app/.env.example app/.env
+   ```
 
 7. Service Configuration
 
    - Configure the service according to [documentation](api_docs/configuration.md)  
 
-8. Run the EUDIW Issuer 
+8. Install Authorization Server
+    - Install the service according to [Issuer Authorization Server]()
+
+9. Install Issuer Front-End
+    - Install the service according to [Issuer Front-End]()
+
+10. Run the EUDIW Issuer Back-end
 
     On the root directory of the clone repository, insert one of the following command lines to run the EUDIW Issuer.
 
@@ -197,70 +207,58 @@ server {
 
 ## 6. Docker
 
-To run the EUDIW issuer in Docker please follow these steps:
+This guide provides step-by-step instructions for deploying the **EUDIW Issuer** service using **Docker Compose v2**.
 
-1. Install Docker following the official instructions for your operating system : <https://docs.docker.com/engine/install/>
+1. Install docker
 
-2. Download the Dockerfile at <https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/Dockerfile> 
-
-3. Build the Docker: `sudo docker build -t eudiw-issuer .`
-
-4. Create 2 directories to be mounted:
-
-   1. First directory named `config_secrets`
-      
-      This directory will have the cert.pem and key.pem generated in [Section 4](#4-running-your-local-eudiw-issuer-over-https)
-   
-      As well as the config_secrets.py based on this [example](app/app_config/__config_secrets.py)
+    Ensure you have Docker installed on your system. Follow the **official installation instructions** for your operating system:
+    [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
 
-   2. Second directory named `pid-issuer`, inside will be a directory `cert` and `privKey`
-      
-      The `cert` directory has the certificates of the trusted CAs in PEM format as well as the Document/Credential signer (DS) certificates in DER format
+2. Configure Docker Compose
 
-      The `privKey` directory has the Document/Credential signer (DS) private keys
+    The service's container orchestration is managed by the `docker-compose.yml` file.
+
+    * **Customize the configuration:** Review and modify the local `docker-compose.yml` file to align with your specific deployment requirements (e.g., exposed ports, service names, volumes).
+    * *Reference file:* [docker-compose.yml](./docker-compose.yml)
+
+3. Set Up Environment Variables
+
+    Service parameters and sensitive settings are managed through an environment file.
+
+    * **Create the environment file:** We recommend copying the example file to create your local configuration.
+
+    * **Update variables:** Edit the newly created `app/.env` file with your specific settings and credentials.
+        * *Reference example:* [.env example](./app/.env.example)
 
 
-    Example:
-   
+4. Pull the Docker Image
 
-    ```bash
-    docker-issuer
-    ├── Dockerfile
-    ├── config_secrets
-    │   ├── config_secrets.py
-    │   ├── cert.pem
-    │   └── key.pem
-    └── pid-issuer
-        ├── cert
-        │   ├── PID-DS-0001_UT_cert.der
-        │   └── PIDIssuerCAUT01.pem
-        └── privKey
-            └── PID-DS-0001_UT.pem
+    ```
+    docker compose pull
     ```
 
-5. Run Docker
+5. Run the 
 
-    If running a basic configuration without EIDAS node or Dynamic presentation, their respective variables can be removed from the run command below.
-    
-    ```bash
-    sudo docker run -d \
-    --name eudiw-issuer \
-    -e SERVICE_URL="https://your.service.url/" \
-    -e EIDAS_NODE_URL="https://your.eidas.node.url/" \
-    -e DYNAMIC_PRESENTATION_URL="https://your.dynamic.presentation.url/" \
-    -v ./config_secrets:/root/secrets \
-    -v ./pid-issuer:/etc/eudiw/pid-issuer \
-    -p 5000:5000 \
-    eudiw-issuer
+    Start the EUDIW Issuer backend in detached mode (runs in the background):
+
+    ```
+    docker compose up -d
     ```
 
-5. Docker logs
+6. Check Logs
 
-    Issuer logs in real time: `sudo docker logs -f eudiw-issuer`
-    All logs: `sudo docker logs eudiw-issuer`
+    To confirm the service is running correctly and to monitor its output in real-time for troubleshooting, use the following command:
+    ```
+    docker compose logs -f
+    ```
 
-6. Stopping Docker Issuer
-   `sudo docker stop eudiw-issuer`
+7. Deploy Related Services
 
+To complete the full EUDIW ecosystem, you will also need to deploy the associated Front-end and Authorization Server components.
 
+* **Front-end Installation:** Follow the guide to install the web issuing front-end component using Docker.
+    * [Front-end Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/dev/install.md#6-docker)
+
+* **Authorization Server Installation:** Follow the guide to install the OIDC authorization server component using Docker.
+    * [Authorization Server Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-oidc-eudiw-py/blob/dev/install.md#6-docker)

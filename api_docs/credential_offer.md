@@ -2,7 +2,7 @@
 
 ## 1. Authorization code flow
  
-**Endpoint**: <https://issuer.eudiw.dev/credential_offer> (or <https://localhost/credential_offer> if installed locally)
+**Endpoint**: <https://ec.issuer.eudiw.dev/credential_offer> (or <https://localhost/credential_offer> if installed locally)
 
 A form is presented showing the Request Credentials for your EUDI Wallet that can be requested.
 
