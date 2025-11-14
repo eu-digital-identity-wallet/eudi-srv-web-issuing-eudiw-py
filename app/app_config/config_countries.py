@@ -79,10 +79,10 @@ class ConfCountries:
         "EU": {
             "name": "nodeEU",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=EU",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_EU.pem",
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_EU.pem",
             # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EU.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes,
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_EU_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_EU_cert.der",
             "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -108,12 +108,12 @@ class ConfCountries:
         formCountry: {
             "name": "FormEU",
             "pid_url": cfgserv.service_url + "pid/form",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_UT.pem",
-            # "pid_mdoc_privkey": cfgserv.privKey_path + "hackathon-DS-0002_UT.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0002_UT.pem',
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_UT.pem",
+            # "pid_mdoc_privkey": cfgserv.privKey_path + "hackathon-DS-0001_UT.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_UT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_UT_cert.der",
-            # "pid_mdoc_cert": cfgserv.trusted_CAs_path + "hackathon-DS-0002_UT_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_UT_cert.der",
+            # "pid_mdoc_cert": cfgserv.trusted_CAs_path + "hackathon-DS-0001_UT_cert.der",
             "un_distinguishing_sign": "FC",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -147,10 +147,10 @@ class ConfCountries:
         },
         "PT": {
             "name": "Portugal",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_PT.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0002_PT.pem',
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_PT.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_PT.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_PT_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_PT_cert.der",
             "un_distinguishing_sign": "P",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -177,10 +177,10 @@ class ConfCountries:
         },
         "EE": {
             "name": "Estonia",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_EE.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0002_EE.pem',
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_EE.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_EE.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_EE_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_EE_cert.der",
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
                 "eu.europa.ec.eudi.pid_vc_sd_jwt",
@@ -213,10 +213,10 @@ class ConfCountries:
         "CZ": {
             "name": "Czechia",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=CZ",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_CZ.pem",
-            # "pid_mdoc_privkey": 'app\certs\PID-DS-0002_CZ.pem',
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_CZ.pem",
+            # "pid_mdoc_privkey": 'app\certs\PID-DS-0001_CZ.pem',
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_CZ_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_CZ_cert.der",
             "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -241,9 +241,9 @@ class ConfCountries:
         "NL": {
             "name": "Netherland",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=NL",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_NL.pem",
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_NL.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_NL_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_NL_cert.der",
             "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",
@@ -268,9 +268,9 @@ class ConfCountries:
         "LU": {
             "name": "Luxembourg",
             "pid_url_oidc": cfgserv.service_url + "eidasnode/lightrequest?country=LU",
-            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0002_LU.pem",
+            "pid_mdoc_privkey": cfgserv.privKey_path + "PID-DS-0001_LU.pem",
             "pid_mdoc_privkey_passwd": None,  # None or bytes
-            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0002_LU_cert.der",
+            "pid_mdoc_cert": cfgserv.trusted_CAs_path + "PID-DS-0001_LU_cert.der",
             "loa": EIDAS_LOA_HIGH,
             "supported_credentials": [
                 "eu.europa.ec.eudi.pid_mdoc",

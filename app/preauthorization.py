@@ -62,12 +62,10 @@ def preauthRed():
     credential_list = json.loads(credentials_id)
 
     scope = " ".join(credential_list)
-    print("\ncredential_list: ", scope)
 
     session_id = request_preauth_token(scope=scope)
 
     session["session_id"] = session_id
-    print("\nsession_id")
 
     authorization_details = []
 
@@ -76,15 +74,18 @@ def preauthRed():
             {"type": "openid_credential", "credential_configuration_id": credential}
         )
 
-    print("\nauthorization_details: ", authorization_details)
-
     session_manager.update_authorization_details(
         session_id=session_id, authorization_details=authorization_details
     )
 
-    session_manager.update_frontend_id(
-        session_id=session_id, frontend_id="5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
-    )
+    if "frontend_id" in session:
+        session_manager.update_frontend_id(
+            session_id=session_id, frontend_id=session["frontend_id"]
+        )
+    else:
+        session_manager.update_frontend_id(
+            session_id=session_id, frontend_id=cfgservice.default_frontend
+        )
 
     # session["authorization_details"] = authorization_details
 
@@ -100,8 +101,6 @@ def preauthRed():
     session_manager.update_credentials_requested(
         session_id=session_id, credentials_requested=credentials_requested
     )
-
-    print("\ncredentials_requested", credentials_requested)
 
     # session["credentials_requested"] = credentials_requested
 
@@ -155,8 +154,6 @@ def preauth_form():
 
     cleaned_data = form_formatter(form_data)
 
-    print("\nCleaned Data: ", cleaned_data)
-
     """ form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(
         {"expires": datetime.now() + timedelta(minutes=cfgservice.form_expiry)}
@@ -166,8 +163,6 @@ def preauth_form():
     session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
-
-    print("\nPresentation Data: ", presentation_data, flush=True)
 
     target_url = ConfFrontend.registered_frontends[current_session.frontend_id]["url"]
 
@@ -186,7 +181,6 @@ def form_authorize_generate():
 
     form_data = request.form.to_dict()
 
-    print("form_data: ", form_data, flush=True)
     user_id = form_data["user_id"]
     # data = form_dynamic_data[user_id]
 
@@ -214,10 +208,15 @@ def generate_offer(data):
 
     transaction_id = generate_unique_id()
 
-    print("\npre_auth_code: ", pre_auth_code)
+    if "frontend_id" in session:
+        credential_issuer = ConfFrontend.registered_frontends[session["frontend_id"]][
+            "url"
+        ]
+    else:
+        credential_issuer = cfgservice.service_url[:-1]
 
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": credential_issuer,
         "credential_configuration_ids": current_session.credentials_requested,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
@@ -302,11 +301,8 @@ def credentialOfferReq2():
     data = json_payload["credentials"][0]["data"]
 
     scope = " ".join(credential_ids)
-    print("\ncredential_list: ", scope)
 
     session_id = request_preauth_token(scope=scope)
-
-    print("\nsession_id", session_id)
 
     session_manager.update_authorization_details(
         session_id=session_id, authorization_details=authorization_details

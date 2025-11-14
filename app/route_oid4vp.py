@@ -116,8 +116,6 @@ def openid4vp():
         }
     )
 
-    print("\npayload_cross_device", payload_cross_device)
-
     headers = {
         "Content-Type": "application/json",
     }
@@ -129,9 +127,6 @@ def openid4vp():
     response_same = requests.request(
         "POST", url[:-1], headers=headers, data=payload_same_device
     ).json()
-
-    print("\nresponse_cross: ", response_cross)
-    print("\nresponse_same: ", response_same)
 
     session_manager.update_oid4vp_transaction_id(
         session_id=session_id, oid4vp_transaction_id=response_same["transaction_id"]

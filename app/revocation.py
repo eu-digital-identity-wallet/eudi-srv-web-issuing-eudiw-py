@@ -99,11 +99,7 @@ def oid4vp_call():
     form.remove("proceed")
     session_id = str(uuid.uuid4())
 
-    print("\nform: ", form)
-
     input_descriptors = []
-
-    # print("\nrequested: ", credentials_requested)
 
     dcql_credentials = []
     query_id_counter = 0
@@ -159,8 +155,6 @@ def oid4vp_call():
     headers = {
         "Content-Type": "application/json",
     }
-
-    print("\npayload: ", payload_cross_device)
 
     response_cross = requests.request(
         "POST", url[:-1], headers=headers, data=payload_cross_device
@@ -348,15 +342,11 @@ def get_status_mdoc(mdoc_credential: str) -> Union[list, dict]:
 
     mdoc = cbor2.loads(mdoc_bytes)
 
-    print("\nlen documents: ", len(mdoc["documents"]))
-
     if len(mdoc["documents"]) == 1:
         status = cbor2.loads(
             cbor2.loads(mdoc["documents"][0]["issuerSigned"]["issuerAuth"][2]).value
         )["status"]
 
-        print("\nstatus: ", status)
-        print("\nstatus type: ", type(status))
         return status
 
     else:
@@ -368,8 +358,6 @@ def get_status_mdoc(mdoc_credential: str) -> Union[list, dict]:
                 )["status"]
             )
 
-        print("\nstatuses: ", statuses)
-        print("\nstatuses type: ", type(statuses))
         return statuses
 
 
@@ -400,7 +388,6 @@ def oid4vp_get():
 
     elif "presentation_id" in request.args:
         presentation_id = request.args["presentation_id"]
-        print("\npresentation_id", presentation_id)
 
         # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
         if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
@@ -425,8 +412,6 @@ def oid4vp_get():
         return jsonify({"error": error_msg}), 400
 
     response_json = response.json()
-
-    print("\nresponse: ", response_json)
 
     credentials = {"dc+sd-jwt": [], "mso_mdoc": []}
 
@@ -459,9 +444,6 @@ def oid4vp_get():
                 credentials["mso_mdoc"].append(response_json["vp_token"][index])
             elif format == "dc+sd-jwt":
                 credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
-
-    print("\ncredentials: ", credentials)
-    print("\nmso_mdoc len: ", len(credentials["mso_mdoc"]))
 
     for credential in credentials["mso_mdoc"]:
 
@@ -536,7 +518,6 @@ def revoke():
         "X-Api-Key": cfgservice.revocation_api_key,
     }
 
-    print("\nresp: ", status_lists)
     for _format in status_lists:
         for _status in status_lists[_format]:
             if "identifier_list" in _status:
