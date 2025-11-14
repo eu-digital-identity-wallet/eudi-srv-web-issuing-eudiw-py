@@ -164,11 +164,15 @@ _14 Jul 2025_
 
 _11 Nov 2025_
 
-### Added:
+### Added
 - Support for Credential Request encryption
 - Key attestations proof type
 - Pytest tests
+- `session_manager` for tracking session state throughout the service
 
 ### Changed
-- Separated Issuer Back end, front end and authorization server into multiple services.
-- Updated PID to latest version
+- Split Issuer backend, frontend, and authorization server into separate services
+- Updated PID to the latest version
+- Refactored and cleaned up code
+- Migrated configuration, variables, and secrets to `.env` format
+- Streamlined Dockerfile for minimal deployment
