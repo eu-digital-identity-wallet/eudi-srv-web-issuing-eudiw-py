@@ -16,9 +16,11 @@
            ]
         }
      },
+     "vct":"urn:eudi:pid:1",
+     "credential_metadata": {
      "display":[
         {
-           "name":"PID test (sd-jwt-vc)",
+           "name":"PID (SD-JWT VC)",
            "locale":"en",
            "logo":{
               "uri":"https://examplestate.com/public/pid.png",
@@ -26,7 +28,6 @@
            }
         }
      ],
-     "vct":"urn:eudi:pid:1",
      "claims":[
         {
            "path":[
@@ -258,7 +259,7 @@
         },
         {
            "path":[
-              "portrait"
+              "picture"
            ],
            "mandatory":false,
            "value_type":"jpeg",
@@ -314,26 +315,6 @@
         },
         {
            "path":[
-              "age_equal_or_over"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"18_test",
-           "display":[
-              {
-                 "name":"Age Over 18",
-                 "locale":"en"
-              }
-           ],
-           "issuer_conditions":{
-              "cardinality":{
-                 "min":0,
-                 "max":1
-              }
-           }
-        },
-        {
-           "path":[
               "email_address"
            ],
            "mandatory":false,
@@ -362,78 +343,7 @@
         },
         {
            "path":[
-              "age_equal_or_over",
-              "16"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 16",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_equal_or_over",
-              "18"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 18",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_equal_or_over",
-              "65"
-           ],
-           "mandatory":false,
-           "source":"user",
-           "value_type":"bool",
-           "display":[
-              {
-                 "name":"Age Over 65",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_in_years"
-           ],
-           "mandatory":false,
-           "value_type":"uint",
-           "display":[
-              {
-                 "name":"Age in Years",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "age_birth_year"
-           ],
-           "mandatory":false,
-           "value_type":"uint",
-           "display":[
-              {
-                 "name":"Age Year of Birth",
-                 "locale":"en"
-              }
-           ]
-        },
-        {
-           "path":[
-              "issuance_date"
+              "date_of_issuance"
            ],
            "mandatory":true,
            "source":"issuer",
@@ -446,7 +356,7 @@
         },
         {
            "path":[
-              "expiry_date"
+              "date_of_expiry"
            ],
            "mandatory":true,
            "source":"issuer",
@@ -523,7 +433,8 @@
               }
            ]
         }
-     ],
+     ]
+   },
      "issuer_config":{
         "issuing_authority":"Test PID issuer",
         "organization_id":"EUDI Wallet Reference Implementation",

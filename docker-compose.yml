@@ -1,0 +1,14 @@
+services:
+  issuer_backend:
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:main
+    ports:
+      - "5000:5000"
+    volumes:
+      - /etc/eudiw/pid-issuer-dev/cert/:/etc/eudiw/pid-issuer-dev/cert/:ro
+      - /etc/eudiw/pid-issuer-dev/privKey/:/etc/eudiw/pid-issuer-dev/privKey/:ro
+      - /tmp/log_dev:/tmp/log_dev
+    env_file:
+      - app/.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

@@ -1,5 +1,7 @@
+git+https://github.com/wbond/oscrypto.git@d5f3437#egg=oscrypto
 Flask-Cors==4.0.0
 requests==2.31.0
+jwcrypto==1.5.6
 cbor2==5.4.6
 pytz==2023.4
 flask==2.3.3
@@ -12,7 +14,6 @@ cbor_diag==1.0.1
 validators==0.22.0
 Flask-Session==0.6.0
 jsonschema==4.21.1
-flask==2.3.3 
 werkzeug==2.3.7 
 pycose==1.0.1
 cwt==2.3.2
@@ -22,10 +23,14 @@ pillow==10.2.0
 segno==1.6.1
 qrcode-artistic==3.0.2
 gunicorn
-git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
-git+https://github.com/eu-digital-identity-wallet/idpy-oidc.git
-git+https://github.com/eu-digital-identity-wallet/openid4v.git
+Authlib>=1.5.1
+dotenv
+pytest
+pytest-cov
+git+https://github.com/niscy-eudiw/pyMDOC-CBOR.git@branch-development
+git+https://github.com/niscy-eudiw/idpy-oidc.git@branch-development
+#git+https://github.com/niscy-eudiw/openid4v.git@branch-development
 #git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@9181a0a4514b7de2cc30a84d320b509e9fc5cb59
 git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1
-git+https://github.com/rohe/fedservice.git@a4bef2e3f230f4b07c6ef45e4c8be55778d0561e
-git+https://github.com/rohe/idpy-sdjwt.git@de1715ef89c7f3db5daf3cdc53fec26d6ade03d9
+#git+https://github.com/rohe/fedservice.git@a4bef2e3f230f4b07c6ef45e4c8be55778d0561e
+#git+https://github.com/rohe/idpy-sdjwt.git@de1715ef89c7f3db5daf3cdc53fec26d6ade03d9

@@ -160,3 +160,19 @@ _14 Jul 2025_
 - SD-JWT VC PID contains improperly disclosed elements in nationalities
 - Unable to issue PoR Credential through wallet tester
 
+## [0.9]
+
+_11 Nov 2025_
+
+### Added
+- Support for Credential Request encryption
+- Key attestations proof type
+- Pytest tests
+- `session_manager` for tracking session state throughout the service
+
+### Changed
+- Split Issuer backend, frontend, and authorization server into separate services
+- Updated PID to the latest version
+- Refactored and cleaned up code
+- Migrated configuration, variables, and secrets to `.env` format
+- Streamlined Dockerfile for minimal deployment
