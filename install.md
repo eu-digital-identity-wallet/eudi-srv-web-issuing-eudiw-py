@@ -79,10 +79,10 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
    - Configure the service according to [documentation](api_docs/configuration.md)  
 
 8. Install Authorization Server
-    - Install the service according to [Issuer Authorization Server]()
+    - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
 
 9. Install Issuer Front-End
-    - Install the service according to [Issuer Front-End]()
+    - Install the service according to [Issuer Front-End](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/install.md)
 
 10. Run the EUDIW Issuer Back-end
 
