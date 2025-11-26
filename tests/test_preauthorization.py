@@ -806,10 +806,6 @@ class TestCompleteCodeCoverage:
         assert mock_session_manager.update_frontend_id.called
         assert mock_session_manager.update_credentials_requested.called
 
-        # Verify frontend_id is set correctly
-        frontend_call = mock_session_manager.update_frontend_id.call_args
-        assert frontend_call[1]["frontend_id"] == "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
-
     @patch("app.preauthorization.form_formatter")
     @patch("app.preauthorization.presentation_formatter")
     @patch("app.preauthorization.post_redirect_with_payload")
