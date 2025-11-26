@@ -186,3 +186,4 @@ External credential offer API
 
 ### Fixed
 install.md URLs 
+update .env example
