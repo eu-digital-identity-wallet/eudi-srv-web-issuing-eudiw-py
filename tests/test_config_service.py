@@ -43,11 +43,11 @@ def clear_env(monkeypatch):
 def test_default_service_urls():
     """Test that default URLs are correctly set when env vars are not provided."""
     conf = ConfService()
-    assert conf.service_url == "https://dev.issuer.eudiw.dev/"
-    assert conf.wallet_test_url == "https://dev.tester.issuer.eudiw.dev/"
+    assert conf.service_url == "https://backend.issuer.eudiw.dev/"
+    assert conf.wallet_test_url == "https://tester.issuer.eudiw.dev/"
     assert conf.revocation_service_url.endswith("/token_status_list/take")
     assert conf.revoke_service_url.endswith("/token_status_list/set")
-    assert conf.dynamic_presentation_url.startswith("https://dev.verifier-backend")
+    assert conf.dynamic_presentation_url.startswith("https://verifier-backend")
 
 
 def test_env_override(monkeypatch):

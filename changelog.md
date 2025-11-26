@@ -176,3 +176,14 @@ _11 Nov 2025_
 - Refactored and cleaned up code
 - Migrated configuration, variables, and secrets to `.env` format
 - Streamlined Dockerfile for minimal deployment
+
+## [0.9.1]
+
+_26 Nov 2025_
+
+### Added
+External credential offer API
+
+### Fixed
+install.md URLs 
+update .env example
