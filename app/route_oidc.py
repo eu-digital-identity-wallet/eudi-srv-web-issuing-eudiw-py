@@ -1147,6 +1147,31 @@ def credentialOffer2():
     return jsonify({"base64_img": qr_img_base64, "session_id": session_id})
 
 
+@oidc.route("/credential_offer_create", methods=["GET"])
+def credentialOfferCreate():
+    session_id = generate_unique_id()
+
+    credential_configuration_id = request.args.get("credential_configuration_id")
+
+    if not credential_configuration_id:
+        return {
+            "error": "invalid_request",
+            "error_description": "Missing required parameter: credential_configuration_id",
+        }, 400
+
+    credential_issuer = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+        "url"
+    ]
+
+    credential_offer = {
+        "credential_issuer": credential_issuer,
+        "credential_configuration_ids": [credential_configuration_id],
+        "grants": {"authorization_code": {"issuer_state": session_id}},
+    }
+
+    return credential_offer
+
+
 @oidc.route("/credential_offer", methods=["GET", "POST"])
 def credentialOffer():
 

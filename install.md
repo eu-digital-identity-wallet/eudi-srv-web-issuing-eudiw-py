@@ -258,7 +258,7 @@ This guide provides step-by-step instructions for deploying the **EUDIW Issuer**
 To complete the full EUDIW ecosystem, you will also need to deploy the associated Front-end and Authorization Server components.
 
 * **Front-end Installation:** Follow the guide to install the web issuing front-end component using Docker.
-    * [Front-end Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/dev/install.md#6-docker)
+    * [Front-end Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/install.md#6-docker)
 
 * **Authorization Server Installation:** Follow the guide to install the OIDC authorization server component using Docker.
-    * [Authorization Server Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-oidc-eudiw-py/blob/dev/install.md#6-docker)
+    * [Authorization Server Deployment Guide](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md#6-docker)

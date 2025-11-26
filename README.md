@@ -119,6 +119,9 @@ Yes. Please see how in [Install Docker](install.md#6-docker).
 
 Information and guides on the revocation service can be found in the following [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-statuslist-py).
 
+### J. Can an external service create a credential offer?
+Yes, please see how in [Credential Offer Endpoint](api_docs/credential_offer_create.md)
+
 ## How to contribute
 
 We welcome contributions to this project. To ensure that the process is smooth for everyone
