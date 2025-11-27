@@ -1,6 +1,6 @@
 services:
   issuer_backend:
-    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:main
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:latest
     ports:
       - "5000:5000"
     volumes:
