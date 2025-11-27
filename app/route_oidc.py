@@ -1144,6 +1144,10 @@ def credentialOffer2():
 
     qr_img_base64 = base64.b64encode(out.getvalue()).decode("utf-8")
 
+    cfgservice.app_logger.info(
+        f", Session ID: {session_id}, Credential offer successfully generated"
+    )
+    
     return jsonify({"base64_img": qr_img_base64, "session_id": session_id})
 
 

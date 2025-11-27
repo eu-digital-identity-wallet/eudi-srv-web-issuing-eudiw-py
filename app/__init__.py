@@ -94,6 +94,22 @@ def replace_domain(
     else:
         return obj
 
+def fix_key_attestations(data):
+    """
+    Recursively traverse the data structure and replace 
+    key_attestations_required: null with key_attestations_required: {}
+    """
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key == "key_attestations_required" and value is None:
+                data[key] = {}
+            else:
+                fix_key_attestations(value)
+    elif isinstance(data, list):
+        for item in data:
+            fix_key_attestations(item)
+    
+    return data
 
 def setup_metadata():
     global oidc_metadata
@@ -150,6 +166,10 @@ def setup_metadata():
             "source",
             "selective_disclosure",
         },
+    )
+
+    oidc_metadata_clean["credential_configurations_supported"] = fix_key_attestations(
+        oidc_metadata_clean["credential_configurations_supported"]
     )
 
     old_domain = oidc_metadata["credential_issuer"]

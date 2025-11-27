@@ -134,7 +134,10 @@ def mdocFormatter(
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
     revocation_json = None
-    if cfgservice.revocation_api_key:
+
+    country = current_session.country
+
+    if cfgservice.revocation_api_key and country not in ("AV", "AV2"):
         payload = (
             "doctype="
             + credential_metadata["doctype"]
