@@ -74,7 +74,6 @@ def validate_vp_token(response_json, credentials_requested):
         return True, "Status invalid:" + str(mdoc_cbor["status"])
 
     error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
-    error, errorMsg = validate_certificate(mdoc_cbor["documents"][0])
 
     if error == False:
 

@@ -292,6 +292,30 @@ class ConfCountries:
                 "client_secret": eidas_node_client_secret,
             },
         },
+        "AV": {
+            "name": "Trusted Issuer",
+            "pid_mdoc_privkey": "/etc/eudiw/age_verification/privKey/AgeVerificationDS-001.pem",
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/age_verification/cert/AgeVerificationDS-001_cert.der",
+            "un_distinguishing_sign": "AV",
+            "supported_credentials": [
+                "eu.europa.ec.eudi.age_verification_mdoc",
+                "eu.europa.ec.eudi.age_verification_mdoc_passport"
+            ],
+            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
+        },
+        "AV2": {
+            "name": "Non-Trusted Issuer",
+            "pid_mdoc_privkey": "/etc/eudiw/age_verification/privKey/bak/AgeVerificationDS-001.pem",
+            "pid_mdoc_privkey_passwd": None,  # None or bytes
+            "pid_mdoc_cert": "/etc/eudiw/age_verification/cert/bak/AgeVerificationDS-001_cert.der",
+            "un_distinguishing_sign": "AV",
+            "supported_credentials": [
+                "eu.europa.ec.eudi.age_verification_mdoc",
+                "eu.europa.ec.eudi.pid_mdoc"
+            ],
+            "dynamic_R2": cfgserv.service_url + "dynamic/form_R2",
+        },
     }
 
 
@@ -299,5 +323,8 @@ class ConfFrontend:
     registered_frontends = {
         cfgserv.default_frontend: {
             "url": os.getenv("DEFAULT_FRONTEND_URL", "https://ec.dev.issuer.eudiw.dev")
-        }
+        },
+        "6d725b3c-6d42-448e-8bfd-1eff1fcf152d": {
+            "url": "https://age-verification.issuer.eudiw.dev"
+        },
     }

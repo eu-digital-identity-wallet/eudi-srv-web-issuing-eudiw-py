@@ -82,6 +82,25 @@ def Supported_Countries():
     current_session = session_manager.get_session(session_id=session_id)
     # session["credentials_requested"] = credentials_requested
 
+    if "eu.europa.ec.eudi.age_verification_mdoc_passport" in  current_session.credentials_requested:
+        user_data = {"age_over_18": True}
+        session_manager.update_user_data(
+            session_id=session_id, user_data=user_data
+        )
+
+        current_session = session_manager.get_session(session_id=session_id)
+
+        return redirect(
+            url_get(
+                cfgserv.OpenID_first_endpoint,
+                {
+                    "token": current_session.jws_token,
+                    "username": session_id,
+                },
+            )
+        )
+
+
     display_countries = {}
     for country in cfgcountries.supported_countries:
         res = all(
@@ -161,7 +180,7 @@ def dynamic_R1(country):
     credentials_requested = current_session.credentials_requested
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
 
-    if country == "FC":
+    if country == "FC" or country == "AV" or country == "AV2":
 
         mandatory_attributes = getAttributesForm(current_session.credentials_requested)
         if "user_pseudonym" in mandatory_attributes:
@@ -498,7 +517,7 @@ def dynamic_R2_data_collect(country, session_id, access_token):
     country -- credential issuing country that user selected
     """
 
-    if country == "FC":
+    if country == "FC" or country == "AV" or country == "AV2":
 
         current_session = session_manager.get_session(session_id=session_id)
 
@@ -755,7 +774,7 @@ def credentialCreation(credential_request, data, country, session_id):
         # formatting_functions = document_mappings[doctype]["formatting_functions"]
 
         form_data = {}
-        if country == "FC":
+        if country == "FC" or country == "AV" or country == "AV2":
             form_data = data
 
         elif country == "sample":
@@ -1177,8 +1196,6 @@ def Dynamic_form():
     """Form PID page.
     Form page where the user can enter its PID data.
     """
-    # session["route"] = "/dynamic/form"
-    # session["country"] = "FC"
 
     session_id = session["session_id"]
 

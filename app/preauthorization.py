@@ -131,7 +131,6 @@ def preauthRed():
 
 @preauth.route("/preauth_form", methods=["GET", "POST"])
 def preauth_form():
-    # session["country"] = "FC"
 
     form_data = request.form.to_dict()
 
@@ -360,12 +359,17 @@ def request_preauth_token(scope):
 
     tx_code = _response.get("tx_code")
 
+    if scope == "eu.europa.ec.eudi.age_verification_mdoc" or scope == "eu.europa.ec.eudi.age_verification_mdoc_passport":
+        country = "AV"
+    else:
+        country = "FC"
+
     session_manager.add_session(
         session_id=session_id,
         pre_authorized_code=preauth_code,
         scope=scope,
         tx_code=tx_code,
-        country="FC",
+        country=country,
     )
 
     return session_id
