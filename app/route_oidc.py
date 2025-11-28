@@ -491,9 +491,14 @@ def generate_credentials(credential_request, session_id):
 
     elif "proofs" in credential_request:
         for alg, key_list in credential_request["proofs"].items():
-            if alg != "jwt":
-                return {"error": "proof currently not supported"}
-            else:
+            if alg == "attestation":
+                for _attestation in key_list:
+                    claims = decode_verify_attestation(_attestation)
+                    for _jwk in claims["attested_keys"]:
+                        device_key = pKfromJWK(_jwk)
+                        pubKeys.append({"attestation": device_key})
+
+            elif alg == "jwt":
                 for jwt_ in key_list:
                     try:
                         device_key = pKfromJWT(jwt_)
@@ -508,6 +513,9 @@ def generate_credentials(credential_request, session_id):
                 session_manager.update_is_batch_credential(
                     session_id=session_id, is_batch_credential=True
                 )
+            else:
+
+                return {"error": "proof currently not supported"}
 
         formatter_request.update({"proofs": pubKeys})
 
