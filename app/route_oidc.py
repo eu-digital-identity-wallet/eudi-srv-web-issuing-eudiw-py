@@ -463,7 +463,7 @@ def decode_verify_attestation(jwt_raw):
 
     return claims
 
-
+import jwt
 def generate_credentials(credential_request, session_id):
     formatter_request = {}
 
@@ -500,19 +500,25 @@ def generate_credentials(credential_request, session_id):
 
             elif alg == "jwt":
                 for jwt_ in key_list:
-                    try:
-                        device_key = pKfromJWT(jwt_)
-                        pubKeys.append({alg: device_key})
-                    except Exception as e:
-                        _resp = {
-                            "error": "invalid_proof",
-                            "error_description": str(e),
-                        }
-                        return _resp
+                    header = jwt.get_unverified_header(jwt_)
+                    if "key_attestation" in header:
+                        header = jwt.get_unverified_header(jwt_)
+                        key_attestation = header.get("key_attestation")
+                        claims = decode_verify_attestation(key_attestation)
+                        for _jwk in claims["attested_keys"]:
+                            device_key = pKfromJWK(_jwk)
+                            pubKeys.append({"attestation": device_key})
+                    else:
+                        try:
+                            device_key = pKfromJWT(jwt_)
+                            pubKeys.append({alg: device_key})
+                        except Exception as e:
+                            _resp = {
+                                "error": "invalid_proof",
+                                "error_description": str(e),
+                            }
+                            return _resp 
 
-                session_manager.update_is_batch_credential(
-                    session_id=session_id, is_batch_credential=True
-                )
             else:
 
                 return {"error": "proof currently not supported"}
@@ -529,6 +535,11 @@ def generate_credentials(credential_request, session_id):
             pubKeys.append({"attestation": device_key})
 
         formatter_request.update({"proofs": pubKeys})
+
+    if len(pubKeys) > 1:
+        session_manager.update_is_batch_credential(
+                    session_id=session_id, is_batch_credential=True
+                )
 
     redirect_uri = cfgservice.service_url + "dynamic/dynamic_R2"
 
@@ -726,6 +737,13 @@ def credential():
     )
     _response["notification_id"] = notification_id
 
+
+    if "error" in _response:
+        cfgservice.app_logger.error(
+            f", Session ID: {session_id}, Credential response with error, Payload: {_response}"
+        )
+        return jsonify(_response), 400
+
     # Deferred case. Issuer doesnt have the data yet
 
     is_deferred = False
@@ -765,7 +783,7 @@ def credential():
             return _response, 202
 
         cfgservice.app_logger.info(
-            f", Session ID: {session_id}, Credential Issuance Succesfull"
+            f", Session ID: {session_id}, Credential Issuance Successful"
         )
         return _response, 200
 
@@ -773,7 +791,7 @@ def credential():
         return _response, 202
 
     cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential Issuance Succesfull"
+        f", Session ID: {session_id}, Credential Issuance Successful"
     )
     return _response, 200
 
@@ -956,6 +974,12 @@ def deferred_credential():
         credential_request=validated_credential_request, session_id=session_id
     )
 
+    if "error" in _response:
+        cfgservice.app_logger.error(
+            f", Session ID: {session_id}, Credential response with error, Payload: {_response}"
+        )
+        return jsonify(_response), 400
+
     # add notification_id
     notification_id = str(uuid.uuid4())
     session_manager.store_notification_id(
@@ -991,7 +1015,7 @@ def deferred_credential():
             return _response, 202
 
         cfgservice.app_logger.info(
-            f", Session ID: {session_id}, Credential Issuance Succesfull"
+            f", Session ID: {session_id}, Credential Issuance Successful"
         )
         return _response, 200
 
@@ -999,7 +1023,7 @@ def deferred_credential():
         return _response, 202
 
     cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential Issuance Succesfull"
+        f", Session ID: {session_id}, Credential Issuance Successful"
     )
     return _response, 200
 
@@ -1110,7 +1134,7 @@ def get_logs_by_session():
                             seen_lines.add(stripped_line)
                             matches.append(stripped_line)
 
-                            if "Credential Issuance Succesfull" in stripped_line:
+                            if "Credential Issuance Successful" in stripped_line:
                                 successful = True
         except FileNotFoundError:
             continue
@@ -1153,7 +1177,7 @@ def credentialOffer2():
     qr_img_base64 = base64.b64encode(out.getvalue()).decode("utf-8")
 
     cfgservice.app_logger.info(
-        f", Session ID: {session_id}, Credential offer successfully generated"
+        f", Session ID: {session_id}, Credential offer successfully generated, uri: {uri}"
     )
     
     return jsonify({"base64_img": qr_img_base64, "session_id": session_id})

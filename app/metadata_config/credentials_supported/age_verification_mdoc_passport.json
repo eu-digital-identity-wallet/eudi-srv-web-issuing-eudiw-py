@@ -20,7 +20,7 @@
       "credential_metadata": {
       "display":[
          {
-            "name":"Proof of Age",
+            "name":"Proof of Age (Passport)",
             "locale":"en",
             "logo":{
                "uri":"https://examplestate.com/public/pid.png",
