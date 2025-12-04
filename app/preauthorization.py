@@ -335,7 +335,7 @@ def credentialOfferReq2():
     json_string = json.dumps(credential_offer)
 
     uri = (
-        f"openid-credential-offer://credential_offer?credential_offer="
+        f"{cfgservice.credential_offer_scheme}credential_offer?credential_offer="
         + urllib.parse.quote(json_string, safe=":/")
     )
 

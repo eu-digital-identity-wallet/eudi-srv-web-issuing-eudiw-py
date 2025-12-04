@@ -52,6 +52,14 @@ class ConfService:
         "DEFAULT_FRONTEND", "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
     )
 
+    oid4vp_scheme = os.getenv(
+        "OID4VP_SCHEME", "haip-vp://"
+    )
+
+    credential_offer_scheme = os.getenv(
+        "CREDENTIAL_OFFER_SCHEME", "haip-vci://"
+    )
+
     # ---------------------------------------------------------------------------
     trusted_CAs_path = os.getenv("TRUSTED_CAS_PATH", "/etc/eudiw/pid-issuer/cert/")
 
