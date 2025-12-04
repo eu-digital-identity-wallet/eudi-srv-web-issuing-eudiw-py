@@ -189,7 +189,7 @@ def oid4vp_call():
     domain = urlparse(url).netloc
 
     deeplink_url = (
-        "eudi-openid4vp://"
+        cfgservice.oid4vp_scheme
         + domain
         + "?client_id="
         + response_same["client_id"]
@@ -198,7 +198,7 @@ def oid4vp_call():
     )
 
     qr_code_url = (
-        "eudi-openid4vp://"
+        cfgservice.oid4vp_scheme
         + domain
         + "?client_id="
         + response_cross["client_id"]

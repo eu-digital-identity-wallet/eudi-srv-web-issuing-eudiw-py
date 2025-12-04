@@ -1079,7 +1079,7 @@ def credential_offer():
         data_payload={
             "cred": credentials,
             "redirect_url": cfgservice.service_url,
-            "credential_offer_URI": "openid-credential-offer://",
+            "credential_offer_URI": cfgservice.credential_offer_scheme,
         },
     )
 
@@ -1168,7 +1168,7 @@ def credentialOffer2():
     }
 
     json_string = json.dumps(credential_offer)
-    uri = f"openid-credential-offer://credential_offer?credential_offer={urllib.parse.quote(json_string, safe=':/')}"
+    uri = f"{cfgservice.credential_offer_scheme}credential_offer?credential_offer={urllib.parse.quote(json_string, safe=':/')}"
 
     qrcode = segno.make(uri)
     out = io.BytesIO()
