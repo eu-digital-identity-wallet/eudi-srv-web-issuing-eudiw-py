@@ -227,7 +227,6 @@ def update_dates_and_special_claims(
 
 def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
     list_fields = [
-        "driving_privileges",
         "places_of_work",
         "legislation",
         "employment_details",

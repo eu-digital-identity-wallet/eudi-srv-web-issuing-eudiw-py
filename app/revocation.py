@@ -75,7 +75,11 @@ def revocation_choice():
                 {cred: credential["credential_metadata"]["display"][0]["name"]}
             )
 
-        if credential["format"] == "mso_mdoc":
+        if (credential["format"] == "mso_mdoc"
+            and credential["scope"] not in [
+                "eu.europa.ec.eudi.age_verification_mdoc_passport",
+                "eu.europa.ec.eudi.age_verification_mdoc",
+        ]):
             credentials["mdoc format"].update(
                 {cred: credential["credential_metadata"]["display"][0]["name"]}
             )
@@ -112,16 +116,24 @@ def oid4vp_call():
         query_id = f"query_{query_id_counter}"
         dcql_credential = {"id": query_id, "format": credential_format, "claims": []}
 
+        session[query_id] = credential_format
+
         # Add the meta object based on the format
         if credential_format == "dc+sd-jwt":
             dcql_credential["meta"] = {"vct_values": [credential_config["vct"]]}
+
+            for claim in credential_metadata["claims"]:
+                dcql_credential["claims"].append(
+                    {"path": claim["path"]}
+                )
+
         elif credential_format == "mso_mdoc":
             dcql_credential["meta"] = {"doctype_value": credential_config["doctype"]}
-
-        for claim in credential_metadata["claims"]:
-            dcql_credential["claims"].append(
-                {"path": claim["path"], "intent_to_retain": False}
-            )
+            for claim in credential_metadata["claims"]:
+                dcql_credential["claims"].append(
+                    {"path": claim["path"], "intent_to_retain": False}
+                )
+        
 
         dcql_credentials.append(dcql_credential)
 
@@ -147,7 +159,7 @@ def oid4vp_call():
             "request_uri_method": "post",
             "dcql_query": dcql_query,
             "wallet_response_redirect_uri_template": cfgservice.service_url
-            + "getpidoid4vp?response_code={RESPONSE_CODE}&session_id="
+            + "revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id="
             + session_id,
         }
     )
@@ -211,8 +223,9 @@ def oid4vp_call():
 
     target_url = ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"]
 
+    
     return post_redirect_with_payload(
-        target_url=f"{target_url}/display_revocation_authorization",
+        target_url=f"{target_url}/display_revocation_qr_code",
         data_payload={
             "url_data": deeplink_url,
             "redirect_url": cfgservice.service_url,
@@ -232,6 +245,15 @@ def b64url_decode(data):
     except Exception as e:
         raise ValueError(f"Invalid base64 data: {e}")
 
+def b64_decode_x5c(data):
+    if not re.fullmatch(r"[A-Za-z0-9+/]*={0,2}", data):
+        raise ValueError("Invalid base64 characters in x5c certificate")
+
+    padding = "=" * (-len(data) % 4)
+    try:
+        return base64.b64decode(data + padding)
+    except Exception as e:
+        raise ValueError(f"Invalid base64 in x5c: {e}")
 
 def extract_public_key_from_x5c(
     jwt_raw: str,
@@ -258,7 +280,7 @@ def extract_public_key_from_x5c(
     if not x5c_chain:
         raise ValueError("x5c header not found in JWT")
 
-    x5c_cert_der = b64url_decode(x5c_chain[0])
+    x5c_cert_der = b64_decode_x5c(x5c_chain[0])
     x509_cert = x509.load_der_x509_certificate(x5c_cert_der, default_backend())
     return x509_cert.public_key(), unverified_header["alg"]
 
@@ -369,35 +391,28 @@ def oid4vp_get():
             ", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device"
         )
 
+        current_session = session_manager.get_session(session_id=session["session_id"])
+
         response_code = request.args.get("response_code")
-        """ presentation_id = oid4vp_requests[request.args.get("session_id")]["response"][
-            "transaction_id"
-        ] """
 
-        # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
-        """ if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
-            raise ValueError("Invalid presentation_id")
+        presentation_id = current_session.oid4vp_transaction_id
 
-        url = (
-            cfgservice.dynamic_presentation_url
-            + presentation_id
-            + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
-            + "&response_code="
-            + response_code
-        ) """
+        url = f"{cfgservice.dynamic_presentation_url}{presentation_id}?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=&response_code={response_code}"
 
     elif "presentation_id" in request.args:
-        presentation_id = request.args["presentation_id"]
-
-        # Validate presentation_id: allow only base64url characters (alphanumeric, '-', '_')
-        if not re.fullmatch(r"[A-Za-z0-9\-_]+", presentation_id):
-            raise ValueError("Invalid presentation_id")
-
-        url = (
-            cfgservice.dynamic_presentation_url
-            + presentation_id
-            + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
+        cfgservice.app_logger.info(
+            f", Session ID: {session['session_id']}, oid4vp flow: cross_device"
         )
+
+        presentation_id = request.args.get("presentation_id")
+
+        if not presentation_id:
+            raise ValueError("Presentation id is required")
+
+        if not re.match(r"^[A-Za-z0-9_-]+$", presentation_id):
+            raise ValueError("Invalid Presentation id format")
+
+        url = f"{cfgservice.dynamic_presentation_url}{presentation_id}?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
 
     else:
         return jsonify({"error": "Missing required parameters"}), 400
@@ -417,7 +432,13 @@ def oid4vp_get():
 
     resp = {"dc+sd-jwt": [], "mso_mdoc": []}
 
-    if len(response_json["vp_token"]) == 1:
+    for query_number, query in response_json["vp_token"].items():
+        if session[query_number] == "mso_mdoc":
+            credentials["mso_mdoc"].extend(query)
+        elif session[query_number] == "dc+sd-jwt":
+            credentials["dc+sd-jwt"].extend(query)  
+
+    """ if len(response_json["vp_token"]) == 1:
 
         format = response_json["presentation_submission"]["descriptor_map"][0]["format"]
 
@@ -443,11 +464,13 @@ def oid4vp_get():
             if format == "mso_mdoc":
                 credentials["mso_mdoc"].append(response_json["vp_token"][index])
             elif format == "dc+sd-jwt":
-                credentials["dc+sd-jwt"].append(response_json["vp_token"][index])
+                credentials["dc+sd-jwt"].append(response_json["vp_token"][index]) """
+
 
     for credential in credentials["mso_mdoc"]:
 
         statuses = get_status_mdoc(credential)
+        
         if isinstance(statuses, list):
             resp["mso_mdoc"].extend(statuses)
         else:
@@ -473,10 +496,7 @@ def oid4vp_get():
                     }
                 )
 
-    print(display_list)
-
     revocation_id = generate_unique_id()
-
     revocation_requests.update(
         {
             revocation_id: {
@@ -520,6 +540,7 @@ def revoke():
 
     for _format in status_lists:
         for _status in status_lists[_format]:
+
             if "identifier_list" in _status:
                 id = _status["identifier_list"]["id"]
                 uri = _status["identifier_list"]["uri"]
@@ -530,11 +551,12 @@ def revoke():
                     response = requests.post(
                         cfgservice.revoke_service_url, headers=headers, data=payload
                     )
+
                     if response.status_code == 200:
-                        print(f"[OK] {uri} id={id}")
+                        print(f"[OK] {uri} id={id}", flush=True)
                     else:
                         print(
-                            f"[FAIL] {uri} id={id} -> {response.status_code} {response.text}"
+                            f"[FAIL] {uri} id={id} -> {response.status_code} {response.text}",flush=True
                         )
 
                 except Exception as e:
@@ -545,16 +567,16 @@ def revoke():
                 uri = _status["status_list"]["uri"]
 
                 payload = f"uri={quote_plus(uri)}&idx={idx}&status=1"
-
                 try:
                     response = requests.post(
                         cfgservice.revoke_service_url, headers=headers, data=payload
                     )
+
                     if response.status_code == 200:
-                        print(f"[OK] {uri} idx={idx}")
+                        print(f"[OK] {uri} idx={idx}",flush=True)
                     else:
                         print(
-                            f"[FAIL] {uri} idx={idx} -> {response.status_code} {response.text}"
+                            f"[FAIL] {uri} idx={idx} -> {response.status_code} {response.text}", flush=True
                         )
 
                 except Exception as e:
