@@ -187,3 +187,26 @@ External credential offer API
 ### Fixed
 install.md URLs 
 update .env example
+
+## [0.9.2]
+
+_28 Nov 2025_
+
+### Fixed
+Fix invalid version tag in Docker Compose file by @thirtified
+
+## [0.9.3]
+
+_05 Dec 2025_
+
+### Added
+OID4VP and Credential offer scheme env variables
+
+### Fixed
+Fix Pre-Authorization Front-End URL Handling
+mDL with multiple driving privileges
+key_attestation in JWT format handling
+Form Formatter Not Marking Mandatory Attributes
+
+### Changed
+Updated revocation test to OID4VP version 1

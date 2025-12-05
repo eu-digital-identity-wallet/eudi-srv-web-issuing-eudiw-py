@@ -500,7 +500,17 @@ def generate_credentials(credential_request, session_id):
 
             elif alg == "jwt":
                 for jwt_ in key_list:
-                    header = jwt.get_unverified_header(jwt_)
+                    try:
+                        header = jwt.get_unverified_header(jwt_)
+                    except jwt.DecodeError as e:
+                        cfgservice.app_logger.info(
+                            f", Session ID: {session_id}, invalid proof in credential request"
+                        )
+                    except Exception as e:
+                        cfgservice.app_logger.info(
+                            f", Session ID: {session_id}, invalid proof in credential request"
+                        )
+                        
                     if "key_attestation" in header:
                         header = jwt.get_unverified_header(jwt_)
                         key_attestation = header.get("key_attestation")
@@ -513,6 +523,9 @@ def generate_credentials(credential_request, session_id):
                             device_key = pKfromJWT(jwt_)
                             pubKeys.append({alg: device_key})
                         except Exception as e:
+                            cfgservice.app_logger.info(
+                                    f", Session ID: {session_id}, invalid proof in credential request"
+                                )
                             _resp = {
                                 "error": "invalid_proof",
                                 "error_description": str(e),
@@ -520,7 +533,9 @@ def generate_credentials(credential_request, session_id):
                             return _resp 
 
             else:
-
+                cfgservice.app_logger.info(
+                                    f", Session ID: {session_id}, invalid proof in credential request"
+                                )
                 return {"error": "proof currently not supported"}
 
         formatter_request.update({"proofs": pubKeys})
