@@ -134,7 +134,10 @@ def mdocFormatter(
     mdoci = MdocCborIssuer(private_key=cose_pkey, alg="ES256")
 
     revocation_json = None
-    if cfgservice.revocation_api_key:
+
+    country = current_session.country
+
+    if cfgservice.revocation_api_key and country not in ("AV", "AV2"):
         payload = (
             "doctype="
             + credential_metadata["doctype"]
@@ -297,13 +300,13 @@ def sdjwtFormatter(PID, country):
 
     vct = PID["credential_metadata"]["vct"]  # doctype2vct(doctype)
 
-    doctype = vct2doctype(vct)
+    #doctype = vct2doctype(vct)
 
     revocation_json = None
 
     if cfgservice.revocation_api_key:
         payload = (
-            "doctype=" + doctype + "&country=" + country + "&expiry_date=" + validity
+            "doctype=" + vct + "&country=" + country + "&expiry_date=" + validity
         )
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",

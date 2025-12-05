@@ -39,10 +39,6 @@ from flask_session import Session
 from flask_cors import CORS
 from werkzeug.debug import *
 from werkzeug.exceptions import HTTPException
-from idpyoidc.configure import Configuration
-from idpyoidc.configure import create_from_config_file
-from idpyoidc.server.configure import OPConfiguration
-from idpyoidc.server import Server
 from urllib.parse import urlparse
 from pycose.keys.ec2 import EC2Key
 from typing import Dict, Any, List, Union, cast
@@ -94,6 +90,22 @@ def replace_domain(
     else:
         return obj
 
+def fix_key_attestations(data):
+    """
+    Recursively traverse the data structure and replace 
+    key_attestations_required: null with key_attestations_required: {}
+    """
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key == "key_attestations_required" and value is None:
+                data[key] = {}
+            else:
+                fix_key_attestations(value)
+    elif isinstance(data, list):
+        for item in data:
+            fix_key_attestations(item)
+    
+    return data
 
 def setup_metadata():
     global oidc_metadata
@@ -150,6 +162,10 @@ def setup_metadata():
             "source",
             "selective_disclosure",
         },
+    )
+
+    oidc_metadata_clean["credential_configurations_supported"] = fix_key_attestations(
+        oidc_metadata_clean["credential_configurations_supported"]
     )
 
     old_domain = oidc_metadata["credential_issuer"]
@@ -309,14 +325,9 @@ def page_not_found(e):
 from typing import Optional
 
 
-class FlaskIssuer(Flask):
-    srv_config: Optional[OPConfiguration] = None
-    server: Optional[Server] = None
-
-
 def create_app(test_config=None):
     # create and configure the app
-    app = FlaskIssuer(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True)
 
     app.register_error_handler(Exception, handle_exception)
     app.register_error_handler(404, page_not_found)

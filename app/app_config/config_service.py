@@ -25,7 +25,7 @@ NOTE: You should only change it if you understand what you're doing.
 """
 
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from concurrent_log_handler import ConcurrentTimedRotatingFileHandler
 import os
 import sys
 
@@ -50,6 +50,14 @@ class ConfService:
 
     default_frontend = os.getenv(
         "DEFAULT_FRONTEND", "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+    )
+
+    oid4vp_scheme = os.getenv(
+        "OID4VP_SCHEME", "haip-vp://"
+    )
+
+    credential_offer_scheme = os.getenv(
+        "CREDENTIAL_OFFER_SCHEME", "haip-vci://"
     )
 
     # ---------------------------------------------------------------------------
@@ -163,6 +171,8 @@ class ConfService:
             "eu.europa.ec.eudi.tax_residency_vc_sd_jwt",
             "eu.europa.ec.eudi.employee_mdoc",
             "eu.europa.ec.eudi.pid_mdoc_deferred",
+            "eu.europa.ec.eudi.age_verification_mdoc",
+            "eu.europa.ec.eudi.age_verification_mdoc_passport"
         ],
     }
 
@@ -248,52 +258,51 @@ class ConfService:
 
     auth_log_file = os.getenv("AUTH_LOG_FILE", "/tmp/oidc_log/logs.log")
 
+
     def _setup_app_logger():
-
         logger = logging.getLogger("app_logger")
-
-        if logger.handlers and any(
-            isinstance(h, TimedRotatingFileHandler) for h in logger.handlers
-        ):
+        
+        # Check if already configured (avoid duplicates)
+        if logger.handlers:
             return logger
-
-        # Clear any broken handlers
-        logger.handlers.clear()
-
-        log_dir = "/tmp/log_dev"
-        # log_dir = "../../log"
-        log_file_info = "logs.log"
-
-        backup_count = 7
-
+        
+        env_log_path = os.getenv("LOG_FILE", "/tmp/log/logs.log")
+        log_dir = os.path.dirname(env_log_path)
+        
         try:
-            log_dir = os.path.dirname(os.getenv("LOG_FILE", "/tmp/log_dev/logs.log"))
-            os.makedirs(log_dir, exist_ok=True)
-        except FileExistsError:
-            pass
-
-        log_handler_info = TimedRotatingFileHandler(
-            filename=f"{log_dir}/{log_file_info}",
-            when="midnight",  # Rotation midnight
-            interval=1,  # new file each day
-            backupCount=backup_count,
+            os.makedirs(log_dir, mode=0o755, exist_ok=True)
+        except OSError as e:
+            print(f"Warning: Could not create log directory: {e}", file=sys.stderr)
+        
+        formatter = logging.Formatter(
+            "%(asctime)s %(name)s %(levelname)s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
         )
-
-        formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
-        log_handler_info.setFormatter(formatter)
-        log_handler_info.setLevel(logging.INFO)
-
-        # Console handler for stdout
+        
+        try:
+            file_handler = ConcurrentTimedRotatingFileHandler(
+                filename=env_log_path,
+                when='midnight',      # Rotate at midnight
+                interval=1,           # Daily rotation
+                backupCount=7,        # Keep 7 days of logs
+                encoding='utf-8',
+                    utc=False
+            )
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(logging.INFO)
+            logger.addHandler(file_handler)
+        except Exception as e:
+            print(f"Warning: Could not create file handler: {e}", file=sys.stderr)
+        
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
         console_handler.setLevel(logging.INFO)
-
-        app_logger = logging.getLogger("app_logger")
-        app_logger.addHandler(log_handler_info)
-        app_logger.addHandler(console_handler)
-        app_logger.setLevel(logging.INFO)
-        app_logger.propagate = False
-
-        return app_logger
+        logger.addHandler(console_handler)
+        
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+        
+        return logger
+    
 
     app_logger = _setup_app_logger()

@@ -131,7 +131,6 @@ def preauthRed():
 
 @preauth.route("/preauth_form", methods=["GET", "POST"])
 def preauth_form():
-    # session["country"] = "FC"
 
     form_data = request.form.to_dict()
 
@@ -213,8 +212,11 @@ def generate_offer(data):
             "url"
         ]
     else:
-        credential_issuer = cfgservice.service_url[:-1]
+        credential_issuer = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+            "url"
+        ]
 
+    
     credential_offer = {
         "credential_issuer": credential_issuer,
         "credential_configuration_ids": current_session.credentials_requested,
@@ -317,7 +319,7 @@ def credentialOfferReq2():
     tx_code = current_session.tx_code
 
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"],
         "credential_configuration_ids": credential_ids,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
@@ -336,7 +338,7 @@ def credentialOfferReq2():
     json_string = json.dumps(credential_offer)
 
     uri = (
-        f"openid-credential-offer://credential_offer?credential_offer="
+        f"{cfgservice.credential_offer_scheme}credential_offer?credential_offer="
         + urllib.parse.quote(json_string, safe=":/")
     )
 
@@ -360,12 +362,17 @@ def request_preauth_token(scope):
 
     tx_code = _response.get("tx_code")
 
+    if scope == "eu.europa.ec.eudi.age_verification_mdoc" or scope == "eu.europa.ec.eudi.age_verification_mdoc_passport":
+        country = "AV"
+    else:
+        country = "FC"
+
     session_manager.add_session(
         session_id=session_id,
         pre_authorized_code=preauth_code,
         scope=scope,
         tx_code=tx_code,
-        country="FC",
+        country=country,
     )
 
     return session_id
