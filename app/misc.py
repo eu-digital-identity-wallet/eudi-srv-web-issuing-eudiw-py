@@ -258,6 +258,7 @@ def getMandatoryAttributes(claims, namespace):
             attributes_form[attribute_name] = {
                 "type": claim.get("value_type", "string"),
                 "filled_value": None,
+                "mandatory": True,
             }
 
             if "issuer_conditions" in claim:

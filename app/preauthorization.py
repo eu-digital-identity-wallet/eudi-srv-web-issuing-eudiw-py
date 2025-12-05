@@ -212,8 +212,11 @@ def generate_offer(data):
             "url"
         ]
     else:
-        credential_issuer = cfgservice.service_url[:-1]
+        credential_issuer = ConfFrontend.registered_frontends[cfgservice.default_frontend][
+            "url"
+        ]
 
+    
     credential_offer = {
         "credential_issuer": credential_issuer,
         "credential_configuration_ids": current_session.credentials_requested,
@@ -316,7 +319,7 @@ def credentialOfferReq2():
     tx_code = current_session.tx_code
 
     credential_offer = {
-        "credential_issuer": cfgservice.service_url[:-1],
+        "credential_issuer": ConfFrontend.registered_frontends[cfgservice.default_frontend]["url"],
         "credential_configuration_ids": credential_ids,
         "grants": {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
