@@ -102,6 +102,7 @@ def oid4vp_call():
     form = list(form_keys)
     form.remove("proceed")
     session_id = str(uuid.uuid4())
+    session["session_id"] = session_id
 
     input_descriptors = []
 
@@ -386,12 +387,15 @@ def get_status_mdoc(mdoc_credential: str) -> Union[list, dict]:
 @revocation.route("getoid4vp", methods=["GET", "POST"])
 def oid4vp_get():
 
+    session_id = session["session_id"]
+
     if "response_code" in request.args and "session_id" in request.args:
+
         cfgservice.app_logger.info(
-            ", Session ID: " + session["session_id"] + ", " + "oid4vp flow: same_device"
+            ", Session ID: " + session_id + ", " + "oid4vp flow: same_device"
         )
 
-        current_session = session_manager.get_session(session_id=session["session_id"])
+        current_session = session_manager.get_session(session_id=session_id)
 
         response_code = request.args.get("response_code")
 
@@ -401,7 +405,7 @@ def oid4vp_get():
 
     elif "presentation_id" in request.args:
         cfgservice.app_logger.info(
-            f", Session ID: {session['session_id']}, oid4vp flow: cross_device"
+            f", Session ID: {session_id}, oid4vp flow: cross_device"
         )
 
         presentation_id = request.args.get("presentation_id")
