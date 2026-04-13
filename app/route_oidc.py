@@ -1195,7 +1195,7 @@ def credentialOfferCreate():
             "error_description": "Missing required parameter: credential_configuration_id",
         }, 400
 
-    CONFIGURATION["frontend"]["frontends_config"][CONFIGURATION["frontend"]["default"]]["url"]
+    credential_issuer = CONFIGURATION["frontend"]["frontends_config"][CONFIGURATION["frontend"]["default"]]["url"]
 
     credential_offer = {
         "credential_issuer": credential_issuer,
