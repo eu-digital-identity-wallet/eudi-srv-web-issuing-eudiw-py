@@ -315,7 +315,7 @@
         },
         {
            "path":[
-              "email_address"
+              "email"
            ],
            "mandatory":false,
            "value_type":"string",
@@ -329,7 +329,7 @@
         },
         {
            "path":[
-              "mobile_phone_number"
+              "phone_number"
            ],
            "mandatory":false,
            "value_type":"string",

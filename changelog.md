@@ -228,3 +228,13 @@ _02 Apr 2026_
 ### Changed
 - Configuration to yaml
 - install.md
+
+
+
+## [0.9.5]
+
+_29 Apr 2026_
+
+### Fixed
+- Update PID SD-JWT VC attributes for `email_address` and `mobile_phone_number` 
+- Update TAX mdoc metadata field `credential_signing_alg_values_supported`
