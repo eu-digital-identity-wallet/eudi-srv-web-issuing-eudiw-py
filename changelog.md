@@ -237,4 +237,5 @@ _29 Apr 2026_
 
 ### Fixed
 - Update PID SD-JWT VC attributes for `email_address` and `mobile_phone_number` 
+- Update PID SD-JWT VC attribute `address`
 - Update TAX mdoc metadata field `credential_signing_alg_values_supported`

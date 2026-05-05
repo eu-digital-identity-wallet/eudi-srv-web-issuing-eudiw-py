@@ -257,6 +257,7 @@ def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
         "credential_holder",
         "subject",
         "residence_address",
+        "address"
     ]
 
     for field in list_fields:
