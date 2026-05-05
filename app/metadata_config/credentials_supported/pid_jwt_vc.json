@@ -235,7 +235,7 @@
            ],
            "mandatory":false,
            "source":"user",
-           "value_type":"uint",
+           "value_type":"string",
            "display":[
               {
                  "name":"House Number",
