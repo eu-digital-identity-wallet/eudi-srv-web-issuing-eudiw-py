@@ -16,13 +16,12 @@
 #
 ###############################################################################
 
-import pytest
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.hazmat.primitives.asymmetric.ec import SECP256R1
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from app.boot_validate import validate_cert_algo  # adjust if needed
 
@@ -41,8 +40,8 @@ def create_self_signed_cert(private_key, algo=hashes.SHA256()):
         .issuer_name(issuer)
         .public_key(private_key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.utcnow())
-        .not_valid_after(datetime.utcnow() + timedelta(days=10))
+        .not_valid_before(datetime.now(UTC))
+        .not_valid_after(datetime.now(UTC) + timedelta(days=10))
         .sign(private_key, algo)
     )
     return cert.public_bytes(serialization.Encoding.PEM)

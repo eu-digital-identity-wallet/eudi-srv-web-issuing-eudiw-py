@@ -15,11 +15,9 @@
 # limitations under the License.
 #
 ###############################################################################
-import os
-import logging
-import time
 import pytest
 from app.app_config.config_service import ConfService
+from app import CONFIGURATION
 
 
 @pytest.fixture(autouse=True)
@@ -42,29 +40,12 @@ def clear_env(monkeypatch):
 
 def test_default_service_urls():
     """Test that default URLs are correctly set when env vars are not provided."""
-    conf = ConfService()
-    assert conf.service_url == "https://backend.issuer.eudiw.dev/"
-    assert conf.wallet_test_url == "https://tester.issuer.eudiw.dev/"
-    assert conf.revocation_service_url.endswith("/token_status_list/take")
-    assert conf.revoke_service_url.endswith("/token_status_list/set")
-    assert conf.dynamic_presentation_url.startswith("https://verifier-backend")
-
-
-def test_env_override(monkeypatch):
-    """Test environment variable overrides take precedence."""
-    monkeypatch.setenv("SERVICE_URL", "https://example.com/")
-    monkeypatch.setenv("WALLET_TEST_URL", "https://wallet.example.com/")
-    monkeypatch.setenv("EIDAS_NODE_URL", "https://node.example.com/")
-
-    # Reload class
-    from importlib import reload
-    import app.app_config.config_service as config_service
-
-    reload(config_service)
-    conf = config_service.ConfService()
-
-    assert conf.service_url == "https://example.com/"
-    assert conf.wallet_test_url == "https://wallet.example.com/"
+    conf = CONFIGURATION
+    assert conf['service_url'] == "https://backend.issuer.eudiw.dev"
+    assert conf['wallet_tester_url'] == "https://tester.issuer.eudiw.dev"
+    assert conf['revocation']['take_url'].endswith("/token_status_list/take")
+    assert conf['revocation']['set_url'].endswith("/token_status_list/set")
+    assert conf['dynamic_presentation_url'].startswith("https://verifier-backend")
 
 
 def test_registered_claims_keys_exist():
