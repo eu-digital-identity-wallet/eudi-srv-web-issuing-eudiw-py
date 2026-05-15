@@ -160,6 +160,9 @@ def formatter(data, un_distinguishing_sign, scope, format):
     # Normalize list and type fields
     normalize_list_and_type_fields(data, attributes_req, attributes_req2)
 
+    if requested_credential.get("scope") == "eu.europa.ec.eudi.pid_vc_sd_jwt":
+        normalize_address(data, attributes_req, attributes_req2)
+
     # Populate pdata
     populate_pdata(
         data,
@@ -256,8 +259,7 @@ def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
         "competent_institution",
         "credential_holder",
         "subject",
-        "residence_address",
-        "address"
+        "residence_address"
     ]
 
     for field in list_fields:
@@ -285,6 +287,23 @@ def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
     ):
         data["gender"] = int(data["gender"])
 
+def normalize_address(data, attributes_req, attributes_req2):
+    list_fields = [
+        "address"
+    ]
+
+    for field in list_fields:
+        if field in attributes_req and field in data:
+            if isinstance(data[field], str):
+                data[field] = json.loads(data[field])
+            if isinstance(data[field], list):
+                data[field] = data[field][0]
+
+        if field in attributes_req2 and field in data:
+            if isinstance(data[field], str):
+                data[field] = json.loads(data[field])
+            if isinstance(data[field], list):
+                data[field] = data[field][0]
 
 def populate_pdata(
     data,
