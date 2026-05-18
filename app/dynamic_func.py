@@ -158,7 +158,7 @@ def formatter(data, un_distinguishing_sign, scope, format):
     )
 
     # Normalize list and type fields
-    normalize_list_and_type_fields(data, attributes_req, attributes_req2)
+    normalize_list_and_type_fields(data, attributes_req, attributes_req2, requested_credential.get("scope"))
 
     # Populate pdata
     populate_pdata(
@@ -248,7 +248,7 @@ def update_dates_and_special_claims(
         data["credential_type"] = doctype_config["credential_type"]
 
 
-def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
+def normalize_list_and_type_fields(data, attributes_req, attributes_req2, scope=None):
     list_fields = [
         "places_of_work",
         "legislation",
@@ -256,9 +256,11 @@ def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
         "competent_institution",
         "credential_holder",
         "subject",
-        "residence_address",
-        "address"
+        "residence_address"
     ]
+
+    if scope == "eu.europa.ec.eudi.pid_vc_sd_jwt":
+        list_fields.append("address")
 
     for field in list_fields:
         if field in attributes_req and field in data:
@@ -284,7 +286,6 @@ def normalize_list_and_type_fields(data, attributes_req, attributes_req2):
         and data["gender"].isdigit()
     ):
         data["gender"] = int(data["gender"])
-
 
 def populate_pdata(
     data,
