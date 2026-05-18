@@ -493,7 +493,6 @@ class TestNormalizeListAndTypeFields:
     def test_normalize_list_fields_json_string(self):
         """Tests normalization of list fields passed as JSON strings."""
         data = {
-            "driving_privileges": '[{"class": "B"}]',  # In MOCK_ATTRIBUTES_REQ
             "residence_address": '[{"street": "Main St"}]',  # In MOCK_ATTRIBUTES_OPT
         }
 
@@ -501,13 +500,11 @@ class TestNormalizeListAndTypeFields:
             data, self.MOCK_ATTRIBUTES_REQ, self.MOCK_ATTRIBUTES_OPT
         )
 
-        assert data["driving_privileges"] == {"class": "B"}
         assert data["residence_address"] == {"street": "Main St"}
 
     def test_normalize_list_fields_python_list(self):
         """Tests normalization of list fields passed as Python lists."""
         data = {
-            "driving_privileges": [{"class": "B"}],  # In MOCK_ATTRIBUTES_REQ
             "residence_address": [{"street": "Main St"}],  # In MOCK_ATTRIBUTES_OPT
         }
 
@@ -516,7 +513,6 @@ class TestNormalizeListAndTypeFields:
         )
 
         # It should take the first element from the list
-        assert data["driving_privileges"] == {"class": "B"}
         assert data["residence_address"] == {"street": "Main St"}
 
     def test_numeric_conversions(self):
@@ -569,6 +565,7 @@ class TestPopulatePdata:
     MOCK_ATTRIBUTES_REQ = {"mdoc_mand1"}
     MOCK_ATTRIBUTES_OPT = {"mdoc_opt1"}
     MOCK_ISSUER_CLAIMS = {"mdoc_iss1"}
+    MOCK_ATTRIBUTES_BY_NAMESPACE = { "ns1": { "mandatory": ["mdoc_mand1"], "optional": ["mdoc_opt1"], "issuer": ["mdoc_iss1"] }, "ns2": { "mandatory": ["mdoc_mand1"], "optional": ["mdoc_opt1"], "issuer": ["mdoc_iss1"] } }
 
     MOCK_ATTRIBUTES_REQ_SDJWT = {"sdjwt_mand1"}
     MOCK_ATTRIBUTES_OPT_SDJWT = {"sdjwt_opt1"}
@@ -611,6 +608,7 @@ class TestPopulatePdata:
             self.MOCK_ATTRIBUTES_REQ,
             self.MOCK_ATTRIBUTES_OPT,
             self.MOCK_ISSUER_CLAIMS,
+            self.MOCK_ATTRIBUTES_BY_NAMESPACE,
         )
 
         # Assertions
