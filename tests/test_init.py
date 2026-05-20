@@ -18,7 +18,7 @@
 ###############################################################################
 import pytest
 import json
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 from werkzeug.exceptions import NotFound
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
@@ -35,23 +35,38 @@ from datetime import datetime, timedelta
 
 @pytest.fixture
 def mock_config_service(monkeypatch):
+    configuration = {
+        "service_url": "https://test-domain.com/",
+        "trusted_CAs_path": "/fake/path/to/CAs",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": { # Minimal mock frontend registry
+                    "url": "https://frontend.test"
+                }
+            }
+        },
+        "keys":  {
+            "credential_encryption_key": b"Key_Sample"
+        },
+        "logging": {
+            "backend_path": "/tmp/log/fakepath.log",
+            "log_level": "INFO"
+        }
+    }
     mock_cfgserv = Mock()
     mock_cfgserv.service_url = "https://test-domain.com/"
     mock_cfgserv.trusted_CAs_path = "/fake/path/to/CAs"
     mock_cfgserv.app_logger = Mock()
     mock_cfgserv.oidc = True
     mock_cfgserv.default_frontend = "test_frontend"
+    
+    mock_build_credential_encryption_metadata = MagicMock()
+    mock_build_credential_encryption_metadata.return_value = 'Sample_Credential_Encryption_Metadata'
 
-    # Minimal mock frontend registry
-    from types import SimpleNamespace
-
-    mock_conf_frontend = SimpleNamespace(
-        registered_frontends={"test_frontend": {"url": "https://frontend.test"}}
-    )
-
-    monkeypatch.setattr("app.cfgserv", mock_cfgserv)
-    monkeypatch.setattr("app.ConfFrontend", mock_conf_frontend)
-    return mock_cfgserv
+    monkeypatch.setattr("app.CONFIGURATION", configuration)
+    monkeypatch.setattr("app._build_credential_encryption_metadata", mock_build_credential_encryption_metadata)
+    return configuration
 
 
 @pytest.fixture
@@ -136,7 +151,7 @@ def mock_cert_file(tmp_path):
 
 
 @pytest.fixture
-def app():
+def app(mock_config_service):
     """Create test Flask app"""
     from app import create_app
 
@@ -373,7 +388,7 @@ class TestSetupTrustedCAs:
         """Test successful CA setup"""
 
         monkeypatch.setattr("app.IS_TEST_ENV", False)
-        mock_config_service.trusted_CAs_path = str(mock_cert_file)
+        mock_config_service['trusted_CAs_path'] = str(mock_cert_file)
 
         import app
 
@@ -386,7 +401,7 @@ class TestSetupTrustedCAs:
     def test_setup_trusted_cas_file_not_found(self, monkeypatch, mock_config_service):
         """Test CA setup with missing directory"""
         monkeypatch.setattr("app.IS_TEST_ENV", False)
-        mock_config_service.trusted_CAs_path = "/nonexistent/path"
+        mock_config_service['trusted_CAs_path'] = "/nonexistent/path"
 
         import app
 
@@ -403,7 +418,7 @@ class TestSetupTrustedCAs:
         cert_dir.mkdir()
         (cert_dir / "invalid.pem").write_text("not a valid certificate")
 
-        mock_config_service.trusted_CAs_path = str(cert_dir)
+        mock_config_service['trusted_CAs_path'] = str(cert_dir)
 
         import app
 
@@ -439,15 +454,28 @@ class TestErrorHandlers:
             with app.test_request_context():
                 result = handle_exception(error)
 
-        assert isinstance(result, str)
-        assert "internal_error" in result
+        assert isinstance(result, tuple)
+        
+        response = result[0]
+        
+        assert result[1] == 500
+        assert b'error' in response.data
+        
+        parsed_response = json.loads(response.data.decode('utf-8'))
+        
+        assert parsed_response.get('error') == 'Internal Server Error'
+        
 
     def test_page_not_found_handler(self, client, mock_config_service):
         """Test 404 error handler"""
         response = client.get("/nonexistent-route-12345")
 
-        assert response.status_code == 200
-        assert b"error_404" in response.data
+        assert response.status_code == 404
+        assert b"error" in response.data
+        
+        parsed_response = json.loads(response.data.decode('utf-8'))
+        
+        assert parsed_response.get('error') == 'Not Found'
 
 
 # ============================================================================
