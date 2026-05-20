@@ -75,23 +75,27 @@ def mock_session_manager():
 @pytest.fixture
 def mock_config():
     """Mock configuration services."""
-    with patch("app.preauthorization.cfgservice") as mock_cfg, patch(
-        "app.preauthorization.ConfFrontend"
-    ) as mock_frontend:
-
-        mock_cfg.service_url = "http://test-service.com/"
-        mock_cfg.form_expiry = 30
-        mock_cfg.wallet_test_url = "http://test-wallet.com/"
-        mock_cfg.default_frontend = "default"
-        mock_cfg.authorization_server_internal_url = "http://127.0.0.1:6005"
-        mock_cfg.app_logger = Mock()
-
-        mock_frontend.registered_frontends = {
-            "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "http://test-frontend.com"},
-            "default": {"url": "http://default-frontend.com"},
+        
+    mock_cfg = {
+        "service_url": "http://test-service.com/",
+        "expiry": {
+            "form": 30
+        },
+        "wallet_tester_url": "http://test-wallet.com/",
+        "frontend": {
+            "default": "default",
+            "frontends_config": {
+                "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "http://test-frontend.com"},
+                "default": {"url": "http://default-frontend.com"},
+            }
+        },
+        "authorization_server": {
+            "base_url": "http://127.0.0.1:6005"
         }
-
-        yield mock_cfg, mock_frontend
+    }
+    
+    with patch.dict("app.preauthorization.CONFIGURATION", mock_cfg):
+        yield mock_cfg
 
 
 class TestPreauthRed:
@@ -453,7 +457,7 @@ class TestRequestPreauthToken:
         """Test successful preauth token request."""
         # Setup
 
-        mock_cfg, mock_frontend = mock_config
+        mock_cfg = mock_config
 
         mock_response = Mock()
         mock_response.json.return_value = {
@@ -469,7 +473,7 @@ class TestRequestPreauthToken:
         # Assert
         assert result == "test_session_id"
 
-        expected_url = f"{mock_cfg.authorization_server_internal_url}/preauth_generate"
+        expected_url = f"{mock_cfg['authorization_server']['base_url']}/preauth_generate"
 
         mock_requests.assert_called_once_with(
             "POST",
@@ -719,8 +723,10 @@ class TestEdgeCases:
     @patch("app.preauthorization.form_formatter")
     @patch("app.preauthorization.presentation_formatter")
     @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.preauthorization.logger")
     def test_preauth_form_logs_data(
         self,
+        mock_logger,
         mock_post_redirect,
         mock_pres_formatter,
         mock_form_formatter,
@@ -743,9 +749,9 @@ class TestEdgeCases:
         )
 
         # Verify logger was called
-        mock_cfg, _ = mock_config
-        assert mock_cfg.app_logger.info.called
-        assert mock_cfg.app_logger.info.call_count >= 2
+        mock_cfg = mock_config
+        assert mock_logger.info.called
+        assert mock_logger.info.call_count >= 2
 
     @patch("app.preauthorization.requests.request")
     def test_request_preauth_token_returns_all_values(
