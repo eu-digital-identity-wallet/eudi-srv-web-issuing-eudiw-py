@@ -106,7 +106,7 @@ def test_cborformatter_invalid_issue_date(mock_validate, client):
 @patch("app.route_formatter.sdjwtFormatter")
 def test_sd_jwtformatter_success(mock_sdjwtFormatter, client):
     mock_sdjwtFormatter.return_value = "signed_sdjwt"
-    payload = {"country": "FC", "data": {}, "credential_metadata": {}}
+    payload = {"country": "FC", "data": {}, "credential_metadata": {}, "scope": "test"}
     response = client.post("/formatter/sd-jwt", json=payload)
     data = json.loads(response.data)
     assert response.status_code == 200
