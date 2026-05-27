@@ -679,7 +679,7 @@ def credentialCreation(credential_request, data, country, session_id):
     for proof in credential_request["proofs"]:
 
         if "credential_identifier" in credential_request:
-            doctype = credentials_supported[
+            scope = credentials_supported[
                 credential_request["credential_identifier"]
             ]["scope"]
 

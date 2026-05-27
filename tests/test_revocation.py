@@ -59,16 +59,29 @@ def client():
 @pytest.fixture
 def mock_config():
     """Mock configuration service."""
-    with patch("app.revocation.cfgservice") as mock:
-        mock.service_url = "http://test.com/"
-        mock.dynamic_presentation_url = "http://test.com/presentation/"
-        mock.default_frontend = "default"
-        mock.deffered_expiry = 15
-        mock.revocation_code_expiry = 10
-        mock.revoke_service_url = "http://test.com/revoke"
-        mock.revocation_api_key = "test_api_key"
-        mock.app_logger = MagicMock()
-        yield mock
+    
+    mock_config = {
+        "service_url": "http://test.com/",
+        "dynamic_presentation_url": "http://test.com/presentation/",
+        "frontend": {
+            "default": "default",
+            "frontends_config": {
+                "default": {
+                    "url": "http://frontend.test.com"
+                }
+            }
+        },
+        "expiry": {
+            "revocation_code": 10
+        },
+        "revocation": {
+            "set_url": "http://test.com/revoke",
+            "api_key": "test_api_key"
+        },
+        "oid4vp_scheme": "haip-vp://"
+    }
+    with patch("app.revocation.CONFIGURATION", mock_config) :
+        yield mock_config
 
 
 @pytest.fixture
@@ -87,6 +100,7 @@ def mock_oidc_metadata():
             "test_mdoc_credential": {
                 "format": "mso_mdoc",
                 "doctype": "test.doctype",
+                "scope": "test.doctype.scope",
                 "credential_metadata": {
                     "display": [{"name": "Test mDoc Credential"}],
                     "claims": [
@@ -99,14 +113,6 @@ def mock_oidc_metadata():
     }
     with patch("app.revocation.oidc_metadata", metadata):
         yield metadata
-
-
-@pytest.fixture
-def mock_frontend_config():
-    """Mock frontend configuration."""
-    with patch("app.revocation.ConfFrontend") as mock:
-        mock.registered_frontends = {"default": {"url": "http://frontend.test.com"}}
-        yield mock
 
 
 @pytest.fixture
@@ -193,7 +199,7 @@ class TestExtractPublicKeyFromX5c:
         private_key, _ = rsa_key_pair
 
         cert_der = x509_cert.public_bytes(serialization.Encoding.DER)
-        cert_b64 = base64.urlsafe_b64encode(cert_der).decode("utf-8").rstrip("=")
+        cert_b64 = base64.b64encode(cert_der).decode("utf-8").rstrip("=")
 
         payload = {"test": "data"}
         token = jwt.encode(
@@ -239,7 +245,7 @@ class TestVerifyAndDecodeSdjwt:
         private_key, _ = rsa_key_pair
 
         cert_der = x509_cert.public_bytes(serialization.Encoding.DER)
-        cert_b64 = base64.urlsafe_b64encode(cert_der).decode("utf-8").rstrip("=")
+        cert_b64 = base64.b64encode(cert_der).decode("utf-8").rstrip("=")
 
         payload = {"status": {"idx": 123}, "test": "data"}
         token = jwt.encode(
@@ -279,7 +285,7 @@ class TestVerifyAndDecodeSdjwt:
         )
 
         cert_der = cert.public_bytes(serialization.Encoding.DER)
-        cert_b64 = base64.urlsafe_b64encode(cert_der).decode("utf-8").rstrip("=")
+        cert_b64 = base64.b64encode(cert_der).decode("utf-8").rstrip("=")
 
         payload = {"status": {"idx": 456}, "test": "ec_data"}
         token = jwt.encode(
@@ -316,7 +322,7 @@ class TestVerifyAndDecodeSdjwt:
         )
 
         cert_der = cert.public_bytes(serialization.Encoding.DER)
-        cert_b64 = base64.urlsafe_b64encode(cert_der).decode("utf-8").rstrip("=")
+        cert_b64 = base64.b64encode(cert_der).decode("utf-8").rstrip("=")
 
         payload = {"status": {"idx": 789}, "test": "ed25519_data"}
         token = jwt.encode(
@@ -421,7 +427,7 @@ class TestRevocationChoice:
     """Test /revocation_choice endpoint."""
 
     def test_revocation_choice_get(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test GET request to revocation_choice."""
         with patch("app.revocation.post_redirect_with_payload") as mock_redirect:
@@ -442,7 +448,7 @@ class TestOid4vpCall:
     """Test /oid4vp_call endpoint."""
 
     def test_revoke_with_identifier_list(
-        self, client, mock_config, mock_frontend_config
+        self, client, mock_config
     ):
         """Test revoking credentials with identifier_list."""
         revocation_id = "test_revoc_id"
@@ -457,7 +463,7 @@ class TestOid4vpCall:
                             {
                                 "identifier_list": {
                                     "uri": "http://test.com/identifier",
-                                    "id": "abc123",
+                                    "id": b"abc123",
                                 }
                             }
                         ],
@@ -499,7 +505,7 @@ class TestOid4vpCall:
 
             assert response.status_code == 404
 
-    def test_revoke_api_failure(self, client, mock_config, mock_frontend_config):
+    def test_revoke_api_failure(self, client, mock_config):
         """Test revoke when API call fails."""
         revocation_id = "test_revoc_id"
 
@@ -536,7 +542,7 @@ class TestOid4vpCall:
             # Should still redirect even if API fails
             assert mock_redirect.called
 
-    def test_revoke_api_exception(self, client, mock_config, mock_frontend_config):
+    def test_revoke_api_exception(self, client, mock_config):
         """Test revoke when API call raises exception."""
         revocation_id = "test_revoc_id"
 
@@ -573,7 +579,7 @@ class TestOid4vpCall:
             assert mock_redirect.called
             assert revocation_id not in mock_revoc_req
 
-    def test_revoke_both_list_types(self, client, mock_config, mock_frontend_config):
+    def test_revoke_both_list_types(self, client, mock_config):
         """Test revoking credentials with both status_list and identifier_list."""
         revocation_id = "test_revoc_id"
 
@@ -590,7 +596,7 @@ class TestOid4vpCall:
                                 },
                                 "identifier_list": {
                                     "uri": "http://test.com/identifier",
-                                    "id": "xyz789",
+                                    "id": b"xyz789",
                                 },
                             }
                         ],
@@ -614,7 +620,7 @@ class TestOid4vpCall:
             assert mock_post.call_count == 2
 
     def test_revoke_multiple_credentials(
-        self, client, mock_config, mock_frontend_config
+        self, client, mock_config
     ):
         """Test revoking multiple credentials."""
         revocation_id = "test_revoc_id"
@@ -642,7 +648,7 @@ class TestOid4vpCall:
                             {
                                 "identifier_list": {
                                     "uri": "http://test.com/identifier",
-                                    "id": "doc1",
+                                    "id": b"doc1",
                                 }
                             }
                         ],
@@ -664,7 +670,7 @@ class TestOid4vpCall:
             # Should make 3 API calls
             assert mock_post.call_count == 3
 
-    def test_revoke_cleans_up_request(self, client, mock_config, mock_frontend_config):
+    def test_revoke_cleans_up_request(self, client, mock_config):
         """Test that revoke removes the request from storage."""
         revocation_id = "test_revoc_id"
 
@@ -703,7 +709,7 @@ class TestOid4vpCall:
 class TestEdgeCases:
     """Test edge cases and error conditions."""
 
-    def test_empty_vp_token_list(self, client, mock_config, mock_frontend_config):
+    def test_empty_vp_token_list(self, client, mock_config):
         """Test handling of empty vp_token list."""
         with patch("app.revocation.requests.request") as mock_request, patch(
             "app.revocation.post_redirect_with_payload"
@@ -711,19 +717,23 @@ class TestEdgeCases:
             "app.revocation.generate_unique_id"
         ) as mock_id, patch(
             "app.revocation.revocation_requests", {}
-        ):
+        ), patch(
+            "app.revocation.session", {}
+        ) as mock_session:
 
             mock_id.return_value = "unique_id"
 
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
-                "vp_token": [],
+                "vp_token": {},
                 "presentation_submission": {"descriptor_map": []},
             }
             mock_request.return_value = mock_response
 
             mock_redirect.return_value = "redirect_response"
+            
+            mock_session['session_id'] = "session_abc123"
 
             response = client.get("/revocation/getoid4vp?presentation_id=valid_id")
 
@@ -731,7 +741,7 @@ class TestEdgeCases:
             assert mock_redirect.called
 
     def test_status_without_uri_parsing(
-        self, client, mock_config, mock_frontend_config
+        self, client, mock_config
     ):
         """Test credential status with malformed URI that can't be parsed properly."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -742,19 +752,23 @@ class TestEdgeCases:
             "app.revocation.generate_unique_id"
         ) as mock_id, patch(
             "app.revocation.revocation_requests", {}
-        ):
+        ), patch(
+            "app.revocation.session", {}
+        ) as mock_session:
 
             mock_id.return_value = "unique_id"
 
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
-                "vp_token": ["test_token"],
+                "vp_token": {"test_token_nr": "oXB0ZXN0X3Rva2VuX3F1ZXJ5ZHRlc3Q"},
                 "presentation_submission": {
                     "descriptor_map": [{"format": "dc+sd-jwt", "path": "$[0]"}]
                 },
             }
             mock_request.return_value = mock_response
+            mock_session['session_id'] = "session_abc123"
+            mock_session['test_token_nr'] = "mso_mdoc"
 
             # Return status with short URI path (will cause IndexError)
             mock_status_sdjwt.return_value = {
@@ -771,7 +785,7 @@ class TestEdgeCases:
                 client.get("/revocation/getoid4vp?presentation_id=valid_id")
 
     def test_status_without_status_list_or_identifier_list(
-        self, client, mock_config, mock_frontend_config
+        self, client, mock_config
     ):
         """Test credential status without status_list or identifier_list."""
         revocation_id = "test_revoc_id"
@@ -802,7 +816,7 @@ class TestEdgeCases:
             # But should still redirect
             assert mock_redirect.called
 
-    def test_url_quote_encoding(self, client, mock_config, mock_frontend_config):
+    def test_url_quote_encoding(self, client, mock_config):
         """Test that URIs are properly URL-encoded."""
         revocation_id = "test_revoc_id"
 
@@ -849,7 +863,7 @@ class TestEdgeCases:
             assert "%3F" in payload or "param=value" in payload
 
     def test_qr_code_generation(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test QR code generation process."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -901,7 +915,7 @@ class TestDataStructures:
     """Test data structure handling and transformations."""
 
     def test_dcql_query_structure_sdjwt(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test DCQL query structure for SD-JWT credentials."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -936,7 +950,7 @@ class TestDataStructures:
             assert "claims" in cred
 
     def test_dcql_query_structure_mdoc(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test DCQL query structure for mDoc credentials."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -964,7 +978,7 @@ class TestDataStructures:
             assert "meta" in cred
             assert "doctype_value" in cred["meta"]
 
-    def test_display_list_parsing(self, client, mock_config, mock_frontend_config):
+    def test_display_list_parsing(self, client, mock_config):
         """Test parsing of status URIs into display list."""
         with patch("app.revocation.requests.request") as mock_request, patch(
             "app.revocation.get_status_sdjwt"
@@ -974,17 +988,21 @@ class TestDataStructures:
             "app.revocation.generate_unique_id"
         ), patch(
             "app.revocation.revocation_requests", {}
-        ):
+        ), patch(
+            "app.revocation.session", {}
+        ) as mock_session:
 
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
-                "vp_token": ["test_token"],
+                "vp_token": {"test_token_nr": { "test_token_query": "xyz789" } },
                 "presentation_submission": {
                     "descriptor_map": [{"format": "dc+sd-jwt", "path": "$[0]"}]
                 },
             }
             mock_request.return_value = mock_response
+            mock_session['session_id'] = "session_abc123"
+            mock_session['test_token_nr'] = 'mso_mdoc'
 
             mock_status.return_value = {
                 "status_list": {
@@ -1010,7 +1028,7 @@ class TestDataStructures:
             )
 
     def test_oid4vp_call_post_with_mdoc(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test POST request to oid4vp_call with mDoc credential."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -1042,7 +1060,7 @@ class TestDataStructures:
             assert mock_redirect.called
 
     def test_oid4vp_call_post_with_multiple_credentials(
-        self, client, mock_config, mock_oidc_metadata, mock_frontend_config
+        self, client, mock_config, mock_oidc_metadata
     ):
         """Test POST request to oid4vp_call with multiple credentials."""
         with patch("app.revocation.requests.request") as mock_request, patch(
@@ -1105,7 +1123,7 @@ class TestOid4vpGet:
             assert response.status_code == 400
 
     def test_oid4vp_get_mixed_credentials(
-        self, client, mock_config, mock_frontend_config
+        self, client, mock_config
     ):
         """Test GET request with mixed SD-JWT and mDoc credentials."""
         with patch("app.revocation.requests.request") as mock_request, patch(

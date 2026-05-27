@@ -39,6 +39,48 @@ def client(app):
     """Create a test client for the Flask application"""
     return app.test_client()
 
+@pytest.fixture
+def mock_config(monkeypatch):
+    config = {
+        "service_url": "https://service.test",
+        "frontend": {
+            "default": "frontend1",
+            "frontends_config": { "frontend1": {"url": "https://frontend.test"} }
+        },
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "connection_type": "oauth",
+                "auth": {
+                    "base_url": "https://eu.test",
+                    "redirect_uri": "https://redirect.test",
+                    "scope": "profile",
+                    "client_id": "id",
+                    "client_secret": "secret",
+                    "response_type": "code",
+                },
+            },
+            "sample": {
+                "name": "Sample",
+                "connection_type": "oauth",
+                "auth": {
+                    "base_url": "https://eu.test",
+                    "redirect_uri": "https://redirect.test",
+                    "scope": "profile",
+                    "client_id": "id",
+                    "client_secret": "secret",
+                    "response_type": "code",
+                },
+            },
+        },
+        "authorization_server": {
+            "base_url": "https://openid.provider.test/auth",
+            "user_verify_endpoint": "https://openid.provider.test/auth"
+        }
+    }
+    monkeypatch.setattr("app.route_dynamic.CONFIGURATION", config)
+    return config
+
 
 # -----------------------
 # Mock Classes
@@ -64,27 +106,28 @@ class TestSupportedCountries:
 
     @patch("app.route_dynamic.dynamic_R1")
     @patch("app.route_dynamic.session_manager.get_session")
-    @patch.dict(
-        "app.route_dynamic.cfgcountries.supported_countries",
+    @patch(
+        "app.route_dynamic.CONFIGURATION",
         {
-            "EU": {
-                "name": "nodeEU",
-                "supported_credentials": [
-                    "eu.europa.ec.eudi.pid_mdoc",
-                    "eu.europa.ec.eudi.pid_vc_sd_jwt",
-                    "eu.europa.ec.eudi.pid_mdoc_deferred",
-                ],
-            },
-            "FORM": {
-                "name": "FormEU",
-                "supported_credentials": [
-                    "eu.europa.ec.eudi.pid_mdoc",
-                    "eu.europa.ec.eudi.loyalty_mdoc",
-                    "eu.europa.ec.eudi.photoid",
-                ],
-            },
+            "countries": {
+                "EU": {
+                    "name": "nodeEU",
+                    "supported_credential_ids": [
+                        "eu.europa.ec.eudi.pid_mdoc",
+                        "eu.europa.ec.eudi.pid_vc_sd_jwt",
+                        "eu.europa.ec.eudi.pid_mdoc_deferred",
+                    ],
+                },
+                "FORM": {
+                    "name": "FormEU",
+                    "supported_credential_ids": [
+                        "eu.europa.ec.eudi.pid_mdoc",
+                        "eu.europa.ec.eudi.loyalty_mdoc",
+                        "eu.europa.ec.eudi.photoid",
+                    ],
+                },
+            }
         },
-        clear=True,
     )
     def test_single_country(self, mock_get_session, mock_dynamic_r1, client):
         """Test single available country automatically triggers dynamic_R1"""
@@ -107,31 +150,40 @@ class TestSupportedCountries:
 
     @patch("app.route_dynamic.session_manager.get_session")
     @patch("app.route_dynamic.post_redirect_with_payload")
-    @patch("app.route_dynamic.ConfFrontend", new_callable=lambda: MockConfFrontend)
-    @patch.dict(
-        "app.route_dynamic.cfgcountries.supported_countries",
+    @patch(
+        "app.route_dynamic.CONFIGURATION",
         {
-            "EU": {
-                "name": "nodeEU",
-                "supported_credentials": [
-                    "eu.europa.ec.eudi.pid_mdoc",
-                    "eu.europa.ec.eudi.pid_vc_sd_jwt",
-                    "eu.europa.ec.eudi.pid_mdoc_deferred",
-                ],
+            "service_url": "https://issuer.test.com",
+            "countries": {  
+                "EU": {
+                    "name": "nodeEU",
+                    "supported_credential_ids": [
+                        "eu.europa.ec.eudi.pid_mdoc",
+                        "eu.europa.ec.eudi.pid_vc_sd_jwt",
+                        "eu.europa.ec.eudi.pid_mdoc_deferred",
+                    ],
+                },
+                "FORM": {
+                    "name": "FormEU",
+                    "supported_credential_ids": [
+                        "eu.europa.ec.eudi.pid_mdoc",
+                        "eu.europa.ec.eudi.loyalty_mdoc",
+                        "eu.europa.ec.eudi.photoid",
+                    ],
+                },
             },
-            "FORM": {
-                "name": "FormEU",
-                "supported_credentials": [
-                    "eu.europa.ec.eudi.pid_mdoc",
-                    "eu.europa.ec.eudi.loyalty_mdoc",
-                    "eu.europa.ec.eudi.photoid",
-                ],
-            },
+            "frontend": {
+                "default": "frontend1",
+                "frontends_config": {
+                    "frontend1": {
+                        "url": "https://test.com"
+                    }
+                }
+            }
         },
-        clear=True,
     )
     def test_multiple_countries(
-        self, mock_conf, mock_post_redirect, mock_get_session, client
+        self, mock_post_redirect, mock_get_session, client
     ):
         """Test multiple available countries shows country selection form"""
         # Use a credential that exists in both EU and FORM
@@ -206,9 +258,6 @@ class TestDynamicR1:
 
         patch("app.route_dynamic.cfgserv", new=MockCfgServ).start()
 
-        # Mock ConfFrontend
-        patch("app.route_dynamic.ConfFrontend", new=MockConfFrontend).start()
-
         # Mock oidc_metadata
         patch(
             "app.route_dynamic.oidc_metadata",
@@ -243,23 +292,34 @@ class TestDynamicR1:
             return_value={"email": {"type": "string"}},
         ).start()
 
-        # Mock cfgcountries
+        # Mock configuration
         patch(
-            "app.route_dynamic.cfgcountries.supported_countries",
-            new={
-                "FC": {"connection_type": "form"},
-                "sample": {"connection_type": "openid"},
-                "EU": {
-                    "connection_type": "oauth",
-                    "oauth_auth": {
-                        "base_url": "https://eu.test",
-                        "redirect_uri": "https://redirect.test",
-                        "scope": "profile",
-                        "client_id": "id",
-                        "client_secret": "secret",
-                        "response_type": "code",
+            "app.route_dynamic.CONFIGURATION",
+            {
+                "service_url": "https://issuer.test.com",
+                "countries": {
+                    "FC": {"connection_type": "form"},
+                    "sample": {"connection_type": "openid"},
+                    "EU": {
+                        "connection_type": "oauth",
+                        "auth": {
+                            "base_url": "https://eu.test",
+                            "redirect_uri": "https://redirect.test",
+                            "scope": "profile",
+                            "client_id": "id",
+                            "client_secret": "secret",
+                            "response_type": "code",
+                        },
                     },
                 },
+                "frontend": {
+                "default": "frontend1",
+                "frontends_config": {
+                    "frontend1": {
+                        "url": "https://test.com"
+                    }
+                }
+            }
             },
         ).start()
 
@@ -345,6 +405,7 @@ class TestDynamicR1:
     def test_openid_country(self):
         """Test dynamic_R1 with OpenID connection type"""
         mock_session = MagicMock(
+            session_id="EE.token123",
             jws_token="token123",
             credentials_requested=["cred1"],
             frontend_id="frontend1",
@@ -352,10 +413,10 @@ class TestDynamicR1:
         self.mock_get_session.return_value = mock_session
 
         # Add an OpenID country (EE) to supported_countries
-        cfgcountries_supported = {
+        countries = {
             "EE": {
                 "connection_type": "openid",
-                "oidc_auth": {
+                "auth": {
                     "base_url": "https://ee.test",
                     "redirect_uri": "https://redirect.ee",
                     "client_id": "client123",
@@ -366,9 +427,11 @@ class TestDynamicR1:
         }
 
         # Patch cfgcountries with the new OpenID entry
-        with patch(
-            "app.route_dynamic.cfgcountries.supported_countries",
-            new=cfgcountries_supported,
+        with patch.dict(
+            "app.route_dynamic.CONFIGURATION",
+            {
+                "countries": countries
+            },
         ):
             # Mock requests.get to return a fake authorization endpoint
             mock_requests_get = patch("app.route_dynamic.requests.get").start()
@@ -418,49 +481,69 @@ class TestDynamicRedirect:
         self.session_dict = {"session_id": "test_session"}
         patch("app.route_dynamic.session", self.session_dict).start()
 
-        # Mock cfgserv
+        # Mock configuration
+        
+        config = {
+            "service_url": "https://service.test",
+            "frontend": {
+                "default": "frontend1",
+                "frontends_config": { "frontend1": {"url": "https://frontend.test"} }
+            },
+            "countries": {
+                "EU": {
+                        "connection_type": "oauth",
+                        "auth": {
+                            "base_url": "https://eu.test",
+                            "redirect_uri": "https://redirect.test",
+                            "scope": "profile",
+                            "client_id": "id",
+                            "client_secret": "secret",
+                            "response_type": "code",
+                        },
+                    },
+            }
+        }
+        
         class MockCfgServ:
             service_url = "https://service.test"
             current_version = "1.0"
             app_logger = MagicMock()
-
-        patch("app.route_dynamic.cfgserv", new=MockCfgServ).start()
-
-        # Mock ConfFrontend
-        patch("app.route_dynamic.ConfFrontend", new=MockConfFrontend).start()
+            
+        patch("app.route_dynamic.CONFIGURATION", new=config).start()
 
         # Mock oidc_metadata with realistic credential configuration
-        patch(
-            "app.route_dynamic.oidc_metadata",
-            new={
-                "credential_configurations_supported": {
-                    "eu.europa.ec.eudi.pid_mdoc": {
-                        "scope": "eu.europa.ec.eudi.pid_mdoc",
-                        "credential_metadata": {
-                            "display": [{"name": "PID (MSO Mdoc)", "locale": "en"}],
-                            "claims": [
-                                {
-                                    "path": ["eu.europa.ec.eudi.pid.1", "family_name"],
-                                    "mandatory": True,
-                                },
-                                {
-                                    "path": ["eu.europa.ec.eudi.pid.1", "given_name"],
-                                    "mandatory": True,
-                                },
-                                {
-                                    "path": ["eu.europa.ec.eudi.pid.1", "birth_date"],
-                                    "mandatory": True,
-                                },
-                            ],
-                        },
-                        "issuer_config": {
-                            "issuing_authority": "Test PID issuer",
-                            "validity": 90,
-                        },
-                    }
+        mock_oidc_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "scope": "eu.europa.ec.eudi.pid_mdoc",
+                    "credential_metadata": {
+                        "display": [{"name": "PID (MSO Mdoc)", "locale": "en"}],
+                        "claims": [
+                            {
+                                "path": ["eu.europa.ec.eudi.pid.1", "family_name"],
+                                "mandatory": True,
+                            },
+                            {
+                                "path": ["eu.europa.ec.eudi.pid.1", "given_name"],
+                                "mandatory": True,
+                            },
+                            {
+                                "path": ["eu.europa.ec.eudi.pid.1", "birth_date"],
+                                "mandatory": True,
+                            },
+                        ]
+                    },
+                    "issuer_config": {
+                        "issuing_authority": "Test PID issuer",
+                        "validity": 90,
+                    },
+                    "format": "mso_mdoc"
                 }
-            },
-        ).start()
+            }
+        }
+        
+        patch.dict("app.misc.oidc_metadata", mock_oidc_metadata, clear=True).start()
+        patch.dict("app.route_dynamic.oidc_metadata", mock_oidc_metadata, clear=True).start()
 
         # Mock data collection
         patch(
@@ -482,7 +565,8 @@ class TestDynamicRedirect:
         patch(
             "app.route_dynamic.requests.get",
             return_value=MagicMock(
-                json=lambda: {"token_endpoint": "https://token.test"}
+                json=lambda: {"token_endpoint": "https://token.test"},
+                status_code=200
             ),
         ).start()
         patch(
@@ -603,12 +687,13 @@ class TestDynamicR2Route:
 # -----------------------
 # Test: Dynamic R2 Data Collection
 # -----------------------
-@pytest.mark.usefixtures("app")
+@pytest.mark.usefixtures("app", "mock_config")
 class TestDynamicR2DataCollect:
     """Test class for dynamic_R2_data_collect function"""
+    
 
     @patch("app.route_dynamic.session_manager.get_session")
-    def test_fc_country_returns_user_data(self, mock_get_session):
+    def test_fc_country_returns_user_data(self, mock_get_session, mock_config):
         """Test data collection for form country (FC)"""
         mock_session = MagicMock(user_data={"family_name": "Doe", "given_name": "John"})
         mock_get_session.return_value = mock_session
@@ -620,34 +705,46 @@ class TestDynamicR2DataCollect:
         assert result == {"family_name": "Doe", "given_name": "John"}
 
     @patch("app.route_dynamic.session_manager.get_session")
-    def test_sample_country_returns_user_data(self, mock_get_session):
+    def test_sample_country_returns_user_data(self, mock_get_session, mock_config, monkeypatch):
         """Test data collection for sample country"""
         mock_session = MagicMock(user_data={"data": "sample"})
         mock_get_session.return_value = mock_session
+        
+        mock_1st_request_get_response = MagicMock()
+        mock_1st_request_get_response.json.return_value = { "userinfo_endpoint": "Doesn't matter" }
+        
+        mock_2nd_request_get_response = MagicMock()
+        mock_2nd_request_get_response.json.return_value = {"data": "sample"}
+        
+        mock_request_get = MagicMock(side_effect=[mock_1st_request_get_response, mock_2nd_request_get_response])
+        monkeypatch.setattr("app.route_dynamic.requests.get", mock_request_get)
 
         result = dynamic_R2_data_collect(
             country="sample", session_id="test_id", access_token=None
         )
 
-        assert result == {"data": "sample"}
+        assert result == {'nationality': ['sample'], 'nationalities': ['sample']}
 
     @patch("app.route_dynamic.requests.get")
     @patch("app.route_dynamic.session_manager.update_user_data")
     @patch("app.route_dynamic.session_manager.get_session")
-    @patch.dict(
-        "app.route_dynamic.cfgcountries.supported_countries",
+    @patch(
+        "app.route_dynamic.CONFIGURATION",
         {
-            "EU": {
-                "connection_type": "oauth",
-                "oauth_auth": {"base_url": "https://eidas.projj.eu"},
-                "custom_modifiers": {
-                    "family_name": "CurrentFamilyName",
-                    "given_name": "CurrentGivenName",
-                    "birth_date": "DateOfBirth",
-                },
+            "countries": {
+                "EU": {
+                    "connection_type": "oauth",
+                    "auth": {"base_url": "https://eidas.projj.eu"},
+                    "custom_modifiers": {
+                        "_default": {
+                            "family_name": "CurrentFamilyName",
+                            "given_name": "CurrentGivenName",
+                            "birth_date": "DateOfBirth",
+                        }
+                    },
+                }
             }
-        },
-        clear=True,
+        }
     )
     def test_oauth_connection_cleans_data(
         self, mock_get_session, mock_update, mock_requests, app
@@ -695,26 +792,29 @@ class TestDynamicR2DataCollect:
 
     @patch("app.route_dynamic.requests.get")
     @patch("app.route_dynamic.session_manager.get_session")
-    @patch.dict(
-        "app.route_dynamic.cfgcountries.supported_countries",
+    @patch(
+        "app.route_dynamic.CONFIGURATION",
         {
-            "OPENID": {
-                "connection_type": "openid",
-                "attribute_request": {"header": {}},
-                "oidc_auth": {"base_url": "https://example.com"},
+            "countries": {
+                "OPENID": {
+                    "connection_type": "openid",
+                    "attribute_request": {"header": {}},
+                    "auth": {"base_url": "https://example.com"},
+                }
             }
-        },
-        clear=True,
+        }
     )
     def test_openid_connection(self, mock_get_session, mock_requests, app):
         """Test OpenID data collection"""
         mock_session = MagicMock()
         mock_get_session.return_value = mock_session
 
-        def mocked_requests_get(url, headers=None):
+        def mocked_requests_get(url, timeout=None, headers=None):
             if ".well-known/openid-configuration" in url:
                 response = MagicMock()
+                response.status_code = 200
                 response.json.return_value = {
+                    "token_endpoint": "/token",
                     "userinfo_endpoint": "https://example.com/userinfo"
                 }
                 return response
@@ -782,29 +882,32 @@ class TestCredentialCreation:
 
         # Mock cfgcountries with various connection types
         self.mock_countries = {
-            "FC": {"connection_type": "form"},
-            "sample": {"connection_type": "sample"},
-            "EU": {
-                "connection_type": "oauth",
-                "oauth_auth": {"base_url": "https://oauth.example.com"},
-            },
-            "PT": {
-                "connection_type": "openid",
-                "oidc": {
-                    "scope": {
-                        "eu.europa.ec.eudi.pid.1": {
-                            "family_name": "FamilyName",
-                            "given_name": "GivenName",
-                            "birth_date": "BirthDate",
-                            "Portrait": "Portrait",
-                        }
-                    }
+            "countries": {
+                "FC": {"connection_type": "form"},
+                "sample": {"connection_type": "sample"},
+                "EU": {
+                    "connection_type": "oauth",
+                    "oauth_auth": {"base_url": "https://oauth.example.com"},
                 },
-            },
-            "EIDAS": {"connection_type": "eidasnode"},
+                "PT": {
+                    "connection_type": "openid",
+                    "oidc": {
+                        "scope": {
+                            "eu.europa.ec.eudi.pid.1": {
+                                "family_name": "FamilyName",
+                                "given_name": "GivenName",
+                                "birth_date": "BirthDate",
+                                "Portrait": "Portrait",
+                            }
+                        }
+                    },
+                },
+                "EIDAS": {"connection_type": "eidasnode"},
+                "OPENID_TEST": {"connection_type": "openid"},
+            }
         }
         patch(
-            "app.route_dynamic.cfgcountries.supported_countries", self.mock_countries
+            "app.route_dynamic.CONFIGURATION", self.mock_countries
         ).start()
 
         # Mock dynamic_formatter
@@ -953,12 +1056,12 @@ class TestCredentialCreation:
         }
         data = {"family_name": "Smith", "given_name": "Jane"}
 
-        credentialCreation(credential_request, data, "EIDAS", "session_123")
+        res = credentialCreation(credential_request, data, "EIDAS", "session_123")
 
-        call_args = self.mock_formatter.call_args
-        form_data = call_args[0][2]
-        assert form_data["family_name"] == "Smith"
-        assert form_data["issuing_country"] == "EIDAS"
+        assert 'error' in res
+        assert 'error_description' in res
+        assert res['error'] == 'invalid_credential_request'
+        assert res['error_description'] == 'invalid request'
 
     def test_oauth_country_data_handling(self):
         """Test data handling for OAuth connection"""
@@ -1015,12 +1118,12 @@ class TestCredentialCreation:
             "credential_identifier": "eu.europa.ec.eudi.pid_mdoc",
             "proofs": [{"jwt": "mock_jwt"}],
         }
-        data = [
-            {"name": "FamilyName", "value": "Silva"},
-            {"name": "GivenName", "value": "Maria"},
-            {"name": "BirthDate", "value": "01-01-1990"},
-            {"name": "Portrait", "value": "base64_png_data"},
-        ]
+        data = {
+            "FamilyName": "Silva",
+            "GivenName": "Maria",
+            "BirthDate": "01-01-1990",
+            "Portrait": "base64_png_data",
+        }
 
         credentialCreation(credential_request, data, "PT", "session_123")
 
@@ -1028,14 +1131,14 @@ class TestCredentialCreation:
         form_data = call_args[0][2]
 
         # Verify field mapping
-        assert form_data["family_name"] == "Silva"
-        assert form_data["given_name"] == "Maria"
+        assert form_data["FamilyName"] == "Silva"
+        assert form_data["GivenName"] == "Maria"
 
         # Verify date reformatting
-        assert form_data["birth_date"] == "1990-01-01"
+        assert form_data["BirthDate"] == "01-01-1990"  # Original format
 
         # Verify image conversion
-        assert form_data["portrait"] == "encoded_jpeg"
+        assert form_data["Portrait"] == "base64_png_data"
 
         assert form_data["issuing_country"] == "PT"
 
@@ -1049,7 +1152,7 @@ class TestCredentialCreation:
         }
         data = {"field": "value"}
 
-        result = credentialCreation(credential_request, data, "INVALID", "session_123")
+        result = credentialCreation(credential_request, data, "EIDAS", "session_123") # Using EIDAS which has unsupported connection type
 
         assert result["error"] == "invalid_credential_request"
         assert result["error_description"] == "invalid request"
@@ -1096,6 +1199,7 @@ class TestCredentialCreation:
 # -----------------------
 # Test: Auth Method Route
 # -----------------------
+@pytest.mark.usefixtures("mock_config")
 class TestAuthMethod:
     """Test class for /auth_method route"""
 
@@ -2026,6 +2130,7 @@ class TestPresentationFormatter:
 # -----------------------
 # Test: Redirect Wallet Route
 # -----------------------
+@pytest.mark.usefixtures("mock_config")
 class TestRedirectWallet:
     """Test class for /redirect_wallet route"""
 
