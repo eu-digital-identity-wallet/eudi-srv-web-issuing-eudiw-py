@@ -50,9 +50,9 @@ def app():
     app.config["SECRET_KEY"] = "test-secret-key"
 
     # Import and register blueprint
-    with patch("app.route_oidc.cfgservice"), patch(
-        "app.route_oidc.ConfFrontend"
-    ), patch("app.route_oidc.session_manager"):
+    with patch("app.route_oidc.CONFIGURATION"), patch(
+        "app.route_oidc.session_manager"
+    ):
         from app.route_oidc import oidc
 
         app.register_blueprint(oidc)
@@ -83,35 +83,32 @@ def mock_session_manager():
 @pytest.fixture
 def mock_cfgservice():
     """Mock configuration service"""
-    with patch("app.route_oidc.cfgservice") as mock:
-        mock.service_url = "https://test.issuer.dev/"
-        mock.wallet_test_url = "https://test.wallet.dev/"
-        mock.form_expiry = 10
-        mock.nonce_key = "test-key.pem"
-        mock.credential_request_priv_key = "test-priv-key.pem"
-        mock.dynamic_presentation_url = "https://test.presentation.dev/"
-        mock.auth_method_supported_credencials = {
+    with patch("app.route_oidc.CONFIGURATION", {
+        "service_url": "https://test.issuer.dev/",
+        "wallet_test_url": "https://test.wallet.dev/",
+        "expiry": {
+            "form": 10,
+        },
+        "keys": {
+            "nonce_path": "test-key.pem",
+            "nonce_key": "test-key.pem", # This has been added because of errors on test_nonce_generation, which expects a 'nonce_key' field in the configuration for loading the private key. The 'nonce_path' field is still included as it may be used elsewhere in the code.
+            "credential_request_path": "test-priv-key.pem",
+            "credential_encryption_key": "credential_encryption_key.pem",
+        },
+        "dynamic_presentation_url": "https://test.presentation.dev/",
+        "credential_auth_methods": {
             "PID_login": ["eu.europa.ec.eudi.pid_mdoc"],
             "country_selection": ["eu.europa.ec.eudi.mdl"],
-        }
-        mock.default_frontend = "test_frontend"
-        mock.app_logger = Mock()
-        yield mock
-
-
-@pytest.fixture(autouse=True)
-def mock_conf_frontend(monkeypatch):
-    """Mock ConfFrontend registry"""
-    mock_conf = type(
-        "MockConfFrontend",
-        (),
-        {
-            "registered_frontends": {
+        },
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
                 "test_frontend": {"url": "https://frontend.example.com"}
             }
         },
-    )()
-    monkeypatch.setattr("app.route_oidc.ConfFrontend", mock_conf)
+        "credential_offer_scheme": "haip-vci://",
+    }) as mock:
+        yield mock
 
 
 class TestWellKnownEndpoints:
@@ -159,14 +156,33 @@ class TestAuthChoice:
     def test_auth_choice_with_scope(
         self, client, mock_session_manager, mock_cfgservice
     ):
-        """Test auth_choice with scope parameter"""
-        with patch("app.route_oidc.ConfFrontend") as mock_frontend:
-            mock_frontend.registered_frontends = {
-                "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {
-                    "url": "https://test.frontend.dev"
+        mock_oidc_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "credential_metadata": {"display": [{"name": "PID"}]},
+                    "scope": "eu.europa.ec.eudi.pid_mdoc",
                 }
             }
-
+        }
+        
+        """Test auth_choice with scope parameter"""
+        with patch.dict("app.route_oidc.CONFIGURATION", {
+            "frontend": {
+                "default": "5d725b3c-6d42-448e-8bfd-1eff1fcf152d",
+                "frontends_config": {
+                    "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "https://test.frontend.dev"}
+                }
+            }
+        }), patch.dict(
+            "app.route_oidc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
+        ), patch.dict(
+            "app.misc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
+        ):
             response = client.get(
                 "/auth_choice",
                 query_string={
@@ -187,12 +203,14 @@ class TestAuthChoice:
             [{"credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc"}]
         )
 
-        with patch("app.route_oidc.ConfFrontend") as mock_frontend:
-            mock_frontend.registered_frontends = {
-                "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {
-                    "url": "https://test.frontend.dev"
+        with patch.dict("app.route_oidc.CONFIGURATION", {
+            "frontend": {
+                "default": "5d725b3c-6d42-448e-8bfd-1eff1fcf152d",
+                "frontends_config": {
+                    "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "https://test.frontend.dev"}
                 }
             }
+        }):
 
             response = client.get(
                 "/auth_choice",
@@ -461,6 +479,7 @@ class TestNotification:
         assert response.status_code == 401
 
 
+@pytest.mark.usefixtures("mock_cfgservice")
 class TestNonce:
     """Test nonce endpoint"""
 
@@ -496,17 +515,24 @@ class TestCredentialOffer:
     def test_credential_offer_choice(self, mock_render, client, mock_cfgservice):
         """Test credential offer choice page"""
         mock_render.return_value = "rendered_template"
-
-        with patch(
-            "app.route_oidc.oidc_metadata",
-            {
-                "credential_configurations_supported": {
-                    "eu.europa.ec.eudi.pid_mdoc": {
-                        "format": "mso_mdoc",
-                        "credential_metadata": {"display": [{"name": "PID"}]},
-                    }
+        
+        mock_oidc_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "credential_metadata": {"display": [{"name": "PID"}]},
                 }
-            },
+            }
+        }
+
+        with patch.dict(
+            "app.route_oidc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
+        ), patch.dict(
+            "app.misc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
         ):
             response = client.get("/credential_offer_choice")
 
@@ -636,7 +662,7 @@ class TestEncryptResponse:
 
         assert result.status_code == 400
 
-
+@pytest.mark.usefixtures("mock_session_manager")
 class TestGenerateCredentials:
     """Test generate_credentials function"""
 
@@ -660,8 +686,9 @@ class TestGenerateCredentials:
 
     @patch("app.route_oidc.requests.post")
     @patch("app.route_oidc.pKfromJWT")
+    @patch("app.route_oidc.jwt.get_unverified_header", return_value={"kid": "test-kid"})
     def test_generate_credentials_batch_proofs(
-        self, mock_pk, mock_post, mock_session_manager, mock_cfgservice
+        self, mock_get_header, mock_pk, mock_post, mock_session_manager, mock_cfgservice
     ):
         """Test batch credential generation"""
         from app.route_oidc import generate_credentials
@@ -753,8 +780,25 @@ class TestAuthChoiceFlow:
     def test_auth_choice_redirect_to_oid4vp(
         self, client, mock_session_manager, mock_cfgservice
     ):
-        """Test redirect to OID4VP"""
-        with patch("app.route_oidc.ConfFrontend"):
+        mock_oidc_metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "credential_metadata": {"display": [{"name": "PID"}]},
+                    "scope": "eu.europa.ec.eudi.pid_mdoc",
+                }
+            }
+        }
+        with patch.dict(
+            "app.route_oidc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
+        ), patch.dict(
+            "app.misc.oidc_metadata",
+            mock_oidc_metadata,
+            clear=True
+        ):
+            """Test redirect to OID4VP"""
             response = client.get(
                 "/auth_choice",
                 query_string={

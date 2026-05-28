@@ -272,7 +272,7 @@ def pid_authorization_get():
         raise ValueError("Invalid Presentation id format")
 
     url = (
-        cfgservice.dynamic_presentation_url
+        CONFIGURATION['dynamic_presentation_url']
         + presentation_id
         + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
     )
