@@ -107,6 +107,14 @@ def mock_cfgservice():
             }
         },
         "credential_offer_scheme": "haip-vci://",
+        "authorization_server": {
+            "base_url": "https://backend.issuer.eudiw.dev/oidc",
+            "user_verify_endpoint": "https://issuer.eudiw.dev/oidc/verify/user"
+        },
+        "logging": {
+            "backend_path": "/tmp/log_prod/logs.log",
+            "level": "INFO"
+        }
     }) as mock:
         yield mock
 
@@ -309,8 +317,8 @@ class TestCredentialEndpoint:
 
             assert response.status_code == 202
             assert "transaction_id" in response.json
-
-
+            
+@pytest.mark.usefixtures("mock_cfgservice")
 class TestVerifyIntrospection:
     """Test token introspection verification"""
 
@@ -594,7 +602,7 @@ class TestLogs:
     """Test logs endpoint"""
 
     @patch("builtins.open", create=True)
-    def test_get_logs_by_session(self, mock_open, client):
+    def test_get_logs_by_session(self, mock_open, client, mock_cfgservice):
         """Test retrieving logs by session ID"""
         mock_file = MagicMock()
         mock_file.__enter__.return_value.__iter__.return_value = [

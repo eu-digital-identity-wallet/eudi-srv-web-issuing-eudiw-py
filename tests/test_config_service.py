@@ -17,7 +17,7 @@
 ###############################################################################
 import pytest
 from app.app_config.config_service import ConfService
-from app import CONFIGURATION
+import app
 
 
 @pytest.fixture(autouse=True)
@@ -37,15 +37,30 @@ def clear_env(monkeypatch):
     ]:
         monkeypatch.delenv(key, raising=False)
 
+@pytest.fixture
+def mock_configuration(monkeypatch):
+    """Mock configuration for testing."""
+    config = {
+        "service_url": "https://backend.issuer.eudiw.dev",
+        "wallet_tester_url": "https://tester.issuer.eudiw.dev",
+        "revocation": {
+            "take_url": "https://revocation.service.test/token_status_list/take",
+            "set_url": "https://revocation.service.test/token_status_list/set"
+        },
+        "dynamic_presentation_url": "https://verifier-backend.service.test"
+    }
+    
+    monkeypatch.setattr("app.CONFIGURATION", config)
+
 
 def test_default_service_urls():
     """Test that default URLs are correctly set when env vars are not provided."""
-    conf = CONFIGURATION
+    conf = app.CONFIGURATION
     assert conf['service_url'] == "https://backend.issuer.eudiw.dev"
     assert conf['wallet_tester_url'] == "https://tester.issuer.eudiw.dev"
     assert conf['revocation']['take_url'].endswith("/token_status_list/take")
     assert conf['revocation']['set_url'].endswith("/token_status_list/set")
-    assert conf['dynamic_presentation_url'].startswith("https://verifier-backend")
+    assert conf['dynamic_presentation_url'].startswith("https://verifier-backend.service.test")
 
 
 def test_registered_claims_keys_exist():

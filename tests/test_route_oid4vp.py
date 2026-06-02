@@ -387,6 +387,16 @@ class TestGetPidOid4vpAdditional:
 
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.requests.request")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.validate_vp_token")
     def test_vp_token_invalid(
         self,
@@ -416,6 +426,16 @@ class TestGetPidOid4vpAdditional:
 
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.requests.request")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     def test_requests_non_200(
         self, mock_requests, mock_get_session, client, mock_session_data
     ):
