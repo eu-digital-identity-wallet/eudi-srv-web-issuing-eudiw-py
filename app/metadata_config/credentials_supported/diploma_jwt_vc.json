@@ -42,8 +42,7 @@
                "details":[
                   "limited_time"
                ],
-               "batch_size":30,
-               "reissue_trigger_unused":3
+               "batch_size":30
             }
          ]
       },
