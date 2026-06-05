@@ -39,6 +39,18 @@
                }
             }
          ],
+         "credential_reuse_policy":{
+         "id":"arf_annex_ii",
+         "options":[
+            {
+               "details":[
+                  "limited_time"
+               ],
+               "batch_size":30,
+               "reissue_trigger_unused":3
+            }
+         ]
+      },
          "claims":[
             {
                "path":[
