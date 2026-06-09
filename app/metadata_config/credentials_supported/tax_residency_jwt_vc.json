@@ -36,7 +36,7 @@
                "details":[
                   "limited_time"
                ],
-               "batch_size":30
+               "reissue_trigger_lifetime_left": 7776000
             }
          ]
       },
