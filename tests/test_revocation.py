@@ -19,14 +19,11 @@
 import base64
 import io
 import json
-import uuid
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, Mock, patch, call
+from unittest.mock import Mock, patch
 import cbor2
 import pytest
-import segno
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519, ed448
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.x509.oid import NameOID
