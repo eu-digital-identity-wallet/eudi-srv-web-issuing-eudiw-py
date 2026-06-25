@@ -272,7 +272,7 @@ def pid_authorization_get():
         raise ValueError("Invalid Presentation id format")
 
     url = (
-        cfgservice.dynamic_presentation_url
+        CONFIGURATION['dynamic_presentation_url']
         + presentation_id
         + "?nonce=hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc="
     )
@@ -737,7 +737,7 @@ def credential():
     _response["notification_id"] = notification_id
 
 
-    if "error" in _response:
+    if "error" in _response and _response['error'] != 'Pending':
         logger.error(
             f", Session ID: {session_id}, Credential response with error, Payload: {_response}"
         )

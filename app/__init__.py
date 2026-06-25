@@ -94,7 +94,14 @@ def _load_config() -> dict:
 
     return _process_config(config)
 
-CONFIGURATION = _load_config()
+if os.getenv("MOCK_CONFIGURATION"):
+    CONFIGURATION = {
+        "expiry": {
+            "session": 30
+        }
+    }
+else:
+    CONFIGURATION = _load_config()
 
 logger = logging.getLogger(__name__)
 
