@@ -73,25 +73,30 @@ def mock_session_manager():
 
 
 @pytest.fixture
-def mock_config():
+def mock_configuration():
     """Mock configuration services."""
-    with patch("app.preauthorization.cfgservice") as mock_cfg, patch(
-        "app.preauthorization.ConfFrontend"
-    ) as mock_frontend:
-
-        mock_cfg.service_url = "http://test-service.com/"
-        mock_cfg.form_expiry = 30
-        mock_cfg.wallet_test_url = "http://test-wallet.com/"
-        mock_cfg.default_frontend = "default"
-        mock_cfg.authorization_server_internal_url = "http://127.0.0.1:6005"
-        mock_cfg.app_logger = Mock()
-
-        mock_frontend.registered_frontends = {
-            "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "http://test-frontend.com"},
-            "default": {"url": "http://default-frontend.com"},
-        }
-
-        yield mock_cfg, mock_frontend
+        
+    mock_cfg = {
+        "service_url": "http://test-service.com/",
+        "expiry": {
+            "form": 30
+        },
+        "wallet_tester_url": "http://test-wallet.com/",
+        "frontend": {
+            "default": "default",
+            "frontends_config": {
+                "5d725b3c-6d42-448e-8bfd-1eff1fcf152d": {"url": "http://test-frontend.com"},
+                "default": {"url": "http://default-frontend.com"},
+            }
+        },
+        "authorization_server": {
+            "base_url": "http://127.0.0.1:6005"
+        },
+        "credential_offer_scheme": "haip-vci://"
+    }
+    
+    with patch.dict("app.preauthorization.CONFIGURATION", mock_cfg):
+        yield mock_cfg
 
 
 class TestPreauthRed:
@@ -109,7 +114,7 @@ class TestPreauthRed:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test successful preauth request."""
         # Setup
@@ -159,7 +164,7 @@ class TestPreauthRed:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test preauth with empty credentials list."""
         from flask import Response
@@ -189,7 +194,7 @@ class TestPreauthRed:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test that optional attributes are filtered correctly."""
         from flask import Response
@@ -229,7 +234,7 @@ class TestPreauthForm:
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test successful form submission."""
         from flask import Response
@@ -272,7 +277,7 @@ class TestPreauthForm:
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test form submission with date conversion."""
         from flask import Response
@@ -308,7 +313,7 @@ class TestFormAuthorizeGenerate:
 
     @patch("app.preauthorization.generate_offer")
     def test_form_authorize_generate_success(
-        self, mock_generate_offer, client, mock_session_manager, mock_config
+        self, mock_generate_offer, client, mock_session_manager, mock_configuration
     ):
         """Test successful authorization generation."""
         from flask import Response
@@ -335,7 +340,7 @@ class TestCredentialOfferReq2:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_success(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test successful credential offer request."""
         # Setup - Create a valid JWT-like token
@@ -377,7 +382,7 @@ class TestCredentialOfferReq2:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_multiple_credentials(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test credential offer request with multiple credentials."""
         header = (
@@ -419,7 +424,7 @@ class TestCredentialOfferReq2:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_with_padding(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test JWT token with different padding scenarios."""
         header = base64.urlsafe_b64encode(b'{"alg":"HS256"}').decode(
@@ -448,12 +453,12 @@ class TestRequestPreauthToken:
 
     @patch("app.preauthorization.requests.request")
     def test_request_preauth_token_success(
-        self, mock_requests, mock_session_manager, mock_config
+        self, mock_requests, mock_session_manager, mock_configuration
     ):
         """Test successful preauth token request."""
         # Setup
 
-        mock_cfg, mock_frontend = mock_config
+        mock_cfg = mock_configuration
 
         mock_response = Mock()
         mock_response.json.return_value = {
@@ -469,7 +474,7 @@ class TestRequestPreauthToken:
         # Assert
         assert result == "test_session_id"
 
-        expected_url = f"{mock_cfg.authorization_server_internal_url}/preauth_generate"
+        expected_url = f"{mock_cfg['authorization_server']['base_url']}/preauth_generate"
 
         mock_requests.assert_called_once_with(
             "POST",
@@ -487,7 +492,7 @@ class TestRequestPreauthToken:
 
     @patch("app.preauthorization.requests.request")
     def test_request_preauth_token_empty_scope(
-        self, mock_requests, mock_session_manager, mock_config
+        self, mock_requests, mock_session_manager, mock_configuration
     ):
         """Test preauth token request with empty scope."""
         mock_response = Mock()
@@ -506,7 +511,7 @@ class TestRequestPreauthToken:
 
     @patch("app.preauthorization.requests.request")
     def test_request_preauth_token_with_special_chars(
-        self, mock_requests, mock_session_manager, mock_config
+        self, mock_requests, mock_session_manager, mock_configuration
     ):
         """Test preauth token request with special characters in scope."""
         mock_response = Mock()
@@ -538,7 +543,7 @@ class TestIntegration:
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test flow from form submission to offer generation."""
         from flask import Response
@@ -584,7 +589,7 @@ class TestEdgeCases:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test preauth handles credentials with 'vct' field instead of 'credential_configuration_id'."""
         from flask import Response
@@ -624,7 +629,7 @@ class TestEdgeCases:
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test form submission without effective_from_date."""
         from flask import Response
@@ -647,7 +652,7 @@ class TestEdgeCases:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_includes_tx_code_value(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test that credentialOfferReq2 includes tx_code value in response."""
         header = (
@@ -693,7 +698,7 @@ class TestEdgeCases:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test preauth with a single credential."""
         from flask import Response
@@ -719,14 +724,16 @@ class TestEdgeCases:
     @patch("app.preauthorization.form_formatter")
     @patch("app.preauthorization.presentation_formatter")
     @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.preauthorization.logger")
     def test_preauth_form_logs_data(
         self,
+        mock_logger,
         mock_post_redirect,
         mock_pres_formatter,
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test that preauth_form logs form data."""
         from flask import Response
@@ -743,13 +750,13 @@ class TestEdgeCases:
         )
 
         # Verify logger was called
-        mock_cfg, _ = mock_config
-        assert mock_cfg.app_logger.info.called
-        assert mock_cfg.app_logger.info.call_count >= 2
+        mock_cfg = mock_configuration
+        assert mock_logger.info.called
+        assert mock_logger.info.call_count >= 2
 
     @patch("app.preauthorization.requests.request")
     def test_request_preauth_token_returns_all_values(
-        self, mock_requests, mock_session_manager, mock_config
+        self, mock_requests, mock_session_manager, mock_configuration
     ):
         """Test that request_preauth_token extracts all values from response."""
         mock_response = Mock()
@@ -786,7 +793,7 @@ class TestCompleteCodeCoverage:
         mock_request_token,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test that preauth updates all required session fields."""
         from flask import Response
@@ -816,7 +823,7 @@ class TestCompleteCodeCoverage:
         mock_form_formatter,
         client,
         mock_session_manager,
-        mock_config,
+        mock_configuration,
     ):
         """Test that 'proceed' is removed from form_data before formatting."""
         from flask import Response
@@ -841,7 +848,7 @@ class TestCompleteCodeCoverage:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_constructs_authorization_details(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test that credentialOfferReq2 constructs proper authorization_details."""
         header = base64.urlsafe_b64encode(b"{}").decode("utf-8").rstrip("=")
@@ -874,7 +881,7 @@ class TestCompleteCodeCoverage:
 
     @patch("app.preauthorization.request_preauth_token")
     def test_credential_offer_req2_extracts_data_from_first_credential(
-        self, mock_request_token, client, mock_session_manager, mock_config
+        self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
         """Test that credentialOfferReq2 extracts data from first credential only."""
         header = base64.urlsafe_b64encode(b"{}").decode("utf-8").rstrip("=")

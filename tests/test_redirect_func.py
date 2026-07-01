@@ -31,8 +31,7 @@ def app():
 
 
 class TestRedirectFunc:
-    @patch("app.redirect_func.cfgserv")
-    def test_url_get_simple(self, mock_cfgserv):
+    def test_url_get_simple(self):
         url = "http://example.com"
         args = {"a": "1", "b": "2"}
         result = rf.url_get(url, args)

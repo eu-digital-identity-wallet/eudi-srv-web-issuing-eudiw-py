@@ -57,8 +57,17 @@ class TestOid4vpRouteSuccess:
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.session_manager.update_oid4vp_transaction_id")
     @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        },
+        "oid4vp_scheme": "haip-vp://"
+    })
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.segno.make")
     @patch("app.route_oid4vp.oidc_metadata")
@@ -67,8 +76,6 @@ class TestOid4vpRouteSuccess:
         mock_oidc_metadata,
         mock_segno,
         mock_post_redirect,
-        mock_conf_frontend,
-        mock_cfgservice,
         mock_requests,
         mock_update_tx,
         mock_get_session,
@@ -94,14 +101,6 @@ class TestOid4vpRouteSuccess:
                 }
             }
         )
-
-        # Mock config
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
-        mock_cfgservice.service_url = "https://service.com/"
-
-        mock_conf_frontend.registered_frontends = {
-            "test_frontend": {"url": "https://frontend.com"}
-        }
 
         # Mock requests
         mock_response_cross = {
@@ -188,16 +187,22 @@ class TestGetPidOid4vp:
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.getAttributesForm")
     @patch("app.route_oid4vp.getAttributesForm2")
     def test_same_device_flow(
         self,
         mock_getAttributesForm2,
         mock_getAttributesForm,
-        mock_conf_frontend,
-        mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
@@ -215,21 +220,6 @@ class TestGetPidOid4vp:
             {"credential_configuration_id": "dummy"}
         ]
         mock_get_session.return_value = mock_session_data
-
-        # Configs
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
-        mock_cfgservice.service_url = "https://service.com/"
-        mock_cfgservice.config_doctype = {
-            "eu.europa.ec.eudi.pseudonym.age_over_18.1": {
-                "issuing_authority": "FC Authority",
-                "validity": 365,
-                "credential_type": "over18",
-            }
-        }
-
-        mock_conf_frontend.registered_frontends = {
-            "test_frontend": {"url": "https://frontend.com"}
-        }
 
         # Requests mock
         mock_response = MagicMock()
@@ -287,16 +277,22 @@ class TestGetPidOid4vpAdditional:
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.getAttributesForm")
     @patch("app.route_oid4vp.getAttributesForm2")
     def test_cross_device_flow(
         self,
         mock_getAttributesForm2,
         mock_getAttributesForm,
-        mock_conf_frontend,
-        mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
@@ -314,12 +310,6 @@ class TestGetPidOid4vpAdditional:
             {"credential_configuration_id": "dummy"}
         ]
         mock_get_session.return_value = mock_session_data
-
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
-        mock_cfgservice.service_url = "https://service.com/"
-        mock_conf_frontend.registered_frontends = {
-            "test_frontend": {"url": "https://frontend.com"}
-        }
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -346,16 +336,22 @@ class TestGetPidOid4vpAdditional:
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.getAttributesForm")
     @patch("app.route_oid4vp.getAttributesForm2")
     def test_non_age_over18_flow(
         self,
         mock_getAttributesForm2,
         mock_getAttributesForm,
-        mock_conf_frontend,
-        mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
@@ -373,11 +369,6 @@ class TestGetPidOid4vpAdditional:
             {"credential_configuration_id": "dummy"}
         ]
         mock_get_session.return_value = mock_session_data
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
-        mock_cfgservice.service_url = "https://service.com/"
-        mock_conf_frontend.registered_frontends = {
-            "test_frontend": {"url": "https://frontend.com"}
-        }
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -396,6 +387,16 @@ class TestGetPidOid4vpAdditional:
 
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.requests.request")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.validate_vp_token")
     def test_vp_token_invalid(
         self,
@@ -425,6 +426,16 @@ class TestGetPidOid4vpAdditional:
 
     @patch("app.route_oid4vp.session_manager.get_session")
     @patch("app.route_oid4vp.requests.request")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     def test_requests_non_200(
         self, mock_requests, mock_get_session, client, mock_session_data
     ):
@@ -447,16 +458,22 @@ class TestGetPidOid4vpAdditional:
     @patch("app.route_oid4vp.validate_vp_token")
     @patch("app.route_oid4vp.cbor2elems")
     @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.ConfFrontend")
+    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "frontend": {
+            "default": "test_frontend",
+            "frontends_config": {
+                "test_frontend": {"url": "https://frontend.com"}
+            }
+        }
+    })
     @patch("app.route_oid4vp.getAttributesForm")
     @patch("app.route_oid4vp.getAttributesForm2")
     def test_authorization_details_age_over18(
         self,
         mock_getAttributesForm2,
         mock_getAttributesForm,
-        mock_conf_frontend,
-        mock_cfgservice,
         mock_post_redirect,
         mock_cbor2elems,
         mock_validate_vp_token,
@@ -481,19 +498,6 @@ class TestGetPidOid4vpAdditional:
             sess["session_id"] = "123"
 
         mock_get_session.return_value = mock_session_data
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
-        mock_cfgservice.service_url = "https://service.com/"
-        mock_cfgservice.config_doctype = {
-            "eu.europa.ec.eudi.pseudonym.age_over_18.1": {
-                "issuing_authority": "FC Authority",
-                "validity": 365,
-                "credential_type": "over18",
-            }
-        }
-
-        mock_conf_frontend.registered_frontends = {
-            "test_frontend": {"url": "https://frontend.com"}
-        }
 
         mock_response = MagicMock()
         mock_response.status_code = 200

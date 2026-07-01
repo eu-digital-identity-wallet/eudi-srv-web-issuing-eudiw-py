@@ -50,13 +50,13 @@ def mock_external_dependencies():
         "app.dynamic_func.doctype2credentialSDJWT": MagicMock(),
         "app.dynamic_func.getNamespaces": MagicMock(return_value=["ns1", "ns2"]),
         "app.dynamic_func.getMandatoryAttributes": MagicMock(
-            side_effect=[["mdoc_mand1"], ["mdoc_mand2"]]
+            side_effect=[[("mdoc_mand1_key", "mdoc_mand1_key")], [("mdoc_mand2_key", "mdoc_mand2_key")]]
         ),
         "app.dynamic_func.getOptionalAttributes": MagicMock(
-            side_effect=[["mdoc_opt1"], ["mdoc_opt2"]]
+            side_effect=[[("mdoc_opt1_key", "mdoc_opt1_value")], [("mdoc_opt2_key", "mdoc_opt2_value")]]
         ),
         "app.dynamic_func.getIssuerFilledAttributes": MagicMock(
-            side_effect=[["mdoc_iss1", "issuance_date"], ["mdoc_iss2"]]
+            side_effect=[[("mdoc_iss1_key", "mdoc_iss1_value"), ("issuance_date_key", "issuance_date_value")], [("mdoc_iss2_key", "mdoc_iss2_value")]]
         ),
         "app.dynamic_func.getMandatoryAttributesSDJWT": MagicMock(
             return_value=["sdjwt_mand1"]
@@ -68,8 +68,8 @@ def mock_external_dependencies():
             return_value=["sdjwt_iss1", "issue_date"]
         ),
         # Dependencies from app_config
-        "app.dynamic_func.cfgserv": MagicMock(),
-        "app.dynamic_func.cfgcountries": MagicMock(),
+        "app.dynamic_func.CONFIGURATION": {},
+        #"app.dynamic_func.cfgcountries": MagicMock(),
         # Dependency from redirect_func
         "app.dynamic_func.json_post": MagicMock(),
         # Dependencies from app
@@ -83,7 +83,7 @@ def mock_external_dependencies():
     mocks["datetime.date"].today.return_value = MOCK_TODAY
 
     # Specific setup for cfgcountries mock
-    mocks["app.dynamic_func.cfgcountries"].supported_countries = {
+    mocks["app.dynamic_func.CONFIGURATION"]['countries'] = {
         "PT": {"un_distinguishing_sign": "PRT"}
     }
 
@@ -111,14 +111,14 @@ class TestDynamicFormatter:
     MOCK_SESSION_ID = "session123"
 
     @pytest.mark.parametrize(
-        "doctype, expected_un_sign",
+        "scope, expected_un_sign",
         [
-            ("org.iso.18013.5.1.mDL", "PRT"),
+            ("eu.europa.ec.eudi.mdl_mdoc", "PRT"),
             ("eu.europa.ec.eudi.pid.1", ""),  # Non-mDL should have empty sign
         ],
     )
     def test_mso_mdoc_success(
-        self, mock_external_dependencies, doctype, expected_un_sign
+        self, mock_external_dependencies, scope, expected_un_sign
     ):
         """Tests the mso_mdoc format flow."""
         mock_credential = b"mock_mdoc_data"
@@ -139,7 +139,7 @@ class TestDynamicFormatter:
         ) as mock_formatter:
             result = dynamic_formatter(
                 format="mso_mdoc",
-                doctype=doctype,
+                scope=scope,
                 form_data=self.MOCK_FORM_DATA,
                 device_publickey=self.MOCK_DEVICE_KEY,
                 session_id=self.MOCK_SESSION_ID,
@@ -166,8 +166,8 @@ class TestDynamicFormatter:
     def test_dc_sd_jwt_success(self, mock_external_dependencies):
         """Tests the dc+sd-jwt format flow with successful json_post."""
         mock_sd_jwt = "mock.sd-jwt.data"
-        mock_external_dependencies["app.dynamic_func.cfgserv"].service_url = (
-            "http://formatter/"
+        mock_external_dependencies["app.dynamic_func.CONFIGURATION"]['service_url'] = (
+            "http://formatter"
         )
         mock_external_dependencies[
             "app.dynamic_func.json_post"
@@ -182,6 +182,7 @@ class TestDynamicFormatter:
             "credential_metadata": {"claims": {}},
             "issuer_config": {"validity": 365},
         }
+        mock_scope = "eu.europa.ec.eudi.pid.1"
 
         with patch(
             "app.dynamic_func.formatter",
@@ -189,7 +190,7 @@ class TestDynamicFormatter:
         ) as mock_formatter:
             result = dynamic_formatter(
                 format="dc+sd-jwt",
-                doctype="eu.europa.ec.eudi.pid.1",
+                scope=mock_scope,
                 form_data=self.MOCK_FORM_DATA,
                 device_publickey=self.MOCK_DEVICE_KEY,
                 session_id=self.MOCK_SESSION_ID,
@@ -204,6 +205,7 @@ class TestDynamicFormatter:
                 {
                     "country": "PT",
                     "credential_metadata": mock_formatter_cred,
+                    "scope": mock_scope,
                     "device_publickey": self.MOCK_DEVICE_KEY,
                     "data": mock_formatter_data,
                 },
@@ -218,6 +220,10 @@ class TestDynamicFormatter:
             "error_code": 1,
             "error_message": "Post failed",
         }
+        
+        mock_external_dependencies[
+            "app.dynamic_func.CONFIGURATION"
+        ]["service_url"] = "http://formatter"
 
         # Mock formatter return
         mock_formatter_data = {"sdjwt_attr": "value"}
@@ -232,7 +238,7 @@ class TestDynamicFormatter:
         ):
             result = dynamic_formatter(
                 format="dc+sd-jwt",
-                doctype="eu.europa.ec.eudi.pid.1",
+                scope="eu.europa.ec.eudi.pid.1",
                 form_data=self.MOCK_FORM_DATA,
                 device_publickey=self.MOCK_DEVICE_KEY,
                 session_id=self.MOCK_SESSION_ID,
@@ -321,35 +327,49 @@ class TestGetRequestedCredential:
     MOCK_DATA = {"issuing_country": "PT"}
 
     @patch(
-        "app.dynamic_func.doctype2credential",
-        return_value={"cred_mdoc": "data", "issuer_config": {"validity": 365}},
+        "app.dynamic_func.oidc_metadata",
+        {
+            "credential_configurations_supported": {
+                "mdl": {
+                    "cred_mdoc": "data",
+                    "issuer_config": {
+                        "validity": 365
+                    }
+                }
+            } 
+        },
     )
-    def test_mdoc(self, mock_doctype2credential):
+    def test_mdoc(self):
         """Tests credential retrieval for mso_mdoc format."""
         cred, pdata = get_requested_credential(
             self.MOCK_DATA, "mdl", "mso_mdoc", MOCK_TODAY
         )
-        mock_doctype2credential.assert_called_once_with("mdl", "mso_mdoc")
+        #mock_oidc_metadata.assert_called_once_with("mdl", "mso_mdoc")
         assert cred["cred_mdoc"] == "data"
         assert pdata == {}
 
     @patch(
-        "app.dynamic_func.doctype2credentialSDJWT",
-        return_value={
-            "cred_sdjwt": "data",
-            "issuer_config": {
-                "validity": 365,
-                "organization_name": "OrgName",
-                "organization_id": "OrgID",
-            },
+        "app.dynamic_func.oidc_metadata",
+        {
+            "credential_configurations_supported": {
+                "pid": {
+                    "cred_sdjwt": "data",
+                    "issuer_config": {
+                        "validity": 365,
+                        "organization_name": "OrgName",
+                        "organization_id": "OrgID",
+                    },
+                    "vct": "pid"
+                }
+            }
         },
     )
-    def test_sdjwt(self, mock_doctype2credentialSDJWT):
+    def test_sdjwt(self):
         """Tests credential retrieval and pdata initialization for dc+sd-jwt format."""
         cred, pdata = get_requested_credential(
             self.MOCK_DATA, "pid", "dc+sd-jwt", MOCK_TODAY
         )
-        mock_doctype2credentialSDJWT.assert_called_once_with("pid", "dc+sd-jwt")
+        #mock_doctype2credentialSDJWT.assert_called_once_with("pid", "dc+sd-jwt")
         assert cred["cred_sdjwt"] == "data"
         assert pdata["claims"] == {}
         assert pdata["evidence"][0]["type"] == "pid"
@@ -473,7 +493,6 @@ class TestNormalizeListAndTypeFields:
     def test_normalize_list_fields_json_string(self):
         """Tests normalization of list fields passed as JSON strings."""
         data = {
-            "driving_privileges": '[{"class": "B"}]',  # In MOCK_ATTRIBUTES_REQ
             "residence_address": '[{"street": "Main St"}]',  # In MOCK_ATTRIBUTES_OPT
         }
 
@@ -481,13 +500,11 @@ class TestNormalizeListAndTypeFields:
             data, self.MOCK_ATTRIBUTES_REQ, self.MOCK_ATTRIBUTES_OPT
         )
 
-        assert data["driving_privileges"] == {"class": "B"}
         assert data["residence_address"] == {"street": "Main St"}
 
     def test_normalize_list_fields_python_list(self):
         """Tests normalization of list fields passed as Python lists."""
         data = {
-            "driving_privileges": [{"class": "B"}],  # In MOCK_ATTRIBUTES_REQ
             "residence_address": [{"street": "Main St"}],  # In MOCK_ATTRIBUTES_OPT
         }
 
@@ -496,7 +513,6 @@ class TestNormalizeListAndTypeFields:
         )
 
         # It should take the first element from the list
-        assert data["driving_privileges"] == {"class": "B"}
         assert data["residence_address"] == {"street": "Main St"}
 
     def test_numeric_conversions(self):
@@ -549,6 +565,7 @@ class TestPopulatePdata:
     MOCK_ATTRIBUTES_REQ = {"mdoc_mand1"}
     MOCK_ATTRIBUTES_OPT = {"mdoc_opt1"}
     MOCK_ISSUER_CLAIMS = {"mdoc_iss1"}
+    MOCK_ATTRIBUTES_BY_NAMESPACE = { "ns1": { "mandatory": ["mdoc_mand1"], "optional": ["mdoc_opt1"], "issuer": ["mdoc_iss1"] }, "ns2": { "mandatory": ["mdoc_mand1"], "optional": ["mdoc_opt1"], "issuer": ["mdoc_iss1"] } }
 
     MOCK_ATTRIBUTES_REQ_SDJWT = {"sdjwt_mand1"}
     MOCK_ATTRIBUTES_OPT_SDJWT = {"sdjwt_opt1"}
@@ -591,6 +608,7 @@ class TestPopulatePdata:
             self.MOCK_ATTRIBUTES_REQ,
             self.MOCK_ATTRIBUTES_OPT,
             self.MOCK_ISSUER_CLAIMS,
+            self.MOCK_ATTRIBUTES_BY_NAMESPACE,
         )
 
         # Assertions

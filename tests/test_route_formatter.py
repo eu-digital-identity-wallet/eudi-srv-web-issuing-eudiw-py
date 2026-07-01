@@ -35,13 +35,23 @@ def app():
 def client(app):
     return app.test_client()
 
+@pytest.fixture
+def patch_configuration(mock_configuration, monkeypatch):
+    mock_configuration['countries'] = {
+        "FC": {
+            "name": "Fictionland",
+            "supported_credential_ids": ["org.iso.18013.5.1.mDL"],
+        }
+    }
+    monkeypatch.setattr("app.route_formatter.CONFIGURATION", mock_configuration)
+
 
 # -------------------------
 # Tests for /formatter/cbor
 # -------------------------
 @patch("app.route_formatter.validate_mandatory_args")
 @patch("app.route_formatter.mdocFormatter")
-def test_cborformatter_success(mock_mdocFormatter, mock_validate, client):
+def test_cborformatter_success(mock_mdocFormatter, mock_validate, client, patch_configuration):
     mock_validate.return_value = (True, [])
     mock_mdocFormatter.return_value = "base64mdoc"
 
@@ -67,7 +77,7 @@ def test_cborformatter_success(mock_mdocFormatter, mock_validate, client):
 
 
 @patch("app.route_formatter.validate_mandatory_args")
-def test_cborformatter_invalid_expiry_date(mock_validate, client):
+def test_cborformatter_invalid_expiry_date(mock_validate, client, patch_configuration):
     mock_validate.return_value = (True, [])
     payload = {
         "credential_metadata": {"doctype": "org.iso.18013.5.1.mDL"},
@@ -84,7 +94,7 @@ def test_cborformatter_invalid_expiry_date(mock_validate, client):
 
 
 @patch("app.route_formatter.validate_mandatory_args")
-def test_cborformatter_invalid_issue_date(mock_validate, client):
+def test_cborformatter_invalid_issue_date(mock_validate, client, patch_configuration):
     mock_validate.return_value = (True, [])
     payload = {
         "credential_metadata": {"doctype": "org.iso.18013.5.1.mDL"},
@@ -106,7 +116,7 @@ def test_cborformatter_invalid_issue_date(mock_validate, client):
 @patch("app.route_formatter.sdjwtFormatter")
 def test_sd_jwtformatter_success(mock_sdjwtFormatter, client):
     mock_sdjwtFormatter.return_value = "signed_sdjwt"
-    payload = {"country": "FC", "data": {}, "credential_metadata": {}}
+    payload = {"country": "FC", "data": {}, "credential_metadata": {}, "scope": "test"}
     response = client.post("/formatter/sd-jwt", json=payload)
     data = json.loads(response.data)
     assert response.status_code == 200
@@ -140,7 +150,7 @@ def test_cborformatter_missing_mandatory_args(mock_validate, client):
 
 
 @patch("app.route_formatter.validate_mandatory_args")
-def test_cborformatter_unsupported_country(mock_validate, client):
+def test_cborformatter_unsupported_country(mock_validate, client, patch_configuration):
     # Simulate mandatory args validation passing
     mock_validate.return_value = (True, [])
 

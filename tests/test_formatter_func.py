@@ -69,24 +69,36 @@ def country():
 
 class TestMdocFormatter:
 
-    @patch("builtins.open", new_callable=mock_open, read_data=b"fake_key_data")
     @patch("app.formatter_func.serialization.load_pem_private_key")
     @patch("app.formatter_func.urlsafe_b64encode_nopad", return_value=b"signed_mdoc")
     @patch("app.formatter_func.MdocCborIssuer")
     @patch("app.formatter_func.requests.post")
-    @patch("app.formatter_func.cfgservice")
-    @patch("app.formatter_func.cfgcountries")
     @patch("app.formatter_func.session_manager")
+    @patch("app.formatter_func.CONFIGURATION", { # Mock country config
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "keys": {
+                    "_default": {
+                        "private_key_path": "fake_path",
+                        "private_key": "PK Sample Content",
+                        "private_key_password": None,
+                        "certificate_path": "fake_cert_path"
+                    }
+                }
+            }
+        },
+        "revocation": {
+            "enabled": False
+        }
+    })
     def test_basic_mdocFormatter(
         self,
         mock_session_manager,
-        mock_cfgcountries,
-        mock_cfgservice,
         mock_requests_post,
         mock_MdocCborIssuer,
         mock_b64encode,
         mock_load_key,
-        mock_open,
         sample_data,
         credential_metadata,
         country,
@@ -97,21 +109,13 @@ class TestMdocFormatter:
         # Mock session
         mock_session = MagicMock()
         mock_session.is_batch_credential = False
+        mock_session.country = 'FC'
         mock_session_manager.get_session.return_value = mock_session
 
         # Mock private key
         mock_private_key = MagicMock()
         mock_private_key.private_numbers.return_value.private_value = 12345
         mock_load_key.return_value = mock_private_key
-
-        # Mock country config
-        mock_cfgcountries.supported_countries = {
-            country: {
-                "pid_mdoc_privkey": "fake_path",
-                "pid_mdoc_privkey_passwd": None,
-                "pid_mdoc_cert": "fake_cert_path",
-            }
-        }
 
         # Disable revocation
         global revocation_api_key
@@ -130,7 +134,7 @@ class TestMdocFormatter:
         )
 
         # Assertions
-        mock_open.assert_called_once_with("fake_path", "rb")
+        #mock_open.assert_called_once_with("fake_path", "rb")
         mock_load_key.assert_called_once()
         mock_MdocCborIssuer.assert_called_once()
         mock_mdoci_instance.new.assert_called_once()
@@ -142,26 +146,38 @@ class TestMdocFormatter:
         # Pseudonym encoded
         assert sample_data["Person"]["user_pseudonym"] == b"johndoe123"
 
-    @patch("builtins.open", new_callable=mock_open, read_data=b"fake_key_data")
     @patch("app.formatter_func.serialization.load_pem_private_key")
     @patch(
         "app.formatter_func.urlsafe_b64encode_nopad", return_value=b"signed_mdoc_batch"
     )
     @patch("app.formatter_func.MdocCborIssuer")
     @patch("app.formatter_func.requests.post")
-    @patch("app.formatter_func.cfgservice")
-    @patch("app.formatter_func.cfgcountries")
     @patch("app.formatter_func.session_manager")
+    @patch("app.formatter_func.CONFIGURATION", { # Mock country config
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "keys": {
+                    "_default": {
+                        "private_key_path": "fake_path",
+                        "private_key": "PK Sample Content",
+                        "private_key_password": None,
+                        "certificate_path": "fake_cert_path"
+                    }
+                }
+            }
+        },
+        "revocation": {
+            "enabled": False
+        }
+    })
     def test_batch_credential(
         self,
         mock_session_manager,
-        mock_cfgcountries,
-        mock_cfgservice,
         mock_requests_post,
         mock_MdocCborIssuer,
         mock_b64encode,
         mock_load_key,
-        mock_open,
         sample_data,
         credential_metadata,
         country,
@@ -172,21 +188,13 @@ class TestMdocFormatter:
         # Mock session
         mock_session = MagicMock()
         mock_session.is_batch_credential = True
+        mock_session.country = 'FC'
         mock_session_manager.get_session.return_value = mock_session
 
         # Mock private key
         mock_private_key = MagicMock()
         mock_private_key.private_numbers.return_value.private_value = 12345
         mock_load_key.return_value = mock_private_key
-
-        # Mock country config
-        mock_cfgcountries.supported_countries = {
-            country: {
-                "pid_mdoc_privkey": "fake_path",
-                "pid_mdoc_privkey_passwd": None,
-                "pid_mdoc_cert": "fake_cert_path",
-            }
-        }
 
         # Disable revocation
         global revocation_api_key
@@ -212,7 +220,6 @@ class TestMdocFormatter:
 
         assert result == b"signed_mdoc_batch"
 
-    @patch("builtins.open", new_callable=mock_open, read_data=b"fake_key_data")
     @patch("app.formatter_func.serialization.load_pem_private_key")
     @patch(
         "app.formatter_func.urlsafe_b64encode_nopad",
@@ -220,19 +227,34 @@ class TestMdocFormatter:
     )
     @patch("app.formatter_func.MdocCborIssuer")
     @patch("app.formatter_func.requests.post")
-    @patch("app.formatter_func.cfgservice")
-    @patch("app.formatter_func.cfgcountries")
     @patch("app.formatter_func.session_manager")
+    @patch("app.formatter_func.CONFIGURATION", { # Mock country config
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "keys": {
+                    "_default": {
+                        "private_key_path": "fake_path",
+                        "private_key": "PK Sample Content",
+                        "private_key_password": None,
+                        "certificate_path": "fake_cert_path"
+                    }
+                }
+            }
+        },
+        "revocation": {
+            "enabled": True,
+            "api_key": "Fake API-Key",
+            "take_url": "Fake Take URL"
+        }
+    })
     def test_revocation_branch(
         self,
         mock_session_manager,
-        mock_cfgcountries,
-        mock_cfgservice,
         mock_requests_post,
         mock_MdocCborIssuer,
         mock_b64encode,
         mock_load_key,
-        mock_open,
         sample_data,
         credential_metadata,
         country,
@@ -243,21 +265,13 @@ class TestMdocFormatter:
         # Mock session
         mock_session = MagicMock()
         mock_session.is_batch_credential = False
+        mock_session.country = 'FC'
         mock_session_manager.get_session.return_value = mock_session
 
         # Mock private key
         mock_private_key = MagicMock()
         mock_private_key.private_numbers.return_value.private_value = 12345
         mock_load_key.return_value = mock_private_key
-
-        # Mock country config
-        mock_cfgcountries.supported_countries = {
-            country: {
-                "pid_mdoc_privkey": "fake_path",
-                "pid_mdoc_privkey_passwd": None,
-                "pid_mdoc_cert": "fake_cert_path",
-            }
-        }
 
         # Enable revocation
         global revocation_api_key
@@ -266,7 +280,7 @@ class TestMdocFormatter:
         # Mock requests.post to return JSON
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"revoked": False}
+        mock_response.json.return_value = { "revoked": False, "identifier_list": {"id": "abc123" } }
         mock_requests_post.return_value = mock_response
 
         # Mock MdocCborIssuer instance
@@ -283,7 +297,7 @@ class TestMdocFormatter:
 
         mock_requests_post.assert_called_once()
         called_revocation = mock_mdoci_instance.new.call_args.kwargs["revocation"]
-        assert called_revocation == {"revoked": False}
+        assert called_revocation == { "revoked": False, "identifier_list": {"id": b'abc123' } }
 
         assert result == b"signed_mdoc_revocation"
 
@@ -399,8 +413,8 @@ class TestSDJWTNestedClaims:
         result = sdjwtNestedClaims(claims, credential_metadata)
         key = list(result.keys())[0]
         sub = result[key]
-        assert isinstance(sub, dict)
-        assert sub[SDObj("company")] == "ABC"
+        assert isinstance(sub, list)
+        assert sub[0][SDObj("company")] == "ABC"
 
     def test_list_claim_length_gt1(self):
         claims = {"roles": [{"role": "admin"}, {"role": "user"}]}
@@ -440,8 +454,8 @@ class TestSDJWTNestedClaims:
         result = sdjwtNestedClaims(claims, credential_metadata)
         key = list(result.keys())[0]
         sub = result[key]
-        assert isinstance(sub, dict)
-        assert sub[SDObj("name")] == "Python"
+        assert isinstance(sub, list)
+        assert sub[0][SDObj("name")] == "Python"
 
     def test_list_length_gt1_with_dict_element(self):
         claims = {"projects": [{"name": "A"}, {"name": "B"}]}
@@ -456,7 +470,6 @@ class TestSDJWTNestedClaims:
 
 class TestSDJWTFormatter:
 
-    @patch("builtins.open", new_callable=mock_open, read_data=b"fake_cert_data")
     @patch("app.formatter_func.base64.b64encode", side_effect=lambda x: b"encoded_cert")
     @patch("app.formatter_func.serialization.load_pem_private_key")
     @patch(
@@ -477,14 +490,30 @@ class TestSDJWTFormatter:
         "app.formatter_func.sdjwtNestedClaims", return_value={"claim_wrapped": "value"}
     )
     @patch("app.formatter_func.vct2doctype", side_effect=lambda vct: "Person")
-    @patch("app.formatter_func.cfgcountries")
-    @patch("app.formatter_func.cfgservice")
     @patch("app.formatter_func.requests.post")
+    @patch("app.formatter_func.CONFIGURATION", { # Mock country config
+        "service_url": "Fake_URL",
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "keys": {
+                    "_default": {
+                        "private_key_path": "fake_path",
+                        "private_key": "PK Sample Content",
+                        "private_key_password": None,
+                        "certificate_path": "fake_cert_path",
+                        "certificate": "Fake_Certificate_Content"
+                    }
+                }
+            }
+        },
+        "revocation": {
+            "enabled": False,
+        }
+    })
     def test_basic_sdjwtFormatter(
         self,
         mock_requests_post,
-        mock_cfgservice,
-        mock_cfgcountries,
         mock_vct2doctype,
         mock_sdjwtNestedClaims,
         mock_SDJWTIssuer,
@@ -494,7 +523,6 @@ class TestSDJWTFormatter:
         mock_urlsafe_b64decode,
         mock_load_private_key,
         mock_b64encode,
-        mock_open_file,
     ):
         # Mock PID input
         PID = {
@@ -512,15 +540,6 @@ class TestSDJWTFormatter:
         mock_private_key.private_numbers.return_value.private_value = 12345
         mock_load_private_key.return_value = mock_private_key
 
-        # Mock cfgcountries
-        mock_cfgcountries.supported_countries = {
-            country: {
-                "pid_mdoc_cert": "fake_cert_path",
-                "pid_mdoc_privkey": "fake_key_path",
-                "pid_mdoc_privkey_passwd": None,
-            }
-        }
-
         # Disable revocation
         global revocation_api_key
         revocation_api_key = None
@@ -530,11 +549,9 @@ class TestSDJWTFormatter:
         mock_sdjwt_instance.sd_jwt_issuance = "sdjwt_token"
         mock_SDJWTIssuer.return_value = mock_sdjwt_instance
 
-        result = sdjwtFormatter(PID, country)
+        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt")
 
         # Assertions
-        mock_open_file.assert_any_call("fake_cert_path", "rb")
-        mock_open_file.assert_any_call("fake_key_path", "rb")
         mock_load_private_key.assert_called_once()
         mock_load_public_key.assert_called_once()
         mock_sdjwtNestedClaims.assert_called_once_with(
@@ -564,14 +581,32 @@ class TestSDJWTFormatter:
         "app.formatter_func.sdjwtNestedClaims", return_value={"claim_wrapped": "value"}
     )
     @patch("app.formatter_func.vct2doctype", side_effect=lambda vct: "Person")
-    @patch("app.formatter_func.cfgcountries")
-    @patch("app.formatter_func.cfgservice")
     @patch("app.formatter_func.requests.post")
+    @patch("app.formatter_func.CONFIGURATION", { # Mock country config
+        "service_url": "Fake_URL",
+        "countries": {
+            "FC": {
+                "name": "FormEU",
+                "keys": {
+                    "_default": {
+                        "private_key_path": "fake_path",
+                        "private_key": "PK Sample Content",
+                        "private_key_password": None,
+                        "certificate_path": "fake_cert_path",
+                        "certificate": "Fake_Certificate_Content"
+                    }
+                }
+            }
+        },
+        "revocation": {
+            "enabled": True,
+            "api_key": "Fake API-Key",
+            "take_url": "Fake Take URL"
+        }
+    })
     def test_revocation_branch(
         self,
         mock_requests_post,
-        mock_cfgservice,
-        mock_cfgcountries,
         mock_vct2doctype,
         mock_sdjwtNestedClaims,
         mock_SDJWTIssuer,
@@ -599,15 +634,6 @@ class TestSDJWTFormatter:
         mock_private_key.private_numbers.return_value.private_value = 12345
         mock_load_private_key.return_value = mock_private_key
 
-        # Mock cfgcountries
-        mock_cfgcountries.supported_countries = {
-            country: {
-                "pid_mdoc_cert": "fake_cert_path",
-                "pid_mdoc_privkey": "fake_key_path",
-                "pid_mdoc_privkey_passwd": None,
-            }
-        }
-
         # Enable revocation
         global revocation_api_key
         revocation_api_key = "FAKE_API_KEY"
@@ -623,7 +649,7 @@ class TestSDJWTFormatter:
         mock_sdjwt_instance.sd_jwt_issuance = "sdjwt_token_revocation"
         mock_SDJWTIssuer.return_value = mock_sdjwt_instance
 
-        result = sdjwtFormatter(PID, country)
+        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt")
 
         mock_requests_post.assert_called_once()
         mock_sdjwtNestedClaims.assert_called_once()
