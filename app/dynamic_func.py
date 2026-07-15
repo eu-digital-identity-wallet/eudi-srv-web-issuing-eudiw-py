@@ -60,7 +60,7 @@ def dynamic_formatter(format, scope, form_data, device_publickey, session_id):
     r = {}
 
     if format == "mso_mdoc":
-        base64_mdoc = mdocFormatter(
+        credential = mdocFormatter(
             data=data,
             credential_metadata=requested_credential,
             country=current_session.country,
@@ -69,27 +69,15 @@ def dynamic_formatter(format, scope, form_data, device_publickey, session_id):
         )
 
     elif format == "dc+sd-jwt":
-        url = CONFIGURATION["service_url"] + "/formatter/sd-jwt"
-
-        r = json_post(
-            url,
-            {
-                "country": current_session.country,
+        credential = sdjwtFormatter(
+            PID={
                 "credential_metadata": requested_credential,
-                "scope": scope,
-                "device_publickey": device_publickey,
                 "data": data,
             },
-        ).json()
-
-        if not r["error_code"] == 0:
-            return "Error"
-
-    if format == "mso_mdoc":
-        credential = base64_mdoc
-
-    elif format == "dc+sd-jwt":
-        credential = r["sd-jwt"]
+            country=current_session.country,
+            scope=scope,
+            session_id=session_id,
+        )
 
     return credential
 

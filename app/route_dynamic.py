@@ -328,7 +328,7 @@ def red():
         "grant_type": "authorization_code",
         "code": auth_code,
         "redirect_uri": country_config["auth"]["redirect_uri"],
-    }  
+    }
 
     try:
         response = requests.post(

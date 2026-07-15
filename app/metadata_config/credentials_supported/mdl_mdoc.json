@@ -35,7 +35,7 @@
                "details":[
                   "once_only"
                ],
-               "batch_size":30,
+               "batch_size":60,
                "reissue_trigger_unused":3
             }
          ]

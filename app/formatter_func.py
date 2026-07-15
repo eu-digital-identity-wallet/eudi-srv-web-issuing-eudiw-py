@@ -42,13 +42,15 @@ from sd_jwt.verifier import SDJWTVerifier
 from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
-
+import logging
 
 from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
 from app_config.config_service import ConfService as cfgservice
 
 from app import session_manager
 from app import CONFIGURATION
+
+logger = logging.getLogger(__name__)
 
 
 def mdocFormatter(
@@ -93,6 +95,17 @@ def mdocFormatter(
     expiry_date = issuance_date + datetime.timedelta(
         days=credential_metadata["issuer_config"]["validity"]
     )
+
+    if current_session.max_credential_exp is not None:
+            max_expiry_date = datetime.datetime.fromtimestamp(
+                current_session.max_credential_exp, tz=datetime.timezone.utc
+            )
+            if expiry_date >= max_expiry_date:
+                logger.info(
+                    f", Session ID: {session_id}, clamping mdoc expiry from "
+                    f"{expiry_date.isoformat()} to WIA/KA ceiling {max_expiry_date.isoformat()}"
+                )
+                expiry_date = max_expiry_date
 
     validity = {
         "issuance_date": issuance_date,
@@ -164,7 +177,7 @@ def mdocFormatter(
         data=data,
         validity=validity,
         devicekeyinfo=device_publickey,
-        cert_path=CONFIGURATION["countries"][country]["keys"]["_default"]["certificate_path"], 
+        cert_path=CONFIGURATION["countries"][country]["keys"]["_default"]["certificate_path"],
         revocation=revocation_json,
     )
 
@@ -279,7 +292,7 @@ def sdjwtNestedClaims(claims, credential_metadata):
     return nestedDict
 
 
-def sdjwtFormatter(PID, country, scope):
+def sdjwtFormatter(PID, country, scope, session_id):
     """Construct sd-jwt with the country private key
 
     Keyword arguments:
@@ -302,6 +315,15 @@ def sdjwtFormatter(PID, country, scope):
         + datetime.timedelta(PID["credential_metadata"]["issuer_config"]["validity"])
     ).strftime("%Y-%m-%d")
     exp = DatestringFormatter(validity)
+
+    current_session = session_manager.get_session(session_id=session_id)
+    if current_session and current_session.max_credential_exp is not None:
+        if exp >= current_session.max_credential_exp:
+            logger.info(
+                f", Session ID: {session_id}, clamping sd-jwt exp from {exp} "
+                f"to WIA/KA ceiling {current_session.max_credential_exp}"
+            )
+            exp = current_session.max_credential_exp
 
     pid_data = PID.get("data", {})
     device_key = PID["device_publickey"]

@@ -63,7 +63,8 @@ class Session:
         transaction_id: Optional[Dict[str, Dict]] = None,
         notification_ids: Optional[List[str]] = None,
         is_batch_credential: bool = False,
-        oid4vp_transaction_id: Optional[str] = None,  # <-- ADDED
+        oid4vp_transaction_id: Optional[str] = None,
+        max_credential_exp: Optional[int] = None,
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -81,7 +82,8 @@ class Session:
         self.transaction_id = transaction_id if transaction_id is not None else {}
         self.notification_ids = notification_ids if notification_ids is not None else []
         self.is_batch_credential = is_batch_credential
-        self.oid4vp_transaction_id = oid4vp_transaction_id  # <-- ADDED
+        self.oid4vp_transaction_id = oid4vp_transaction_id
+        self.max_credential_exp = max_credential_exp
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
@@ -115,8 +117,10 @@ class Session:
             data["transaction_id"] = self.transaction_id
         if self.notification_ids:
             data["notification_ids"] = self.notification_ids
-        if self.oid4vp_transaction_id is not None:  # <-- ADDED
+        if self.oid4vp_transaction_id is not None:
             data["oid4vp_transaction_id"] = self.oid4vp_transaction_id
+        if self.max_credential_exp is not None:
+                    data["max_credential_exp"] = self.max_credential_exp
         return data
 
     def __repr__(self):
@@ -152,10 +156,12 @@ class Session:
             optional_parts.append(f"transaction_id='{self.transaction_id}'")
         if self.notification_ids:
             optional_parts.append(f"notification_ids='{self.notification_ids}'")
-        if self.oid4vp_transaction_id:  # <-- ADDED
+        if self.oid4vp_transaction_id:
             optional_parts.append(
                 f"oid4vp_transaction_id='{self.oid4vp_transaction_id}'"
             )
+        if self.max_credential_exp:
+                    optional_parts.append(f"max_credential_exp='{self.max_credential_exp}'")
 
         return (
             f"Session(session_id='{self.session_id}', "
@@ -409,6 +415,24 @@ class SessionManager:
             else:
                 logger.info(
                     f"Warning: Attempted to update is_batch_credential for non-existent session_id: {session_id}"
+                )
+
+    def update_max_credential_exp(self, session_id: str, max_credential_exp: int):
+        """
+        Updates the 'max_credential_exp' attribute of a session — the TS3 2.4.3
+        ceiling derived from the WIA client_status.exp and KA key_storage_status.exp
+        seen during this credential request.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.max_credential_exp = max_credential_exp
+                logger.info(
+                    f"Updated max_credential_exp for session_id {session_id} to: {max_credential_exp}"
+                )
+            else:
+                logger.info(
+                    f"Warning: Attempted to update max_credential_exp for non-existent session_id: {session_id}"
                 )
 
     def update_oid4vp_transaction_id(self, session_id: str, oid4vp_transaction_id: str):
