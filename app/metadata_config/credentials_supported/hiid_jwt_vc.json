@@ -13,18 +13,30 @@
         "jwt":{
            "proof_signing_alg_values_supported":[
               "ES256"
-           ]
+           ],
+           "key_attestations_required":{
+              "key_storage":[
+                 "iso_18045_high"
+              ],
+              "user_authentication":[
+                 "iso_18045_high"
+              ],
+              "preferred_key_storage_status_period":2678400
+           }
         },
-        "cwt":{
+        "attestation":{
            "proof_signing_alg_values_supported":[
               "ES256"
            ],
-           "proof_alg_values_supported":[
-              -7
-           ],
-           "proof_crv_values_supported":[
-              1
-           ]
+           "key_attestations_required":{
+              "key_storage":[
+                 "iso_18045_high"
+              ],
+              "user_authentication":[
+                 "iso_18045_high"
+              ],
+              "preferred_key_storage_status_period":2678400
+           }
         }
      },
      "vct":"urn:eu.europa.ec.eudi:hiid:1",

@@ -73,6 +73,7 @@ def dynamic_formatter(format, scope, form_data, device_publickey, session_id):
             PID={
                 "credential_metadata": requested_credential,
                 "data": data,
+                "device_publickey": device_publickey
             },
             country=current_session.country,
             scope=scope,

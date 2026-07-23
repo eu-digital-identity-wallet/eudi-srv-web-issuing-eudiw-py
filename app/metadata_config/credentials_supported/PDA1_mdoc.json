@@ -18,7 +18,30 @@
         "jwt":{
            "proof_signing_alg_values_supported":[
               "ES256"
-           ]
+           ],
+           "key_attestations_required":{
+              "key_storage":[
+                 "iso_18045_high"
+              ],
+              "user_authentication":[
+                 "iso_18045_high"
+              ],
+              "preferred_key_storage_status_period":2678400
+           }
+        },
+        "attestation":{
+           "proof_signing_alg_values_supported":[
+              "ES256"
+           ],
+           "key_attestations_required":{
+              "key_storage":[
+                 "iso_18045_high"
+              ],
+              "user_authentication":[
+                 "iso_18045_high"
+              ],
+              "preferred_key_storage_status_period":2678400
+           }
         }
      },
      "credential_metadata": {

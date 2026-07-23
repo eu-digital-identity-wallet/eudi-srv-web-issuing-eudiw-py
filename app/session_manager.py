@@ -65,6 +65,7 @@ class Session:
         is_batch_credential: bool = False,
         oid4vp_transaction_id: Optional[str] = None,
         max_credential_exp: Optional[int] = None,
+        client_status: Optional[Dict] = None,
     ):
         """Initializes a new Session instance."""
         self.session_id = session_id
@@ -84,6 +85,7 @@ class Session:
         self.is_batch_credential = is_batch_credential
         self.oid4vp_transaction_id = oid4vp_transaction_id
         self.max_credential_exp = max_credential_exp
+        self.client_status = client_status
 
     def to_dict(self) -> Dict:
         """Converts the Session object into a dictionary."""
@@ -120,7 +122,9 @@ class Session:
         if self.oid4vp_transaction_id is not None:
             data["oid4vp_transaction_id"] = self.oid4vp_transaction_id
         if self.max_credential_exp is not None:
-                    data["max_credential_exp"] = self.max_credential_exp
+            data["max_credential_exp"] = self.max_credential_exp
+        if self.client_status is not None:
+            data["client_status"] = self.client_status
         return data
 
     def __repr__(self):
@@ -162,6 +166,8 @@ class Session:
             )
         if self.max_credential_exp:
                     optional_parts.append(f"max_credential_exp='{self.max_credential_exp}'")
+        if self.client_status:
+            optional_parts.append(f"client_status='{self.client_status}'")
 
         return (
             f"Session(session_id='{self.session_id}', "
@@ -571,6 +577,232 @@ class SessionManager:
                 self._remove_session_from_all_managers(session_obj)
         return None
 
+    def update_client_status(self, session_id: str, client_status: Dict):
+        """
+        Replaces the entire 'client_status' structure of a session.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                session_obj.client_status = client_status
+                logger.info(f"Updated client_status for session_id {session_id}")
+            else:
+                logger.info(
+                    f"Warning: Attempted to update client_status for non-existent session_id: {session_id}"
+                )
+
+    def update_client_status_exp(self, session_id: str, exp: int):
+        """
+        Updates the top-level 'exp' field of the session's client_status.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                if session_obj.client_status is None:
+                    session_obj.client_status = {}
+                session_obj.client_status["exp"] = exp
+                logger.info(f"Updated client_status.exp for session_id {session_id} to: {exp}")
+            else:
+                logger.info(
+                    f"Warning: Attempted to update client_status.exp for non-existent session_id: {session_id}"
+                )
+
+    def update_client_status_status(self, session_id: str, status: Dict):
+        """
+        Updates the top-level 'status' field of the session's client_status
+        (the WIA client_status.status.status_list entry).
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if session_obj:
+                if session_obj.client_status is None:
+                    session_obj.client_status = {}
+                session_obj.client_status["status"] = status
+                logger.info(f"Updated client_status.status for session_id {session_id}")
+            else:
+                logger.info(
+                    f"Warning: Attempted to update client_status.status for non-existent session_id: {session_id}"
+                )
+
+    def add_key_storage_status(
+        self,
+        session_id: str,
+        status: Optional[Dict] = None,
+        keys: Optional[List[Dict]] = None,
+    ) -> Optional[int]:
+        """
+        Appends a new entry to client_status.key_storage_statuses (one KA's
+        status + its keys). Returns the index of the new entry, or None if
+        the session does not exist.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if not session_obj:
+                logger.info(
+                    f"Warning: Attempted to add key_storage_status for non-existent session_id: {session_id}"
+                )
+                return None
+            if session_obj.client_status is None:
+                session_obj.client_status = {}
+            key_storage_statuses = session_obj.client_status.setdefault(
+                "key_storage_statuses", []
+            )
+            key_storage_statuses.append(
+                {"status": status, "keys": keys if keys is not None else []}
+            )
+            index = len(key_storage_statuses) - 1
+            logger.info(
+                f"Added key_storage_status at index {index} for session_id {session_id}"
+            )
+            return index
+
+    def update_key_storage_status(
+        self, session_id: str, key_storage_status_index: int, status: Dict
+    ):
+        """
+        Updates the 'status' field of a specific key_storage_statuses entry,
+        identified by its index, in the session's client_status.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if not session_obj:
+                logger.info(
+                    f"Warning: Attempted to update key_storage_status for non-existent session_id: {session_id}"
+                )
+                return
+            key_storage_statuses = (session_obj.client_status or {}).get(
+                "key_storage_statuses"
+            )
+            if not key_storage_statuses or key_storage_status_index >= len(key_storage_statuses):
+                logger.info(
+                    f"Warning: key_storage_status index {key_storage_status_index} "
+                    f"not found for session_id: {session_id}"
+                )
+                return
+            key_storage_statuses[key_storage_status_index]["status"] = status
+            logger.info(
+                f"Updated key_storage_statuses[{key_storage_status_index}].status "
+                f"for session_id {session_id}"
+            )
+
+    def add_key_to_key_storage_status(
+        self,
+        session_id: str,
+        key_storage_status_index: int,
+        key: str,
+        key_status: Optional[Dict] = None,
+    ) -> Optional[int]:
+        """
+        Appends a key entry ({'key': ..., 'key_status': ...}) to the 'keys'
+        list of a specific key_storage_statuses entry. Returns the index of
+        the new key within that list, or None if the session or the
+        key_storage_status index is not found.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if not session_obj:
+                logger.info(
+                    f"Warning: Attempted to add key for non-existent session_id: {session_id}"
+                )
+                return None
+            key_storage_statuses = (session_obj.client_status or {}).get(
+                "key_storage_statuses"
+            )
+            if not key_storage_statuses or key_storage_status_index >= len(key_storage_statuses):
+                logger.info(
+                    f"Warning: key_storage_status index {key_storage_status_index} "
+                    f"not found for session_id: {session_id}"
+                )
+                return None
+            keys_list = key_storage_statuses[key_storage_status_index].setdefault("keys", [])
+            keys_list.append({"key": key, "key_status": key_status})
+            index = len(keys_list) - 1
+            logger.info(
+                f"Added key at index {index} to key_storage_statuses[{key_storage_status_index}] "
+                f"for session_id {session_id}"
+            )
+            return index
+
+    def update_key_status(
+        self,
+        session_id: str,
+        key_storage_status_index: int,
+        key_index: int,
+        key_status: Dict,
+    ):
+        """
+        Updates the 'key_status' field of a specific key entry, identified by
+        its key_storage_statuses index and its index within that entry's
+        'keys' list.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if not session_obj:
+                logger.info(
+                    f"Warning: Attempted to update key_status for non-existent session_id: {session_id}"
+                )
+                return
+            key_storage_statuses = (session_obj.client_status or {}).get(
+                "key_storage_statuses"
+            )
+            if not key_storage_statuses or key_storage_status_index >= len(key_storage_statuses):
+                logger.info(
+                    f"Warning: key_storage_status index {key_storage_status_index} "
+                    f"not found for session_id: {session_id}"
+                )
+                return
+            keys_list = key_storage_statuses[key_storage_status_index].get("keys", [])
+            if key_index >= len(keys_list):
+                logger.info(
+                    f"Warning: key index {key_index} not found in "
+                    f"key_storage_statuses[{key_storage_status_index}] for session_id: {session_id}"
+                )
+                return
+            keys_list[key_index]["key_status"] = key_status
+            logger.info(
+                f"Updated key_status for key {key_index} in "
+                f"key_storage_statuses[{key_storage_status_index}] for session_id {session_id}"
+            )
+
+    def update_key_status_by_key(
+        self, session_id: str, key: str, key_status: Dict
+    ) -> bool:
+        """
+        Finds the key entry matching 'key' anywhere in this session's
+        client_status.key_storage_statuses[*].keys[*], and updates its
+        'key_status' field. Returns True if found and updated, False otherwise.
+        """
+        with self._sessions_lock:
+            session_obj = self._sessions.get(session_id)
+            if not session_obj:
+                logger.info(
+                    f"Warning: Attempted to update key_status for non-existent session_id: {session_id}"
+                )
+                return False
+
+            key_storage_statuses = (session_obj.client_status or {}).get(
+                "key_storage_statuses"
+            )
+            if not key_storage_statuses:
+                logger.info(
+                    f"Warning: no key_storage_statuses found for session_id: {session_id}"
+                )
+                return False
+
+            for ka_entry in key_storage_statuses:
+                for key_entry in ka_entry.get("keys", []):
+                    if key_entry.get("key") == key:
+                        key_entry["key_status"] = key_status
+                        logger.info(
+                            f"Updated key_status for matching key in session_id {session_id}"
+                        )
+                        return True
+
+            logger.info(
+                f"Warning: key not found in key_storage_statuses for session_id: {session_id}"
+            )
+            return False
+
     def is_expired(self, session_obj: Session) -> bool:
         """
         Checks if a Session object has expired.
@@ -634,3 +866,20 @@ class SessionManager:
         """
         with self._sessions_lock:
             return len(self._sessions)
+
+
+    def get_all_client_statuses(self) -> Dict[str, Dict]:
+        """
+        Returns a dict mapping session_id -> client_status for every
+        non-expired session that currently has a client_status recorded.
+        Expired sessions are skipped (not removed here; cleanup is left to
+        clean_expired_sessions()).
+        """
+        with self._sessions_lock:
+            result = {}
+            for session_id, session_obj in self._sessions.items():
+                if self.is_expired(session_obj):
+                    continue
+                if session_obj.client_status:
+                    result[session_id] = session_obj.client_status
+            return result

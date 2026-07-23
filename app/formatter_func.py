@@ -43,6 +43,7 @@ from sd_jwt.utils.yaml_specification import load_yaml_specification
 from uuid import uuid4
 import jwt
 import logging
+import copy
 
 from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
 from app_config.config_service import ConfService as cfgservice
@@ -168,6 +169,11 @@ def mdocFormatter(
 
         if response.status_code == 200:
             revocation_json = response.json()
+            session_manager.update_key_status_by_key(
+                    session_id=session_id,
+                    key=device_publickey,
+                    key_status=copy.deepcopy(revocation_json),
+                )
             revocation_json["identifier_list"]["id"] = revocation_json[
                 "identifier_list"
             ]["id"].encode("utf-8")
@@ -349,6 +355,12 @@ def sdjwtFormatter(PID, country, scope, session_id):
             revocation_json = response.json()
             if "identifier_list" in revocation_json:
                 revocation_json.pop("identifier_list")
+
+            session_manager.update_key_status_by_key(
+                    session_id=session_id,
+                    key=device_key,
+                    key_status=revocation_json,
+                )
 
     claims = {
         "iss": CONFIGURATION["service_url"],
