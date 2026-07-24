@@ -43,6 +43,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
 from pycose.keys.ec2 import EC2Key
+from app.db_status_persistence import init_db_status
 
 from app.session_manager import SessionManager
 from app.redirect_func import post_redirect_with_payload
@@ -81,7 +82,7 @@ def _process_config(config: dict) -> dict:
     return config
 
 def _load_config() -> dict:
-    config_path = os.environ.get("ISSUER_CONFIG_PATH", "/etc/issuer_config/config_issuer_backend.yaml")
+    config_path = os.environ.get("ISSUER_CONFIG_PATH", "/opt/eudiw_issuer/dev/issuer_backend/config/config_issuer_backend.yaml")
     try:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
@@ -98,7 +99,14 @@ if os.getenv("MOCK_CONFIGURATION"):
     CONFIGURATION = {
         "expiry": {
             "session": 30
-        }
+        },
+        "postgres": {
+            "host": "localhost",
+            "port": 5432,
+            "dbname": "eudiw_issuer_mock",
+            "user": "postgres",
+            "password": "postgres",
+        },
     }
 else:
     CONFIGURATION = _load_config()
@@ -120,6 +128,8 @@ IS_TEST_ENV = (
 
 session_manager = SessionManager(default_expiry_minutes=CONFIGURATION["expiry"]["session"])
 
+init_db_status(CONFIGURATION["postgres"])
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -140,7 +150,7 @@ def create_app(test_config=None):
         pass
 
     configure_logging(app, CONFIGURATION["logging"])
-    
+
     app.logger.info("Running initialization setups...")
     setup_metadata()
     if not IS_TEST_ENV:

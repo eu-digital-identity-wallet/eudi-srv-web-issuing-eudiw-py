@@ -67,6 +67,8 @@ import requests
 
 from .app_config.config_service import ConfService as cfgservice
 from . import oidc_metadata, openid_metadata, oidc_metadata_clean
+from app.db_status_persistence import persist_client_status
+
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -990,6 +992,10 @@ def credential():
         _response = {"transaction_id": _transaction_id, "interval": 30}
         is_deferred = True
 
+
+    if not is_deferred and current_session and current_session.client_status:
+        persist_client_status(session_id, current_session.client_status)
+
     #logger.info(
     #    f", Session ID: {session_id}, Credential response, Payload: {_response}"
     #)
@@ -1202,6 +1208,9 @@ def deferred_credential():
 
     current_session = session_manager.get_session(session_id=session_id)
 
+    session_manager.update_client_status_status(session_id, wia_client_status.get("status"))
+    session_manager.update_client_status_exp(session_id, wia_client_status.get("exp"))
+
     _response = generate_credentials(
         credential_request=validated_credential_request, session_id=session_id, wia_client_status=wia_client_status
     )
@@ -1225,6 +1234,9 @@ def deferred_credential():
     if "error" in _response and _response["error"] == "Pending":
         _response = {"transaction_id": deferred_transaction_id, "interval": 30}
         is_deferred = True
+
+    if not is_deferred and current_session and current_session.client_status:
+        persist_client_status(session_id, current_session.client_status)
 
     logger.info(
         f", Session ID: {session_id}, Deferred credential response, Payload: {_response}"
