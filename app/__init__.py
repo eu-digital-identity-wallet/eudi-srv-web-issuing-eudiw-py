@@ -51,6 +51,7 @@ from app.app_config.logging_config import configure_logging
 
 
 
+
 # Load environment variables
 load_dotenv()
 
@@ -129,6 +130,10 @@ IS_TEST_ENV = (
 session_manager = SessionManager(default_expiry_minutes=CONFIGURATION["expiry"]["session"])
 
 init_db_status(CONFIGURATION["postgres"])
+
+from app.nightly_sweep_scheduler import start_scheduler
+
+start_scheduler()
 
 def create_app(test_config=None):
     # create and configure the app
