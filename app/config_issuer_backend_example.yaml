@@ -47,6 +47,10 @@ trust_validator:
   url: "https://trust-validator.eudiw.dev/trust"
   enabled: true
 
+status_validator:
+  url: "https://status-validator.issuer.eudiw.dev/status"
+  enabled: true
+
 # ============================================================================
 # SCHEMA CONFIGURATION
 # ============================================================================
@@ -62,7 +66,7 @@ postgres:
   port: 5432
   dbname: "eudiw_issuer"
   user: "issuer_backend"
-  password: "4BkA*^5tj0MfgdN9t^"
+  password: "secret_here"
 
 # ============================================================================
 # LOGGING
