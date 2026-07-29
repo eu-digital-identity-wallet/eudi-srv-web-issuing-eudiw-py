@@ -83,7 +83,7 @@ def _process_config(config: dict) -> dict:
     return config
 
 def _load_config() -> dict:
-    config_path = os.environ.get("ISSUER_CONFIG_PATH", "/opt/eudiw_issuer/dev/issuer_backend/config/config_issuer_backend.yaml")
+    config_path = os.environ.get("ISSUER_CONFIG_PATH", "/etc/issuer_config/config_issuer_backend.yaml")
     try:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
