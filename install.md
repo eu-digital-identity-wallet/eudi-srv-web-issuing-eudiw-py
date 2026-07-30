@@ -20,7 +20,13 @@ and should only be used with Flask v. 3.1 or higher.
 
 To install [Flask](https://flask.palletsprojects.com/en/stable/), please follow the [Installation Guide](https://flask.palletsprojects.com/en/stable/installation/).
 
-## 3. How to run the EUDIW Issuer?
+## 3. PostgreSQL
+
+The EUDIW Issuer was tested with
+
++ PostgreSQL v. 16.14
+
+## 4. How to run the EUDIW Issuer?
 
 To run the EUDIW Issuer, please follow these simple steps (some of which may have already been completed when installing Flask) for Linux/macOS or Windows.
 
@@ -76,6 +82,16 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
 
    Configuration location can be changed using environment variable ISSUER_CONFIG_PATH
 
+   Update the following variables in the configuration file:
+
+   - **`postgres`** — connection details for the PostgreSQL database used by the EUDIW Issuer.
+     - `host`, `port`: address of the PostgreSQL instance
+     - `dbname`: name of the database to connect to
+     - `user`, `password`: credentials with access to that database
+   
+   - **`status_validator`** — URL for the service where revocation/validity status of Referenced Tokens can be checked against a Token Status List
+     - `url`: endpoint of the Status Validator service
+
 7. Install Authorization Server
     - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
 8. Install Issuer Front-End
@@ -97,7 +113,7 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     flask --app app run --debug
     ```
     
-## 4. Running your local EUDIW Issuer over HTTPS
+## 5. Running your local EUDIW Issuer over HTTPS
 
 1. Generate a self signed certificate and a private key
    + Linux/macOS
@@ -153,11 +169,11 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     flask --app app run --cert=cert.pem --key=key.pem
     ```
     
-## 5. Make your local EUDIW Issuer available on the Internet (optional)
+## 6. Make your local EUDIW Issuer available on the Internet (optional)
 
 If you want to make your local EUDIW Issuer available on the Internet, we recommend to use NGINX reverse proxy and certbot (to generate an HTTPS certificate).
 
-### 5.1 Install and configure NGINX
+### 6.1 Install and configure NGINX
 
 1. Follow the installation guide in https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
 
@@ -193,7 +209,7 @@ server {
 3. Restart the Nginx server
 
 
-### 5.2 Install and run certbot to gef a free HTTPS certificate
+### 6.2 Install and run certbot to gef a free HTTPS certificate
 
 1. Follow the installation guide in https://certbot.eff.org
 
@@ -202,7 +218,7 @@ server {
 3. Restart the Nginx server and goto `https:\\FQDN\` (FQDN configured in the Nginx configuration file)
 
 
-## 6. Docker
+## 7. Docker
 
 This guide provides step-by-step instructions for deploying the **EUDIW Issuer** service using **Docker Compose v2**.
 
