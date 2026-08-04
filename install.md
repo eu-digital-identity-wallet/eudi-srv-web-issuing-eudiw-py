@@ -26,10 +26,11 @@ The EUDIW Issuer was tested with
 
 + PostgreSQL v. 16.14
 
+To install PostgreSQL, please follow the [Download Instructions](https://www.postgresql.org/download/).
+
 ## 4. How to run the EUDIW Issuer?
 
 To run the EUDIW Issuer, please follow these simple steps (some of which may have already been completed when installing Flask) for Linux/macOS or Windows.
-
 
 1. Clone the EUDIW Issuer repository:
 
@@ -72,7 +73,35 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     pip install -r app/requirements.txt
     ```
 
-6. Setup configuration
+6. Setup database
+
+    Make sure PostgreSQL is installed and running (see [PostgreSQL downloads](https://www.postgresql.org/download/) if you haven't installed it yet).
+
+    Connect to PostgreSQL:
+    ```shell
+    sudo -u postgres psql       # Linux/macOS
+    psql -U postgres            # Windows
+    ```
+
+    Then create a dedicated database and user for the EUDIW Issuer:
+
+    ```sql
+    CREATE USER some-username WITH PASSWORD 'some-password';
+    CREATE DATABASE some-db-name OWNER some-username;
+    GRANT ALL PRIVILEGES ON DATABASE some-db-name TO some-username;
+    ```
+
+    > ⚠️ **Important: replace the placeholder values before running these commands:**
+    >
+    > | Placeholder | Replace with |
+    > |---|---|
+    > | `some-username` | a username of your choice |
+    > | `some-password` | a strong, unique password |
+    > | `some-db-name` | a database name of your choice |
+    >
+    > Write down the values you choose as you'll enter them again as `dbname`, `user`, and `password` in the `postgres` section of the configuration file in step 7.
+
+7. Setup configuration
 
    -  Copy ```app/config_issuer_backend_example.yaml``` to ```etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
 
@@ -92,12 +121,12 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
    - **`status_validator`** — URL for the service where revocation/validity status of Referenced Tokens can be checked against a Token Status List
      - `url`: endpoint of the Status Validator service
 
-7. Install Authorization Server
+8. Install Authorization Server
     - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
-8. Install Issuer Front-End
+9. Install Issuer Front-End
     - Install the service according to [Issuer Front-End](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/install.md)
 
-9. Run the EUDIW Issuer Back-end
+10. Run the EUDIW Issuer Back-end
 
     On the root directory of the clone repository, insert one of the following command lines to run the EUDIW Issuer.
 
@@ -115,7 +144,7 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     
 ## 5. Running your local EUDIW Issuer over HTTPS
 
-1. Generate a self signed certificate and a private key
+1. Generate a self-signed certificate and a private key
    + Linux/macOS
      
        Example: 
