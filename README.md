@@ -75,9 +75,9 @@ Pre-requisites:
 
 + Python v. 3.9 or 3.10
 + Flask v. 2.3 or higher
++ PostgreSQL v. 16.14
 
 Click [here](install.md) for detailed installation instructions.
-
 
 ## 2. Run
 

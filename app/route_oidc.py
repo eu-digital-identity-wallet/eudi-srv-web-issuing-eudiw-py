@@ -67,6 +67,8 @@ import requests
 
 from .app_config.config_service import ConfService as cfgservice
 from . import oidc_metadata, openid_metadata, oidc_metadata_clean
+from app.db_status_persistence import persist_client_status
+
 
 oidc = Blueprint("oidc", __name__, url_prefix="/")
 CORS(oidc)  # enable CORS on the blue print
@@ -295,7 +297,7 @@ def verify_introspection(bearer_token):
         CONFIGURATION["authorization_server"].get("internal_url")
         or CONFIGURATION["authorization_server"]["base_url"]
     )
-    
+
     introspection_url = f"{base}/introspection"
 
     payload = f"token={bearer_token}"
@@ -341,7 +343,29 @@ def verify_introspection(bearer_token):
             401,
         )
 
-    return username
+    # Introspection already confirmed the token is active/well-formed, so an
+    # unverified decode here is just claim extraction, not a trust decision.
+    client_status = None
+    try:
+        at_claims = jwt.decode(bearer_token, options={"verify_signature": False})
+        client_status = at_claims.get("client_status")
+    except jwt.DecodeError:
+        # Opaque/non-JWT access tokens won't have this - not necessarily an error
+        # unless your AS is configured to always issue JWT ATs.
+        logger.info("Access token is not a JWT; no client_status claim available.")
+
+    if client_status and CONFIGURATION["status_validator"]["enabled"]:
+        status_list = client_status["status"]["status_list"]
+        revoked = check_status_list_revocation(
+            url=CONFIGURATION["status_validator"]["url"],
+            status_idx=status_list["idx"],
+            status_uri=status_list["uri"],
+        )
+        if revoked:
+            logger.error(f"WIA client_status revoked for session tied to {username}")
+            return jsonify({"error": "invalid_token"}), 401
+
+    return username, client_status
 
 
 from app import session_manager
@@ -441,10 +465,108 @@ from authlib.jose import JsonWebKey
 def decode_verify_attestation(jwt_raw):
     claims = verify_jwt_with_x5c(jwt_raw=jwt_raw)
 
+    key_storage_status = claims.get("key_storage_status")
+    if key_storage_status and CONFIGURATION["status_validator"]["enabled"]:
+        status_list = key_storage_status["status"]["status_list"]
+        revoked = check_status_list_revocation(
+            url=CONFIGURATION["status_validator"]["url"],
+            status_idx=status_list["idx"],
+            status_uri=status_list["uri"],
+        )
+        if revoked:
+            raise KARevokedError("Key Attestation is revoked")
+
     return claims
 
+def get_batch_size(credential_configuration_id):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+    cfg = credentialsSupported.get(
+        credential_configuration_id, {}
+    )
+    options = (
+        cfg.get("credential_metadata", {})
+        .get("credential_reuse_policy", {})
+        .get("options", [])
+    )
+
+    for option in options:
+        if "once_only" in option.get("details", []):
+            return option.get("batch_size")
+
+    return None
+
+
+class CredentialValidityError(Exception):
+    pass
+
+
+def compute_max_credential_exp(wia_client_status_exp, ka_key_storage_status_exp, custom_validity_seconds=None):
+    """
+    TS3 2.4.3: technical validity of a PID SHALL end before client_status.exp (WIA)
+    and key_storage_status.exp (KA). For other attestations, use custom validity if
+    configured, else fall back to the same constraint.
+    """
+    now = int(time.time())
+    candidates = [c for c in (wia_client_status_exp, ka_key_storage_status_exp) if c is not None]
+    hard_ceiling = min(candidates) if candidates else None
+
+    if hard_ceiling is not None and hard_ceiling <= now:
+        raise CredentialValidityError(
+            "WIA/KA revocation maintenance period has already expired or expires immediately"
+        )
+
+    if custom_validity_seconds is not None:
+        proposed = now + custom_validity_seconds
+        if hard_ceiling is not None and proposed >= hard_ceiling:
+            proposed = hard_ceiling - 1
+        return proposed
+
+    if hard_ceiling is not None:
+        return hard_ceiling - 1
+
+    return None
+
+def get_custom_validity_seconds(credential_configuration_id):
+    credentialsSupported = oidc_metadata["credential_configurations_supported"]
+
+    cfg = credentialsSupported.get(
+        credential_configuration_id, {}
+    )
+    validity_days = cfg.get("issuer_config", {}).get("validity")
+
+    if validity_days is not None:
+        return validity_days * 24 * 60 * 60  # Convert days to seconds
+    return None
+
+def check_status_list_revocation(
+    url: str, status_idx: int, status_uri: str, timeout: int = 10
+) -> bool:
+    """
+    Calls status-list-validator to check whether the status list entry
+    referenced by client_status (WIA) or key_storage_status (KA) is revoked.
+    Returns True if revoked, False if valid.
+    """
+    payload = {
+        "idx": status_idx,
+        "uri": status_uri,
+        "validation_context": "PIDStatus",
+    }
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+    response = requests.post(
+        f"{url}", json=payload, headers=headers, timeout=timeout
+    )
+    response.raise_for_status()
+    data = response.json()
+    logger.info(f"Revocation check response: {data}")
+    return data.get("valid") is False
+
 import jwt
-def generate_credentials(credential_request, session_id):
+import time
+
+class KARevokedError(Exception):
+    pass
+
+def generate_credentials(credential_request, session_id, wia_client_status=None):
     formatter_request = {}
 
     formatter_request.update(
@@ -456,6 +578,7 @@ def generate_credentials(credential_request, session_id):
     )
 
     pubKeys = []
+    ka_key_storage_status_exps = []  # collect exp from every KA actually used
 
     if (
         "proof" in credential_request
@@ -473,10 +596,33 @@ def generate_credentials(credential_request, session_id):
         for alg, key_list in credential_request["proofs"].items():
             if alg == "attestation":
                 for _attestation in key_list:
-                    claims = decode_verify_attestation(_attestation)
+                    try:
+                        claims = decode_verify_attestation(_attestation)
+                    except KARevokedError as e:
+                        logger.info(
+                            f", Session ID: {session_id}, KA revoked (attestation proof): {e}"
+                        )
+                        return {"error": "invalid_proof", "error_description": str(e)}
+
+                    key_storage_status = claims.get("key_storage_status")
+                    if key_storage_status and key_storage_status.get("exp") is not None:
+                        ka_key_storage_status_exps.append(key_storage_status["exp"])
+
+                    ka_index = session_manager.add_key_storage_status(
+                        session_id=session_id,
+                        status=key_storage_status.get("status") if key_storage_status else None,
+                    )
+
                     for _jwk in claims["attested_keys"]:
                         device_key = pKfromJWK(_jwk)
                         pubKeys.append({"attestation": device_key})
+
+                        if ka_index is not None:
+                            session_manager.add_key_to_key_storage_status(
+                                session_id=session_id,
+                                key_storage_status_index=ka_index,
+                                key=device_key,
+                            )
 
             elif alg == "jwt":
                 for jwt_ in key_list:
@@ -486,37 +632,70 @@ def generate_credentials(credential_request, session_id):
                         logger.info(
                             f", Session ID: {session_id}, invalid proof in credential request"
                         )
+                        continue
                     except Exception as e:
                         logger.info(
                             f", Session ID: {session_id}, invalid proof in credential request"
                         )
-                        
+                        continue
+
                     if "key_attestation" in header:
-                        header = jwt.get_unverified_header(jwt_)
                         key_attestation = header.get("key_attestation")
-                        claims = decode_verify_attestation(key_attestation)
+                        try:
+                            claims = decode_verify_attestation(key_attestation)
+                        except KARevokedError as e:
+                            logger.info(
+                                f", Session ID: {session_id}, KA revoked (jwt proof header): {e}"
+                            )
+                            return {"error": "invalid_proof", "error_description": str(e)}
+
+                        key_storage_status = claims.get("key_storage_status")
+                        if key_storage_status and key_storage_status.get("exp") is not None:
+                            ka_key_storage_status_exps.append(key_storage_status["exp"])
+
+                        ka_index = session_manager.add_key_storage_status(
+                                session_id=session_id,
+                                status=key_storage_status.get("status") if key_storage_status else None,
+                            )
+
                         for _jwk in claims["attested_keys"]:
                             device_key = pKfromJWK(_jwk)
                             pubKeys.append({"attestation": device_key})
+
+                            if ka_index is not None:
+                                session_manager.add_key_to_key_storage_status(
+                                    session_id=session_id,
+                                    key_storage_status_index=ka_index,
+                                    key=device_key,
+                                )
                     else:
                         try:
                             device_key = pKfromJWT(jwt_)
                             pubKeys.append({alg: device_key})
                         except Exception as e:
                             logger.info(
-                                    f", Session ID: {session_id}, invalid proof in credential request"
-                                )
+                                f", Session ID: {session_id}, invalid proof in credential request"
+                            )
                             _resp = {
                                 "error": "invalid_proof",
                                 "error_description": str(e),
                             }
-                            return _resp 
+                            return _resp
 
             else:
                 logger.info(
-                                    f", Session ID: {session_id}, invalid proof in credential request"
-                                )
+                    f", Session ID: {session_id}, invalid proof in credential request"
+                )
                 return {"error": "proof currently not supported"}
+
+        # --- TS3 2.2.2.1: cap keys used against the issuer's configured batch_size ---
+        batch_size = get_batch_size(credential_request["credential_configuration_id"])
+        if batch_size and len(pubKeys) > batch_size:
+            logger.info(
+                f", Session ID: {session_id}, KA contained {len(pubKeys)} keys, "
+                f"truncating to batch_size {batch_size}"
+            )
+            pubKeys = pubKeys[:batch_size]
 
         formatter_request.update({"proofs": pubKeys})
 
@@ -524,17 +703,66 @@ def generate_credentials(credential_request, session_id):
         "proof" in credential_request
         and credential_request["proof"]["proof_type"] == "attestation"
     ):
-        claims = decode_verify_attestation(credential_request["proof"]["attestation"])
+        try:
+            claims = decode_verify_attestation(credential_request["proof"]["attestation"])
+        except KARevokedError as e:
+            logger.info(
+                f", Session ID: {session_id}, KA revoked (single attestation proof): {e}"
+            )
+            return {"error": "invalid_proof", "error_description": str(e)}
+
+        key_storage_status = claims.get("key_storage_status")
+        if key_storage_status and key_storage_status.get("exp") is not None:
+            ka_key_storage_status_exps.append(key_storage_status["exp"])
+
+        ka_index = session_manager.add_key_storage_status(
+            session_id=session_id,
+            status=key_storage_status.get("status") if key_storage_status else None,
+        )
+
         for _jwk in claims["attested_keys"]:
             device_key = pKfromJWK(_jwk)
             pubKeys.append({"attestation": device_key})
+
+            if ka_index is not None:
+                session_manager.add_key_to_key_storage_status(
+                    session_id=session_id,
+                    key_storage_status_index=ka_index,
+                    key=device_key,
+                )
 
         formatter_request.update({"proofs": pubKeys})
 
     if len(pubKeys) > 1:
         session_manager.update_is_batch_credential(
-                    session_id=session_id, is_batch_credential=True
-                )
+            session_id=session_id, is_batch_credential=True
+        )
+
+    # --- TS3 2.4.3: credential validity SHALL end before client_status.exp (WIA)
+    # and key_storage_status.exp (KA) ---
+    wia_client_status_exp = (
+        wia_client_status.get("exp") if wia_client_status else None
+    )
+    ka_key_storage_status_exp = (
+        min(ka_key_storage_status_exps) if ka_key_storage_status_exps else None
+    )
+
+    try:
+        max_exp = compute_max_credential_exp(
+            wia_client_status_exp=wia_client_status_exp,
+            ka_key_storage_status_exp=ka_key_storage_status_exp,
+            custom_validity_seconds=get_custom_validity_seconds(
+                credential_request["credential_configuration_id"]
+            ),
+        )
+    except CredentialValidityError as e:
+        logger.error(f", Session ID: {session_id}, {e}")
+        return {"error": "invalid_proof", "error_description": str(e)}
+
+    if max_exp is not None:
+            session_manager.update_max_credential_exp(
+                session_id=session_id, max_credential_exp=max_exp
+            )
 
     redirect_uri = f"{CONFIGURATION['service_url']}/dynamic/dynamic_R2"
 
@@ -624,7 +852,7 @@ def decrypt_jwe_credential_request(jwt_token):
     try:
         """ with open(cfgservice.credential_request_priv_key, "r") as key_file:
             pem_private_key = key_file.read() """
-        
+
         pem_private_key = CONFIGURATION["keys"]["credential_encryption_key"]
 
         private_key = jwk.JWK.from_pem(pem_private_key)
@@ -696,19 +924,17 @@ def credential():
         # Original JSON handling
         credential_request = request.get_json()
 
-    logger.info(
-        f", Started Credential Request, Payload: {credential_request}"
-    )
+    #logger.info(
+    #    f", Started Credential Request, Payload: {credential_request}"
+    #)
 
     verification_result_introspection = verify_introspection(bearer_token=bearer_token)
 
-    # Check if the result is an error response (a tuple)
-    if isinstance(verification_result_introspection, tuple):
-        # If it's a tuple, it's a Flask error response. Return it immediately.
+    if isinstance(verification_result_introspection, tuple) and len(verification_result_introspection) == 2 and isinstance(verification_result_introspection[0], str):
+        session_id, wia_client_status = verification_result_introspection
+    else:
         return verification_result_introspection
 
-    # If the result is not a tuple, it's the username string
-    session_id = verification_result_introspection
 
     verification_result_request = verify_credential_request(credential_request)
 
@@ -725,8 +951,11 @@ def credential():
 
     current_session = session_manager.get_session(session_id=session_id)
 
+    session_manager.update_client_status_status(session_id, wia_client_status.get("status"))
+    session_manager.update_client_status_exp(session_id, wia_client_status.get("exp"))
+
     _response = generate_credentials(
-        credential_request=validated_credential_request, session_id=session_id
+        credential_request=validated_credential_request, session_id=session_id, wia_client_status=wia_client_status
     )
 
     # add notification_id
@@ -736,6 +965,8 @@ def credential():
     )
     _response["notification_id"] = notification_id
 
+    #if current_session and current_session.client_status:
+    #    print(json.dumps(current_session.client_status, indent=2),flush=True)
 
     if "error" in _response and _response['error'] != 'Pending':
         logger.error(
@@ -761,9 +992,13 @@ def credential():
         _response = {"transaction_id": _transaction_id, "interval": 30}
         is_deferred = True
 
-    logger.info(
-        f", Session ID: {session_id}, Credential response, Payload: {_response}"
-    )
+
+    if not is_deferred and current_session and current_session.client_status:
+        persist_client_status(session_id, current_session.client_status)
+
+    #logger.info(
+    #    f", Session ID: {session_id}, Credential response, Payload: {_response}"
+    #)
 
     if "credential_response_encryption" in validated_credential_request:
         _response = encrypt_response(
@@ -771,9 +1006,9 @@ def credential():
             credential_response=_response,
         )
 
-        logger.info(
-            f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
-        )
+        #logger.info(
+        #    f", Session ID: {session_id}, Credential encrypted response, Payload: {_response.data.decode('utf-8')}"
+        #)
 
         if _response.status_code != 200:
             return _response
@@ -794,6 +1029,14 @@ def credential():
     )
     return _response, 200
 
+
+@oidc.route("/admin/sessions/client_status", methods=["GET"])
+def get_all_sessions_client_status():
+    """
+    Returns client_status for every active session that has one.
+    """
+    statuses = session_manager.get_all_client_statuses()
+    return jsonify(statuses), 200
 
 @oidc.route("/notification", methods=["POST"])
 def notification():
@@ -821,13 +1064,10 @@ def notification():
 
     verification_result_introspection = verify_introspection(bearer_token=bearer_token)
 
-    # Check if the result is an error response (a tuple)
-    if isinstance(verification_result_introspection, tuple):
-        # If it's a tuple, it's a Flask error response. Return it immediately.
+    if isinstance(verification_result_introspection, tuple) and len(verification_result_introspection) == 2 and isinstance(verification_result_introspection[0], str):
+        session_id, wia_client_status = verification_result_introspection
+    else:
         return verification_result_introspection
-
-    # If the result is not a tuple, it's the username string
-    session_id = verification_result_introspection
 
     logger.info(
         f", Session ID: {session_id}, Notification Request, Payload: {notification_request}"
@@ -933,13 +1173,10 @@ def deferred_credential():
 
     verification_result_introspection = verify_introspection(bearer_token=bearer_token)
 
-    # Check if the result is an error response (a tuple)
-    if isinstance(verification_result_introspection, tuple):
-        # If it's a tuple, it's a Flask error response. Return it immediately.
+    if isinstance(verification_result_introspection, tuple) and len(verification_result_introspection) == 2 and isinstance(verification_result_introspection[0], str):
+        session_id, wia_client_status = verification_result_introspection
+    else:
         return verification_result_introspection
-
-    # If the result is not a tuple, it's the username string
-    session_id = verification_result_introspection
 
     logger.info(
         f", Session ID: {session_id}, Deferred Request, Payload: {deferred_request}"
@@ -971,8 +1208,11 @@ def deferred_credential():
 
     current_session = session_manager.get_session(session_id=session_id)
 
+    session_manager.update_client_status_status(session_id, wia_client_status.get("status"))
+    session_manager.update_client_status_exp(session_id, wia_client_status.get("exp"))
+
     _response = generate_credentials(
-        credential_request=validated_credential_request, session_id=session_id
+        credential_request=validated_credential_request, session_id=session_id, wia_client_status=wia_client_status
     )
 
     if "error" in _response:
@@ -994,6 +1234,9 @@ def deferred_credential():
     if "error" in _response and _response["error"] == "Pending":
         _response = {"transaction_id": deferred_transaction_id, "interval": 30}
         is_deferred = True
+
+    if not is_deferred and current_session and current_session.client_status:
+        persist_client_status(session_id, current_session.client_status)
 
     logger.info(
         f", Session ID: {session_id}, Deferred credential response, Payload: {_response}"
@@ -1086,12 +1329,12 @@ def credential_offer():
 """ @oidc.route("/test_dump", methods=["GET", "POST"])
 def dump_test():
     _store = current_app.server.context.dump()
-    
+
     print("\n------Store-----\n", _store)
     print("\n------Store type-----\n", type(_store))
-    
+
     json_string = json.dumps(_store, indent=4)
-    
+
     with open("data.json", "w") as json_file:
         json_file.write(json_string)
     return "dump"
@@ -1179,7 +1422,7 @@ def credentialOffer2():
     logger.info(
         f", Session ID: {session_id}, Credential offer successfully generated, uri: {uri}"
     )
-    
+
     return jsonify({"base64_img": qr_img_base64, "session_id": session_id})
 
 

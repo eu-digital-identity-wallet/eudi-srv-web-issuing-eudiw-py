@@ -6,7 +6,7 @@
 # SERVICE CONFIGURATION
 # ============================================================================
 service_url: "https://backend.issuer.eudiw.dev"
-  
+
 wallet_tester_url: "https://tester.issuer.eudiw.dev"
 
 revocation:
@@ -20,7 +20,7 @@ revocation:
 # ============================================================================
 frontend:
   default: "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
-  
+
   frontends_config:
     "5d725b3c-6d42-448e-8bfd-1eff1fcf152d":
       url: "https://issuer.eudiw.dev"
@@ -43,8 +43,12 @@ authorization_server:
 dynamic_presentation_url: "https://verifier-backend.eudiw.dev/ui/presentations"
 
 # WUA trust validator url, available at https://github.com/eu-digital-identity-wallet/eudi-srv-trust-validator
-trust_validator:  
+trust_validator:
   url: "https://trust-validator.eudiw.dev/trust"
+  enabled: true
+
+status_validator:
+  url: "https://status-validator.issuer.eudiw.dev/status"
   enabled: true
 
 # ============================================================================
@@ -53,6 +57,16 @@ trust_validator:
 oid4vp_scheme: "haip-vp://"
 
 credential_offer_scheme: "haip-vci://"
+
+# ============================================================================
+# POSTGRES CONFIGURATION
+# ============================================================================
+postgres:
+  host: "localhost"
+  port: 5432
+  dbname: "eudiw_issuer"
+  user: "issuer_backend"
+  password: "secret_here"
 
 # ============================================================================
 # LOGGING
@@ -73,7 +87,7 @@ expiry:
 # KEY PATHS
 # ============================================================================
 keys:
-  nonce_path: "/etc/eudiw/pid-issuer-dev/privKey/nonce_rsa2048.pem" # Private key that signs the nonce at the nonce enpoint. 
+  nonce_path: "/etc/eudiw/pid-issuer-dev/privKey/nonce_rsa2048.pem" # Private key that signs the nonce at the nonce enpoint.
   credential_request_path: "/etc/eudiw/pid-issuer-dev/privKey/credential_request.pem" # Private key used for credential request encryption. Metadata advertised public key is automatically generated from this private key.
 
 # Path to trusted CA certificates, used to validate VP_Tokens
@@ -142,22 +156,22 @@ countries:
     keys:
       _default:
         private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_EU.pem"
-        private_key_password: null 
+        private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_EU_cert.der"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
       - "eu.europa.ec.eudi.pid_vc_sd_jwt"
       - "eu.europa.ec.eudi.pid_mdoc_deferred"
-    
+
     custom_modifiers:
       _default:
         family_name: "CurrentFamilyName"
         given_name: "CurrentGivenName"
         birth_date: "DateOfBirth"
-    
+
     connection_type: "oauth"
-    
+
     auth:
       base_url: "https://eidas.projj.eu"
       redirect_uri: "https://backend.issuer.eudiw.dev/dynamic/redirect"
@@ -167,15 +181,15 @@ countries:
       client_secret: "example"
 
   FC:
-    name: "FormEU"    
+    name: "FormEU"
     keys:
       _default:
         private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_UT.pem"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_UT_cert.der"
-    
+
     un_distinguishing_sign: "FC"
-    
+
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
       - "eu.europa.ec.eudi.pid_vc_sd_jwt"
@@ -209,29 +223,29 @@ countries:
 
   PT:
     name: "Portugal"
-    
+
     keys:
       _default:
         private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_PT.pem"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_PT_cert.der"
-    
+
     un_distinguishing_sign: "P"
-    
+
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
       - "eu.europa.ec.eudi.pid_vc_sd_jwt"
       - "eu.europa.ec.eudi.mdl_mdoc"
       - "eu.europa.ec.eudi.pid_mdoc_deferred"
-    
+
     connection_type: "oauth"
-    
+
     custom_modifiers:
       _default:
         "http://interop.gov.pt/MDC/Cidadao/DataNascimento": "birth_date"
         "http://interop.gov.pt/MDC/Cidadao/NomeApelido": "family_name"
         "http://interop.gov.pt/MDC/Cidadao/NomeProprio": "given_name"
-    
+
     auth:
       base_url: "https://country-connector.ageverification.dev"
       redirect_uri: "https://backend.issuer.eudiw.dev/dynamic/redirect"
@@ -242,19 +256,19 @@ countries:
 
   EE:
     name: "Estonia"
-    
+
     keys:
       _default:
         private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_EE.pem"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_EE_cert.der"
-    
+
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
       - "eu.europa.ec.eudi.pid_vc_sd_jwt"
-    
+
     connection_type: "openid"
-    
+
     auth:
       base_url: "https://tara-test.ria.ee"
       redirect_uri: "https://pprpid.provider.eudiw.projj.eu/tara/redirect"

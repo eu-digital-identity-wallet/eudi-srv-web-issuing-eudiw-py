@@ -14,217 +14,252 @@
          "jwt":{
             "proof_signing_alg_values_supported":[
                "ES256"
-            ]
-         }
-      },
-      "credential_metadata": {
-      "display":[
-         {
-            "name":"Proof of Age",
-            "locale":"en",
-            "logo":{
-               "uri":"https://examplestate.com/public/pid.png",
-               "alt_text":"A square figure of a Proof of Age"
+            ],
+            "key_attestations_required":{
+               "key_storage":[
+                  "iso_18045_high"
+               ],
+               "user_authentication":[
+                  "iso_18045_high"
+               ],
+               "preferred_key_storage_status_period":2678400
+            }
+         },
+         "attestation":{
+            "proof_signing_alg_values_supported":[
+               "ES256"
+            ],
+            "key_attestations_required":{
+               "key_storage":[
+                  "iso_18045_high"
+               ],
+               "user_authentication":[
+                  "iso_18045_high"
+               ],
+               "preferred_key_storage_status_period":2678400
             }
          }
-      ],
-      "claims":[
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_18"
-            ],
-            "mandatory":true,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
+      },
+      "credential_metadata":{
+         "display":[
+            {
+               "name":"Proof of Age",
+               "locale":"en",
+               "logo":{
+                  "uri":"https://examplestate.com/public/pid.png",
+                  "alt_text":"A square figure of a Proof of Age"
+               }
+            }
+         ],
+         "credential_reuse_policy":{
+            "id":"arf_annex_ii",
+            "options":[
                {
-                  "name":"Age Over 18",
-                  "locale":"en"
+                  "details":[
+                     "once_only"
+                  ],
+                  "batch_size":60,
+                  "reissue_trigger_unused":3
                }
             ]
          },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_13"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 13",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_15"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 15",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_16"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 16",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_21"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 21",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_23"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 23",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_25"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 25",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_27"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 27",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_28"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 28",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_40"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 40",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_60"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 60",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_65"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 65",
-                  "locale":"en"
-               }
-            ]
-         },
-         {
-            "path":[
-               "eu.europa.ec.av.1",
-               "age_over_67"
-            ],
-            "mandatory":false,
-            "value_type":"bool",
-            "source":"user",
-            "display":[
-               {
-                  "name":"Age Over 67",
-                  "locale":"en"
-               }
-            ]
-         }
-      ]
+         "claims":[
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_18"
+               ],
+               "mandatory":true,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 18",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_13"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 13",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_15"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 15",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_16"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 16",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_21"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 21",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_23"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 23",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_25"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 25",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_27"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 27",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_28"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 28",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_40"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 40",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_60"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 60",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_65"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 65",
+                     "locale":"en"
+                  }
+               ]
+            },
+            {
+               "path":[
+                  "eu.europa.ec.av.1",
+                  "age_over_67"
+               ],
+               "mandatory":false,
+               "value_type":"bool",
+               "source":"user",
+               "display":[
+                  {
+                     "name":"Age Over 67",
+                     "locale":"en"
+                  }
+               ]
+            }
+         ]
       },
       "issuer_config":{
          "issuing_authority":"Test QEAA issuer",
@@ -234,4 +269,4 @@
          "namespace":"eu.europa.ec.av.1"
       }
    }
- }
+}

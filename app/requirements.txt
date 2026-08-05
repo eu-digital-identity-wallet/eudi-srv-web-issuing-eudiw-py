@@ -26,5 +26,8 @@ python-dotenv==1.2.2
 pytest
 pytest-cov
 PyYAML==6.0.3
+psycopg==3.3.4
+psycopg_pool==3.3.1
+apscheduler==3.11.3
 git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
 git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1

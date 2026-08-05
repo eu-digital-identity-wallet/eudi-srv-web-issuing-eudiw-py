@@ -241,7 +241,16 @@ _29 Apr 2026_
 - Update TAX mdoc metadata field `credential_signing_alg_values_supported`
 
 ## [0.9.6]
+
 _25 Jun 2026_
 
 ### Fixed
 - Updated all unit tests, now passing successfully.
+
+## [0.9.7]
+
+_5 Aug 2026_
+
+### Changed
+- Updated supported credentials metadata to include `credential_reuse_policy`.
+- Updated implementation to align with EUDI TS3 v1.5 specification.

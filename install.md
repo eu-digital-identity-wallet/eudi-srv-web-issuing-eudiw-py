@@ -20,10 +20,17 @@ and should only be used with Flask v. 3.1 or higher.
 
 To install [Flask](https://flask.palletsprojects.com/en/stable/), please follow the [Installation Guide](https://flask.palletsprojects.com/en/stable/installation/).
 
-## 3. How to run the EUDIW Issuer?
+## 3. PostgreSQL
+
+The EUDIW Issuer was tested with
+
++ PostgreSQL v. 16.14
+
+To install PostgreSQL, please follow the [Download Instructions](https://www.postgresql.org/download/).
+
+## 4. How to run the EUDIW Issuer?
 
 To run the EUDIW Issuer, please follow these simple steps (some of which may have already been completed when installing Flask) for Linux/macOS or Windows.
-
 
 1. Clone the EUDIW Issuer repository:
 
@@ -66,7 +73,35 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     pip install -r app/requirements.txt
     ```
 
-6. Setup configuration
+6. Setup database
+
+    Make sure PostgreSQL is installed and running (see [PostgreSQL downloads](https://www.postgresql.org/download/) if you haven't installed it yet).
+
+    Connect to PostgreSQL:
+    ```shell
+    sudo -u postgres psql       # Linux/macOS
+    psql -U postgres            # Windows
+    ```
+
+    Then create a dedicated database and user for the EUDIW Issuer:
+
+    ```sql
+    CREATE USER some-username WITH PASSWORD 'some-password';
+    CREATE DATABASE some-db-name OWNER some-username;
+    GRANT ALL PRIVILEGES ON DATABASE some-db-name TO some-username;
+    ```
+
+    > ⚠️ **Important: replace the placeholder values before running these commands:**
+    >
+    > | Placeholder | Replace with |
+    > |---|---|
+    > | `some-username` | a username of your choice |
+    > | `some-password` | a strong, unique password |
+    > | `some-db-name` | a database name of your choice |
+    >
+    > Write down the values you choose as you'll enter them again as `dbname`, `user`, and `password` in the `postgres` section of the configuration file in step 7.
+
+7. Setup configuration
 
    -  Copy ```app/config_issuer_backend_example.yaml``` to ```etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
 
@@ -76,12 +111,22 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
 
    Configuration location can be changed using environment variable ISSUER_CONFIG_PATH
 
-7. Install Authorization Server
+   Update the following variables in the configuration file:
+
+   - **`postgres`** — connection details for the PostgreSQL database used by the EUDIW Issuer.
+     - `host`, `port`: address of the PostgreSQL instance
+     - `dbname`: name of the database to connect to
+     - `user`, `password`: credentials with access to that database
+   
+   - **`status_validator`** — URL for the service where revocation/validity status of Referenced Tokens can be checked against a Token Status List
+     - `url`: endpoint of the Status Validator service
+
+8. Install Authorization Server
     - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
-8. Install Issuer Front-End
+9. Install Issuer Front-End
     - Install the service according to [Issuer Front-End](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/install.md)
 
-9. Run the EUDIW Issuer Back-end
+10. Run the EUDIW Issuer Back-end
 
     On the root directory of the clone repository, insert one of the following command lines to run the EUDIW Issuer.
 
@@ -97,9 +142,9 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     flask --app app run --debug
     ```
     
-## 4. Running your local EUDIW Issuer over HTTPS
+## 5. Running your local EUDIW Issuer over HTTPS
 
-1. Generate a self signed certificate and a private key
+1. Generate a self-signed certificate and a private key
    + Linux/macOS
      
        Example: 
@@ -153,11 +198,11 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     flask --app app run --cert=cert.pem --key=key.pem
     ```
     
-## 5. Make your local EUDIW Issuer available on the Internet (optional)
+## 6. Make your local EUDIW Issuer available on the Internet (optional)
 
 If you want to make your local EUDIW Issuer available on the Internet, we recommend to use NGINX reverse proxy and certbot (to generate an HTTPS certificate).
 
-### 5.1 Install and configure NGINX
+### 6.1 Install and configure NGINX
 
 1. Follow the installation guide in https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
 
@@ -193,7 +238,7 @@ server {
 3. Restart the Nginx server
 
 
-### 5.2 Install and run certbot to gef a free HTTPS certificate
+### 6.2 Install and run certbot to gef a free HTTPS certificate
 
 1. Follow the installation guide in https://certbot.eff.org
 
@@ -202,7 +247,7 @@ server {
 3. Restart the Nginx server and goto `https:\\FQDN\` (FQDN configured in the Nginx configuration file)
 
 
-## 6. Docker
+## 7. Docker
 
 This guide provides step-by-step instructions for deploying the **EUDIW Issuer** service using **Docker Compose v2**.
 

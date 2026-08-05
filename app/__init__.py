@@ -43,10 +43,12 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
 from pycose.keys.ec2 import EC2Key
+from app.db_status_persistence import init_db_status
 
 from app.session_manager import SessionManager
 from app.redirect_func import post_redirect_with_payload
 from app.app_config.logging_config import configure_logging
+
 
 
 
@@ -98,7 +100,14 @@ if os.getenv("MOCK_CONFIGURATION"):
     CONFIGURATION = {
         "expiry": {
             "session": 30
-        }
+        },
+        "postgres": {
+            "host": "localhost",
+            "port": 5432,
+            "dbname": "eudiw_issuer_mock",
+            "user": "postgres",
+            "password": "postgres",
+        },
     }
 else:
     CONFIGURATION = _load_config()
@@ -120,6 +129,12 @@ IS_TEST_ENV = (
 
 session_manager = SessionManager(default_expiry_minutes=CONFIGURATION["expiry"]["session"])
 
+init_db_status(CONFIGURATION["postgres"])
+
+from app.nightly_sweep_scheduler import start_scheduler
+
+start_scheduler()
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -140,7 +155,7 @@ def create_app(test_config=None):
         pass
 
     configure_logging(app, CONFIGURATION["logging"])
-    
+
     app.logger.info("Running initialization setups...")
     setup_metadata()
     if not IS_TEST_ENV:
