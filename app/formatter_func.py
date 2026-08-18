@@ -106,7 +106,7 @@ def mdocFormatter(
                     f", Session ID: {session_id}, clamping mdoc expiry from "
                     f"{expiry_date.isoformat()} to WIA/KA ceiling {max_expiry_date.isoformat()}"
                 )
-                expiry_date = max_expiry_date
+                expiry_date = max_expiry_date.replace(tzinfo=None)
 
     validity = {
         "issuance_date": issuance_date,

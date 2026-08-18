@@ -254,3 +254,13 @@ _5 Aug 2026_
 ### Changed
 - Updated supported credentials metadata to include `credential_reuse_policy`.
 - Updated implementation to align with EUDI TS3 v1.5 specification.
+
+## [0.9.8]
+
+_14 Aug 2026_
+
+### Changed
+- Updated OID4VP requests to specify either a registration certificate or intended use on Verifier requests.
+
+### Fixed
+- Fixed invalid `validUntil` timestamp format in the issuance of some mso_mdoc credentials.
