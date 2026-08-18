@@ -43,6 +43,8 @@ from datetime import datetime, timedelta
 import cbor2
 import logging
 
+from .oid4vp_func import oid4vp_verifier_requests
+
 """ from app.data_management import (
     oid4vp_requests,
 ) """
@@ -141,52 +143,10 @@ def oid4vp_call():
     # Final DCQL query
     dcql_query = {"credentials": dcql_credentials}
 
-    url = CONFIGURATION["dynamic_presentation_url"]
+    response_redirect_uri = CONFIGURATION["service_url"] + "/revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id=" + session_id
+    response_cross, response_same = oid4vp_verifier_requests(dcql_query, response_redirect_uri)
 
-    payload_cross_device = json.dumps(
-        {
-            "type": "vp_token",
-            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "dcql_query": dcql_query,
-            "request_uri_method": "post",
-        }
-    )
-
-    payload_same_device = json.dumps(
-        {
-            "type": "vp_token",
-            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "request_uri_method": "post",
-            "dcql_query": dcql_query,
-            "wallet_response_redirect_uri_template": CONFIGURATION["service_url"]
-            + "/revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id="
-            + session_id,
-        }
-    )
-
-    headers = {
-        "Content-Type": "application/json",
-    }
-
-    response_cross = requests.request(
-        "POST", url, headers=headers, data=payload_cross_device
-    ).json()
-
-    response_same = requests.request(
-        "POST", url, headers=headers, data=payload_same_device
-    ).json()
-
-    """ oid4vp_requests.update(
-        {
-            session_id: {
-                "response": response_same,
-                "expires": datetime.now()
-                + timedelta(minutes=cfgservice.deffered_expiry),
-            }
-        }
-    ) """
-
-    domain = urlparse(url).netloc
+    domain = urlparse(CONFIGURATION["dynamic_presentation_url"]).netloc
 
     deeplink_url = f"{CONFIGURATION['oid4vp_scheme']}{domain}?client_id={response_same['client_id']}&request_uri={response_same['request_uri']}"
     qr_code_url = f"{CONFIGURATION['oid4vp_scheme']}{domain}?client_id={response_cross['client_id']}&request_uri={response_cross['request_uri']}"
