@@ -43,6 +43,7 @@ from . import session_manager
 from . import oidc_metadata
 
 from app import CONFIGURATION
+from .oid4vp_func import setup_oid4vp_verifier_requests
 
 oid4vp = Blueprint("oid4vp", __name__, url_prefix="/")
 CORS(oid4vp)  # enable CORS on the blue print
@@ -96,45 +97,15 @@ def openid4vp():
     # Final DCQL query
     dcql_query = {"credentials": dcql_credentials}
 
-    url = CONFIGURATION["dynamic_presentation_url"]
-    payload_cross_device = json.dumps(
-        {
-            "type": "vp_token",
-            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "dcql_query": dcql_query,
-            "request_uri_method": "get",
-        }
-    )
+    response_redirect_uri = f"{CONFIGURATION['service_url']}/getpidoid4vp?response_code={{RESPONSE_CODE}}&session_id={session_id}"
+    response_cross, response_same =  setup_oid4vp_verifier_requests(dcql_query, session_id, "get", response_redirect_uri)
 
-    payload_same_device = json.dumps(
-        {
-            "type": "vp_token",
-            "nonce": "hiCV7lZi5qAeCy7NFzUWSR4iCfSmRb99HfIvCkPaCLc=",
-            "request_uri_method": "get",
-            "dcql_query": dcql_query,
-            "profile": "haip",
-            "authorization_request_uri": "haip-vp://",
-            "wallet_response_redirect_uri_template": f"{CONFIGURATION['service_url']}/getpidoid4vp?response_code={{RESPONSE_CODE}}&session_id={session_id}",
-        }
-    )
-
-    headers = {
-        "Content-Type": "application/json",
-    }
-
-    response_cross = requests.request(
-        "POST", url, headers=headers, data=payload_cross_device
-    ).json()
-
-    response_same = requests.request(
-        "POST", url, headers=headers, data=payload_same_device
-    ).json()
 
     session_manager.update_oid4vp_transaction_id(
         session_id=session_id, oid4vp_transaction_id=response_same["transaction_id"]
     )
 
-    domain = urlparse(url).netloc
+    domain = urlparse(CONFIGURATION["dynamic_presentation_url"]).netloc
 
     deeplink_url = f"{CONFIGURATION['oid4vp_scheme']}{domain}?client_id={response_same['client_id']}&request_uri={response_same['request_uri']}"
 

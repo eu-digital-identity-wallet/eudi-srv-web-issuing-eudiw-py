@@ -259,5 +259,8 @@ _5 Aug 2026_
 
 _14 Aug 2026_
 
+### Changed
+- Updated OID4VP requests to specify either a registration certificate or intended use on Verifier requests.
+
 ### Fixed
 - Fixed invalid `validUntil` timestamp format in the issuance of some mso_mdoc credentials.

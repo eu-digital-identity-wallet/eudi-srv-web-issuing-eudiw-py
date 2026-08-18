@@ -41,6 +41,9 @@ authorization_server:
 # ============================================================================
 #verifier url for oid4vp request generation, available at https://github.com/eu-digital-identity-wallet/eudi-srv-verifier-endpoint
 dynamic_presentation_url: "https://verifier-backend.eudiw.dev/ui/presentations"
+# at least one of 'intended_use_id' or 'registration_certificate_jwt' must be defined
+intended_use_id:
+registration_certificate_jwt:
 
 # WUA trust validator url, available at https://github.com/eu-digital-identity-wallet/eudi-srv-trust-validator
 trust_validator:
