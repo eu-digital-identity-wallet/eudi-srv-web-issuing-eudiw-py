@@ -43,7 +43,7 @@ from datetime import datetime, timedelta
 import cbor2
 import logging
 
-from .oid4vp_func import setup_oid4vp_verifier_requests
+from .oid4vp_func import oid4vp_verifier_requests
 
 """ from app.data_management import (
     oid4vp_requests,
@@ -144,7 +144,7 @@ def oid4vp_call():
     dcql_query = {"credentials": dcql_credentials}
 
     response_redirect_uri = CONFIGURATION["service_url"] + "/revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id=" + session_id
-    response_cross, response_same = setup_oid4vp_verifier_requests(dcql_query, "post", response_redirect_uri)
+    response_cross, response_same = oid4vp_verifier_requests(dcql_query, response_redirect_uri)
 
     domain = urlparse(CONFIGURATION["dynamic_presentation_url"]).netloc
 

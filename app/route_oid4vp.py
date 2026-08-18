@@ -43,7 +43,7 @@ from . import session_manager
 from . import oidc_metadata
 
 from app import CONFIGURATION
-from .oid4vp_func import setup_oid4vp_verifier_requests
+from .oid4vp_func import oid4vp_verifier_requests
 
 oid4vp = Blueprint("oid4vp", __name__, url_prefix="/")
 CORS(oid4vp)  # enable CORS on the blue print
@@ -98,7 +98,7 @@ def openid4vp():
     dcql_query = {"credentials": dcql_credentials}
 
     response_redirect_uri = f"{CONFIGURATION['service_url']}/getpidoid4vp?response_code={{RESPONSE_CODE}}&session_id={session_id}"
-    response_cross, response_same =  setup_oid4vp_verifier_requests(dcql_query, "get", response_redirect_uri)
+    response_cross, response_same =  oid4vp_verifier_requests(dcql_query, response_redirect_uri)
 
 
     session_manager.update_oid4vp_transaction_id(
