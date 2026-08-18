@@ -144,7 +144,7 @@ def oid4vp_call():
     dcql_query = {"credentials": dcql_credentials}
 
     response_redirect_uri = CONFIGURATION["service_url"] + "/revocation/getoid4vp?response_code={RESPONSE_CODE}&session_id=" + session_id
-    response_cross, response_same = setup_oid4vp_verifier_requests(dcql_query, session_id, "post", response_redirect_uri)
+    response_cross, response_same = setup_oid4vp_verifier_requests(dcql_query, "post", response_redirect_uri)
 
     domain = urlparse(CONFIGURATION["dynamic_presentation_url"]).netloc
 

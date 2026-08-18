@@ -98,7 +98,7 @@ def openid4vp():
     dcql_query = {"credentials": dcql_credentials}
 
     response_redirect_uri = f"{CONFIGURATION['service_url']}/getpidoid4vp?response_code={{RESPONSE_CODE}}&session_id={session_id}"
-    response_cross, response_same =  setup_oid4vp_verifier_requests(dcql_query, session_id, "get", response_redirect_uri)
+    response_cross, response_same =  setup_oid4vp_verifier_requests(dcql_query, "get", response_redirect_uri)
 
 
     session_manager.update_oid4vp_transaction_id(
