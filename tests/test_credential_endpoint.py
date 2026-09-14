@@ -88,7 +88,7 @@ class TestCredentialEndpoint:
             },
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -140,7 +140,7 @@ class TestCredentialEndpoint:
         }
 
         mock_dependencies["decrypt_jwe"].return_value = decrypted_request
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = decrypted_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -229,7 +229,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "jwt_vc_json"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -264,7 +264,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         error_response = ({"error": "invalid_credential_request"}, 400)
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = error_response
 
         response = client.post(
@@ -282,7 +282,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "mso_mdoc"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"error": "Pending"}
         mock_dependencies["session_manager"].get_session.return_value = {}
@@ -306,7 +306,7 @@ class TestCredentialEndpoint:
             "credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc_deferred"
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"credential": "test"}
         mock_dependencies["session_manager"].get_session.return_value = {}
@@ -349,7 +349,7 @@ class TestCredentialEndpoint:
                 b"encrypted_response", 200, {"Content-Type": "application/jwt"}
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -394,7 +394,7 @@ class TestCredentialEndpoint:
                 b"encrypted_response", 200, {"Content-Type": "application/jwt"}
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"error": "Pending"}
         mock_dependencies["encrypt_response"].return_value = mock_response
@@ -427,7 +427,7 @@ class TestCredentialEndpoint:
                 400,
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -467,7 +467,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "jwt_vc_json"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -507,14 +507,14 @@ class TestIntegrationScenarios:
             },
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, {})
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
         }
-        mock_dependencies["session_manager"].get_session.return_value = {
-            "user_id": "user123"
-        }
+        mock_dependencies["session_manager"].get_session.return_value = Mock(
+            client_status=None, user_id="user123"
+        )
 
         response = client.post(
             "/credential",
