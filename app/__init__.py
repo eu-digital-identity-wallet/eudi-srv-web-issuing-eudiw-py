@@ -108,6 +108,16 @@ if os.getenv("MOCK_CONFIGURATION"):
             "user": "postgres",
             "password": "postgres",
         },
+        "status_validator": {
+            "url": "https://status-validator.test",
+            "enabled": False,
+        },
+        "revocation": {
+            "take_url": "https://revocation.test/take",
+            "set_url": "https://revocation.test/set",
+            "api_key": "test",
+            "enabled": False,
+        },
     }
 else:
     CONFIGURATION = _load_config()
