@@ -75,9 +75,12 @@ def mock_config():
             "set_url": "http://test.com/revoke",
             "api_key": "test_api_key"
         },
-        "oid4vp_scheme": "haip-vp://"
+        "oid4vp_scheme": "haip-vp://",
+        "intended_use_id": "test-intended-use-id"
     }
-    with patch("app.revocation.CONFIGURATION", mock_config) :
+    with patch("app.revocation.CONFIGURATION", mock_config), patch(
+        "app.oid4vp_func.CONFIGURATION", mock_config
+    ):
         yield mock_config
 
 
