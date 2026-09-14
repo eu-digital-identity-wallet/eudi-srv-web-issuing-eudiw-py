@@ -549,7 +549,7 @@ class TestSDJWTFormatter:
         mock_sdjwt_instance.sd_jwt_issuance = "sdjwt_token"
         mock_SDJWTIssuer.return_value = mock_sdjwt_instance
 
-        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt")
+        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt", "test-session-id")
 
         # Assertions
         mock_load_private_key.assert_called_once()
@@ -649,7 +649,7 @@ class TestSDJWTFormatter:
         mock_sdjwt_instance.sd_jwt_issuance = "sdjwt_token_revocation"
         mock_SDJWTIssuer.return_value = mock_sdjwt_instance
 
-        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt")
+        result = sdjwtFormatter(PID, country, "eu.europa.ec.eudi.learning_credential_vc_sd_jwt", "test-session-id")
 
         mock_requests_post.assert_called_once()
         mock_sdjwtNestedClaims.assert_called_once()
