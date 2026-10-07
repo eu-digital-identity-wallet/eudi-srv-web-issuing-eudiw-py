@@ -27,6 +27,8 @@ frontend:
       metadata_signing_key_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/PID-DS-03.key"
       metadata_access_certificate_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/PID-DS-03.crt"
       metadata_signing_key_password: null
+      # Registration certificate (JWT) advertised in the credential issuer metadata "issuer_info". Optional (null to disable).
+      registration_certificate_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/registration_cert.jwt"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION
