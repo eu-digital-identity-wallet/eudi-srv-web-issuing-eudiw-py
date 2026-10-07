@@ -67,6 +67,12 @@ def _process_config(config: dict) -> dict:
     for frontend in config["frontend"]["frontends_config"].values():
         frontend["metadata_signing_key"] = _load_file(frontend["metadata_signing_key_path"])
         frontend["metadata_access_certificate"] = _load_file(frontend["metadata_access_certificate_path"])
+        registration_certificate_path = frontend.get("registration_certificate_path")
+        frontend["registration_certificate"] = (
+            _load_file(registration_certificate_path).decode().strip()
+            if registration_certificate_path
+            else None
+        )
 
     # --- Global keys ---
     keys = config["keys"]
@@ -390,6 +396,14 @@ def setup_metadata():
     oidc_metadata = cast(
         Dict[str, Any], replace_domain(oidc_metadata, old_domain, new_domain)
     )
+
+    default_frontend = CONFIGURATION["frontend"]["frontends_config"][CONFIGURATION["frontend"]["default"]]
+    registration_certificate = default_frontend.get("registration_certificate")
+    if registration_certificate:
+        issuer_info = [{"data": registration_certificate, "format": "registration_cert"}]
+        oidc_metadata["issuer_info"] = issuer_info
+        oidc_metadata_clean["issuer_info"] = copy.deepcopy(issuer_info)
+        logger.info("issuer_info: registration certificate added to metadata")
 
     logger.info("Setting up credential_request_encryption in oidc_metadata_clean")
     try:
