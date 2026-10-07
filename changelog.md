@@ -264,3 +264,9 @@ _14 Aug 2026_
 
 ### Fixed
 - Fixed invalid `validUntil` timestamp format in the issuance of some mso_mdoc credentials.
+
+## [0.10.0]
+
+_07 Oct 2026_
+### Added
+- JWT Registration certificate support
