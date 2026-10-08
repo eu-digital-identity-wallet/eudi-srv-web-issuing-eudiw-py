@@ -274,11 +274,12 @@ class TestCredentialEndpoint:
         self, mock_generate, mock_introspect, client, mock_cfgservice
     ):
         """Test successful credential issuance"""
-        mock_introspect.return_value = "test-session-id"
+        mock_introspect.return_value = ("test-session-id", {})
         mock_generate.return_value = {"credential": "test-credential-data"}
 
         with patch("app.route_oidc.session_manager") as mock_sm:
             mock_session = Mock()
+            mock_session.client_status = None
             mock_sm.get_session.return_value = mock_session
 
             response = client.post(
@@ -299,7 +300,7 @@ class TestCredentialEndpoint:
         self, mock_generate, mock_introspect, client, mock_cfgservice
     ):
         """Test deferred credential response"""
-        mock_introspect.return_value = "test-session-id"
+        mock_introspect.return_value = ("test-session-id", {})
         mock_generate.return_value = {"error": "Pending"}
 
         with patch("app.route_oidc.session_manager") as mock_sm:
@@ -335,7 +336,7 @@ class TestVerifyIntrospection:
         with app.app_context():
             result = verify_introspection("valid-token")
 
-        assert result == "test-user"
+        assert result == ("test-user", None)
 
     @patch("requests.request")
     def test_verify_introspection_inactive_token(self, mock_request, app):
@@ -441,11 +442,12 @@ class TestDeferredCredential:
     ):
         """Test successful deferred credential"""
         transaction_id = str(uuid.uuid4())
-        mock_introspect.return_value = "test-session-id"
+        mock_introspect.return_value = ("test-session-id", {})
         mock_generate.return_value = {"credential": "test-credential"}
 
         with patch("app.route_oidc.session_manager") as mock_sm:
             mock_session = Mock()
+            mock_session.client_status = None
             mock_session.transaction_id = {
                 transaction_id: {
                     "credential_configuration_id": "test-cred",
@@ -470,7 +472,7 @@ class TestNotification:
     @patch("app.route_oidc.verify_introspection")
     def test_notification_success(self, mock_introspect, client, mock_cfgservice):
         """Test successful notification"""
-        mock_introspect.return_value = "test-session-id"
+        mock_introspect.return_value = ("test-session-id", {})
 
         response = client.post(
             "/notification",
@@ -688,7 +690,12 @@ class TestGenerateCredentials:
             "proof": {"proof_type": "jwt", "jwt": "test-jwt-token"},
         }
 
-        result = generate_credentials(credential_request, "test-session-id")
+        with patch.dict(
+            "app.route_oidc.oidc_metadata",
+            {"credential_configurations_supported": {}},
+            clear=True,
+        ):
+            result = generate_credentials(credential_request, "test-session-id")
 
         assert "credential" in result
 
@@ -709,7 +716,12 @@ class TestGenerateCredentials:
             "proofs": {"jwt": ["jwt1", "jwt2", "jwt3"]},
         }
 
-        result = generate_credentials(credential_request, "test-session-id")
+        with patch.dict(
+            "app.route_oidc.oidc_metadata",
+            {"credential_configurations_supported": {}},
+            clear=True,
+        ):
+            result = generate_credentials(credential_request, "test-session-id")
 
         mock_session_manager.update_is_batch_credential.assert_called_once()
 
@@ -736,7 +748,12 @@ class TestGenerateCredentials:
             },
         }
 
-        result = generate_credentials(credential_request, "test-session-id")
+        with patch.dict(
+            "app.route_oidc.oidc_metadata",
+            {"credential_configurations_supported": {}},
+            clear=True,
+        ):
+            result = generate_credentials(credential_request, "test-session-id")
 
         assert "credential" in result
 
