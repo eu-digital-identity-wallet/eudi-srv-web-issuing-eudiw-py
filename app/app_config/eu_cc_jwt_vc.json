@@ -1,0 +1,622 @@
+{
+   "eu.webuildconsortium.eucc_sd_jwt": {
+      "format": "dc+sd-jwt",
+      "vct": "uri:eu.eudi.eucc.1",
+      "scope": "eu.webuildconsortium.eucc_sd_jwt",
+      "cryptographic_binding_methods_supported": [
+         "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+         "ES256"
+      ],
+      "proof_types_supported": {
+         "jwt": {
+            "proof_signing_alg_values_supported": [
+               "ES256"
+            ]
+         }
+      },
+      "credential_metadata": {
+         "display": [
+            {
+               "name": "EU Company Certificate",
+               "locale": "en",
+               "description": "Registry-backed proof of a company's incorporation and registered company information.",
+               "logo": {
+                  "uri": "https://issuer.example/assets/eucc-logo.png",
+                  "alt_text": "EU Company Certificate logo"
+               }
+            }
+         ],
+         "claims": [
+            {
+               "path": [
+                  "attestation_legal_category"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attestation legal category",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "issuing_country"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Issuing country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_id"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_form_type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal form type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registration_member_state"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Registration member state",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registration_date"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Registration date",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_status"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person status",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_activity"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person activity",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_activity",
+                  "code"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_activity",
+                  "description"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Description",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_person_duration"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person duration",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Registered address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "full_address"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Full address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "care_of"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Care of",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "thorough_fare"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Thorough fare",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "locator_designator"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Locator designator",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "post_code"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Post code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "post_name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Post name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "post_office_box"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Post office box",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "locator_name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Locator name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "admin_unit_level_1"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Admin unit level 1",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "registered_address",
+                  "admin_unit_level_2"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Admin unit level 2",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal representative",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Natural person",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person",
+                  "full_name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Full name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person",
+                  "date_of_birth"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Date of birth",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person",
+                  "identifier"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Identifier",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person",
+                  "nationality"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Nationality",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "natural_person",
+                  "signatory_rule"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Signatory rule",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "legal_person"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Legal person",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "legal_person",
+                  "name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "legal_person",
+                  "id"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "legal_person",
+                  "formtype"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Formtype",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "legal_representative",
+                  null,
+                  "legal_person",
+                  "signatory_rule"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Signatory rule",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "share_capital"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Share capital",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "share_capital",
+                  "amount"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Amount",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "share_capital",
+                  "currency"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Currency",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "digital_contact_point"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Digital contact point",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "digital_contact_point",
+                  "website"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Website",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "digital_contact_point",
+                  "email"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Email",
+                     "locale": "en"
+                  }
+               ]
+            }
+         ]
+      },
+      "issuer_config": {
+         "issuing_authority": "Test EUCC issuer",
+         "organization_id": "EUDI Wallet Reference Implementation",
+         "validity": 365,
+         "organization_name": "Test EUCC issuer",
+         "attestation_legal_category": "Pub-EAA"
+      }
+   }
+}

@@ -1,0 +1,452 @@
+{
+   "eu.webuildconsortium.eu_poa_sd_jwt": {
+      "format": "dc+sd-jwt",
+      "vct": "uri:eu.eudi.eu-poa.1",
+      "scope": "eu.webuildconsortium.eu_poa_sd_jwt",
+      "cryptographic_binding_methods_supported": [
+         "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+         "ES256"
+      ],
+      "proof_types_supported": {
+         "jwt": {
+            "proof_signing_alg_values_supported": [
+               "ES256"
+            ]
+         }
+      },
+      "credential_metadata": {
+         "display": [
+            {
+               "name": "EU Power of Attorney",
+               "locale": "en",
+               "description": "Power of attorney granting an attorney specific powers of representation on behalf of a company.",
+               "logo": {
+                  "uri": "https://issuer.example/assets/eu-poa-logo.png",
+                  "alt_text": "EU Power of Attorney logo"
+               }
+            }
+         ],
+         "claims": [
+            {
+               "path": [
+                  "attestation_legal_category"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attestation legal category",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "issuing_country"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Issuing country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "date_of_execution"
+               ],
+               "mandatory": true,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Date of execution",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "euid_reference"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Euid reference",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_full_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal full name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_date_of_birth"
+               ],
+               "mandatory": true,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal date of birth",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_identification_document_kind"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal identification document kind",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_identification_document_number"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal identification document number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_place_of_birth"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal place of birth",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "principal_full_address"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Principal full address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_statutory_full_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company statutory full name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_business_register_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company business register name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_business_register_location"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company business register location",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_kind_of_legal_entity"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company kind of legal entity",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_jurisdiction"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company jurisdiction",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "company_registered_office"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Company registered office",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_full_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney full name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_date_of_birth"
+               ],
+               "mandatory": false,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney date of birth",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_identification_document_kind"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney identification document kind",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_identification_document_number"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney identification document number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_place_of_birth"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney place of birth",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attorney_full_address"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Attorney full address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "scope_of_representation_powers"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Scope of representation powers",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "scope_of_representation_power_of_substitution"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Scope of representation power of substitution",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "validity_period_valid_from"
+               ],
+               "mandatory": true,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Validity period valid from",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "validity_period_valid_until"
+               ],
+               "mandatory": true,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Validity period valid until",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "applicable_law_jurisdiction"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Applicable law jurisdiction",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "signing_place"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Signing place",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "signing_date"
+               ],
+               "mandatory": true,
+               "value_type": "full-date",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Signing date",
+                     "locale": "en"
+                  }
+               ]
+            }
+         ]
+      },
+      "issuer_config": {
+         "issuing_authority": "Test EU PoA issuer",
+         "organization_id": "EUDI Wallet Reference Implementation",
+         "validity": 365,
+         "organization_name": "Test EU PoA issuer",
+         "attestation_legal_category": "EAA"
+      }
+   }
+}

@@ -130,6 +130,9 @@ class ConfService:
     sca_iban_validity = 30
     iban_ov_validity = 365
     pid_validity = 90
+    eucc_validity = 365
+    ereceipt_validity = 2192
+    eu_poa_validity = 365
 
     # Issuing configuration per credential.
     config_doctype = {
@@ -186,6 +189,27 @@ class ConfService:
             "organization_name": "Test PID issuer",
             "attestation_legal_category": "PID",
         },
+        "uri:eu.eudi.eucc.1": {
+            "issuing_authority": "Test EUCC issuer",
+            "organization_id": pid_organization_id,
+            "validity": eucc_validity,
+            "organization_name": "Test EUCC issuer",
+            "attestation_legal_category": "Pub-EAA",
+        },
+        "eu.we-build.ereceipt.1": {
+            "issuing_authority": "Test eReceipt issuer",
+            "organization_id": pid_organization_id,
+            "validity": ereceipt_validity,
+            "organization_name": "Test eReceipt issuer",
+            "attestation_legal_category": "non-qualified-EAA",
+        },
+        "uri:eu.eudi.eu-poa.1": {
+            "issuing_authority": "Test EU PoA issuer",
+            "organization_id": pid_organization_id,
+            "validity": eu_poa_validity,
+            "organization_name": "Test EU PoA issuer",
+            "attestation_legal_category": "EAA",
+        },
     }
 
     # Type of user authentication allowed per credential.
@@ -196,10 +220,13 @@ class ConfService:
             "eu.webuildconsortium.sca.iban_mdoc",
             "eu.webuildconsortium.sca.iban_sd_jwt",
             "eu.webuildconsortium.iban_ov_sd_jwt",
+            "eu.webuildconsortium.eu_poa_sd_jwt",
         ],
         "country_selection": [
             "eu.europa.ec.eudi.pid_mdoc",
             "eu.europa.ec.eudi.pid_vc_sd_jwt",
+            "eu.webuildconsortium.eucc_sd_jwt",
+            "eu.webuildconsortium.ereceipt_sd_jwt",
         ],
     }
 

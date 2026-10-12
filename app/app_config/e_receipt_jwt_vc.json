@@ -1,0 +1,1481 @@
+{
+   "eu.webuildconsortium.ereceipt_sd_jwt": {
+      "format": "dc+sd-jwt",
+      "vct": "eu.we-build.ereceipt.1",
+      "scope": "eu.webuildconsortium.ereceipt_sd_jwt",
+      "cryptographic_binding_methods_supported": [
+         "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+         "ES256"
+      ],
+      "proof_types_supported": {
+         "jwt": {
+            "proof_signing_alg_values_supported": [
+               "ES256"
+            ]
+         }
+      },
+      "credential_metadata": {
+         "display": [
+            {
+               "name": "eReceipt",
+               "locale": "en",
+               "description": "Digital, cryptographically verifiable equivalent of a paper till receipt.",
+               "logo": {
+                  "uri": "https://issuer.example/assets/ereceipt-logo.png",
+                  "alt_text": "eReceipt logo"
+               }
+            }
+         ],
+         "claims": [
+            {
+               "path": [
+                  "attestation_legal_category"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attestation legal category",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "receipt_number"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Receipt number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "receipt_timestamp"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Receipt timestamp",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "currency_iso_code"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Currency iso code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "total_price_exc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total price exc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "total_vat_amount"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total vat amount",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "total_price_inc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total price inc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "free_text"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Free text",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "original_receipt_number"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Original receipt number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "custom_attributes"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Custom attributes",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "custom_attributes",
+                  null,
+                  "key"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Key",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "custom_attributes",
+                  null,
+                  "value"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Value",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Merchant",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "company_id"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Company id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Branch",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "id"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "pos_id"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Pos id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "sub_name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Sub name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "email"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Email",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "phone"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Phone",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "branch",
+                  "website_url"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Website url",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "address"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "address",
+                  "street_address"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Street address",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "address",
+                  "city"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "City",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "address",
+                  "zip_code"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Zip code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "merchant",
+                  "address",
+                  "country"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Products",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "name"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "quantity"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Quantity",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "quantity_code"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Quantity code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "unit_price_inc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Unit price inc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "unit_price_inc_vat_decimal"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Unit price inc vat decimal",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "total_amount_exc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount exc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "total_amount_inc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount inc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vats",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats",
+                  null,
+                  "vat_rate"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vat rate",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats",
+                  null,
+                  "vat_amount"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vat amount",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats",
+                  null,
+                  "total_amount_exc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount exc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats",
+                  null,
+                  "total_amount_inc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount inc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "vats",
+                  null,
+                  "vat_code"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vat code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "discounts"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Discounts",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "ean_code"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Ean code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "product_id"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Product id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "free_text"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Free text",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "categorization"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Categorization",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "custom_attributes"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Custom attributes",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "custom_attributes",
+                  null,
+                  "key"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Key",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  null,
+                  "custom_attributes",
+                  null,
+                  "value"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Value",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vats",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats",
+                  null,
+                  "vat_rate"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vat rate",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats",
+                  null,
+                  "total_vat_amount"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total vat amount",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats",
+                  null,
+                  "total_amount_exc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount exc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats",
+                  null,
+                  "total_amount_inc_vat"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Total amount inc vat",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "vats",
+                  null,
+                  "vat_code"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Vat code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Payments",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  null,
+                  "type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  null,
+                  "amount"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Amount",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  null,
+                  "attributes"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attributes",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Verifications",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "version"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Version",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "public_key"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Public key",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "transactionId"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Transactionid",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "current_type"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Current type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "transaction_begin"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Transaction begin",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "transaction_end"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Transaction end",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "transaction_begin",
+                  "signed_data"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Signed data",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "verifications",
+                  null,
+                  "transaction_end",
+                  "signed_data"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Signed data",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Journey",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "id"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Id",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "distance"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Distance",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "duration"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Duration",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "co2_emissions"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Co2 emissions",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Origin",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Destination",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "city"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "City",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "country"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "latitude"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Latitude",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "longitude"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Longitude",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "origin",
+                  "datetime"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Datetime",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "city"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "City",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "country"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "latitude"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Latitude",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "longitude"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Longitude",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "journey",
+                  "destination",
+                  "datetime"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Datetime",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attachments",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "type"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "kind"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Kind",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "title"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Title",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "data"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Data",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "description"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Description",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attachments",
+                  null,
+                  "valid_until"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Valid until",
+                     "locale": "en"
+                  }
+               ]
+            }
+         ]
+      },
+      "issuer_config": {
+         "issuing_authority": "Test eReceipt issuer",
+         "organization_id": "EUDI Wallet Reference Implementation",
+         "validity": 2192,
+         "organization_name": "Test eReceipt issuer",
+         "attestation_legal_category": "non-qualified-EAA"
+      }
+   }
+}
