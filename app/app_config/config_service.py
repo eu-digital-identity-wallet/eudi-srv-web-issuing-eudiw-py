@@ -127,6 +127,9 @@ class ConfService:
     # Validity (in days) of the WE BUILD SCA attestations.
     sca_user_validity = 1
     sca_card_dpc_validity = 730
+    sca_iban_validity = 30
+    iban_ov_validity = 365
+    pid_validity = 90
 
     # Issuing configuration per credential.
     config_doctype = {
@@ -146,6 +149,43 @@ class ConfService:
             "attestation_legal_category": "non-qualified-EAA",
             "network": "mastercard",
         },
+        "eu.webuildconsortium.sca.iban.1": {
+            "issuing_authority": "Test SCA issuer",
+            "organization_id": pid_organization_id,
+            "validity": sca_iban_validity,
+            "organization_name": "Test SCA issuer",
+            "namespace": "eu.webuildconsortium.sca.iban.1",
+            "attestation_legal_category": "non-qualified-EAA",
+        },
+        "https://demo.eudiw.grnet.gr/issuer/credentials/sca/iban/1.0": {
+            "issuing_authority": "Test SCA issuer",
+            "organization_id": pid_organization_id,
+            "validity": sca_iban_validity,
+            "organization_name": "Test SCA issuer",
+            "attestation_legal_category": "non-qualified-EAA",
+        },
+        "eu.we-build:iban-ov:1": {
+            "issuing_authority": "Test IBAN-OV issuer",
+            "organization_id": pid_organization_id,
+            "validity": iban_ov_validity,
+            "organization_name": "Test IBAN-OV issuer",
+            "attestation_legal_category": "EAA",
+        },
+        "eu.europa.ec.eudi.pid.1": {
+            "issuing_authority": "Test PID issuer",
+            "organization_id": pid_organization_id,
+            "validity": pid_validity,
+            "organization_name": "Test PID issuer",
+            "namespace": "eu.europa.ec.eudi.pid.1",
+            "attestation_legal_category": "PID",
+        },
+        "urn:eudi:pid:1": {
+            "issuing_authority": "Test PID issuer",
+            "organization_id": pid_organization_id,
+            "validity": pid_validity,
+            "organization_name": "Test PID issuer",
+            "attestation_legal_category": "PID",
+        },
     }
 
     # Type of user authentication allowed per credential.
@@ -153,8 +193,13 @@ class ConfService:
         "PID_login": [
             "eu.webuildconsortium.sca.user_mdoc",
             "eu.webuildconsortium.sca.card_dpc_sd_jwt",
+            "eu.webuildconsortium.sca.iban_mdoc",
+            "eu.webuildconsortium.sca.iban_sd_jwt",
+            "eu.webuildconsortium.iban_ov_sd_jwt",
         ],
         "country_selection": [
+            "eu.europa.ec.eudi.pid_mdoc",
+            "eu.europa.ec.eudi.pid_vc_sd_jwt",
         ],
     }
 

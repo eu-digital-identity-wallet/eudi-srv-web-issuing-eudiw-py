@@ -1,0 +1,180 @@
+{
+   "eu.webuildconsortium.sca.iban_sd_jwt": {
+      "format": "dc+sd-jwt",
+      "vct": "https://demo.eudiw.grnet.gr/issuer/credentials/sca/iban/1.0",
+      "scope": "eu.webuildconsortium.sca.iban_sd_jwt",
+      "cryptographic_binding_methods_supported": [
+         "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+         "ES256"
+      ],
+      "proof_types_supported": {
+         "jwt": {
+            "proof_signing_alg_values_supported": [
+               "ES256"
+            ],
+            "key_attestations_required": {
+               "key_storage": [
+                  "iso_18045_high"
+               ],
+               "user_authentication": [
+                  "iso_18045_high"
+               ],
+               "preferred_key_storage_status_period": 2678400
+            }
+         }
+      },
+      "credential_metadata": {
+         "display": [
+            {
+               "name": "SCA IBAN Credential",
+               "locale": "en",
+               "description": "Attestation for Strong Customer Authentication bound to an IBAN.",
+               "logo": {
+                  "uri": "https://issuer.bank.example/assets/logo.png",
+                  "alt_text": "SCA IBAN Credential logo"
+               }
+            }
+         ],
+         "claims": [
+            {
+               "path": [
+                  "sub"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Subject identifier",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "masked_iban"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Masked IBAN",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "iban"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "IBAN",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "national_bank_code"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "National Bank Code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "bic"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "BIC",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "scheme_identifier"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Scheme Identifier",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "display_name"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Display Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "currency"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Currency",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attestation_legal_category"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attestation Legal Category",
+                     "locale": "en"
+                  }
+               ]
+            }
+         ]
+      },
+      "issuer_config": {
+         "issuing_authority": "Test SCA issuer",
+         "organization_id": "EUDI Wallet Reference Implementation",
+         "validity": 30,
+         "organization_name": "Test SCA issuer",
+         "attestation_legal_category": "non-qualified-EAA"
+      }
+   }
+}

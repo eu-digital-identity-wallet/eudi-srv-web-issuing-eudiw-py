@@ -1,0 +1,378 @@
+{
+   "eu.webuildconsortium.iban_ov_sd_jwt": {
+      "format": "dc+sd-jwt",
+      "vct": "eu.we-build:iban-ov:1",
+      "scope": "eu.webuildconsortium.iban_ov_sd_jwt",
+      "cryptographic_binding_methods_supported": [
+         "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+         "ES256"
+      ],
+      "proof_types_supported": {
+         "jwt": {
+            "proof_signing_alg_values_supported": [
+               "ES256"
+            ]
+         }
+      },
+      "credential_metadata": {
+         "display": [
+            {
+               "name": "IBAN Ownership Verification",
+               "locale": "en",
+               "description": "Verified proof that an IBAN is owned by a designated legal entity or sole trader.",
+               "logo": {
+                  "uri": "https://issuer.bank.example/assets/logo.png",
+                  "alt_text": "IBAN Ownership Verification logo"
+               }
+            }
+         ],
+         "claims": [
+            {
+               "path": [
+                  "bank_account",
+                  "account_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Account Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "bank_account",
+                  "iban"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "IBAN",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "bank_account",
+                  "national_account_number"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "National Account Number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "bank_account",
+                  "account_type"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Account Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "bank_account",
+                  "account_currency"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Account Currency",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_ownership",
+                  "owner_type"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Owner Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_ownership",
+                  "owner_name"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Owner Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_ownership",
+                  "legal_person_identifiers"
+               ],
+               "mandatory": false,
+               "value_type": "identifier_attributes",
+               "source": "user",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  },
+                  "identifier_attributes": {
+                     "type": {
+                        "mandatory": true,
+                        "value_type": "string",
+                        "source": "user"
+                     },
+                     "value": {
+                        "mandatory": true,
+                        "value_type": "string",
+                        "source": "user"
+                     }
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Owner Legal Person Identifiers",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_ownership",
+                  "given_name"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Given Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_ownership",
+                  "surname"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Surname",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "provider_name"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Provider Name",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "legal_person_identifiers"
+               ],
+               "mandatory": true,
+               "value_type": "identifier_attributes",
+               "source": "issuer",
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  },
+                  "identifier_attributes": {
+                     "type": {
+                        "mandatory": true,
+                        "value_type": "string",
+                        "source": "user"
+                     },
+                     "value": {
+                        "mandatory": true,
+                        "value_type": "string",
+                        "source": "user"
+                     }
+                  }
+               },
+               "display": [
+                  {
+                     "name": "Provider Legal Person Identifiers",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "provider_country"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Provider Country",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "bic_swift"
+               ],
+               "mandatory": true,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "BIC/SWIFT",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "national_bank_code"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "National Bank Code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "nace_code"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "NACE Code",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "account_provider",
+                  "clearing_number"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Clearing Number",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "attestation_legal_category"
+               ],
+               "mandatory": true,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Attestation Legal Category",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "schema_version"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Schema Version",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "trust_anchor_url"
+               ],
+               "mandatory": false,
+               "source": "issuer",
+               "display": [
+                  {
+                     "name": "Trust Anchor URL",
+                     "locale": "en"
+                  }
+               ]
+            }
+         ]
+      },
+      "issuer_config": {
+         "issuing_authority": "Test IBAN-OV issuer",
+         "organization_id": "EUDI Wallet Reference Implementation",
+         "validity": 365,
+         "organization_name": "Test IBAN-OV issuer",
+         "attestation_legal_category": "EAA"
+      }
+   }
+}
