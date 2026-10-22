@@ -178,3 +178,55 @@ def test_extends_integrity(caplog):
         document = type_metadata._document(CONFIG)
     assert "extends#integrity" not in document
     assert "without extends#integrity" in caplog.text
+
+
+def _sample_data(entries):
+    """Data with every claim of the type metadata entries, one element in
+    every array. Children first, so a group is the container they made."""
+    data = {}
+    for entry in sorted(entries, key=lambda e: -len(e["path"])):
+        node, path = data, entry["path"]
+        for i, segment in enumerate(path):
+            if segment is None:
+                continue
+            if i == len(path) - 1:
+                node.setdefault(segment, "x")
+            elif path[i + 1] is None:
+                node = node.setdefault(segment, [{}])[0]
+            else:
+                node = node.setdefault(segment, {})
+    return data
+
+
+def _issued_disclosures(value, path=()):
+    """Whether each claim of an issued (nested) claim set is disclosable."""
+    from sd_jwt.common import SDObj
+
+    found = {}
+    if isinstance(value, dict):
+        for key, child in value.items():
+            name = key.value if isinstance(key, SDObj) else key
+            found[path + (name,)] = isinstance(key, SDObj)
+            found.update(_issued_disclosures(child, path + (name,)))
+    elif isinstance(value, list):
+        for element in value:
+            found.update(_issued_disclosures(element, path))
+    return found
+
+
+def test_published_disclosure_is_the_issued_one():
+    """The type metadata says of every claim what the issued credential does
+    (rb-e-receipt 5.1: the Type Metadata SHALL match the issued SD-JWT VC)."""
+    from app.formatter_func import sdjwtNestedClaims
+
+    for file_name in WE_BUILD_SD_JWT + ["sca_card_dpc.json"]:
+        config = _config(file_name)
+        entries = type_metadata._claims(config)
+        issued = _issued_disclosures(sdjwtNestedClaims(_sample_data(entries), config))
+
+        published = {
+            tuple(s for s in e["path"] if s is not None): e["sd"] == "always"
+            for e in entries
+        }
+        assert set(published) == set(issued), file_name
+        assert [p for p in published if published[p] != issued[p]] == [], file_name

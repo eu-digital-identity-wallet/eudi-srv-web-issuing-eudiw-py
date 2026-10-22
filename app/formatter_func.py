@@ -46,9 +46,10 @@ import logging
 import copy
 
 from misc import (
-    claim_path,
     doctype2vct,
     getSubClaims,
+    is_disclosable,
+    sd_flags,
     urlsafe_b64encode_nopad,
     vct2doctype,
 )
@@ -257,73 +258,39 @@ def cbor2elems(mdoc):
     return d
 
 
-def _sd_flags(credential_metadata):
-    """Explicit selective_disclosure flags, keyed by claim_path (names only,
-    no array element segments), so a flag applies to the claim in every
-    element."""
-    flags = {}
-    for claim_meta in credential_metadata.get("credential_metadata", {}).get("claims", []):
-        if "overall_issuer_conditions" in claim_meta:
-            continue
-        if "selective_disclosure" in claim_meta:
-            flags[claim_path(claim_meta)] = claim_meta["selective_disclosure"]
-    return flags
-
-
 def _sd_key(name, sd):
     return SDObj(value=name) if sd else name
 
 
-def _sd_deep(value, path, flags):
-    """Below the second level a claim is only disclosable if its metadata
-    says so."""
+def _sd_value(value, path, flags):
+    """The value of the claim at path, its object members made disclosable
+    as misc.is_disclosable says, in every array element."""
     if isinstance(value, dict):
         return {
-            _sd_key(k, flags.get(path + (k,), False)): _sd_deep(v, path + (k,), flags)
+            _sd_key(k, is_disclosable(path + (k,), flags)): _sd_value(v, path + (k,), flags)
             for k, v in value.items()
         }
     if isinstance(value, list):
-        return [_sd_deep(element, path, flags) for element in value]
+        return [_sd_value(element, path, flags) for element in value]
     return value
-
-
-def _sd_children(value, path, parent_sd, flags):
-    """Second level: disclosable by default when the parent is, unless the
-    metadata of the claim says otherwise."""
-    def element(e):
-        if not isinstance(e, dict):
-            return e
-        return {
-            _sd_key(k, flags.get(path + (k,), parent_sd)): _sd_deep(v, path + (k,), flags)
-            for k, v in e.items()
-        }
-
-    if isinstance(value, list):
-        return [element(e) for e in value]
-    return element(value)
 
 
 def sdjwtNestedClaims(claims, credential_metadata):
 
     nestedDict = {}
 
-    flags = _sd_flags(credential_metadata)
+    flags = sd_flags(credential_metadata.get("credential_metadata", {}).get("claims", []))
 
     for claim, value in claims.items():
-        sd = flags.get((claim,), True)
+        sd = is_disclosable((claim,), flags)
 
         if isinstance(value, list) and claim == "nationalities" and sd:
             nestedDict.update(
                 {SDObj(value=claim): [SDObj(value=nationality) for nationality in value]}
             )
 
-        elif isinstance(value, (dict, list)):
-            nestedDict.update(
-                {_sd_key(claim, sd): _sd_children(value, (claim,), sd, flags)}
-            )
-
         else:
-            nestedDict.update({_sd_key(claim, sd): value})
+            nestedDict.update({_sd_key(claim, sd): _sd_value(value, (claim,), flags)})
 
     return nestedDict
 

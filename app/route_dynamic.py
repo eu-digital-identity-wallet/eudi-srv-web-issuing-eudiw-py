@@ -817,6 +817,18 @@ def auth():
         return redirect(f"{CONFIGURATION['service_url']}/dynamic/")
 
 
+def _without_gaps(value):
+    """The parsed form data without the {} and None that form_formatter pads
+    unused list indexes with. A list item removed in the form leaves its
+    index unused; padding it would issue an empty entry. A real item is
+    never empty, as empty fields are not parsed."""
+    if isinstance(value, dict):
+        return {key: _without_gaps(child) for key, child in value.items()}
+    if isinstance(value, list):
+        return [_without_gaps(e) for e in value if e is not None and e != {}]
+    return value
+
+
 def form_formatter(form_data: dict) -> dict:
     cleaned_data = {}
 
@@ -875,6 +887,8 @@ def form_formatter(form_data: dict) -> dict:
             current_level[idx] = value
         else:
             current_level[final_key] = value
+
+    cleaned_data = _without_gaps(cleaned_data)
 
     # Fixing places of work data send after restructuring project for nested issues
     if "places_of_work" in cleaned_data and isinstance(

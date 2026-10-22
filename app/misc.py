@@ -339,6 +339,35 @@ def with_array_segments(path, arrays):
     return pointer
 
 
+def sd_flags(claims):
+    """The explicit selective_disclosure flags of the claims, keyed by
+    claim_path, so a flag applies to the claim in every array element."""
+    return {
+        claim_path(claim): claim["selective_disclosure"]
+        for claim in claims
+        if "path" in claim
+        and "overall_issuer_conditions" not in claim
+        and "selective_disclosure" in claim
+    }
+
+
+def is_disclosable(path, flags):
+    """Whether the issuer makes the claim at path (a claim_path) selectively
+    disclosable. A claim's own selective_disclosure flag decides; without
+    one, a top-level claim is disclosable, a second-level claim is if its
+    parent is, and a deeper claim is not. The one rule for both the issued
+    credential (formatter_func.sdjwtNestedClaims) and its published type
+    metadata (type_metadata._claims), so the two cannot disagree."""
+    path = tuple(path)
+    if path in flags:
+        return flags[path]
+    if len(path) == 1:
+        return True
+    if len(path) == 2:
+        return is_disclosable(path[:1], flags)
+    return False
+
+
 def _by_name(claims):
     """The claims with claim_path paths, for the form builders below."""
     return [

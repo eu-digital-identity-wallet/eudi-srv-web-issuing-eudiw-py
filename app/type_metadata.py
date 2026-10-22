@@ -36,6 +36,8 @@ from misc import (
     KEEP_SINGLE_GROUPS_AS_LISTS,
     array_claims,
     claim_path,
+    is_disclosable,
+    sd_flags,
     with_array_segments,
 )
 
@@ -60,32 +62,24 @@ def _display(entry):
 
 
 def _claims(config):
-    """Claim metadata with the issuer's actual selective disclosure, as
-    app/formatter_func.py sdjwtNestedClaims applies it. Paths get a null
-    segment after every array the issuer actually issues, whether or not the
-    configured path has it (misc.array_claims)."""
+    """Claim metadata with the issuer's actual selective disclosure: the
+    rule app/formatter_func.py sdjwtNestedClaims issues by
+    (misc.is_disclosable). Paths get a null segment after every array the
+    issuer actually issues, whether or not the configured path has it
+    (misc.array_claims)."""
     claims = config["credential_metadata"]["claims"]
     by_path = {claim_path(c): c for c in claims if "path" in c}
+    flags = sd_flags(claims)
     arrays = array_claims(
         claims,
         single_groups_as_objects=config.get("scope") not in KEEP_SINGLE_GROUPS_AS_LISTS,
     )
 
-    def sd(path):
-        flag = by_path.get(path, {}).get("selective_disclosure")
-        if flag is not None:
-            return flag
-        if len(path) == 1:
-            return True
-        if len(path) == 2:
-            return sd(path[:1])
-        return False
-
     out = []
     for path, c in by_path.items():
         entry = {
             "path": with_array_segments(path, arrays),
-            "sd": "always" if sd(path) else "never",
+            "sd": "always" if is_disclosable(path, flags) else "never",
         }
         if "display" in c:
             entry["display"] = [

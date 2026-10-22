@@ -1375,6 +1375,25 @@ class TestFormFormatter:
         assert result["birth_date"] == "1990-01-01"
         assert result["issuing_country"] == "EU"
 
+    def test_removed_list_items_leave_no_empty_entries(self):
+        """Items removed in the form leave unused indexes; no empty entry is
+        issued for them."""
+        from app.route_dynamic import form_formatter
+
+        form_data = {
+            # products[1] was removed, and the first VAT line of products[2]
+            "products[0][name]": "Coffee",
+            "products[2][name]": "Tea",
+            "products[2][vats][1][vat_rate]": "13",
+        }
+
+        result = form_formatter(form_data)
+
+        assert result["products"] == [
+            {"name": "Coffee"},
+            {"name": "Tea", "vats": [{"vat_rate": "13"}]},
+        ]
+
     def test_skip_empty_values(self):
         """Test that empty values are skipped"""
         from app.route_dynamic import form_formatter
