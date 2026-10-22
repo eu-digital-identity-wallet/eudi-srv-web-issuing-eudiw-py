@@ -18,6 +18,7 @@
 import copy
 import datetime
 import json
+import logging
 import re
 import secrets
 import uuid
@@ -46,6 +47,8 @@ from app import oidc_metadata
 from app import session_manager
 from app import CONFIGURATION
 from formatter_func import mdocFormatter, sdjwtFormatter
+
+logger = logging.getLogger(__name__)
 
 
 def dynamic_formatter(format, scope, form_data, device_publickey, session_id):
@@ -88,6 +91,26 @@ def dynamic_formatter(format, scope, form_data, device_publickey, session_id):
         )
 
     return credential
+
+
+def check_form_data(data, credentials_requested):
+    """Why the requested credentials cannot be issued from the form data, or
+    None. Runs, on a copy of the data, the formatting the credential endpoint
+    runs, so a check that would fail there (a ValueError, e.g. an IBAN's
+    check digits) fails while the user is still at the form. Other errors
+    are left to the credential endpoint, as before."""
+    credentials_supported = oidc_metadata["credential_configurations_supported"]
+    for credential_id in credentials_requested or []:
+        config = credentials_supported.get(credential_id)
+        if not config:
+            continue
+        try:
+            formatter(copy.deepcopy(data), "", credential_id, config["format"])
+        except ValueError as e:
+            return str(e)
+        except Exception:
+            logger.warning("Form data not checked for %s", credential_id, exc_info=True)
+    return None
 
 
 def formatter(data, un_distinguishing_sign, scope, format):
@@ -331,8 +354,10 @@ def checked_iban(value):
 
 
 def mask_iban(iban):
-    """rb-sca-iban 3.2: the first 4 and the last 4 characters unmasked."""
-    return iban[:4] + "*" * (len(iban) - 8) + iban[-4:]
+    """rb-sca-iban 3.2: the first 4 and the last 4 characters unmasked. The
+    middle is 11 asterisks whatever the IBAN's length, as in both of the
+    rulebook's examples (CZ55***********8745), which also hides the length."""
+    return iban[:4] + "*" * 11 + iban[-4:]
 
 
 def national_bank_code(iban):

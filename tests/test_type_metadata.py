@@ -165,8 +165,9 @@ def test_e_receipt_selective_disclosure():
     assert [p for p in must_not if sd[p] != "never"] == []
 
 
-def test_extends_integrity(caplog):
+def test_extends_integrity(caplog, monkeypatch):
     """rb-sca-iban / rb-sca-card-dpc 4.5: extends and extends#integrity."""
+    monkeypatch.setattr(type_metadata, "_warned_without_integrity", set())
     pinned = dict(CONFIG, issuer_config={"type_metadata": {
         "extends": "https://base.test/sca-iban/1.0",
         "extends#integrity": "sha256-AAAA",
@@ -178,6 +179,12 @@ def test_extends_integrity(caplog):
         document = type_metadata._document(CONFIG)
     assert "extends#integrity" not in document
     assert "without extends#integrity" in caplog.text
+
+    # Once per type, not on every request
+    caplog.clear()
+    with caplog.at_level("WARNING"):
+        type_metadata._document(CONFIG)
+    assert "without extends#integrity" not in caplog.text
 
 
 def _sample_data(entries):

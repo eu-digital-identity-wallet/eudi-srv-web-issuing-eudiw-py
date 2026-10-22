@@ -29,6 +29,7 @@ from app.dynamic_func import (
     populate_pdata,
     shape_claims,
     check_presence_conditions,
+    check_form_data,
     checked_iban,
     mask_iban,
     national_bank_code,
@@ -941,7 +942,7 @@ class TestScaIban:
 
     def test_mask_and_bank_code(self):
         iban = "CZ5508000000001234567899"  # the rulebook's example
-        assert mask_iban(iban) == "CZ55****************7899"
+        assert mask_iban(iban) == "CZ55***********7899"  # as the rulebook shows it
         assert national_bank_code(iban) == "0800"
         assert national_bank_code("DE89370400440532013000") == "37040044"
         assert national_bank_code("GR1601101250000000012300695") == "011"
@@ -960,7 +961,7 @@ class TestScaIban:
         })
         assert data == {
             "iban": "DE89370400440532013000",
-            "masked_iban": "DE89**************3000",
+            "masked_iban": "DE89***********3000",
             "national_bank_code": "37040044",
         }
 
@@ -971,3 +972,35 @@ class TestScaIban:
     def test_bad_iban_fails_issuance(self):
         with pytest.raises(ValueError):
             self._issue({"iban": "DE00370400440532013000"})
+
+
+# --- Test `check_form_data` ---
+
+
+class TestCheckFormData:
+    """Data the credential endpoint would reject is turned down at the form."""
+
+    CONFIGS = {"sca_iban": {"format": "dc+sd-jwt"}, "pid": {"format": "mso_mdoc"}}
+
+    def test_reason_of_a_failing_check(self):
+        with patch.dict("app.dynamic_func.oidc_metadata",
+                        {"credential_configurations_supported": self.CONFIGS}), \
+             patch("app.dynamic_func.formatter",
+                   side_effect=ValueError("The IBAN check digits are wrong")) as formatter:
+            data = {"iban": "DE00"}
+            assert check_form_data(data, ["sca_iban"]) == "The IBAN check digits are wrong"
+            # On a copy: the form data itself is left as it is
+            assert formatter.call_args.args[0] is not data
+            assert formatter.call_args.args[2:] == ("sca_iban", "dc+sd-jwt")
+
+    def test_other_errors_are_left_to_the_credential_endpoint(self):
+        with patch.dict("app.dynamic_func.oidc_metadata",
+                        {"credential_configurations_supported": self.CONFIGS}), \
+             patch("app.dynamic_func.formatter", side_effect=KeyError("x")):
+            assert check_form_data({}, ["sca_iban", "unknown"]) is None
+
+    def test_valid_data(self):
+        with patch.dict("app.dynamic_func.oidc_metadata",
+                        {"credential_configurations_supported": self.CONFIGS}), \
+             patch("app.dynamic_func.formatter", return_value=({}, {})):
+            assert check_form_data({}, ["sca_iban", "pid"]) is None

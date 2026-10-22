@@ -43,6 +43,9 @@ from misc import (
 
 logger = logging.getLogger(__name__)
 
+# The types already warned about for lacking extends#integrity
+_warned_without_integrity = set()
+
 type_metadata = Blueprint("type_metadata", __name__, url_prefix="/")
 CORS(type_metadata)
 
@@ -107,7 +110,9 @@ def _document(config):
         document["extends"] = type_config["extends"]
         if type_config.get("extends#integrity"):
             document["extends#integrity"] = type_config["extends#integrity"]
-        else:
+        elif config["vct"] not in _warned_without_integrity:
+            # Once per type, not on every request
+            _warned_without_integrity.add(config["vct"])
             logger.warning(
                 "Type %s extends %s without extends#integrity; wallets "
                 "following the SCA rulebooks reject it",

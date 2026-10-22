@@ -57,7 +57,12 @@ from misc import (
     calculate_age,
     vct2doctype,
 )
-from dynamic_func import dynamic_formatter, sca_card_choice, sca_card_display
+from dynamic_func import (
+    check_form_data,
+    dynamic_formatter,
+    sca_card_choice,
+    sca_card_display,
+)
 from app import oidc_metadata
 from app import session_manager
 from app import CONFIGURATION
@@ -768,9 +773,18 @@ def credentialCreation(credential_request, data, country, session_id):
             }
         )
 
-        pdata = dynamic_formatter(
-            format, scope, form_data, device_publickey, session_id
-        )
+        # The data checks (e.g. the IBAN's check digits, the rulebooks'
+        # conditional claims) normally fail at the form already
+        # (check_form_data); here they are an OID4VCI error, not a 500.
+        try:
+            pdata = dynamic_formatter(
+                format, scope, form_data, device_publickey, session_id
+            )
+        except ValueError as e:
+            return {
+                "error": "invalid_credential_request",
+                "error_description": str(e),
+            }
 
         credential_response["credentials"].append({"credential": pdata})
 
@@ -1216,11 +1230,24 @@ def Dynamic_form():
 
     cleaned_data = form_formatter(form_data)
 
+    target_url = CONFIGURATION["frontend"]["frontends_config"][current_session.frontend_id]["url"]
+
+    # Data the credentials cannot be issued from is turned down now, with the
+    # reason, rather than when the wallet asks for the credential.
+    problem = check_form_data(cleaned_data, current_session.credentials_requested)
+    if problem:
+        return post_redirect_with_payload(
+            target_url=f"{target_url}/internal_error",
+            data_payload={
+                "error": f"{problem}. Please go back and correct the form.",
+                "error_code": "Invalid form data",
+                "error_type": 400,
+            },
+        )
+
     session_manager.update_user_data(session_id=session_id, user_data=cleaned_data)
 
     presentation_data = presentation_formatter(cleaned_data=cleaned_data)
-
-    target_url = CONFIGURATION["frontend"]["frontends_config"][current_session.frontend_id]["url"]
 
     return post_redirect_with_payload(
         target_url=f"{target_url}/display_authorization",
