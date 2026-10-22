@@ -40,7 +40,8 @@
                      "name": "Attestation legal category",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -53,98 +54,128 @@
                      "name": "Issuing country",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_person_name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person name",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_person_id"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person id",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_form_type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal form type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "registration_member_state"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Registration member state",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
                   "registration_date"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "full-date",
+               "source": "user",
                "display": [
                   {
                      "name": "Registration date",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_person_status"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person status",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "active",
+                     "inactive"
+                  ]
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_person_activity"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "legal_person_activity_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person activity",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -152,7 +183,8 @@
                   "code"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Code",
@@ -166,7 +198,8 @@
                   "description"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Description",
@@ -179,26 +212,36 @@
                   "legal_person_duration"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "full-date",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person duration",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "registered_address"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "registered_address_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Registered address",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -206,7 +249,8 @@
                   "full_address"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Full address",
@@ -220,7 +264,8 @@
                   "care_of"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Care of",
@@ -234,7 +279,8 @@
                   "thorough_fare"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Thorough fare",
@@ -248,7 +294,8 @@
                   "locator_designator"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Locator designator",
@@ -262,7 +309,8 @@
                   "post_code"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Post code",
@@ -276,7 +324,8 @@
                   "post_name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Post name",
@@ -290,7 +339,8 @@
                   "post_office_box"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Post office box",
@@ -304,7 +354,8 @@
                   "locator_name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Locator name",
@@ -318,7 +369,8 @@
                   "admin_unit_level_1"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Admin unit level 1",
@@ -332,7 +384,8 @@
                   "admin_unit_level_2"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Admin unit level 2",
@@ -345,38 +398,52 @@
                   "legal_representative"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "legal_representative_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal representative",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "natural_person_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Natural person",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person",
                   "full_name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Full name",
@@ -387,12 +454,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person",
                   "date_of_birth"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "full-date",
+               "source": "user",
                "display": [
                   {
                      "name": "Date of birth",
@@ -403,12 +470,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person",
                   "identifier"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Identifier",
@@ -419,12 +486,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person",
                   "nationality"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Nationality",
@@ -435,12 +502,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "natural_person",
                   "signatory_rule"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Signatory rule",
@@ -451,27 +518,33 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "legal_person"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "legal_person_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Legal person",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
                   "legal_representative",
-                  null,
                   "legal_person",
                   "name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -482,12 +555,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "legal_person",
                   "id"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Id",
@@ -498,12 +571,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "legal_person",
                   "formtype"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Formtype",
@@ -514,12 +587,12 @@
             {
                "path": [
                   "legal_representative",
-                  null,
                   "legal_person",
                   "signatory_rule"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Signatory rule",
@@ -532,13 +605,21 @@
                   "share_capital"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "share_capital_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Share capital",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -546,7 +627,8 @@
                   "amount"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Amount",
@@ -560,26 +642,38 @@
                   "currency"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Currency",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{3}$"
+               }
             },
             {
                "path": [
                   "digital_contact_point"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "digital_contact_point_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Digital contact point",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -587,7 +681,8 @@
                   "website"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Website",
@@ -601,7 +696,8 @@
                   "email"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Email",
@@ -616,7 +712,8 @@
          "organization_id": "EUDI Wallet Reference Implementation",
          "validity": 365,
          "organization_name": "Test EUCC issuer",
-         "attestation_legal_category": "Pub-EAA"
+         "attestation_legal_category": "Pub-EAA",
+         "issuing_country": "GR"
       }
    }
 }

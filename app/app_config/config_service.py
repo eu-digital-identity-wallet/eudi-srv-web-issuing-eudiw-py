@@ -173,6 +173,14 @@ class ConfService:
             "validity": iban_ov_validity,
             "organization_name": "Test IBAN-OV issuer",
             "attestation_legal_category": "EAA",
+            "account_provider": {
+                "provider_name": "GRNET Test Bank",
+                "legal_person_identifiers": [
+                    {"type": "LEI", "value": "TEST00GRNET000000000"}
+                ],
+                "provider_country": "GRC",
+                "bic_swift": "TESTGRAA",
+            },
         },
         "eu.europa.ec.eudi.pid.1": {
             "issuing_authority": "Test PID issuer",
@@ -195,6 +203,7 @@ class ConfService:
             "validity": eucc_validity,
             "organization_name": "Test EUCC issuer",
             "attestation_legal_category": "Pub-EAA",
+            "issuing_country": "GR",
         },
         "eu.we-build.ereceipt.1": {
             "issuing_authority": "Test eReceipt issuer",
@@ -209,6 +218,7 @@ class ConfService:
             "validity": eu_poa_validity,
             "organization_name": "Test EU PoA issuer",
             "attestation_legal_category": "EAA",
+            "issuing_country": "GR",
         },
     }
 

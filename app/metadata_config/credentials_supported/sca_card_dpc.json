@@ -90,7 +90,8 @@
                      "name":"Attestation Legal Category",
                      "locale":"en"
                   }
-               ]
+               ],
+               "selective_disclosure":false
             }
          ]
       },
@@ -157,6 +158,9 @@
                   }
                }
             ]
+         },
+         "type_metadata":{
+            "extends":"https://webuildconsortium.eu/sca/sca-card-dpc/1.0"
          }
       }
    }

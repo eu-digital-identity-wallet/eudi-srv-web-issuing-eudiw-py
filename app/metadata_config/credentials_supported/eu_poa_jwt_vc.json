@@ -40,7 +40,8 @@
                      "name": "Attestation legal category",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -53,7 +54,8 @@
                      "name": "Issuing country",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -123,7 +125,15 @@
                      "name": "Principal identification document kind",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "passport",
+                     "national_id_card",
+                     "residence_permit",
+                     "driving_license"
+                  ]
+               }
             },
             {
                "path": [
@@ -235,7 +245,10 @@
                      "name": "Company jurisdiction",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               }
             },
             {
                "path": [
@@ -291,7 +304,15 @@
                      "name": "Attorney identification document kind",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "passport",
+                     "national_id_card",
+                     "residence_permit",
+                     "driving_license"
+                  ]
+               }
             },
             {
                "path": [
@@ -340,13 +361,21 @@
                   "scope_of_representation_powers"
                ],
                "mandatory": true,
-               "value_type": "string",
+               "value_type": "list_string",
                "source": "user",
                "issuer_conditions": {
                   "cardinality": {
                      "min": 1,
                      "max": "n"
-                  }
+                  },
+                  "options": [
+                     "The formation of companies",
+                     "Changes to the instrument of constitution of companies and the statutes if contained in a separate instrument",
+                     "Registration and closure of branches of the Company",
+                     "All legal transactions regarding cross-border conversions involving the Company",
+                     "All legal transactions regarding cross border mergers involving the Company",
+                     "All legal transactions regarding cross border divisions involving the Company"
+                  ]
                },
                "display": [
                   {
@@ -367,7 +396,14 @@
                      "name": "Scope of representation power of substitution",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "allowed",
+                     "not_allowed",
+                     "limited"
+                  ]
+               }
             },
             {
                "path": [
@@ -381,7 +417,8 @@
                      "name": "Validity period valid from",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -395,7 +432,8 @@
                      "name": "Validity period valid until",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
@@ -409,7 +447,10 @@
                      "name": "Applicable law jurisdiction",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               }
             },
             {
                "path": [
@@ -446,7 +487,8 @@
          "organization_id": "EUDI Wallet Reference Implementation",
          "validity": 365,
          "organization_name": "Test EU PoA issuer",
-         "attestation_legal_category": "EAA"
+         "attestation_legal_category": "EAA",
+         "issuing_country": "GR"
       }
    }
 }

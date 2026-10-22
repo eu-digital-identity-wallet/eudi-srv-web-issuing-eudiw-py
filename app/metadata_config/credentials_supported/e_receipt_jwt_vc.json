@@ -40,27 +40,37 @@
                      "name": "Attestation legal category",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": false
             },
             {
                "path": [
                   "type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "PURCHASE",
+                     "RETURN",
+                     "PURCHASE_AND_RETURN"
+                  ]
+               }
             },
             {
                "path": [
                   "receipt_number"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Receipt number",
@@ -73,7 +83,8 @@
                   "receipt_timestamp"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "date-time",
+               "source": "user",
                "display": [
                   {
                      "name": "Receipt timestamp",
@@ -86,20 +97,25 @@
                   "currency_iso_code"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Currency iso code",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{3}$"
+               }
             },
             {
                "path": [
                   "total_price_exc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total price exc vat",
@@ -112,7 +128,8 @@
                   "total_vat_amount"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total vat amount",
@@ -125,7 +142,8 @@
                   "total_price_inc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total price inc vat",
@@ -138,7 +156,8 @@
                   "free_text"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Free text",
@@ -151,7 +170,8 @@
                   "original_receipt_number"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Original receipt number",
@@ -164,22 +184,29 @@
                   "custom_attributes"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "custom_attributes_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Custom attributes",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "custom_attributes",
-                  null,
                   "key"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Key",
@@ -190,11 +217,11 @@
             {
                "path": [
                   "custom_attributes",
-                  null,
                   "value"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Value",
@@ -207,13 +234,20 @@
                   "merchant"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "merchant_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Merchant",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -221,7 +255,8 @@
                   "name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -235,7 +270,8 @@
                   "company_id"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Company id",
@@ -249,13 +285,20 @@
                   "branch"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "branch_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Branch",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -264,7 +307,8 @@
                   "id"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Id",
@@ -279,7 +323,8 @@
                   "pos_id"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Pos id",
@@ -294,7 +339,8 @@
                   "name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -309,7 +355,8 @@
                   "sub_name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Sub name",
@@ -324,7 +371,8 @@
                   "email"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Email",
@@ -339,7 +387,8 @@
                   "phone"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Phone",
@@ -354,7 +403,8 @@
                   "website_url"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Website url",
@@ -368,13 +418,20 @@
                   "address"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "address_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Address",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -383,7 +440,8 @@
                   "street_address"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Street address",
@@ -398,7 +456,8 @@
                   "city"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "City",
@@ -413,7 +472,8 @@
                   "zip_code"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Zip code",
@@ -428,35 +488,46 @@
                   "country"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Country",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               }
             },
             {
                "path": [
                   "products"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "products_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Products",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "products",
-                  null,
                   "name"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -467,11 +538,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "quantity"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Quantity",
@@ -482,11 +553,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "quantity_code"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Quantity code",
@@ -497,11 +568,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "unit_price_inc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Unit price inc vat",
@@ -512,11 +583,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "unit_price_inc_vat_decimal"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Unit price inc vat decimal",
@@ -527,11 +598,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount exc vat",
@@ -542,11 +613,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount inc vat",
@@ -557,28 +628,33 @@
             {
                "path": [
                   "products",
-                  null,
                   "vats"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "vats_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Vats",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "products",
-                  null,
                   "vats",
-                  null,
                   "vat_rate"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Vat rate",
@@ -589,13 +665,12 @@
             {
                "path": [
                   "products",
-                  null,
                   "vats",
-                  null,
                   "vat_amount"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Vat amount",
@@ -606,13 +681,12 @@
             {
                "path": [
                   "products",
-                  null,
                   "vats",
-                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount exc vat",
@@ -623,13 +697,12 @@
             {
                "path": [
                   "products",
-                  null,
                   "vats",
-                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount inc vat",
@@ -640,31 +713,66 @@
             {
                "path": [
                   "products",
-                  null,
                   "vats",
-                  null,
                   "vat_code"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Vat code",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "S",
+                     "Z",
+                     "E",
+                     "AE",
+                     "K",
+                     "G",
+                     "O",
+                     "L",
+                     "M",
+                     "B"
+                  ]
+               }
             },
             {
                "path": [
                   "products",
-                  null,
                   "discounts"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "discounts_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Discounts",
+                     "locale": "en"
+                  }
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": "n"
+                  }
+               }
+            },
+            {
+               "path": [
+                  "products",
+                  "discounts",
+                  "amount"
+               ],
+               "mandatory": false,
+               "value_type": "int",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Amount",
                      "locale": "en"
                   }
                ]
@@ -672,11 +780,27 @@
             {
                "path": [
                   "products",
-                  null,
+                  "discounts",
+                  "type"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Type",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
                   "ean_code"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Ean code",
@@ -687,11 +811,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "product_id"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Product id",
@@ -702,11 +826,11 @@
             {
                "path": [
                   "products",
-                  null,
                   "free_text"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Free text",
@@ -717,29 +841,36 @@
             {
                "path": [
                   "products",
-                  null,
                   "categorization"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "categorization_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Categorization",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
                   "products",
-                  null,
-                  "custom_attributes"
+                  "categorization",
+                  "department"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
-                     "name": "Custom attributes",
+                     "name": "Department",
                      "locale": "en"
                   }
                ]
@@ -747,13 +878,49 @@
             {
                "path": [
                   "products",
-                  null,
+                  "categorization",
+                  "category"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Category",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "products",
+                  "custom_attributes"
+               ],
+               "mandatory": false,
+               "value_type": "custom_attributes_attributes",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "Custom attributes",
+                     "locale": "en"
+                  }
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": "n"
+                  }
+               }
+            },
+            {
+               "path": [
+                  "products",
                   "custom_attributes",
-                  null,
                   "key"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Key",
@@ -764,13 +931,12 @@
             {
                "path": [
                   "products",
-                  null,
                   "custom_attributes",
-                  null,
                   "value"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Value",
@@ -783,22 +949,29 @@
                   "vats"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "vats_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Vats",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "vats",
-                  null,
                   "vat_rate"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Vat rate",
@@ -809,11 +982,11 @@
             {
                "path": [
                   "vats",
-                  null,
                   "total_vat_amount"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total vat amount",
@@ -824,11 +997,11 @@
             {
                "path": [
                   "vats",
-                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount exc vat",
@@ -839,11 +1012,11 @@
             {
                "path": [
                   "vats",
-                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Total amount inc vat",
@@ -854,54 +1027,83 @@
             {
                "path": [
                   "vats",
-                  null,
                   "vat_code"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Vat code",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "S",
+                     "Z",
+                     "E",
+                     "AE",
+                     "K",
+                     "G",
+                     "O",
+                     "L",
+                     "M",
+                     "B"
+                  ]
+               }
             },
             {
                "path": [
                   "payments"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "payments_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Payments",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "payments",
-                  null,
                   "type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "CARD",
+                     "CREDIT_TRANSFER",
+                     "MOBILEPAY",
+                     "GIFTCARD"
+                  ]
+               }
             },
             {
                "path": [
                   "payments",
-                  null,
                   "amount"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Amount",
@@ -912,14 +1114,244 @@
             {
                "path": [
                   "payments",
-                  null,
                   "attributes"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "attributes_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Attributes",
+                     "locale": "en"
+                  }
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "ARC"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "ARC",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "ENTRY"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "ENTRY",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "APP"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "APP",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "maskedPAN"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "maskedPAN",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "terminalId"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "terminalId",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "transactionId"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "transactionId",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "authorizationCode"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "authorizationCode",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "CVM"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "CVM",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "CID"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "CID",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "cryptogramType"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "cryptogramType",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "AC"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "AC",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "TSI"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "TSI",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "TVR"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "TVR",
+                     "locale": "en"
+                  }
+               ]
+            },
+            {
+               "path": [
+                  "payments",
+                  "attributes",
+                  "AID"
+               ],
+               "mandatory": false,
+               "value_type": "string",
+               "source": "user",
+               "display": [
+                  {
+                     "name": "AID",
                      "locale": "en"
                   }
                ]
@@ -929,37 +1361,53 @@
                   "verifications"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "verifications_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Verifications",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": "n"
+                  }
+               },
+               "selective_disclosure": false
             },
             {
                "path": [
                   "verifications",
-                  null,
                   "type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "EMV",
+                     "OCMF",
+                     "SCT",
+                     "SCT-INST"
+                  ]
+               }
             },
             {
                "path": [
                   "verifications",
-                  null,
                   "version"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Version",
@@ -970,11 +1418,11 @@
             {
                "path": [
                   "verifications",
-                  null,
                   "public_key"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Public key",
@@ -985,11 +1433,11 @@
             {
                "path": [
                   "verifications",
-                  null,
                   "transactionId"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Transactionid",
@@ -1000,57 +1448,75 @@
             {
                "path": [
                   "verifications",
-                  null,
                   "current_type"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Current type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "AC",
+                     "DC"
+                  ]
+               }
             },
             {
                "path": [
                   "verifications",
-                  null,
                   "transaction_begin"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "transaction_begin_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Transaction begin",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
                   "verifications",
-                  null,
                   "transaction_end"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "transaction_end_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Transaction end",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
                   "verifications",
-                  null,
                   "transaction_begin",
                   "signed_data"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Signed data",
@@ -1061,12 +1527,12 @@
             {
                "path": [
                   "verifications",
-                  null,
                   "transaction_end",
                   "signed_data"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Signed data",
@@ -1079,13 +1545,20 @@
                   "journey"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "journey_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Journey",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -1093,13 +1566,23 @@
                   "type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "TRAIN",
+                     "BUS",
+                     "TAXI",
+                     "FLIGHT",
+                     "FERRY"
+                  ]
+               }
             },
             {
                "path": [
@@ -1107,7 +1590,8 @@
                   "id"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Id",
@@ -1121,7 +1605,8 @@
                   "distance"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Distance",
@@ -1135,7 +1620,8 @@
                   "duration"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Duration",
@@ -1149,7 +1635,8 @@
                   "co2_emissions"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "int",
+               "source": "user",
                "display": [
                   {
                      "name": "Co2 emissions",
@@ -1163,13 +1650,20 @@
                   "origin"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "origin_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Origin",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -1177,13 +1671,20 @@
                   "destination"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "destination_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Destination",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 1,
+                     "max": 1
+                  }
+               }
             },
             {
                "path": [
@@ -1192,7 +1693,8 @@
                   "name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -1207,7 +1709,8 @@
                   "city"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "City",
@@ -1222,13 +1725,17 @@
                   "country"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Country",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               }
             },
             {
                "path": [
@@ -1237,7 +1744,8 @@
                   "latitude"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "number",
+               "source": "user",
                "display": [
                   {
                      "name": "Latitude",
@@ -1252,7 +1760,8 @@
                   "longitude"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "number",
+               "source": "user",
                "display": [
                   {
                      "name": "Longitude",
@@ -1267,7 +1776,8 @@
                   "datetime"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "date-time",
+               "source": "user",
                "display": [
                   {
                      "name": "Datetime",
@@ -1282,7 +1792,8 @@
                   "name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Name",
@@ -1297,7 +1808,8 @@
                   "city"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "City",
@@ -1312,13 +1824,17 @@
                   "country"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Country",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "pattern": "^[A-Z]{2}$"
+               }
             },
             {
                "path": [
@@ -1327,7 +1843,8 @@
                   "latitude"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "number",
+               "source": "user",
                "display": [
                   {
                      "name": "Latitude",
@@ -1342,7 +1859,8 @@
                   "longitude"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "number",
+               "source": "user",
                "display": [
                   {
                      "name": "Longitude",
@@ -1357,7 +1875,8 @@
                   "datetime"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "date-time",
+               "source": "user",
                "display": [
                   {
                      "name": "Datetime",
@@ -1370,52 +1889,72 @@
                   "attachments"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "attachments_attributes",
+               "source": "user",
                "display": [
                   {
                      "name": "Attachments",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "cardinality": {
+                     "min": 0,
+                     "max": "n"
+                  }
+               }
             },
             {
                "path": [
                   "attachments",
-                  null,
                   "type"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Type",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "BARCODE",
+                     "QRCODE"
+                  ]
+               }
             },
             {
                "path": [
                   "attachments",
-                  null,
                   "kind"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Kind",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "options": [
+                     "TICKET",
+                     "RETURN",
+                     "VOUCHER"
+                  ]
+               }
             },
             {
                "path": [
                   "attachments",
-                  null,
                   "title"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Title",
@@ -1426,11 +1965,11 @@
             {
                "path": [
                   "attachments",
-                  null,
                   "data"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Data",
@@ -1441,11 +1980,11 @@
             {
                "path": [
                   "attachments",
-                  null,
                   "description"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Description",
@@ -1456,11 +1995,11 @@
             {
                "path": [
                   "attachments",
-                  null,
                   "valid_until"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "date-time",
+               "source": "user",
                "display": [
                   {
                      "name": "Valid until",

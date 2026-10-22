@@ -59,7 +59,8 @@
                   "masked_iban"
                ],
                "mandatory": true,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Masked IBAN",
@@ -73,7 +74,8 @@
                   "iban"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "IBAN",
@@ -87,7 +89,8 @@
                   "national_bank_code"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "National Bank Code",
@@ -101,7 +104,8 @@
                   "bic"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "BIC",
@@ -115,13 +119,8 @@
                   "scheme_identifier"
                ],
                "mandatory": false,
-               "source": "issuer",
-               "issuer_conditions": {
-                  "cardinality": {
-                     "min": 1,
-                     "max": "n"
-                  }
-               },
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Scheme Identifier",
@@ -135,7 +134,8 @@
                   "display_name"
                ],
                "mandatory": false,
-               "source": "issuer",
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Display Name",
@@ -149,13 +149,8 @@
                   "currency"
                ],
                "mandatory": false,
-               "source": "issuer",
-               "issuer_conditions": {
-                  "cardinality": {
-                     "min": 1,
-                     "max": "n"
-                  }
-               },
+               "value_type": "string",
+               "source": "user",
                "display": [
                   {
                      "name": "Currency",
