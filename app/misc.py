@@ -287,18 +287,86 @@ def getMandatoryAttributes(claims, namespace):
     return attributes_form
 
 
+# Credentials already live that issue their single-occurrence groups as
+# one-element lists (EHIC: authentic_source). Holders and verifiers may rely
+# on that shape, so it is kept.
+KEEP_SINGLE_GROUPS_AS_LISTS = {"eu.europa.ec.eudi.ehic_sd_jwt_vc"}
+
+
+def claim_path(claim):
+    """A claim's path without its null (array element) segments. The
+    metadata paths are claims path pointers, with a null segment after every
+    array; the form and the issued data are walked by name only."""
+    return tuple(s for s in claim["path"] if s is not None)
+
+
+def is_array_group(claim, single_groups_as_objects=True):
+    """The form sends every group as a list. It is issued as one unless it
+    occurs at most once and is shaped into an object (shape_claims)."""
+    if not (claim.get("value_type") or "").endswith("_attributes"):
+        return False
+    max_count = claim.get("issuer_conditions", {}).get("cardinality", {}).get("max")
+    return max_count != 1 or not single_groups_as_objects
+
+
+def array_claims(claims, single_groups_as_objects=True):
+    """The claims (as claim_path gives them) issued as JSON arrays: the groups
+    is_array_group says stay lists, and any claim whose metadata path already
+    has a null segment after it (lists the issuer fills in itself)."""
+    arrays = set()
+    for claim in claims:
+        if "path" not in claim:
+            continue
+        if is_array_group(claim, single_groups_as_objects):
+            arrays.add(claim_path(claim))
+        names = []
+        for segment in claim["path"]:
+            if segment is None:
+                arrays.add(tuple(names))
+            else:
+                names.append(segment)
+    return arrays
+
+
+def with_array_segments(path, arrays):
+    """The claims path pointer for a claim_path: a null segment after every
+    array on the way to the claim."""
+    pointer = []
+    for i, segment in enumerate(path):
+        pointer.append(segment)
+        if tuple(path[: i + 1]) in arrays and i + 1 < len(path):
+            pointer.append(None)
+    return pointer
+
+
+def _by_name(claims):
+    """The claims with claim_path paths, for the form builders below."""
+    return [
+        dict(claim, path=list(claim_path(claim))) if "path" in claim else claim
+        for claim in claims
+    ]
+
+
 def _form_hints(claim):
-    """Input hints a claim gives the form: a closed list of values (options)
-    and an input pattern. Both live in issuer_conditions, which is not
-    published in the issuer metadata."""
+    """Input hints a claim gives the form: a closed list of values (options),
+    free values besides them (other_values: {"label", "used_if"}), an input
+    pattern, and a condition on a sibling for the claim to be used
+    (used_if: {"attribute": ..., "values": [...]}; the form shows and
+    requires the claim only then). They live in issuer_conditions, which is
+    not published in the issuer metadata."""
     conditions = claim.get("issuer_conditions", {})
-    return {k: conditions[k] for k in ("options", "pattern") if k in conditions}
+    return {
+        k: conditions[k]
+        for k in ("options", "other_values", "pattern", "used_if")
+        if k in conditions
+    }
 
 
 def getMandatoryAttributesSDJWT(claims):
     """
     Function to get mandatory attributes from credential in sd-jwt vc format
     """
+    claims = _by_name(claims)
     attributes_form = {}
 
     level1_claims = []
@@ -478,6 +546,7 @@ def getOptionalAttributesSDJWT(claims):
     """
     Function to get optional attributes from credential in sd-jwt vc format
     """
+    claims = _by_name(claims)
     attributes_form = {}
 
     level1_claims = []

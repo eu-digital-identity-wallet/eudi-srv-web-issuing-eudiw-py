@@ -202,6 +202,7 @@
             {
                "path": [
                   "custom_attributes",
+                  null,
                   "key"
                ],
                "mandatory": false,
@@ -217,6 +218,7 @@
             {
                "path": [
                   "custom_attributes",
+                  null,
                   "value"
                ],
                "mandatory": false,
@@ -314,7 +316,8 @@
                      "name": "Id",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -330,7 +333,8 @@
                      "name": "Pos id",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -346,7 +350,8 @@
                      "name": "Name",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -362,7 +367,8 @@
                      "name": "Sub name",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -378,7 +384,8 @@
                      "name": "Email",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -394,7 +401,8 @@
                      "name": "Phone",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -410,7 +418,8 @@
                      "name": "Website url",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -447,7 +456,8 @@
                      "name": "Street address",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -463,7 +473,8 @@
                      "name": "City",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -479,7 +490,8 @@
                      "name": "Zip code",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -498,7 +510,8 @@
                ],
                "issuer_conditions": {
                   "pattern": "^[A-Z]{2}$"
-               }
+               },
+               "selective_disclosure": true
             },
             {
                "path": [
@@ -523,6 +536,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "name"
                ],
                "mandatory": true,
@@ -538,6 +552,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "quantity"
                ],
                "mandatory": true,
@@ -553,6 +568,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "quantity_code"
                ],
                "mandatory": true,
@@ -568,6 +584,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "unit_price_inc_vat"
                ],
                "mandatory": true,
@@ -583,6 +600,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "unit_price_inc_vat_decimal"
                ],
                "mandatory": false,
@@ -598,6 +616,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
@@ -613,6 +632,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
@@ -628,6 +648,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "vats"
                ],
                "mandatory": true,
@@ -649,7 +670,9 @@
             {
                "path": [
                   "products",
+                  null,
                   "vats",
+                  null,
                   "vat_rate"
                ],
                "mandatory": true,
@@ -660,12 +683,15 @@
                      "name": "Vat rate",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
                   "products",
+                  null,
                   "vats",
+                  null,
                   "vat_amount"
                ],
                "mandatory": true,
@@ -676,12 +702,15 @@
                      "name": "Vat amount",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
                   "products",
+                  null,
                   "vats",
+                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
@@ -692,12 +721,15 @@
                      "name": "Total amount exc vat",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
                   "products",
+                  null,
                   "vats",
+                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
@@ -708,12 +740,15 @@
                      "name": "Total amount inc vat",
                      "locale": "en"
                   }
-               ]
+               ],
+               "selective_disclosure": true
             },
             {
                "path": [
                   "products",
+                  null,
                   "vats",
+                  null,
                   "vat_code"
                ],
                "mandatory": false,
@@ -738,11 +773,13 @@
                      "M",
                      "B"
                   ]
-               }
+               },
+               "selective_disclosure": true
             },
             {
                "path": [
                   "products",
+                  null,
                   "discounts"
                ],
                "mandatory": false,
@@ -764,7 +801,9 @@
             {
                "path": [
                   "products",
+                  null,
                   "discounts",
+                  null,
                   "amount"
                ],
                "mandatory": false,
@@ -780,7 +819,9 @@
             {
                "path": [
                   "products",
+                  null,
                   "discounts",
+                  null,
                   "type"
                ],
                "mandatory": false,
@@ -796,6 +837,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "ean_code"
                ],
                "mandatory": false,
@@ -811,6 +853,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "product_id"
                ],
                "mandatory": false,
@@ -826,6 +869,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "free_text"
                ],
                "mandatory": false,
@@ -841,6 +885,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "categorization"
                ],
                "mandatory": false,
@@ -862,6 +907,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "categorization",
                   "department"
                ],
@@ -878,6 +924,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "categorization",
                   "category"
                ],
@@ -894,6 +941,7 @@
             {
                "path": [
                   "products",
+                  null,
                   "custom_attributes"
                ],
                "mandatory": false,
@@ -915,7 +963,9 @@
             {
                "path": [
                   "products",
+                  null,
                   "custom_attributes",
+                  null,
                   "key"
                ],
                "mandatory": false,
@@ -931,7 +981,9 @@
             {
                "path": [
                   "products",
+                  null,
                   "custom_attributes",
+                  null,
                   "value"
                ],
                "mandatory": false,
@@ -967,6 +1019,7 @@
             {
                "path": [
                   "vats",
+                  null,
                   "vat_rate"
                ],
                "mandatory": true,
@@ -982,6 +1035,7 @@
             {
                "path": [
                   "vats",
+                  null,
                   "total_vat_amount"
                ],
                "mandatory": true,
@@ -997,6 +1051,7 @@
             {
                "path": [
                   "vats",
+                  null,
                   "total_amount_exc_vat"
                ],
                "mandatory": true,
@@ -1012,6 +1067,7 @@
             {
                "path": [
                   "vats",
+                  null,
                   "total_amount_inc_vat"
                ],
                "mandatory": true,
@@ -1027,6 +1083,7 @@
             {
                "path": [
                   "vats",
+                  null,
                   "vat_code"
                ],
                "mandatory": false,
@@ -1076,6 +1133,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "type"
                ],
                "mandatory": true,
@@ -1099,6 +1157,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "amount"
                ],
                "mandatory": true,
@@ -1114,6 +1173,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes"
                ],
                "mandatory": false,
@@ -1135,6 +1195,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "ARC"
                ],
@@ -1151,6 +1212,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "ENTRY"
                ],
@@ -1167,6 +1229,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "APP"
                ],
@@ -1183,6 +1246,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "maskedPAN"
                ],
@@ -1199,6 +1263,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "terminalId"
                ],
@@ -1215,6 +1280,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "transactionId"
                ],
@@ -1231,6 +1297,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "authorizationCode"
                ],
@@ -1247,6 +1314,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "CVM"
                ],
@@ -1263,6 +1331,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "CID"
                ],
@@ -1279,6 +1348,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "cryptogramType"
                ],
@@ -1295,6 +1365,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "AC"
                ],
@@ -1311,6 +1382,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "TSI"
                ],
@@ -1327,6 +1399,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "TVR"
                ],
@@ -1343,6 +1416,7 @@
             {
                "path": [
                   "payments",
+                  null,
                   "attributes",
                   "AID"
                ],
@@ -1380,6 +1454,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "type"
                ],
                "mandatory": true,
@@ -1403,6 +1478,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "version"
                ],
                "mandatory": true,
@@ -1418,6 +1494,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "public_key"
                ],
                "mandatory": true,
@@ -1433,6 +1510,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "transactionId"
                ],
                "mandatory": true,
@@ -1448,6 +1526,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "current_type"
                ],
                "mandatory": false,
@@ -1469,6 +1548,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "transaction_begin"
                ],
                "mandatory": false,
@@ -1490,6 +1570,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "transaction_end"
                ],
                "mandatory": false,
@@ -1511,6 +1592,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "transaction_begin",
                   "signed_data"
                ],
@@ -1527,6 +1609,7 @@
             {
                "path": [
                   "verifications",
+                  null,
                   "transaction_end",
                   "signed_data"
                ],
@@ -1907,6 +1990,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "type"
                ],
                "mandatory": true,
@@ -1928,6 +2012,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "kind"
                ],
                "mandatory": true,
@@ -1950,6 +2035,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "title"
                ],
                "mandatory": true,
@@ -1965,6 +2051,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "data"
                ],
                "mandatory": true,
@@ -1980,6 +2067,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "description"
                ],
                "mandatory": false,
@@ -1995,6 +2083,7 @@
             {
                "path": [
                   "attachments",
+                  null,
                   "valid_until"
                ],
                "mandatory": false,

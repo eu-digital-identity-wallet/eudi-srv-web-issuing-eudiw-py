@@ -26,10 +26,20 @@ rulebook for its Claim Selective Disclosure Metadata.
   ending in /credentials/<path>, so it is retrievable from the vct itself.
 - /type-metadata/<vct>: the document of any SD-JWT VC type, by vct.
 """
+import logging
+
 from flask import Blueprint, abort, jsonify
 from flask_cors import CORS
 
 from app import oidc_metadata
+from misc import (
+    KEEP_SINGLE_GROUPS_AS_LISTS,
+    array_claims,
+    claim_path,
+    with_array_segments,
+)
+
+logger = logging.getLogger(__name__)
 
 type_metadata = Blueprint("type_metadata", __name__, url_prefix="/")
 CORS(type_metadata)
@@ -51,16 +61,15 @@ def _display(entry):
 
 def _claims(config):
     """Claim metadata with the issuer's actual selective disclosure, as
-    app/formatter_func.py sdjwtNestedClaims applies it. Array levels get a
-    null path segment, as the metadata paths leave them out."""
+    app/formatter_func.py sdjwtNestedClaims applies it. Paths get a null
+    segment after every array the issuer actually issues, whether or not the
+    configured path has it (misc.array_claims)."""
     claims = config["credential_metadata"]["claims"]
-    by_path = {tuple(c["path"]): c for c in claims if "path" in c}
-    arrays = {
-        path
-        for path, c in by_path.items()
-        if c.get("issuer_conditions", {}).get("cardinality", {}).get("max") == "n"
-        and (c.get("value_type") or "").endswith("_attributes")
-    }
+    by_path = {claim_path(c): c for c in claims if "path" in c}
+    arrays = array_claims(
+        claims,
+        single_groups_as_objects=config.get("scope") not in KEEP_SINGLE_GROUPS_AS_LISTS,
+    )
 
     def sd(path):
         flag = by_path.get(path, {}).get("selective_disclosure")
@@ -74,12 +83,10 @@ def _claims(config):
 
     out = []
     for path, c in by_path.items():
-        typed_path = []
-        for i, segment in enumerate(path):
-            typed_path.append(segment)
-            if path[: i + 1] in arrays and i + 1 < len(path):
-                typed_path.append(None)
-        entry = {"path": typed_path, "sd": "always" if sd(path) else "never"}
+        entry = {
+            "path": with_array_segments(path, arrays),
+            "sd": "always" if sd(path) else "never",
+        }
         if "display" in c:
             entry["display"] = [
                 {"locale": d.get("locale", "en"), "label": d["name"]}
@@ -97,9 +104,22 @@ def _document(config):
         document["name"] = displays[0].get("name")
         if "description" in displays[0]:
             document["description"] = displays[0]["description"]
-    extends = config.get("issuer_config", {}).get("type_metadata", {}).get("extends")
-    if extends:
-        document["extends"] = extends
+    # The SCA rulebooks require both: the base type, and the hash of the base
+    # type document this issuer was built against (an SRI string,
+    # "sha256-<base64>"). The hash is configured, not computed from the base
+    # document as it is now, as that would defeat its purpose.
+    type_config = config.get("issuer_config", {}).get("type_metadata", {})
+    if type_config.get("extends"):
+        document["extends"] = type_config["extends"]
+        if type_config.get("extends#integrity"):
+            document["extends#integrity"] = type_config["extends#integrity"]
+        else:
+            logger.warning(
+                "Type %s extends %s without extends#integrity; wallets "
+                "following the SCA rulebooks reject it",
+                config["vct"],
+                type_config["extends"],
+            )
     document["display"] = [_display(d) for d in displays]
     document["claims"] = _claims(config)
     return document

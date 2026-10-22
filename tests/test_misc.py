@@ -724,3 +724,48 @@ class TestSDJWTFormHints:
             {"country": {"mandatory": False, "type": "string", "source": "user",
                          "pattern": "^[A-Z]{2}$"}}
         ]
+
+
+class TestClaimPaths:
+    """Metadata paths are claims path pointers, with a null segment after
+    every array; the form is built from the names only."""
+
+    CLAIMS = [
+        {"path": ["products"], "mandatory": True, "value_type": "products_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 1, "max": "n"}}},
+        {"path": ["products", None, "name"], "mandatory": True, "value_type": "string",
+         "source": "user"},
+        {"path": ["products", None, "vats"], "mandatory": True, "value_type": "vats_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 1, "max": "n"}}},
+        {"path": ["products", None, "vats", None, "vat_rate"], "mandatory": True,
+         "value_type": "string", "source": "user"},
+        {"path": ["merchant"], "mandatory": True, "value_type": "merchant_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+        {"path": ["provider"], "mandatory": True, "source": "issuer"},
+        {"path": ["provider", "ids", None, "value"], "mandatory": True, "source": "issuer"},
+    ]
+
+    def test_form_ignores_array_segments(self):
+        form = misc.getMandatoryAttributesSDJWT(self.CLAIMS)
+        products = form["products"]["attributes"]
+        assert {"name": {"mandatory": True, "type": "string", "source": "user"}} in products
+        vats = next(a["vats"] for a in products if "vats" in a)
+        assert vats["attributes"] == [
+            {"vat_rate": {"mandatory": True, "type": "string", "source": "user"}}
+        ]
+        # The metadata itself is left as it is.
+        assert self.CLAIMS[1]["path"] == ["products", None, "name"]
+
+    def test_array_claims(self):
+        assert misc.array_claims(self.CLAIMS) == {
+            ("products",), ("products", "vats"), ("provider", "ids"),
+        }
+        # Single-occurrence groups stay lists where that shape is kept.
+        assert ("merchant",) in misc.array_claims(self.CLAIMS, single_groups_as_objects=False)
+
+    def test_with_array_segments(self):
+        arrays = {("products",), ("products", "vats")}
+        assert misc.with_array_segments(("products", "vats", "vat_rate"), arrays) == [
+            "products", None, "vats", None, "vat_rate"
+        ]
+        assert misc.with_array_segments(("products",), arrays) == ["products"]

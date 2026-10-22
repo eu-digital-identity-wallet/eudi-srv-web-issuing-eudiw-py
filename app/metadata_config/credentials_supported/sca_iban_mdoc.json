@@ -59,8 +59,7 @@
                   "masked_iban"
                ],
                "mandatory": true,
-               "value_type": "string",
-               "source": "user",
+               "source": "issuer",
                "display": [
                   {
                      "name": "Masked IBAN",
@@ -73,7 +72,7 @@
                   "eu.webuildconsortium.sca.iban.1",
                   "iban"
                ],
-               "mandatory": false,
+               "mandatory": true,
                "value_type": "string",
                "source": "user",
                "display": [
@@ -89,8 +88,7 @@
                   "national_bank_code"
                ],
                "mandatory": false,
-               "value_type": "string",
-               "source": "user",
+               "source": "issuer",
                "display": [
                   {
                      "name": "National Bank Code",

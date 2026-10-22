@@ -375,7 +375,16 @@
                      "All legal transactions regarding cross-border conversions involving the Company",
                      "All legal transactions regarding cross border mergers involving the Company",
                      "All legal transactions regarding cross border divisions involving the Company"
-                  ]
+                  ],
+                  "other_values": {
+                     "label": "Limitation details",
+                     "used_if": {
+                        "attribute": "scope_of_representation_power_of_substitution",
+                        "values": [
+                           "limited"
+                        ]
+                     }
+                  }
                },
                "display": [
                   {

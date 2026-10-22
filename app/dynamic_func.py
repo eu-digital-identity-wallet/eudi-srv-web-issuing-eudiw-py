@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 ###############################################################################
+import copy
 import datetime
 import json
 import re
@@ -22,7 +23,9 @@ import secrets
 import uuid
 from flask import session
 from misc import (
+    KEEP_SINGLE_GROUPS_AS_LISTS,
     calculate_age,
+    claim_path,
     doctype2credential,
     doctype2credentialSDJWT,
     getIssuerFilledAttributes,
@@ -32,6 +35,7 @@ from misc import (
     getNamespaces,
     getOptionalAttributes,
     getOptionalAttributesSDJWT,
+    is_array_group,
 )
 from redirect_func import json_post
 import base64
@@ -158,6 +162,9 @@ def formatter(data, un_distinguishing_sign, scope, format):
             requested_credential["credential_metadata"]["claims"],
             single_groups_as_objects=scope not in KEEP_SINGLE_GROUPS_AS_LISTS,
         )
+        check_presence_conditions(
+            data, requested_credential["credential_metadata"]["claims"]
+        )
 
     # Populate pdata
     populate_pdata(
@@ -273,13 +280,65 @@ def update_dates_and_special_claims(
 
     # The account provider is the issuing bank itself, so its data comes from
     # the issuer configuration (rb-iban-ov, section 3.2).
+    # A copy, as the credential's data is reshaped later and the configuration
+    # is shared by every issuance.
     if "account_provider" in issuer_claims and "account_provider" in doctype_config:
-        data["account_provider"] = doctype_config["account_provider"]
+        data["account_provider"] = copy.deepcopy(doctype_config["account_provider"])
 
     # A configured issuing country is the issuer's own, whatever country the
     # holder picked to authenticate.
     if "issuing_country" in issuer_claims and "issuing_country" in doctype_config:
         data["issuing_country"] = doctype_config["issuing_country"]
+
+    # rb-sca-iban IR-01 and IR-02: the masked IBAN and the national bank code
+    # are derived from the full IBAN, so they cannot disagree with it.
+    if "masked_iban" in issuer_claims:
+        iban = checked_iban(data.get("iban"))
+        data["iban"] = iban
+        data["masked_iban"] = mask_iban(iban)
+        if "national_bank_code" in issuer_claims:
+            code = national_bank_code(iban)
+            if code:
+                data["national_bank_code"] = code
+            else:
+                # Not known where this country's IBAN carries it, so it
+                # cannot be checked against the IBAN: left out (optional).
+                data.pop("national_bank_code", None)
+
+
+# Where the national bank code is in the IBAN of a country, as
+# (start, end) indexes into the IBAN (SWIFT IBAN Registry, bank identifier).
+_IBAN_BANK_CODE = {
+    "AT": (4, 9), "BE": (4, 7), "BG": (4, 8), "CH": (4, 9), "CY": (4, 7),
+    "CZ": (4, 8), "DE": (4, 12), "DK": (4, 8), "EE": (4, 6), "ES": (4, 8),
+    "FI": (4, 7), "FR": (4, 9), "GB": (4, 8), "GR": (4, 7), "HR": (4, 11),
+    "HU": (4, 7), "IE": (4, 8), "IT": (5, 10), "LI": (4, 9), "LT": (4, 9),
+    "LU": (4, 7), "LV": (4, 8), "MT": (4, 8), "NL": (4, 8), "NO": (4, 8),
+    "PT": (4, 8), "RO": (4, 8), "SE": (4, 7), "SK": (4, 8),
+}
+
+
+def checked_iban(value):
+    """The IBAN without spaces, in capitals, if it is well-formed and its
+    check digits are right (ISO 13616, mod 97); issuance fails otherwise."""
+    iban = re.sub(r"\s+", "", value or "").upper()
+    if not re.fullmatch(r"[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}", iban):
+        raise ValueError("The IBAN is missing or not well-formed")
+    digits = "".join(str(int(c, 36)) for c in iban[4:] + iban[:4])
+    if int(digits) % 97 != 1:
+        raise ValueError("The IBAN check digits are wrong")
+    return iban
+
+
+def mask_iban(iban):
+    """rb-sca-iban 3.2: the first 4 and the last 4 characters unmasked."""
+    return iban[:4] + "*" * (len(iban) - 8) + iban[-4:]
+
+
+def national_bank_code(iban):
+    """The bank code in the IBAN, or None for a country not in the table."""
+    position = _IBAN_BANK_CODE.get(iban[:2])
+    return iban[position[0]:position[1]] if position else None
 
 
 def _made_up_last_four():
@@ -416,8 +475,10 @@ def _to_number(value):
 
 
 def _to_date_time(value):
-    """The form sends a local date-time (YYYY-MM-DDTHH:MM); claims carry
-    RFC 3339, taken here as UTC."""
+    """Claims carry RFC 3339. The form converts the user's local time to UTC
+    before sending it (2026-10-22T07:14:00Z), which is kept as it is. A
+    date-time without an offset (YYYY-MM-DDTHH:MM[:SS]) has no time zone to
+    go by, so it is taken as UTC."""
     if isinstance(value, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?", value):
         return (value if value.count(":") == 2 else value + ":00") + "Z"
     return value
@@ -427,13 +488,16 @@ _VALUE_TYPES = {
     "int": _to_int,
     "number": _to_number,
     "date-time": _to_date_time,
-    "list_string": lambda v: [v] if isinstance(v, str) else v,
+    # Fields left empty (e.g. an unused free value next to a list) are dropped
+    "list_string": lambda v: (
+        [v] if isinstance(v, str) else [s for s in v if s != ""] if isinstance(v, list) else v
+    ),
 }
 
 
 def _apply_at(node, path, transform):
-    """Apply transform to the value at path, in every element of the arrays
-    on the way (claim paths have no segment for array elements)."""
+    """Apply transform to the value at path (a misc.claim_path, so names
+    only), in every element of the arrays on the way."""
     if isinstance(node, list):
         for element in node:
             _apply_at(element, path, transform)
@@ -444,25 +508,19 @@ def _apply_at(node, path, transform):
             _apply_at(node[path[0]], path[1:], transform)
 
 
-# Credentials already live that issue their single-occurrence groups as
-# one-element lists (EHIC: authentic_source). Holders and verifiers may rely
-# on that shape, so it is kept.
-KEEP_SINGLE_GROUPS_AS_LISTS = {"eu.europa.ec.eudi.ehic_sd_jwt_vc"}
-
-
 def shape_claims(data, claims, single_groups_as_objects=True):
     """Give the form data the JSON shape the claim metadata describes. The
     form sends every group as a list (name[0][attribute]), but a group that
-    occurs at most once is an object. Leaf values get their value_type."""
+    occurs at most once is an object (misc.is_array_group). Leaf values get
+    their value_type."""
     for claim in claims:
         if "path" not in claim:
             continue
-        path = [s for s in claim["path"] if s is not None]
+        path = list(claim_path(claim))
         value_type = claim.get("value_type") or ""
-        max_count = claim.get("issuer_conditions", {}).get("cardinality", {}).get("max")
 
         if value_type.endswith("_attributes"):
-            if max_count != 1 or not single_groups_as_objects:
+            if is_array_group(claim, single_groups_as_objects):
                 continue
             _apply_at(
                 data,
@@ -471,6 +529,86 @@ def shape_claims(data, claims, single_groups_as_objects=True):
             )
         elif value_type in _VALUE_TYPES:
             _apply_at(data, path, _VALUE_TYPES[value_type])
+
+
+def _objects_at(node, path):
+    """The objects at path (a misc.claim_path), in every element of the
+    arrays on the way."""
+    if isinstance(node, list):
+        for element in node:
+            yield from _objects_at(element, path)
+    elif isinstance(node, dict):
+        if not path:
+            yield node
+        elif path[0] in node:
+            yield from _objects_at(node[path[0]], path[1:])
+
+
+def _absent(value):
+    return value is None or value in ("", [], {})
+
+
+def check_presence_conditions(data, claims):
+    """Conditional claims, from issuer_conditions:
+    - used_if {"attribute", "values"}: the claim is present if and only if
+      its sibling attribute has one of the values (rb-iban-ov 3.4: owner_name
+      and legal_person_identifiers for an entity, given_name and surname for
+      a person). Where the condition does not hold the claim is dropped;
+      where it holds and the claim is missing, issuance fails.
+    - not_used_if {"attributes"}: the claim and those siblings exclude each
+      other (rb-eucc: a legal representative is a natural or a legal
+      person). Issuance fails if both are present.
+    - other_values {"used_if"} next to options: values besides the options
+      are allowed, and at least one is required, if and only if the sibling
+      condition holds (rb-eu-poa IR-04: limitation details when substitution
+      is limited). Issuance fails otherwise.
+    """
+    for claim in claims:
+        if "path" not in claim:
+            continue
+        conditions = claim.get("issuer_conditions", {})
+        if not any(k in conditions for k in ("used_if", "not_used_if", "other_values")):
+            continue
+        path = claim_path(claim)
+        name = path[-1]
+
+        for parent in _objects_at(data, path[:-1]):
+            rule = conditions.get("used_if")
+            if rule:
+                value = parent.get(rule["attribute"])
+                if value not in rule["values"]:
+                    parent.pop(name, None)
+                elif _absent(parent.get(name)):
+                    raise ValueError(
+                        f"{'.'.join(path)} is required when "
+                        f"{rule['attribute']} is {value}"
+                    )
+
+            excluded = conditions.get("not_used_if", {}).get("attributes", [])
+            if not _absent(parent.get(name)):
+                present = [a for a in excluded if not _absent(parent.get(a))]
+                if present:
+                    raise ValueError(
+                        f"{'.'.join(path)} cannot be combined with "
+                        f"{', '.join(present)}"
+                    )
+
+            other = conditions.get("other_values")
+            if other and isinstance(parent.get(name), list):
+                options = conditions.get("options", [])
+                others = [v for v in parent[name] if v not in options]
+                rule = other["used_if"]
+                value = parent.get(rule["attribute"])
+                if value in rule["values"] and not others:
+                    raise ValueError(
+                        f"{'.'.join(path)} needs {other.get('label', 'a value')} "
+                        f"besides the listed values when {rule['attribute']} is {value}"
+                    )
+                if value not in rule["values"] and others:
+                    raise ValueError(
+                        f"{'.'.join(path)} only takes the listed values unless "
+                        f"{rule['attribute']} is {', '.join(rule['values'])}"
+                    )
 
 
 def populate_pdata(

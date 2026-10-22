@@ -839,6 +839,10 @@ def form_formatter(form_data: dict) -> dict:
             continue
         if "option" in key and "on" in value:
             continue
+        # The radio buttons of a choice between groups (e.g. a natural or a
+        # legal person) only steer the form; the chosen group is the data.
+        if key.endswith("_option"):
+            continue
 
         parts = key_pattern.findall(key)
 

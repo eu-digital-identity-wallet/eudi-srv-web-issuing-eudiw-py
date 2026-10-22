@@ -45,7 +45,13 @@ import jwt
 import logging
 import copy
 
-from misc import doctype2vct, getSubClaims, urlsafe_b64encode_nopad, vct2doctype
+from misc import (
+    claim_path,
+    doctype2vct,
+    getSubClaims,
+    urlsafe_b64encode_nopad,
+    vct2doctype,
+)
 from app_config.config_service import ConfService as cfgservice
 
 from app import session_manager
@@ -252,16 +258,15 @@ def cbor2elems(mdoc):
 
 
 def _sd_flags(credential_metadata):
-    """Explicit selective_disclosure flags, keyed by full claim path. Paths
-    have no segment for array elements, so a flag applies to the claim in
-    every element."""
+    """Explicit selective_disclosure flags, keyed by claim_path (names only,
+    no array element segments), so a flag applies to the claim in every
+    element."""
     flags = {}
     for claim_meta in credential_metadata.get("credential_metadata", {}).get("claims", []):
         if "overall_issuer_conditions" in claim_meta:
             continue
         if "selective_disclosure" in claim_meta:
-            path = tuple(s for s in claim_meta["path"] if s is not None)
-            flags[path] = claim_meta["selective_disclosure"]
+            flags[claim_path(claim_meta)] = claim_meta["selective_disclosure"]
     return flags
 
 

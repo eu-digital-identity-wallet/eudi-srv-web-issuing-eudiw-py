@@ -417,6 +417,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person"
                ],
                "mandatory": false,
@@ -432,12 +433,19 @@
                   "cardinality": {
                      "min": 0,
                      "max": 1
+                  },
+                  "not_used_if": {
+                     "logic": "any",
+                     "attributes": [
+                        "legal_person"
+                     ]
                   }
                }
             },
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person",
                   "full_name"
                ],
@@ -454,6 +462,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person",
                   "date_of_birth"
                ],
@@ -470,6 +479,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person",
                   "identifier"
                ],
@@ -486,6 +496,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person",
                   "nationality"
                ],
@@ -502,6 +513,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "natural_person",
                   "signatory_rule"
                ],
@@ -518,6 +530,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "legal_person"
                ],
                "mandatory": false,
@@ -533,12 +546,19 @@
                   "cardinality": {
                      "min": 0,
                      "max": 1
+                  },
+                  "not_used_if": {
+                     "logic": "any",
+                     "attributes": [
+                        "natural_person"
+                     ]
                   }
                }
             },
             {
                "path": [
                   "legal_representative",
+                  null,
                   "legal_person",
                   "name"
                ],
@@ -555,6 +575,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "legal_person",
                   "id"
                ],
@@ -571,6 +592,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "legal_person",
                   "formtype"
                ],
@@ -587,6 +609,7 @@
             {
                "path": [
                   "legal_representative",
+                  null,
                   "legal_person",
                   "signatory_rule"
                ],

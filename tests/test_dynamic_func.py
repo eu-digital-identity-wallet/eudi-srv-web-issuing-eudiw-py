@@ -28,6 +28,10 @@ from app.dynamic_func import (
     normalize_list_and_type_fields,
     populate_pdata,
     shape_claims,
+    check_presence_conditions,
+    checked_iban,
+    mask_iban,
+    national_bank_code,
 )
 from app.dynamic_func import (
     doctype2credential,  # Imported for mocking
@@ -845,3 +849,125 @@ class TestPopulatePdata:
             "sdjwt_iss1": "val6",
         }
         assert pdata["claims"] == expected_claims
+
+
+# --- Test `check_presence_conditions` ---
+
+
+class TestPresenceConditions:
+    """rb-iban-ov 3.4 (used_if) and rb-eucc (not_used_if)."""
+
+    OWNERSHIP = [
+        {"path": ["account_ownership", "owner_name"],
+         "issuer_conditions": {"used_if": {"attribute": "owner_type", "values": ["entity"]}}},
+        {"path": ["account_ownership", "legal_person_identifiers"],
+         "issuer_conditions": {"used_if": {"attribute": "owner_type", "values": ["entity"]}}},
+        {"path": ["account_ownership", "given_name"],
+         "issuer_conditions": {"used_if": {"attribute": "owner_type", "values": ["person"]}}},
+        {"path": ["account_ownership", "surname"],
+         "issuer_conditions": {"used_if": {"attribute": "owner_type", "values": ["person"]}}},
+    ]
+
+    REPRESENTATIVES = [
+        {"path": ["legal_representative", None, "natural_person"],
+         "issuer_conditions": {"not_used_if": {"logic": "any", "attributes": ["legal_person"]}}},
+        {"path": ["legal_representative", None, "legal_person"],
+         "issuer_conditions": {"not_used_if": {"logic": "any", "attributes": ["natural_person"]}}},
+    ]
+
+    def test_claims_of_the_other_owner_type_are_dropped(self):
+        data = {"account_ownership": {
+            "owner_type": "person", "given_name": "Maria", "surname": "K",
+            "owner_name": "ACME", "legal_person_identifiers": [{"type": "LEI", "value": "x"}],
+        }}
+        check_presence_conditions(data, self.OWNERSHIP)
+        assert data["account_ownership"] == {
+            "owner_type": "person", "given_name": "Maria", "surname": "K",
+        }
+
+    def test_missing_claim_of_the_owner_type_fails(self):
+        data = {"account_ownership": {"owner_type": "entity", "owner_name": "ACME"}}
+        with pytest.raises(ValueError, match="legal_person_identifiers is required"):
+            check_presence_conditions(data, self.OWNERSHIP)
+
+    def test_representative_is_one_kind_of_person(self):
+        data = {"legal_representative": [
+            {"natural_person": {"full_name": "A"}},
+            {"legal_person": {"name": "B"}},
+        ]}
+        check_presence_conditions(data, self.REPRESENTATIVES)
+
+        data["legal_representative"][1]["natural_person"] = {"full_name": "C"}
+        with pytest.raises(ValueError, match="cannot be combined"):
+            check_presence_conditions(data, self.REPRESENTATIVES)
+
+    POWERS = [
+        {"path": ["powers"], "value_type": "list_string",
+         "issuer_conditions": {
+             "options": ["A", "B"],
+             "other_values": {"label": "Limitation details",
+                              "used_if": {"attribute": "substitution", "values": ["limited"]}}}},
+    ]
+
+    def test_limited_substitution_needs_limitation_details(self):
+        """rb-eu-poa IR-04."""
+        check_presence_conditions(
+            {"powers": ["A", "Only up to EUR 10000"], "substitution": "limited"}, self.POWERS)
+        check_presence_conditions({"powers": ["A", "B"], "substitution": "allowed"}, self.POWERS)
+        check_presence_conditions({"powers": ["A"]}, self.POWERS)
+
+        with pytest.raises(ValueError, match="needs Limitation details"):
+            check_presence_conditions({"powers": ["A"], "substitution": "limited"}, self.POWERS)
+        with pytest.raises(ValueError, match="only takes the listed values"):
+            check_presence_conditions({"powers": ["A", "x"], "substitution": "allowed"}, self.POWERS)
+
+    def test_empty_list_values_are_dropped(self):
+        data = {"powers": ["A", ""]}
+        shape_claims(data, self.POWERS)
+        assert data == {"powers": ["A"]}
+
+
+# --- SCA-IBAN: masked IBAN and national bank code (rb-sca-iban IR-01, IR-02) ---
+
+
+class TestScaIban:
+
+    def test_checked_iban(self):
+        assert checked_iban("gr16 0110 1250 0000 0001 2300 695") == "GR1601101250000000012300695"
+        with pytest.raises(ValueError, match="check digits"):
+            checked_iban("GR1701101250000000012300695")
+        with pytest.raises(ValueError, match="not well-formed"):
+            checked_iban("")
+
+    def test_mask_and_bank_code(self):
+        iban = "CZ5508000000001234567899"  # the rulebook's example
+        assert mask_iban(iban) == "CZ55****************7899"
+        assert national_bank_code(iban) == "0800"
+        assert national_bank_code("DE89370400440532013000") == "37040044"
+        assert national_bank_code("GR1601101250000000012300695") == "011"
+        assert national_bank_code("PL61109010140000071219812874") is None
+
+    def _issue(self, data):
+        update_dates_and_special_claims(
+            data, {"masked_iban", "national_bank_code"}, "", MOCK_TODAY, MOCK_TODAY, {}, {})
+        return data
+
+    def test_derived_from_the_iban(self):
+        data = self._issue({
+            "iban": "DE89 3704 0044 0532 0130 00",
+            "masked_iban": "GR16***********0695",  # typed: ignored
+            "national_bank_code": "999",           # typed: ignored
+        })
+        assert data == {
+            "iban": "DE89370400440532013000",
+            "masked_iban": "DE89**************3000",
+            "national_bank_code": "37040044",
+        }
+
+    def test_unknown_bank_code_position_is_left_out(self):
+        data = self._issue({"iban": "PL61109010140000071219812874", "national_bank_code": "1"})
+        assert "national_bank_code" not in data
+
+    def test_bad_iban_fails_issuance(self):
+        with pytest.raises(ValueError):
+            self._issue({"iban": "DE00370400440532013000"})

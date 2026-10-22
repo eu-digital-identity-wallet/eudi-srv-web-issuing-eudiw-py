@@ -182,7 +182,15 @@
                      "name": "Owner Name",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "used_if": {
+                     "attribute": "owner_type",
+                     "values": [
+                        "entity"
+                     ]
+                  }
+               }
             },
             {
                "path": [
@@ -208,6 +216,12 @@
                         "value_type": "string",
                         "source": "user"
                      }
+                  },
+                  "used_if": {
+                     "attribute": "owner_type",
+                     "values": [
+                        "entity"
+                     ]
                   }
                },
                "display": [
@@ -221,6 +235,7 @@
                "path": [
                   "account_ownership",
                   "legal_person_identifiers",
+                  null,
                   "type"
                ],
                "mandatory": true,
@@ -238,6 +253,7 @@
                "path": [
                   "account_ownership",
                   "legal_person_identifiers",
+                  null,
                   "value"
                ],
                "mandatory": true,
@@ -264,7 +280,15 @@
                      "name": "Given Name",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "used_if": {
+                     "attribute": "owner_type",
+                     "values": [
+                        "person"
+                     ]
+                  }
+               }
             },
             {
                "path": [
@@ -279,7 +303,15 @@
                      "name": "Surname",
                      "locale": "en"
                   }
-               ]
+               ],
+               "issuer_conditions": {
+                  "used_if": {
+                     "attribute": "owner_type",
+                     "values": [
+                        "person"
+                     ]
+                  }
+               }
             },
             {
                "path": [
@@ -326,6 +358,7 @@
                "path": [
                   "account_provider",
                   "legal_person_identifiers",
+                  null,
                   "type"
                ],
                "mandatory": true,
@@ -342,6 +375,7 @@
                "path": [
                   "account_provider",
                   "legal_person_identifiers",
+                  null,
                   "value"
                ],
                "mandatory": true,
