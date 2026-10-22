@@ -99,7 +99,7 @@ def check_form_data(data, credentials_requested):
     runs, so a check that would fail there (a ValueError, e.g. an IBAN's
     check digits) fails while the user is still at the form. Other errors
     are left to the credential endpoint, as before."""
-    credentials_supported = oidc_metadata["credential_configurations_supported"]
+    credentials_supported = oidc_metadata.get("credential_configurations_supported", {})
     for credential_id in credentials_requested or []:
         config = credentials_supported.get(credential_id)
         if not config:

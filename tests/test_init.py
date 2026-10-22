@@ -192,6 +192,19 @@ class TestRemoveKeys:
 
         assert result == [{"keep": 1}, {"keep": 3}]
 
+    def test_remove_keys_keeps_null_path_segments(self):
+        """Claim paths mark array elements with null; the published metadata
+        must keep them. Items emptied by the removal still go."""
+        from app import remove_keys
+
+        claims = [
+            {"path": ["products", None, "name"], "source": "user"},
+            {"source": "user"},
+        ]
+        result = remove_keys(claims, {"source"})
+
+        assert result == [{"path": ["products", None, "name"]}]
+
     def test_remove_keys_empty_dict(self):
         from app import remove_keys
 

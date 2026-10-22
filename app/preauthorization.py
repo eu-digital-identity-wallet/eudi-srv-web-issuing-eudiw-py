@@ -38,7 +38,7 @@ from datetime import datetime, timedelta, timezone
 import logging
 import segno
 
-from app.route_dynamic import form_formatter, presentation_formatter
+from app.route_dynamic import check_form_data, form_formatter, presentation_formatter
 from .app_config.config_service import ConfService as cfgservice
 from app.redirect_func import post_redirect_with_payload
 from app.misc import (
@@ -160,6 +160,19 @@ def preauth_form():
     form_data.pop("proceed")
 
     cleaned_data = form_formatter(form_data)
+
+    # As in the authorization code flow (route_dynamic.Dynamic_form): data the
+    # credentials cannot be issued from is turned down now, with the reason.
+    problem = check_form_data(cleaned_data, current_session.credentials_requested)
+    if problem:
+        return post_redirect_with_payload(
+            target_url=f"{CONFIGURATION['frontend']['frontends_config'][current_session.frontend_id]['url']}/internal_error",
+            data_payload={
+                "error": f"{problem}. Please go back and correct the form.",
+                "error_code": "Invalid form data",
+                "error_type": 400,
+            },
+        )
 
     """ form_dynamic_data[user_id] = cleaned_data.copy()
     form_dynamic_data[user_id].update(

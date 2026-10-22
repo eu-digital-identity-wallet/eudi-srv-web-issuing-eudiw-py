@@ -224,6 +224,33 @@ class TestPreauthRed:
 class TestPreauthForm:
     """Test the /preauth_form route."""
 
+    @patch("app.preauthorization.check_form_data", return_value="The IBAN check digits are wrong")
+    @patch("app.preauthorization.form_formatter", return_value={"iban": "DE00"})
+    @patch("app.preauthorization.post_redirect_with_payload")
+    def test_preauth_form_turns_down_bad_data(
+        self,
+        mock_post_redirect,
+        mock_form_formatter,
+        mock_check,
+        client,
+        mock_session_manager,
+        mock_configuration,
+    ):
+        """Data the credentials cannot be issued from is turned down at the
+        form, with the reason, and not stored."""
+        from flask import Response
+
+        mock_post_redirect.return_value = Response("redirect", status=302)
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session_id"
+
+        client.post("/preauth_form", data={"iban": "DE00", "proceed": "true"})
+
+        kwargs = mock_post_redirect.call_args.kwargs
+        assert kwargs["target_url"].endswith("/internal_error")
+        assert kwargs["data_payload"]["error"].startswith("The IBAN check digits are wrong")
+        mock_session_manager.update_user_data.assert_not_called()
+
     @patch("app.preauthorization.form_formatter")
     @patch("app.preauthorization.presentation_formatter")
     @patch("app.preauthorization.post_redirect_with_payload")
