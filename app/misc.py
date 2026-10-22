@@ -287,6 +287,14 @@ def getMandatoryAttributes(claims, namespace):
     return attributes_form
 
 
+def _form_hints(claim):
+    """Input hints a claim gives the form: a closed list of values (options)
+    and an input pattern. Both live in issuer_conditions, which is not
+    published in the issuer metadata."""
+    conditions = claim.get("issuer_conditions", {})
+    return {k: conditions[k] for k in ("options", "pattern") if k in conditions}
+
+
 def getMandatoryAttributesSDJWT(claims):
     """
     Function to get mandatory attributes from credential in sd-jwt vc format
@@ -383,6 +391,7 @@ def getMandatoryAttributesSDJWT(claims):
                         "type": claim["value_type"],
                         "filled_value": None,
                         "mandatory": True,
+                        **_form_hints(claim),
                     }
                 }
             )
@@ -417,6 +426,7 @@ def getMandatoryAttributesSDJWT(claims):
             "mandatory": claim["mandatory"],
             "type": claim["value_type"],
             "source": claim["source"],
+            **_form_hints(claim),
         }
 
         if "issuer_conditions" in claim:
@@ -456,6 +466,7 @@ def getMandatoryAttributesSDJWT(claims):
                                 "value_type"
                             ],  # FIX: Use 'type' for consistency
                             "source": claim["source"],
+                            **_form_hints(claim),
                         }
                     }
                 )
@@ -508,7 +519,13 @@ def getOptionalAttributesSDJWT(claims):
 
         if "value_type" in claim and attribute_name != "nationalities":
             attributes_form.update(
-                {attribute_name: {"type": claim["value_type"], "filled_value": None}}
+                {
+                    attribute_name: {
+                        "type": claim["value_type"],
+                        "filled_value": None,
+                        **_form_hints(claim),
+                    }
+                }
             )
 
         if "issuer_conditions" in claim and attribute_name != "nationalities":
@@ -531,6 +548,7 @@ def getOptionalAttributesSDJWT(claims):
             "mandatory": claim["mandatory"],
             "type": claim["value_type"],
             "source": claim["source"],
+            **_form_hints(claim),
         }
 
         if "issuer_conditions" in claim:
@@ -559,12 +577,17 @@ def getOptionalAttributesSDJWT(claims):
 
         for attribute in attributes_form[attribute_name]["attributes"]:
             if level2_name in attribute:
+                # A second-level group is a list of its third-level
+                # attributes, as in getMandatoryAttributesSDJWT.
+                if "attributes" not in attribute[level2_name]:
+                    attribute[level2_name]["type"] = "list"
                 attribute[level2_name].setdefault("attributes", []).append(
                     {
                         level3_name: {
                             "mandatory": claim["mandatory"],
                             "type": claim["value_type"],
                             "source": claim["source"],
+                            **_form_hints(claim),
                         }
                     }
                 )

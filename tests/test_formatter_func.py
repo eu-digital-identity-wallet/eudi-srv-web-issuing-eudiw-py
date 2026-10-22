@@ -467,6 +467,52 @@ class TestSDJWTNestedClaims:
         assert sub[0][SDObj("name")] == "A"
         assert sub[1][SDObj("name")] == "B"
 
+    def test_nested_flags_by_full_path(self):
+        claims = {
+            "address": {"locality": "Athens", "country": "GR"},
+            "owner": {"ids": [{"type": "LEI", "value": "X"}]},
+        }
+        credential_metadata = {
+            "credential_metadata": {
+                "claims": [
+                    {"path": ["address", "locality"], "selective_disclosure": False},
+                    {"path": ["owner", "ids", "type"], "selective_disclosure": True},
+                ]
+            }
+        }
+        result = sdjwtNestedClaims(claims, credential_metadata)
+        address = result[SDObj("address")]
+        assert address["locality"] == "Athens"
+        assert address[SDObj("country")] == "GR"
+        # Third level: disclosable only where the metadata says so.
+        ids = result[SDObj("owner")][SDObj("ids")]
+        assert ids == [{SDObj("type"): "LEI", "value": "X"}]
+
+    def test_children_of_non_disclosable_claim(self):
+        claims = {"receipt": {"type": "PURCHASE"}, "type": "RETURN"}
+        credential_metadata = {
+            "credential_metadata": {
+                "claims": [{"path": ["receipt"], "selective_disclosure": False}]
+            }
+        }
+        result = sdjwtNestedClaims(claims, credential_metadata)
+        assert result["receipt"] == {"type": "PURCHASE"}
+        assert result[SDObj("type")] == "RETURN"
+
+    def test_nested_flag_does_not_affect_same_named_top_level_claim(self):
+        claims = {"type": "PURCHASE", "verifications": [{"type": "EMV"}]}
+        credential_metadata = {
+            "credential_metadata": {
+                "claims": [
+                    {"path": ["verifications"], "selective_disclosure": False},
+                    {"path": ["verifications", "type"], "selective_disclosure": False},
+                ]
+            }
+        }
+        result = sdjwtNestedClaims(claims, credential_metadata)
+        assert result[SDObj("type")] == "PURCHASE"
+        assert result["verifications"] == [{"type": "EMV"}]
+
 
 class TestSDJWTFormatter:
 

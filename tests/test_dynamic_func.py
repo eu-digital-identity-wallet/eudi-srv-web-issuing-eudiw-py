@@ -27,6 +27,7 @@ from app.dynamic_func import (
     update_dates_and_special_claims,
     normalize_list_and_type_fields,
     populate_pdata,
+    shape_claims,
 )
 from app.dynamic_func import (
     doctype2credential,  # Imported for mocking
@@ -558,6 +559,120 @@ class TestUpdateDatesAndSpecialClaims:
         assert "credential_id" not in data
         assert "network" not in data
         assert "card_id" not in data
+
+    def test_we_build_issuer_data(self):
+        """sub is generated; account provider and issuing country come from
+        the issuer configuration."""
+        provider = {"provider_name": "Bank", "bic_swift": "TESTGRAA"}
+        config = {"account_provider": provider, "issuing_country": "GR"}
+        data = {"issuing_country": "FC"}
+
+        update_dates_and_special_claims(
+            data,
+            {"sub", "account_provider", "issuing_country"},
+            "",
+            MOCK_TODAY,
+            MOCK_TODAY,
+            {"scope": "test_scope", "issuer_config": config},
+            config,
+        )
+
+        assert data["sub"].startswith("urn:uuid:")
+        uuid.UUID(data["sub"][len("urn:uuid:"):])
+        assert data["account_provider"] == provider
+        assert data["issuing_country"] == "GR"
+
+    def test_issuing_country_without_config_is_kept(self):
+        data = {"issuing_country": "FC"}
+
+        update_dates_and_special_claims(
+            data,
+            {"issuing_country"},
+            "",
+            MOCK_TODAY,
+            MOCK_TODAY,
+            self.MOCK_CREDENTIAL,
+            self.MOCK_CREDENTIAL["issuer_config"],
+        )
+
+        assert data["issuing_country"] == "FC"
+
+
+# --- Test `shape_claims` ---
+
+
+class TestShapeClaims:
+
+    def test_group_occurring_once_is_an_object(self):
+        claims = [
+            {"path": ["merchant"], "value_type": "merchant_attributes",
+             "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+            {"path": ["merchant", "address"], "value_type": "address_attributes",
+             "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+            {"path": ["products"], "value_type": "products_attributes",
+             "issuer_conditions": {"cardinality": {"min": 1, "max": "n"}}},
+        ]
+        data = {
+            "merchant": [{"name": "Shop", "address": [{"city": "Athens"}]}],
+            "products": [{"name": "Coffee"}],
+        }
+
+        shape_claims(data, claims)
+
+        assert data["merchant"] == {"name": "Shop", "address": {"city": "Athens"}}
+        assert data["products"] == [{"name": "Coffee"}]
+
+    def test_value_types(self):
+        claims = [
+            {"path": ["total"], "value_type": "int"},
+            {"path": ["products", "price"], "value_type": "int"},
+            {"path": ["latitude"], "value_type": "number"},
+            {"path": ["at"], "value_type": "date-time"},
+            {"path": ["currencies"], "value_type": "list_string"},
+            {"path": ["name"], "value_type": "string"},
+        ]
+        data = {
+            "total": "-250",
+            "products": [{"price": "120"}, {"price": "80"}],
+            "latitude": "37.98",
+            "at": "2026-10-22T10:30",
+            "currencies": "EUR",
+            "name": "42",
+        }
+
+        shape_claims(data, claims)
+
+        assert data == {
+            "total": -250,
+            "products": [{"price": 120}, {"price": 80}],
+            "latitude": 37.98,
+            "at": "2026-10-22T10:30:00Z",
+            "currencies": ["EUR"],
+            "name": "42",
+        }
+
+    def test_single_groups_kept_as_lists_when_asked(self):
+        claims = [
+            {"path": ["authentic_source"], "value_type": "authentic_source_attributes",
+             "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+            {"path": ["total"], "value_type": "int"},
+        ]
+        data = {"authentic_source": [{"id": "A", "name": "B"}], "total": "5"}
+
+        shape_claims(data, claims, single_groups_as_objects=False)
+
+        assert data == {"authentic_source": [{"id": "A", "name": "B"}], "total": 5}
+
+    def test_values_that_do_not_parse_are_kept(self):
+        claims = [
+            {"path": ["total"], "value_type": "int"},
+            {"path": ["at"], "value_type": "date-time"},
+        ]
+        data = {"total": "twelve", "at": "2026-10-22T10:30:00Z"}
+
+        shape_claims(data, claims)
+
+        assert data == {"total": "twelve", "at": "2026-10-22T10:30:00Z"}
 
 
 # --- Test `normalize_list_and_type_fields` ---

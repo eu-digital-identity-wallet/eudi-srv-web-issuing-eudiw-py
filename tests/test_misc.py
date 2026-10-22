@@ -688,3 +688,39 @@ class TestAdditionalCoverage:
     def test_getSubClaims_missing_vct(self):
         result = misc.getSubClaims("nonexistent", "missing_vct")
         assert result == []
+
+
+class TestSDJWTFormHints:
+    """Closed value lists and input patterns reach the form, at every level."""
+
+    CLAIMS = [
+        {"path": ["type"], "mandatory": True, "value_type": "string", "source": "user",
+         "issuer_conditions": {"options": ["PURCHASE", "RETURN"]}},
+        {"path": ["account"], "mandatory": True, "value_type": "account_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+        {"path": ["account", "iban"], "mandatory": True, "value_type": "string",
+         "source": "user", "issuer_conditions": {"pattern": "^[A-Z]{2}[0-9A-Z]{13,30}$"}},
+        {"path": ["journey"], "mandatory": False, "value_type": "journey_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 0, "max": 1}}},
+        {"path": ["journey", "origin"], "mandatory": True, "value_type": "origin_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 1, "max": 1}}},
+        {"path": ["journey", "origin", "country"], "mandatory": False, "value_type": "string",
+         "source": "user", "issuer_conditions": {"pattern": "^[A-Z]{2}$"}},
+    ]
+
+    def test_mandatory_attributes(self):
+        form = misc.getMandatoryAttributesSDJWT(self.CLAIMS)
+        assert form["type"]["options"] == ["PURCHASE", "RETURN"]
+        assert form["account"]["attributes"] == [
+            {"iban": {"mandatory": True, "type": "string", "source": "user",
+                      "pattern": "^[A-Z]{2}[0-9A-Z]{13,30}$"}}
+        ]
+
+    def test_optional_second_level_group_is_a_list(self):
+        form = misc.getOptionalAttributesSDJWT(self.CLAIMS)
+        origin = form["journey"]["attributes"][0]["origin"]
+        assert origin["type"] == "list"
+        assert origin["attributes"] == [
+            {"country": {"mandatory": False, "type": "string", "source": "user",
+                         "pattern": "^[A-Z]{2}$"}}
+        ]

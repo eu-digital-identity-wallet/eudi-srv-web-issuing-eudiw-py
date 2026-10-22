@@ -251,73 +251,74 @@ def cbor2elems(mdoc):
     return d
 
 
+def _sd_flags(credential_metadata):
+    """Explicit selective_disclosure flags, keyed by full claim path. Paths
+    have no segment for array elements, so a flag applies to the claim in
+    every element."""
+    flags = {}
+    for claim_meta in credential_metadata.get("credential_metadata", {}).get("claims", []):
+        if "overall_issuer_conditions" in claim_meta:
+            continue
+        if "selective_disclosure" in claim_meta:
+            path = tuple(s for s in claim_meta["path"] if s is not None)
+            flags[path] = claim_meta["selective_disclosure"]
+    return flags
+
+
+def _sd_key(name, sd):
+    return SDObj(value=name) if sd else name
+
+
+def _sd_deep(value, path, flags):
+    """Below the second level a claim is only disclosable if its metadata
+    says so."""
+    if isinstance(value, dict):
+        return {
+            _sd_key(k, flags.get(path + (k,), False)): _sd_deep(v, path + (k,), flags)
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [_sd_deep(element, path, flags) for element in value]
+    return value
+
+
+def _sd_children(value, path, parent_sd, flags):
+    """Second level: disclosable by default when the parent is, unless the
+    metadata of the claim says otherwise."""
+    def element(e):
+        if not isinstance(e, dict):
+            return e
+        return {
+            _sd_key(k, flags.get(path + (k,), parent_sd)): _sd_deep(v, path + (k,), flags)
+            for k, v in e.items()
+        }
+
+    if isinstance(value, list):
+        return [element(e) for e in value]
+    return element(value)
+
+
 def sdjwtNestedClaims(claims, credential_metadata):
 
     nestedDict = {}
 
-    sd_map = {}
-    if (
-        "credential_metadata" in credential_metadata
-        and "claims" in credential_metadata["credential_metadata"]
-    ):
-        for claim_meta in credential_metadata["credential_metadata"]["claims"]:
-            # Use the last part of the 'path' as the claim name
-            if "overall_issuer_conditions" in claim_meta:
-                continue
-            claim_name = claim_meta["path"][-1]
-            sd_map[claim_name] = claim_meta.get("selective_disclosure", True)
+    flags = _sd_flags(credential_metadata)
 
     for claim, value in claims.items():
-        if sd_map.get(claim, True):
-            if isinstance(value, list) and claim != "nationalities" and len(value) > 1:
-                subClaims = []
-                for element in value:
-                    if isinstance(element, dict):
-                        subClaimsElement = {}
-                        for attribute, value2 in element.items():
-                            subClaimsElement.update({SDObj(value=attribute): value2})
+        sd = flags.get((claim,), True)
 
-                        subClaims.append(subClaimsElement)
+        if isinstance(value, list) and claim == "nationalities" and sd:
+            nestedDict.update(
+                {SDObj(value=claim): [SDObj(value=nationality) for nationality in value]}
+            )
 
-                    else:
-                        subClaims.append(element)
-
-                nestedDict.update({SDObj(value=claim): subClaims})
-
-            elif (
-                isinstance(value, list) and claim != "nationalities" and len(value) == 1
-            ):
-                subClaims = []
-                for element in value:
-                    if isinstance(element, dict):
-                        subClaimsElement = {}
-                        for attribute, value2 in element.items():
-                            subClaimsElement.update({SDObj(value=attribute): value2})
-                        subClaims.append(subClaimsElement)
-                    else:
-                        subClaims.append(element)
-
-                nestedDict.update({SDObj(value=claim): subClaims})
-
-            elif isinstance(value, dict):
-                subClaims = {}
-                for attribute, value2 in value.items():
-                    subClaims.update({SDObj(value=attribute): value2})
-
-                nestedDict.update({SDObj(value=claim): subClaims})
-
-            elif isinstance(value, list) and claim == "nationalities":
-                nationalitiesArray = []
-                for nationality in value:
-                    nationalitiesArray.append(SDObj(value=nationality))
-
-                nestedDict.update({SDObj(value=claim): nationalitiesArray})
-
-            else:
-                nestedDict.update({SDObj(value=claim): value})
+        elif isinstance(value, (dict, list)):
+            nestedDict.update(
+                {_sd_key(claim, sd): _sd_children(value, (claim,), sd, flags)}
+            )
 
         else:
-            nestedDict.update({claim: value})
+            nestedDict.update({_sd_key(claim, sd): value})
 
     return nestedDict
 
