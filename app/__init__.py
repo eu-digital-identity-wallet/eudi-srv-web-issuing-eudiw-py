@@ -182,6 +182,7 @@ def create_app(test_config=None):
         preauthorization,
         revocation,
         signed_metadata,
+        type_metadata,
     )
 
     app.register_blueprint(route_formatter.formatter)
@@ -191,6 +192,7 @@ def create_app(test_config=None):
     app.register_blueprint(route_dynamic.dynamic)
     app.register_blueprint(preauthorization.preauth)
     app.register_blueprint(signed_metadata.metadata)
+    app.register_blueprint(type_metadata.type_metadata)
 
     # config session
     app.config["SESSION_FILE_THRESHOLD"] = 50
