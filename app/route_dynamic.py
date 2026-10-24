@@ -402,8 +402,11 @@ def red():
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
+        # As issued: a configured issuing country replaces the country the
+        # user authenticated with, e.g. "FC" for the form
+        # (dynamic_func.update_dates_and_special_claims).
         presentation_data[credential].update(
-            {"issuing_country": current_session.country}
+            {"issuing_country": doctype_config.get("issuing_country", current_session.country)}
         )
 
         if credential_requested == "eu.europa.ec.eudi.ehic_sd_jwt_vc":
@@ -1069,8 +1072,11 @@ def presentation_formatter(cleaned_data: dict) -> dict:
         presentation_data[credential].update(
             {"estimated_expiry_date": expiry.strftime("%Y-%m-%d")}
         )
+        # As issued: a configured issuing country replaces the country the
+        # user authenticated with, e.g. "FC" for the form
+        # (dynamic_func.update_dates_and_special_claims).
         presentation_data[credential].update(
-            {"issuing_country": current_session.country}
+            {"issuing_country": doctype_config.get("issuing_country", current_session.country)}
         )
 
         # The card the user picked, shown as on the form, so that they recognise

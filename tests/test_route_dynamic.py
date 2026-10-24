@@ -1797,6 +1797,17 @@ class TestPresentationFormatter:
         yield
         patch.stopall()
 
+    def test_issuing_country_as_issued(self):
+        """A configured issuing country is shown, as it is the one issued;
+        otherwise the country the user authenticated with."""
+        from app.route_dynamic import presentation_formatter
+
+        pid = self.mock_metadata["credential_configurations_supported"]["eu.europa.ec.eudi.pid_mdoc"]
+        assert presentation_formatter({})["PID (mDL)"]["issuing_country"] == "EU"
+
+        pid["issuer_config"]["issuing_country"] = "GR"
+        assert presentation_formatter({})["PID (mDL)"]["issuing_country"] == "GR"
+
     def test_basic_presentation_data_structure(self):
         """Test basic structure of presentation data"""
         from app.route_dynamic import presentation_formatter

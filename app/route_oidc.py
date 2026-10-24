@@ -49,7 +49,6 @@ from flask import (
     current_app,
     redirect,
     render_template,
-    url_for,
 )
 from flask.helpers import make_response
 from jwcrypto import jwk, jwe
@@ -1470,8 +1469,12 @@ def credentialOffer():
             credentials_id_list = json.dumps(form)
             if auth_choice == "pre_auth_code":
                 session["credential_offer_URI"] = credential_offer_URI
+                # From the public URL, like the other redirects: url_for gives
+                # /preauth, which misses the path the issuer is served under
+                # behind the proxy (e.g. /issuer).
                 return redirect(
-                    url_for("preauth.preauthRed", credentials_id=credentials_id_list)
+                    f"{CONFIGURATION['service_url']}/preauth?"
+                    + urllib.parse.urlencode({"credentials_id": credentials_id_list})
                 )
 
             else:

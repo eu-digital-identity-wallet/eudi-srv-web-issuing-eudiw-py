@@ -546,6 +546,27 @@ class TestCredentialOffer:
 
             assert response.status_code == 200
 
+    def test_pre_authorized_offer_redirects_under_the_service_url(self, client, mock_cfgservice):
+        """The issuer is served under a path behind the proxy (/issuer); the
+        pre-authorized form is reached from the public URL, not from /preauth."""
+        mock_cfgservice["service_url"] = "https://host.example/issuer"
+        credential = "eu.webuildconsortium.sca.iban_sd_jwt"
+
+        with patch.dict("app.route_oidc.oidc_metadata",
+                        {"credential_configurations_supported": {credential: {}}}, clear=True):
+            response = client.post("/credential_offer", data={
+                credential: credential,
+                "proceed": "Submit",
+                "credential_offer_URI": "haip-vci://",
+                "Authorization Code Grant": "pre_auth_code",
+            })
+
+        assert response.status_code == 302
+        assert response.location == (
+            "https://host.example/issuer/preauth?credentials_id="
+            "%5B%22eu.webuildconsortium.sca.iban_sd_jwt%22%5D"
+        )
+
     @patch("app.route_oidc.generate_unique_id")
     def test_credential_offer2_qr_generation(self, mock_uuid, client, mock_cfgservice):
         """Test QR code generation for credential offer"""

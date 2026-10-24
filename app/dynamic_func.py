@@ -381,7 +381,7 @@ def sca_card_choice(credentials_requested):
     expiry is the credential's, from its validity; the display meta-data has
     no expiry (rb-sca-card-dpc, section 2.9), so it is shown here only.
     """
-    credentials_supported = oidc_metadata["credential_configurations_supported"]
+    credentials_supported = oidc_metadata.get("credential_configurations_supported", {})
     for credential_id in credentials_requested:
         issuer_config = credentials_supported.get(credential_id, {}).get("issuer_config", {})
         config = issuer_config.get("card_display")

@@ -102,6 +102,31 @@ def mock_configuration():
 class TestPreauthRed:
     """Test the /preauth route."""
 
+    @patch("app.preauthorization.sca_card_choice")
+    @patch("app.preauthorization.request_preauth_token", return_value="test_session_id")
+    @patch("app.preauthorization.getAttributesForm", return_value={})
+    @patch("app.preauthorization.getAttributesForm2", return_value={})
+    @patch("app.preauthorization.post_redirect_with_payload")
+    def test_preauth_red_offers_the_card_choice(
+        self, mock_post_redirect, mock_getattr2, mock_getattr1, mock_request_token,
+        mock_card_choice, client, mock_session_manager, mock_configuration,
+    ):
+        """An SCA-Card (DPC) asked for with a pre-authorized offer gets the
+        same card choice as in the other form flows."""
+        from flask import Response
+
+        choice = {"type": "card_choice", "mandatory": True, "options": []}
+        mock_card_choice.return_value = choice
+        mock_post_redirect.return_value = Response("redirect", status=302)
+        with client.session_transaction() as sess:
+            sess["credential_offer_URI"] = "haip-vci://"
+
+        client.get('/preauth?credentials_id=["eu.webuildconsortium.sca.card_dpc_sd_jwt"]')
+
+        mock_card_choice.assert_called_once_with(["eu.webuildconsortium.sca.card_dpc_sd_jwt"])
+        payload = mock_post_redirect.call_args.kwargs["data_payload"]
+        assert payload["mandatory_attributes"]["card"] == choice
+
     @patch("app.preauthorization.request_preauth_token")
     @patch("app.preauthorization.getAttributesForm")
     @patch("app.preauthorization.getAttributesForm2")

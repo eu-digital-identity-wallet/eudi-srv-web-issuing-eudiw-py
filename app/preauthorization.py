@@ -38,7 +38,12 @@ from datetime import datetime, timedelta, timezone
 import logging
 import segno
 
-from app.route_dynamic import check_form_data, form_formatter, presentation_formatter
+from app.route_dynamic import (
+    check_form_data,
+    form_formatter,
+    presentation_formatter,
+    sca_card_choice,
+)
 from .app_config.config_service import ConfService as cfgservice
 from app.redirect_func import post_redirect_with_payload
 from app.misc import (
@@ -104,6 +109,12 @@ def preauthRed():
     # session["credentials_requested"] = credentials_requested
 
     mandatory_attributes = getAttributesForm(credentials_requested)
+
+    # The user picks the card an SCA-Card (DPC) is for, by its card art, as in
+    # the other form flows (route_dynamic.dynamic_R1, route_oid4vp).
+    card_choice = sca_card_choice(credentials_requested)
+    if card_choice:
+        mandatory_attributes["card"] = card_choice
 
     optional_attributes_raw = getAttributesForm2(credentials_requested)
 

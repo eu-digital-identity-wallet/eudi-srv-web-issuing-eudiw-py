@@ -633,7 +633,6 @@ def getOptionalAttributesSDJWT(claims):
                 ]["cardinality"]
 
     for claim in level2_claims:
-        attributes = {}
         attribute_name = claim["path"][0]
 
         if attribute_name not in attributes_form:
@@ -642,26 +641,24 @@ def getOptionalAttributesSDJWT(claims):
         attributes_form[attribute_name]["type"] = "list"
 
         level2_name = claim["path"][1]
-        attributes[level2_name] = {
+        attribute_details = {
             "mandatory": claim["mandatory"],
             "type": claim["value_type"],
             "source": claim["source"],
             **_form_hints(claim),
         }
 
+        # Inside the attribute, as in getMandatoryAttributesSDJWT: next to it,
+        # the form took them for attributes of their own ("Cardinality").
         if "issuer_conditions" in claim:
             if "cardinality" in claim["issuer_conditions"]:
-                attributes["cardinality"] = claim["issuer_conditions"]["cardinality"]
+                attribute_details["cardinality"] = claim["issuer_conditions"]["cardinality"]
             if "not_used_if" in claim["issuer_conditions"]:
-                attributes["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
+                attribute_details["not_used_if"] = claim["issuer_conditions"]["not_used_if"]
 
-        if "attributes" in attributes_form[attribute_name]:
-            if "cardinality" in attributes_form[attribute_name]["attributes"][0]:
-                attributes_form[attribute_name]["attributes"].append(attributes)
-            else:
-                attributes_form[attribute_name]["attributes"][0].update(attributes)
-        else:
-            attributes_form[attribute_name]["attributes"] = [attributes]
+        attributes_form[attribute_name].setdefault("attributes", []).append(
+            {level2_name: attribute_details}
+        )
 
     for claim in level3_claims:
 

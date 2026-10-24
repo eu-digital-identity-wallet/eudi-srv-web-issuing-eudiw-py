@@ -769,3 +769,29 @@ class TestClaimPaths:
             "products", None, "vats", None, "vat_rate"
         ]
         assert misc.with_array_segments(("products",), arrays) == ["products"]
+
+
+class TestOptionalGroupRules:
+    """An optional group's rules stay inside its attributes, where the form
+    reads them, and do not show up as attributes of their own."""
+
+    CLAIMS = [
+        {"path": ["representative"], "mandatory": False, "value_type": "representative_attributes",
+         "source": "user", "issuer_conditions": {"cardinality": {"min": 0, "max": "n"}}},
+        {"path": ["representative", None, "natural_person"], "mandatory": False,
+         "value_type": "natural_person_attributes", "source": "user",
+         "issuer_conditions": {"cardinality": {"min": 0, "max": 1},
+                               "not_used_if": {"logic": "any", "attributes": ["legal_person"]}}},
+        {"path": ["representative", None, "legal_person"], "mandatory": False,
+         "value_type": "legal_person_attributes", "source": "user",
+         "issuer_conditions": {"cardinality": {"min": 0, "max": 1},
+                               "not_used_if": {"logic": "any", "attributes": ["natural_person"]}}},
+    ]
+
+    def test_rules_inside_the_attributes(self):
+        attributes = misc.getOptionalAttributesSDJWT(self.CLAIMS)["representative"]["attributes"]
+        names = [name for item in attributes for name in item]
+        assert names == ["natural_person", "legal_person"]
+        natural = attributes[0]["natural_person"]
+        assert natural["cardinality"] == {"min": 0, "max": 1}
+        assert natural["not_used_if"]["attributes"] == ["legal_person"]
