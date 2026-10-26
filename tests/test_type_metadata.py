@@ -237,3 +237,101 @@ def test_published_disclosure_is_the_issued_one():
         }
         assert set(published) == set(issued), file_name
         assert [p for p in published if published[p] != issued[p]] == [], file_name
+
+
+SCA_TS12 = ["sca_iban_jwt_vc.json", "sca_card_dpc.json"]
+CATEGORY_SCA = "urn:eu:europa:ec:eudi:sua:sca"
+TS12_SCHEMAS = os.path.join(os.path.dirname(__file__), "data", "ts12")
+LANGUAGES = {"en", "el"}
+# TS12 section 3.3.3: maximum lengths of the UI labels
+UI_LABEL_MAX = {
+    "affirmative_action_label": 30,
+    "denial_action_label": 30,
+    "transaction_title": 50,
+    "security_hint": 250,
+}
+
+
+def _ts12_schema(transaction_type):
+    """The TS12 JSON Schema of a built-in type, as published in its api/."""
+    name = "ts12-" + transaction_type.replace(":", "-") + "-data-model.json"
+    with open(os.path.join(TS12_SCHEMAS, name), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _schema_paths(schema, path=("payload",)):
+    """(objects, leaves): the paths of the schema's objects and leaf values."""
+    objects, leaves = [], []
+    for name, child in schema.get("properties", {}).items():
+        if "properties" in child:
+            objects.append(path + (name,))
+            more_objects, more_leaves = _schema_paths(child, path + (name,))
+            objects += more_objects
+            leaves += more_leaves
+        else:
+            leaves.append(path + (name,))
+    return objects, leaves
+
+
+def test_sca_types_publish_ts12_metadata():
+    """TS12 sections 3 and 4.1, WE BUILD CS-12 section 7.2 item 5: SCA-IBAN and
+    SCA-Card (DPC) are of the SCA category and allow payment:1, keyed by its
+    URN and referencing the built-in schema by schema_uri."""
+    for file_name in SCA_TS12:
+        document = type_metadata._document(_config(file_name))
+        assert document["category"] == CATEGORY_SCA, file_name
+        types = document["transaction_data_types"]
+        assert list(types) == ["urn:eudi:sca:payment:1"], file_name
+        assert types["urn:eudi:sca:payment:1"]["schema_uri"] == "urn:eudi:sca:payment:1"
+
+    for file_name in ["e_receipt_jwt_vc.json", "iban_ov_jwt_vc.json"]:
+        document = type_metadata._document(_config(file_name))
+        assert "category" not in document, file_name
+        assert "transaction_data_types" not in document, file_name
+
+
+def test_configured_transaction_data_types_are_defined():
+    for file_name in os.listdir(CONFIGS):
+        type_config = _config(file_name).get("issuer_config", {}).get("type_metadata", {})
+        for name in type_config.get("transaction_data_types", []):
+            assert name in type_metadata.TRANSACTION_DATA_TYPES, (file_name, name)
+
+
+def test_transaction_data_type_definitions():
+    """TS12 sections 3.3 and 4.1: each type has its schema, labels in every
+    language for every claim of the payload, a visualisation level for every
+    leaf, and the UI labels."""
+    for name, definition in type_metadata.TRANSACTION_DATA_TYPES.items():
+        for embedded, referenced in [("schema", "schema_uri"), ("claims", "claims_uri"),
+                                     ("ui_labels", "ui_labels_uri")]:
+            assert (embedded in definition) != (referenced in definition), (name, embedded)
+
+        objects, leaves = _schema_paths(_ts12_schema(name))
+        claims = {tuple(c["path"]): c for c in definition["claims"]}
+        assert set(claims) == set(objects) | set(leaves), name
+        for path, claim in claims.items():
+            assert "sd" not in claim, path
+            assert {d["lang"] for d in claim["display"]} == LANGUAGES, path
+            assert all(d["label"] for d in claim["display"]), path
+            if path in leaves:
+                assert claim["visualisation"] in (1, 2, 3, 4), path
+            else:
+                assert "visualisation" not in claim, path
+
+        ui_labels = definition["ui_labels"]
+        assert "affirmative_action_label" in ui_labels, name
+        for label, values in ui_labels.items():
+            assert {v["lang"] for v in values} == LANGUAGES, (name, label)
+            for value in values:
+                assert 0 < len(value["value"]) <= UI_LABEL_MAX[label], (name, label, value)
+
+
+def test_payment_dynamic_linking_is_prominent():
+    """PSD2 RTS article 5: the amount and the payee are what SCA links the
+    payment to, so they are on the main screen, prominently."""
+    claims = {
+        tuple(c["path"]): c
+        for c in type_metadata.TRANSACTION_DATA_TYPES["urn:eudi:sca:payment:1"]["claims"]
+    }
+    for path in [("payload", "amount"), ("payload", "currency"), ("payload", "payee", "name")]:
+        assert claims[path]["visualisation"] == 1, path

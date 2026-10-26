@@ -190,7 +190,9 @@
          "organization_name": "Test SCA issuer",
          "attestation_legal_category": "non-qualified-EAA",
          "type_metadata": {
-            "extends": "https://webuildconsortium.eu/sca/sca-iban/1.0"
+            "extends": "https://webuildconsortium.eu/sca/sca-iban/1.0",
+            "category": "urn:eu:europa:ec:eudi:sua:sca",
+            "transaction_data_types": ["urn:eudi:sca:payment:1"]
          }
       }
    }

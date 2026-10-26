@@ -1,0 +1,261 @@
+{
+  "urn:eudi:sca:payment:1": {
+    "schema_uri": "urn:eudi:sca:payment:1",
+    "claims": [
+      {
+        "path": ["payload", "transaction_id"],
+        "visualisation": 4,
+        "display": [
+          {"lang": "en", "label": "Transaction ID", "description": "Unique identifier of the transaction"},
+          {"lang": "el", "label": "Αναγνωριστικό συναλλαγής", "description": "Μοναδικό αναγνωριστικό της συναλλαγής"}
+        ]
+      },
+      {
+        "path": ["payload", "date_time"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Started at", "description": "Date and time the payment was started"},
+          {"lang": "el", "label": "Έναρξη", "description": "Ημερομηνία και ώρα έναρξης της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "payee"],
+        "display": [
+          {"lang": "en", "label": "Payee", "description": "Recipient of the payment"},
+          {"lang": "el", "label": "Δικαιούχος", "description": "Παραλήπτης της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "payee", "name"],
+        "visualisation": 1,
+        "display": [
+          {"lang": "en", "label": "Payee", "description": "Name of the recipient of the payment"},
+          {"lang": "el", "label": "Δικαιούχος", "description": "Όνομα του παραλήπτη της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "payee", "id"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Payee identifier", "description": "Identifier of the payee in the payment system"},
+          {"lang": "el", "label": "Αναγνωριστικό δικαιούχου", "description": "Αναγνωριστικό του δικαιούχου στο σύστημα πληρωμών"}
+        ]
+      },
+      {
+        "path": ["payload", "payee", "logo"],
+        "visualisation": 4,
+        "display": [
+          {"lang": "en", "label": "Payee logo", "description": "Logo of the payee"},
+          {"lang": "el", "label": "Λογότυπο δικαιούχου", "description": "Λογότυπο του δικαιούχου"}
+        ]
+      },
+      {
+        "path": ["payload", "payee", "website"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Payee website", "description": "Website of the payee"},
+          {"lang": "el", "label": "Ιστότοπος δικαιούχου", "description": "Ιστότοπος του δικαιούχου"}
+        ]
+      },
+      {
+        "path": ["payload", "pisp"],
+        "display": [
+          {"lang": "en", "label": "Payment initiation service", "description": "Provider that initiates the payment on your behalf"},
+          {"lang": "el", "label": "Υπηρεσία εκκίνησης πληρωμής", "description": "Πάροχος που εκκινεί την πληρωμή για λογαριασμό σας"}
+        ]
+      },
+      {
+        "path": ["payload", "pisp", "legal_name"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Provider legal name", "description": "Legal name of the payment initiation service provider"},
+          {"lang": "el", "label": "Επωνυμία παρόχου", "description": "Νόμιμη επωνυμία του παρόχου υπηρεσίας εκκίνησης πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "pisp", "brand_name"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Payment via", "description": "Brand name of the payment initiation service provider"},
+          {"lang": "el", "label": "Πληρωμή μέσω", "description": "Εμπορική ονομασία του παρόχου υπηρεσίας εκκίνησης πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "pisp", "domain_name"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Provider domain", "description": "Domain name of the payment initiation service provider"},
+          {"lang": "el", "label": "Τομέας παρόχου", "description": "Όνομα τομέα του παρόχου υπηρεσίας εκκίνησης πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "execution_date"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Execution date", "description": "Date the payment is executed"},
+          {"lang": "el", "label": "Ημερομηνία εκτέλεσης", "description": "Ημερομηνία εκτέλεσης της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "currency"],
+        "visualisation": 1,
+        "display": [
+          {"lang": "en", "label": "Currency", "description": "Currency of the payment"},
+          {"lang": "el", "label": "Νόμισμα", "description": "Νόμισμα της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "amount"],
+        "visualisation": 1,
+        "display": [
+          {"lang": "en", "label": "Amount", "description": "Amount of the payment"},
+          {"lang": "el", "label": "Ποσό", "description": "Ποσό της πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "amount_estimated"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Estimated amount", "description": "The amount is an estimate"},
+          {"lang": "el", "label": "Εκτιμώμενο ποσό", "description": "Το ποσό είναι εκτίμηση"}
+        ]
+      },
+      {
+        "path": ["payload", "amount_earmarked"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Amount reserved now", "description": "The amount is reserved on your account now"},
+          {"lang": "el", "label": "Δέσμευση ποσού τώρα", "description": "Το ποσό δεσμεύεται τώρα στον λογαριασμό σας"}
+        ]
+      },
+      {
+        "path": ["payload", "sct_inst"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Instant transfer", "description": "Executed as a SEPA Instant Credit Transfer"},
+          {"lang": "el", "label": "Άμεση μεταφορά", "description": "Εκτελείται ως άμεση μεταφορά πίστωσης SEPA"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence"],
+        "display": [
+          {"lang": "en", "label": "Recurring payment", "description": "The payment repeats"},
+          {"lang": "el", "label": "Επαναλαμβανόμενη πληρωμή", "description": "Η πληρωμή επαναλαμβάνεται"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "start_date"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "First payment", "description": "Date of the first payment"},
+          {"lang": "el", "label": "Πρώτη πληρωμή", "description": "Ημερομηνία της πρώτης πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "end_date"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Last payment", "description": "Date of the last payment"},
+          {"lang": "el", "label": "Τελευταία πληρωμή", "description": "Ημερομηνία της τελευταίας πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "number"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Number of payments", "description": "Number of recurring payments"},
+          {"lang": "el", "label": "Αριθμός πληρωμών", "description": "Αριθμός επαναλαμβανόμενων πληρωμών"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "frequency"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Frequency", "description": "How often the payment repeats"},
+          {"lang": "el", "label": "Συχνότητα", "description": "Πόσο συχνά επαναλαμβάνεται η πληρωμή"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options"],
+        "display": [
+          {"lang": "en", "label": "Payee-initiated payments", "description": "Terms of the payments the payee initiates"},
+          {"lang": "el", "label": "Πληρωμές από τον δικαιούχο", "description": "Όροι των πληρωμών που εκκινεί ο δικαιούχος"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "amount_variable"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Variable amount", "description": "Later payments may have a different amount"},
+          {"lang": "el", "label": "Μεταβλητό ποσό", "description": "Οι επόμενες πληρωμές μπορεί να έχουν διαφορετικό ποσό"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "min_amount"],
+        "visualisation": 3,
+        "display": [
+          {"lang": "en", "label": "Minimum amount", "description": "Minimum amount of a single payment"},
+          {"lang": "el", "label": "Ελάχιστο ποσό", "description": "Ελάχιστο ποσό μίας πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "max_amount"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Maximum amount", "description": "Maximum amount of a single payment"},
+          {"lang": "el", "label": "Μέγιστο ποσό", "description": "Μέγιστο ποσό μίας πληρωμής"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "total_amount"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Total amount", "description": "Total amount of all payments"},
+          {"lang": "el", "label": "Συνολικό ποσό", "description": "Συνολικό ποσό όλων των πληρωμών"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "initial_amount"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Initial amount", "description": "Different amount of the first payments"},
+          {"lang": "el", "label": "Αρχικό ποσό", "description": "Διαφορετικό ποσό των πρώτων πληρωμών"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "initial_amount_number"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Payments at initial amount", "description": "Number of first payments with the initial amount"},
+          {"lang": "el", "label": "Πληρωμές με αρχικό ποσό", "description": "Αριθμός πρώτων πληρωμών με το αρχικό ποσό"}
+        ]
+      },
+      {
+        "path": ["payload", "recurrence", "mit_options", "apr"],
+        "visualisation": 2,
+        "display": [
+          {"lang": "en", "label": "Annual percentage rate", "description": "Annual percentage rate of the instalments"},
+          {"lang": "el", "label": "Συνολικό ετήσιο πραγματικό επιτόκιο", "description": "ΣΕΠΕ των δόσεων"}
+        ]
+      }
+    ],
+    "ui_labels": {
+      "affirmative_action_label": [
+        {"lang": "en", "value": "Confirm payment"},
+        {"lang": "el", "value": "Επιβεβαίωση πληρωμής"}
+      ],
+      "denial_action_label": [
+        {"lang": "en", "value": "Cancel payment"},
+        {"lang": "el", "value": "Ακύρωση πληρωμής"}
+      ],
+      "transaction_title": [
+        {"lang": "en", "value": "Confirm this payment"},
+        {"lang": "el", "value": "Επιβεβαιώστε την πληρωμή"}
+      ],
+      "security_hint": [
+        {"lang": "en", "value": "Check the payee and the amount before you confirm. Do not confirm a payment you did not start yourself."},
+        {"lang": "el", "value": "Ελέγξτε τον δικαιούχο και το ποσό πριν επιβεβαιώσετε. Μην επιβεβαιώνετε πληρωμή που δεν ξεκινήσατε εσείς."}
+      ]
+    }
+  }
+}

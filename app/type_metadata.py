@@ -20,13 +20,17 @@ SD-JWT VC Type Metadata (draft-ietf-oauth-sd-jwt-vc, section 6) for the
 credentials this issuer issues, built from their configuration. The WE BUILD
 rulebooks require it: the SCA rulebooks for the issuer-specific vct, which is a
 URL of this issuer and extends the WE BUILD base type, and the eReceipt
-rulebook for its Claim Selective Disclosure Metadata.
+rulebook for its Claim Selective Disclosure Metadata. SCA types also carry the
+TS12 metadata (category, transaction_data_types) that wallets need to confirm a
+transaction with them.
 
 - /credentials/<path>: the document of an SD-JWT VC type whose vct is a URL
   ending in /credentials/<path>, so it is retrievable from the vct itself.
 - /type-metadata/<vct>: the document of any SD-JWT VC type, by vct.
 """
+import json
 import logging
+import os
 
 from flask import Blueprint, abort, jsonify
 from flask_cors import CORS
@@ -45,6 +49,29 @@ logger = logging.getLogger(__name__)
 
 # The types already warned about for lacking extends#integrity
 _warned_without_integrity = set()
+
+# TS12 section 4.1: what wallets need to process and show a transaction of a
+# type (schema, claim labels and visualisation levels, UI labels), keyed by the
+# type. One file per type in metadata_config/transaction_data_types, shared by
+# the SCA types that list the type in issuer_config.type_metadata. The key is
+# the transaction type URN itself, as WE BUILD CS-12 section 7.2 profiles it.
+_TRANSACTION_DATA_TYPES_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "metadata_config",
+    "transaction_data_types",
+)
+
+
+def _load_transaction_data_types():
+    types = {}
+    for name in sorted(os.listdir(_TRANSACTION_DATA_TYPES_DIR)):
+        if name.endswith(".json"):
+            with open(os.path.join(_TRANSACTION_DATA_TYPES_DIR, name), encoding="utf-8") as f:
+                types.update(json.load(f))
+    return types
+
+
+TRANSACTION_DATA_TYPES = _load_transaction_data_types()
 
 type_metadata = Blueprint("type_metadata", __name__, url_prefix="/")
 CORS(type_metadata)
@@ -119,6 +146,15 @@ def _document(config):
                 config["vct"],
                 type_config["extends"],
             )
+    # TS12 section 3: wallets process a type of this category as an SCA
+    # Attestation, and only for the transaction types listed (section 3.2).
+    if type_config.get("category"):
+        document["category"] = type_config["category"]
+    if type_config.get("transaction_data_types"):
+        document["transaction_data_types"] = {
+            name: TRANSACTION_DATA_TYPES[name]
+            for name in type_config["transaction_data_types"]
+        }
     document["display"] = [_display(d) for d in displays]
     document["claims"] = _claims(config)
     return document
