@@ -1476,7 +1476,7 @@ class TestFormFormatter:
 
         result = form_formatter(form_data, issuing_country="EU")
 
-        assert result["portrait"] == "base64_portrait1_data"
+        assert result["portrait"] == result["picture"] == "base64_portrait1_data"
         assert result["family_name"] == "Doe"
 
     def test_portrait_port2_replacement(self):
@@ -1489,7 +1489,7 @@ class TestFormFormatter:
 
         result = form_formatter(form_data, issuing_country="EU")
 
-        assert result["portrait"] == "base64_portrait2_data"
+        assert result["portrait"] == result["picture"] == "base64_portrait2_data"
 
     def test_portrait_custom_value(self):
         """Test portrait custom base64 value is preserved"""
@@ -1571,15 +1571,16 @@ class TestFormFormatter:
         form_data = {
             "portrait": "Port1",
             "image": "Port2",
-            "picture": "custom_base64_data",
+            "issuing_authority_logo": "custom_base64_data",
             "signature_usual_mark": "Sig1",
         }
 
         result = form_formatter(form_data, issuing_country="EU")
 
-        assert result["portrait"] == "base64_portrait1_data"
+        # picture is the SD-JWT name of portrait.
+        assert result["portrait"] == result["picture"] == "base64_portrait1_data"
         assert result["image"] == "base64_portrait2_data"
-        assert result["picture"] == "custom_base64_data"
+        assert result["issuing_authority_logo"] == "custom_base64_data"
         assert result["signature_usual_mark"] == "base64_signature_data"
 
     def test_complex_nested_structure(self):

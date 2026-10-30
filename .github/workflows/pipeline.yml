@@ -1,15 +1,14 @@
 # CI/CD image pipeline: builds the Docker image (linux/amd64 + linux/arm64) and
 # pushes it to ghcr.io/<owner>/<repo>.
-# Runs on push to dev, preprod and main, on v* tags, and on manual dispatch.
+# Runs on push to main and branch-*, on v* tags, and on manual dispatch.
 # Needs secrets: GHCR_KEY (token with write:packages for ghcr.io).
 name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - dev
-      - preprod
       - main
+      - 'branch-*'
     tags:
       - 'v[0-9]+.*' 
   workflow_dispatch:
@@ -45,9 +44,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # branch-preprod → :branch-preprod  +  :latest
+            # main → :latest
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            # branch-development → :branch-development
+            # branch-preprod → :branch-preprod, branch-refractoring → :branch-refractoring
             type=ref,event=branch
             # v1.2.3 tag → :1.2.3  and  :1.2  and  :1
             type=semver,pattern={{version}}

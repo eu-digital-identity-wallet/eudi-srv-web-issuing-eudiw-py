@@ -193,6 +193,7 @@ class TestVerifiedPidOverride:
         "age_over_18": True,
         "nationality": ["PT"],
         "place_of_birth": {"country": "PT", "locality": "Lisboa"},
+        "portrait": "UmVhbA",
         "expiry_date": "2030-01-01",
     }
     #: Form of a PID request that has both the mdoc and SD-JWT names.
@@ -200,7 +201,12 @@ class TestVerifiedPidOverride:
         name: {"type": "string", "filled_value": None, "mandatory": True}
         for name in ("family_name", "given_name", "birth_date", "age_over_18", "nationality", "place_of_birth")
     }
-    OPTIONAL = {"birthdate": {"type": "string"}, "nationalities": {"type": "list"}, "birth_place": {"type": "list"}}
+    OPTIONAL = {
+        "birthdate": {"type": "string"},
+        "nationalities": {"type": "list"},
+        "birth_place": {"type": "list"},
+        "portrait": {"type": "jpeg"},
+    }
 
     def _submit(self, client, data):
         with patch.object(
@@ -220,6 +226,7 @@ class TestVerifiedPidOverride:
         assert stored["age_over_18"] is True
         assert stored["nationality"] == stored["nationalities"] == ["PT"]
         assert stored["place_of_birth"] == stored["birth_place"] == {"country": "PT", "locality": "Lisboa"}
+        assert stored["portrait"] == stored["picture"] == "UmVhbA"
 
     @pytest.mark.parametrize("key", ["[family_name]", "family_name][x", "[family_name][]"])
     def test_bracketed_name_cannot_override(self, client, key):
@@ -246,6 +253,8 @@ class TestVerifiedPidOverride:
                 "birthdate": "1999-09-09",
                 "birth_place[0][country]": "XX",
                 "nationalities[0][country_code]": "XX",
+                "portrait": "Port1",
+                "picture": "QXR0YWNrZXI",
             },
         )
         self._assert_verified(stored)

@@ -51,6 +51,7 @@ ATTRIBUTE_ALIASES: Tuple[FrozenSet[str], ...] = (
     frozenset({"birth_date", "birthdate"}),
     frozenset({"birth_place", "place_of_birth"}),
     frozenset({"nationality", "nationalities"}),
+    frozenset({"portrait", "picture"}),
 )
 
 
@@ -177,6 +178,8 @@ def _fill_aliases(cleaned_data: Dict[str, Any]) -> None:
 
     if "birth_date" in cleaned_data:
         cleaned_data["birthdate"] = cleaned_data["birth_date"]
+    if "portrait" in cleaned_data:
+        cleaned_data["picture"] = cleaned_data["portrait"]
 
 
 def _resolve_form_choices(cleaned_data: Dict[str, Any]) -> None:

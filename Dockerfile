@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     ca-certificates \
     zlib1g \
+    libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy compiled packages from builder

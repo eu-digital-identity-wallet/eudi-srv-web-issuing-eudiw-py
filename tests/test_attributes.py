@@ -234,3 +234,12 @@ class TestAttributesForm:
     def test_optional_form(self, credentials):
         form = attrs.getAttributesForm2(["pid_mdoc", "pid_sdjwt"])
         assert form == {"nickname": {"type": "string", "filled_value": None}}
+
+    @pytest.mark.parametrize("requested", [["pid_mdoc"], ["pid_sdjwt"], ["pid_mdoc", "pid_sdjwt"], ["pid_sdjwt", "pid_mdoc"]])
+    def test_picture_shown_as_portrait(self, credentials, requested):
+        credentials["pid_mdoc"]["credential_metadata"]["claims"].append(_claim([NS, "portrait"], mandatory=False, value_type="jpeg"))
+        credentials["pid_sdjwt"]["credential_metadata"]["claims"].append(_claim(["picture"], mandatory=False, value_type="jpeg"))
+        form = attrs.getAttributesForm2(requested)
+
+        assert "picture" not in form
+        assert form["portrait"] == {"type": "jpeg", "filled_value": None}

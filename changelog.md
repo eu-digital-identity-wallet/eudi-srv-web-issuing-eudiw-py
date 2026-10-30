@@ -350,6 +350,7 @@ _06 Oct 2026_
 - `/notification` checks the access token before reading the body. A body that is not a JSON object, a missing or non-string `notification_id`, or an `event` other than `credential_accepted`, `credential_failure` or `credential_deleted` gets 400 `invalid_notification_request` (OpenID4VCI 1.0 §11.3).
 - The OID4VP PID login requests only the PID's mandatory claims; the revocation flow requests a single claim (the first mandatory one), as it only needs the issuer-signed status.
 - `display_authorization` payloads carry `image_attributes`, so the consent page shows those values as images. One `IMAGE_ATTRIBUTES` list must cover every `"value_type": "jpeg"` claim (enforced by a test).
+- The PID mdoc `portrait` and SD-JWT VC `picture` are one *portrait* field on the attribute form, for either PID or both together; its value is issued under both names, and a verified portrait cannot be overridden through `picture`. Both PIDs requested together showed two image choices, and the SD-JWT VC alone showed *picture*.
 
 ### Fixed
 - Key attestations without `iat` / `exp`, older than the maximum age or with another `typ` were accepted; untrusted ones caused a server error instead of `invalid_proof`.
@@ -366,3 +367,6 @@ _06 Oct 2026_
 - The PID `sex` claim from the form was issued as a string; it is a uint / JSON number (PID Rulebook).
 - The SD-JWT VC `picture` was issued as base64url; it is a `data:image/jpeg;base64,` URL (PID Rulebook §4.1).
 - The seafarer `issuing_authority_logo` was shown on the consent page in the wrong encoding.
+- `pipeline.yml` only ran on pushes to `dev`, `preprod` and `main`; the repository's branches are `branch-*`, so no branch image was built. It now runs on `main` and `branch-*`.
+- `gitleaks/gitleaks.toml`: the `Env Var` rule had no `id`, so current gitleaks refused to load the config and the (non-blocking) secret scan never ran. The rule is now `env-var`.
+- The Docker image did not start: `psycopg` (pure Python) loads the system `libpq`, which the runtime image lacked (`ImportError: no pq wrapper available`). The runtime stage now installs `libpq5`.

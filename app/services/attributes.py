@@ -588,7 +588,8 @@ def _collect_form_attributes(
 
     The first credential defining an attribute wins. ``birthdate`` is
     dropped when ``birth_date`` is present (and ``nationalities`` when
-    ``nationality`` is, if requested).
+    ``nationality`` is, if requested), and the SD-JWT ``picture`` is shown
+    as the mdoc ``portrait``.
 
     Args:
         credentials_requested: Credential configuration ids.
@@ -621,6 +622,11 @@ def _collect_form_attributes(
             attributes.pop("birthdate")
         if drop_duplicate_nationalities and "nationality" in attributes and "nationalities" in attributes:
             attributes.pop("nationalities")
+        if "picture" in attributes:
+            if "portrait" in attributes:
+                attributes.pop("picture")
+            else:
+                attributes = {"portrait" if name == "picture" else name: value for name, value in attributes.items()}
 
     return attributes
 
