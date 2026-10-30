@@ -5,7 +5,6 @@
 **Important!** Before you proceed, please read
 the [EUDI Wallet Reference Implementation project description](https://github.com/eu-digital-identity-wallet/.github/blob/main/profile/reference-implementation.md)
 
-
 ### Overview
 
 The EUDIW Issuer is an implementation of  the PID and (Q)EAA Provider service.
@@ -14,60 +13,57 @@ The service provides, by default, support for `mso_mdoc` and `SD-JWT-VC`formats,
 
 For authenticating the user, it requires the use of eIDAS node, OAUTH2 server or a simple form (for testing purposes).
 
-
 ### OpenId4VCI coverage
 
 This version of the EUDIW Issuer has support for the [OpenId for Verifiable Credential Issuance (Version 1.0)](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) protocol with the following coverage:
 
 
-| Feature                                                   | Coverage                                                        |
-|-------------------------------------------------------------------|-----------------------------------------------------------------|
-| [Authorization Code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/authorization.md)        | ✅ Support for scoped                                           |
-| [Pre-authorized code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/pre-authorized.md)            | ✅                                                              |
-| [Credential Offer](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/credential_offer.md)                  | ✅ `authorization_code` , ✅ `pre-authorized_code`              |
-| Dynamic Credential Request                                        | ✅                                                              |
-| mso_mdoc format                                                   | ✅                                                              |
-| SD-JWT-VC format                                                  | ✅                                                              |
-| W3C VC DM                                                         | ❌                                                              |
-| [Token Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/token.md)                               | ✅                                                              |
-| [Credential Endpoint](api_docs/credential.md)                     | ✅                                                              |
-| Credential Issuer MetaData                                        | ✅ Unsigned metadata                                            | 
-| [Nonce endpoint](api_docs/nonce_endpoint.md)                      | ✅                                                              | 
-| [Deferred Endpoint](api_docs/deferred.md)                         | ✅ Encryption support                                           |
-| Proof                                                             | ✅ JWT, Key Attestations                                        |
-| Credential response encryption                                    | ✅                                                              |
-| Credential request encryption                                     | ✅                                                              |
-| [Notification Endpoint](api_docs/notification.md)                 | ✅                                                              |
-| Pushed authorization request                                      | ✅                                                              |
-| Wallet authentication                                             | ✅ public client, Wallet client attestations                    |
-| Demonstrating Proof of Possession (DPoP)                          | ✅                                                              |
-| PKCE                                                              | ✅                                                              |
+| Feature                                                                                                                                               | Coverage                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [Authorization Code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/authorization.md)                  | ✅ Support for scoped                              |
+| [Pre-authorized code flow](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/pre-authorized.md) | ✅                                                 |
+| [Credential Offer](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/credential_offer.md)       | ✅ `authorization_code` , ✅ `pre-authorized_code` |
+| Dynamic Credential Request                                                                                                                            | ✅                                                 |
+| mso_mdoc format                                                                                                                                       | ✅                                                 |
+| SD-JWT-VC format                                                                                                                                      | ✅                                                 |
+| W3C VC DM                                                                                                                                             | ❌                                                 |
+| [Token Endpoint](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/api_docs/token.md)                                   | ✅                                                 |
+| [Credential Endpoint](api_docs/credential.md)                                                                                                         | ✅                                                 |
+| Credential Issuer MetaData                                                                                                                            | ✅ Unsigned metadata                               |
+| [Nonce endpoint](api_docs/nonce_endpoint.md)                                                                                                          | ✅                                                 |
+| [Deferred Endpoint](api_docs/deferred.md)                                                                                                             | ✅ Encryption support                              |
+| Proof                                                                                                                                                 | ✅ JWT, Key Attestations                           |
+| Credential response encryption                                                                                                                        | ✅                                                 |
+| Credential request encryption                                                                                                                         | ✅                                                 |
+| [Notification Endpoint](api_docs/notification.md)                                                                                                     | ✅                                                 |
+| Pushed authorization request                                                                                                                          | ✅                                                 |
+| Wallet authentication                                                                                                                                 | ✅ public client, Wallet client attestations       |
+| Demonstrating Proof of Possession (DPoP)                                                                                                              | ✅                                                 |
+| PKCE                                                                                                                                                  | ✅                                                 |
 
 You can use the EUDIW Issuer at [https://issuer.eudiw.dev/](https://issuer.eudiw.dev/), or install it locally.
-
 
 ## :heavy_exclamation_mark: Disclaimer
 
 The released software is a initial development release version:
 
--   The initial development release is an early endeavor reflecting the efforts of a short timeboxed
-    period, and by no means can be considered as the final product.
--   The initial development release may be changed substantially over time, might introduce new
-    features but also may change or remove existing ones, potentially breaking compatibility with your
-    existing code.
--   The initial development release is limited in functional scope.
--   The initial development release may contain errors or design flaws and other problems that could
-    cause system or other failures and data loss.
--   The initial development release has reduced security, privacy, availability, and reliability
-    standards relative to future releases. This could make the software slower, less reliable, or more
-    vulnerable to attacks than mature software.
--   The initial development release is not yet comprehensively documented.
--   Users of the software must perform sufficient engineering and additional testing in order to
-    properly evaluate their application and determine whether any of the open-sourced components is
-    suitable for use in that application.
--   We strongly recommend not putting this version of the software into production use.
--   Only the latest version of the software will be supported
-
+- The initial development release is an early endeavor reflecting the efforts of a short timeboxed
+  period, and by no means can be considered as the final product.
+- The initial development release may be changed substantially over time, might introduce new
+  features but also may change or remove existing ones, potentially breaking compatibility with your
+  existing code.
+- The initial development release is limited in functional scope.
+- The initial development release may contain errors or design flaws and other problems that could
+  cause system or other failures and data loss.
+- The initial development release has reduced security, privacy, availability, and reliability
+  standards relative to future releases. This could make the software slower, less reliable, or more
+  vulnerable to attacks than mature software.
+- The initial development release is not yet comprehensively documented.
+- Users of the software must perform sufficient engineering and additional testing in order to
+  properly evaluate their application and determine whether any of the open-sourced components is
+  suitable for use in that application.
+- We strongly recommend not putting this version of the software into production use.
+- Only the latest version of the software will be supported
 
 ## 1. Installation
 
@@ -95,13 +91,11 @@ Please see detailed instructions in [api_docs/add_credential.md](api_docs/add_cr
 
 ### C. Can I use my IACA certificate with the EUDIW Issuer?
 
-Yes. You must copy your IACA trusted certificate(s) (in PEM format) to the `trusted_CAs_path` folder. If you don't have an IACA certificate, we provide an example test IACA certificate for the country Utopia (UT).
-
-See more information in [api_docs/configuration.md](api_docs/configuration.md#1-service-configuration).
+Yes. You must copy your IACA trusted certificate(s) (in PEM format) to the `trusted_CAs_path` folder (see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml)). If you don't have an IACA certificate, we provide an example test IACA certificate for the country Luxembourg (LU) - see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/IACA-token](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/IACA-token).
 
 ### D. Can I use my Document Signer private key and certificate with the EUDIW Issuer?
 
-Yes. Please follow the instructions in [api_docs/configuration.md](api_docs/configuration.md#2-configuration-of-countries). If you don't have Document Signer private key and certificate, we provide  test private DS keys and certificates, for country Utopia (UT).
+Yes. Please see *countries* configuration exemple in [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml). If you don't have Document Signer private key and certificate, we provide  test private DS keys and certificates, for country Luxembourg (LU) in P12 format - see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/DS-token](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/DS-token) -.
 
 ### E. How can I create a credential offer to issue a credential?
 
@@ -120,6 +114,7 @@ Yes. Please see how in [Install Docker](install.md#6-docker).
 Information and guides on the revocation service can be found in the following [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-statuslist-py).
 
 ### J. Can an external service create a credential offer?
+
 Yes, please see how in [Credential Offer Endpoint](api_docs/credential_offer_create.md)
 
 ## How to contribute

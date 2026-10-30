@@ -3,31 +3,28 @@
 ## [0.3.0]
 
 ### Added:
--  A new mandatory argument, "device_publickey", has been added. This new attribute is the wallet instance public key.
--  Added a tutorial on how to use Pytest, which can be found in the tests folder, "Pytest_Tutorial.md".
 
+- A new mandatory argument, "device_publickey", has been added. This new attribute is the wallet instance public key.
+- Added a tutorial on how to use Pytest, which can be found in the tests folder, "Pytest_Tutorial.md".
 
 ### Changed
 
--  Modifications to the /get_pid and /pid routes: when the "country" parameter is empty, the user is redirected to the 
-    /pid route to choose the corresponding country. In the /pid route, when a card is selected, the user is redirected 
-    back to /getpid, now with the desired country information.
-    
-### Fixed	
--  Correction in the encoding process where the data was encoded twice in base64. Rectified to just base64 encoding.
+- Modifications to the /get_pid and /pid routes: when the "country" parameter is empty, the user is redirected to the
+  /pid route to choose the corresponding country. In the /pid route, when a card is selected, the user is redirected
+  back to /getpid, now with the desired country information.
 
+### Fixed
+
+- Correction in the encoding process where the data was encoded twice in base64. Rectified to just base64 encoding.
 
 ## [0.4.0]
 
 ### Added:
 
--  Added tutorial on using the Robot framework, found in the tests folder under the name, "robot_tutorial.md".
-	
--  Added functionality for issuing mDL requests, both in CBOR and SD-JWT format. To use the "/mdl" and "/getmdl" 
-    routes, the operation and arguments required are the same as for the PID.
-	
+- Added tutorial on using the Robot framework, found in the tests folder under the name, "robot_tutorial.md".
+- Added functionality for issuing mDL requests, both in CBOR and SD-JWT format. To use the "/mdl" and "/getmdl"
+  routes, the operation and arguments required are the same as for the PID.
 - Added metadata to the PID ("issuance_date", "expiry_date", "issuing_authority" and "issuing_country").
-	
 - Added the "un_distinguishing_sign" attribute to the mDL.
 
 ## [0.5.0]
@@ -35,31 +32,34 @@
 _20 Jun 2024_
 
 ### Added:
--  Support notification endpoint - OID4VCI draf13
--  Support deferred flow - OID4VCI draft 13
--  Support dynamic-credential-request - OID4VCI draft 13
--  Support Pre-Authorized Code Flow - OID4VCI draft 13
--  Support credential offer - OID4VCI draft 13
--  Configure a new generic IdP based on OIDC
--  Support batch flow - OID4VCI draft 13
 
+- Support notification endpoint - OID4VCI draf13
+- Support deferred flow - OID4VCI draft 13
+- Support dynamic-credential-request - OID4VCI draft 13
+- Support Pre-Authorized Code Flow - OID4VCI draft 13
+- Support credential offer - OID4VCI draft 13
+- Configure a new generic IdP based on OIDC
+- Support batch flow - OID4VCI draft 13
 
 ### Changed
--  Update current flows to OID4VCI draft 13
--  Remove /oidc route
--  A more dynamically built form and country selection
--  Changed doctype and namespace from "eudiw" to "eudi" in pid and age verification credentials. 
 
+- Update current flows to OID4VCI draft 13
+- Remove /oidc route
+- A more dynamically built form and country selection
+- Changed doctype and namespace from "eudiw" to "eudi" in pid and age verification credentials.
 
 ### Fixed
--  UI scalling for mobile devices
--  Pull [#11](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/11) Fix date validation for issue_date and expiry_date for doc_type org.iso.18013.5.1.mDL
--  Pull [#7](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/7) Fix Directory /tmp/log does not exist
+
+- UI scalling for mobile devices
+- Pull [#11#11](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/11) Fix date validation for issue_date and expiry_date for doc_type org.iso.18013.5.1.mDL
+- Pull [#7#7](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/pull/7) Fix Directory /tmp/log does not exist
 
 ## [0.6.0]
 
 _04 Oct 2024_
+
 ### Added:
+
 - Docker
 - config with environment variables
 - Issue Photo ID attestation
@@ -70,52 +70,63 @@ _04 Oct 2024_
 - Added information to the metadata on how the attribute will be sourced
 
 ### Changed
+
 - UI changes in the credential offer and authorisation pages
 - change the way optional attributes are managed
 - dynamic generation of Issuer managed attributes (issuance date, expiration date, issuing authority, issuing country, ...)
 - Improve responsiveness to the issuer profile and service (including UI) to improve usability and accessibility
 
 ### Fixed
+
 - Fixed form data being prematurely removed
 - Conflicting dependencies
 - Dynamic Issuing always requests full PID attestation instead of the required attributes.
-  
 
 ## [0.7.0]
 
 _28 Jan 2025_
+
 ### Added:
+
 - Authorization server metadata
 - Attestation Revocation
--  Issuer logo to metadata
+- Issuer logo to metadata
 
 ### Changed
+
 - Align SD-JWT-VC format of PID with latest drafts
 
 ## [0.7.1]
 
 _05 Mar 2025_
+
 ### Added:
+
 - EHIC Credential compliant with LSP DC4EU technical specification.
 - PDA1 Credential compliant with LSP DC4EU technical specification.
 - sd-jwt vc: EHIC, PDA1, HIID, IBAN, MSISDN, POR, Tax, Pseudonym age over 18.
 - Created a new issuer_conditions schema in credential metadate to further specify complex credentials like nested claims.
 
 ### Changed
+
 - Backend logic management creating the form and credentials based on metadata issuer_condtitions
 - Front-end form changes to dynamically create a form based on metadata issuer_conditions with nested fields, cardinality and nested mandatory.
 - Update PID to version 1.5
 
 ### Fixed
+
 - Status code on oauth2 PAR is 200 should be 201
 
 ## [0.7.2]
 
 _15 Apr 2025_
+
 ### Changed
+
 - oid4vp presentation_id to transaction_id
 
 ### Fixed
+
 - EHIC and PDA1 not appearing in credential offer selection
 - Some PID sd-jwt vc attribure identifiers
 - PDA1 and EHIC formatting
@@ -126,10 +137,13 @@ _15 Apr 2025_
 ## [0.8.0]
 
 _05 May 2025_
+
 ### Added:
+
 - Nonce Endpoint
 
 ### Changed
+
 - Credential endpoint oid4vci d15
 - Deferred endpoint oid4vci d15
 - Metadata oid4vci d15
@@ -141,21 +155,25 @@ _05 May 2025_
 _25 Jun 2025_
 
 ### Changed
+
 - PID to new spec
 
 ### Fixed
+
 - Refresh token rotation
-- CoR uri 
+- CoR uri
 
 ## [0.8.2]
 
 _14 Jul 2025_
 
 ### Changed
+
 - Preauth form and main generated the same.
 
 ### Fixed
-- Bug where PID and PID sd-jwt cannot be issued at the same time with deeplink 
+
+- Bug where PID and PID sd-jwt cannot be issued at the same time with deeplink
 - Cannot add PID due to bracket error
 - SD-JWT VC PID contains improperly disclosed elements in nationalities
 - Unable to issue PoR Credential through wallet tester
@@ -165,12 +183,14 @@ _14 Jul 2025_
 _11 Nov 2025_
 
 ### Added
+
 - Support for Credential Request encryption
 - Key attestations proof type
 - Pytest tests
 - `session_manager` for tracking session state throughout the service
 
 ### Changed
+
 - Split Issuer backend, frontend, and authorization server into separate services
 - Updated PID to the latest version
 - Refactored and cleaned up code
@@ -182,10 +202,12 @@ _11 Nov 2025_
 _26 Nov 2025_
 
 ### Added
+
 - External credential offer API
 
 ### Fixed
-- install.md URLs 
+
+- install.md URLs
 - update .env example
 
 ## [0.9.2]
@@ -193,6 +215,7 @@ _26 Nov 2025_
 _28 Nov 2025_
 
 ### Fixed
+
 - Fix invalid version tag in Docker Compose file by @thirtified
 
 ## [0.9.3]
@@ -200,43 +223,47 @@ _28 Nov 2025_
 _05 Dec 2025_
 
 ### Added
+
 - OID4VP and Credential offer scheme env variables
 
 ### Fixed
+
 - Fix Pre-Authorization Front-End URL Handling
 - mDL with multiple driving privileges
 - key_attestation in JWT format handling
 - Form Formatter Not Marking Mandatory Attributes
 
 ### Changed
-- Updated revocation test to OID4VP version 1
 
+- Updated revocation test to OID4VP version 1
 
 ## [0.9.4]
 
 _02 Apr 2026_
 
 ### Added
+
 - Sign metadata endpoint
 - WUA trust validator
 
 ### Fixed
+
 - PID SD-JWT VC: email_address and mobile_phone_number not remapped to IANA-registered claim names
 - encoding for place_of_birth in MSO MDoc PID
 - invalid values for credential_signing_alg_values_supported for mdoc credentials in metadata
 
 ### Changed
+
 - Configuration to yaml
 - install.md
-
-
 
 ## [0.9.5]
 
 _29 Apr 2026_
 
 ### Fixed
-- Update PID SD-JWT VC attributes for `email_address` and `mobile_phone_number` 
+
+- Update PID SD-JWT VC attributes for `email_address` and `mobile_phone_number`
 - Update PID SD-JWT VC attribute `address`
 - Update TAX mdoc metadata field `credential_signing_alg_values_supported`
 
@@ -245,6 +272,7 @@ _29 Apr 2026_
 _25 Jun 2026_
 
 ### Fixed
+
 - Updated all unit tests, now passing successfully.
 
 ## [0.9.7]
@@ -252,6 +280,7 @@ _25 Jun 2026_
 _5 Aug 2026_
 
 ### Changed
+
 - Updated supported credentials metadata to include `credential_reuse_policy`.
 - Updated implementation to align with EUDI TS3 v1.5 specification.
 
@@ -260,13 +289,25 @@ _5 Aug 2026_
 _14 Aug 2026_
 
 ### Changed
+
 - Updated OID4VP requests to specify either a registration certificate or intended use on Verifier requests.
 
 ### Fixed
+
 - Fixed invalid `validUntil` timestamp format in the issuance of some mso_mdoc credentials.
 
 ## [0.10.0]
 
 _07 Oct 2026_
+
 ### Added
+
 - JWT Registration certificate support
+
+## 0.10.1]
+
+_30 Oct 2026_
+
+### Added
+
+- Update test PID Issuer certificates and cryptographic keys (available in [https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens)) to comply with the applicable CIR and ETSI requirements
