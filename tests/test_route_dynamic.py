@@ -2357,3 +2357,72 @@ class TestGenerateConnectorAuthorizationUrl:
             self.generate_connector_authorization_url(
                 data_missing_redirect, "IT", ["scope"]
             )
+
+
+# -----------------------
+# Test: Dynamic_form must not 500 on missing "proceed" (issue #178)
+# -----------------------
+class TestDynamicFormProceed:
+    """The "proceed" field is the submit button's name, so it is client-controlled.
+    A POST to /dynamic/form without it must not raise a KeyError / HTTP 500."""
+
+    @pytest.fixture
+    def client(self):
+        app = Flask(__name__)
+        app.secret_key = "test_secret"
+        app.register_blueprint(dynamic)
+        return app.test_client()
+
+    def _patches(self):
+        session_mgr = MagicMock()
+        session_mgr.get_session.return_value = MagicMock(frontend_id="frontend1")
+        return [
+            patch("app.route_dynamic.session_manager", session_mgr),
+            patch("app.route_dynamic.form_formatter", side_effect=lambda d: d),
+            patch("app.route_dynamic.presentation_formatter", return_value={}),
+            patch(
+                "app.route_dynamic.post_redirect_with_payload",
+                return_value=b"redirected",
+            ),
+            patch.dict(
+                "app.route_dynamic.CONFIGURATION",
+                {
+                    "service_url": "https://service.test",
+                    "frontend": {
+                        "frontends_config": {"frontend1": {"url": "https://frontend.test"}}
+                    },
+                },
+            ),
+        ]
+
+    def test_form_without_proceed_does_not_500(self, client):
+        """Missing "proceed" continues the flow (200) instead of a 500."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "sid123"
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post(
+                "/dynamic/form",
+                data={"family_name": "Doe", "given_name": "Jane"},
+            )
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
+
+    def test_form_with_proceed_still_works(self, client):
+        """A normal submit that includes "proceed" is unchanged."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "sid123"
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post(
+                "/dynamic/form",
+                data={"family_name": "Doe", "given_name": "Jane", "proceed": "Submit"},
+            )
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
