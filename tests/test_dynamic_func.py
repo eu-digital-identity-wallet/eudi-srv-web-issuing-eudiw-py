@@ -164,17 +164,11 @@ class TestDynamicFormatter:
             assert result == mock_credential
 
     def test_dc_sd_jwt_success(self, mock_external_dependencies):
-        """Tests the dc+sd-jwt format flow with successful json_post."""
-        mock_sd_jwt = "mock.sd-jwt.data"
-        mock_external_dependencies["app.dynamic_func.CONFIGURATION"]['service_url'] = (
-            "http://formatter"
+        """Tests the dc+sd-jwt format flow, which calls sdjwtFormatter directly."""
+        mock_credential = "mock.sd-jwt.data"
+        mock_external_dependencies["app.dynamic_func.sdjwtFormatter"].return_value = (
+            mock_credential
         )
-        mock_external_dependencies[
-            "app.dynamic_func.json_post"
-        ].return_value.json.return_value = {
-            "error_code": 0,
-            "sd-jwt": mock_sd_jwt,
-        }
 
         # Mock formatter return (data, requested_credential)
         mock_formatter_data = {"sdjwt_attr": "value"}
@@ -199,31 +193,24 @@ class TestDynamicFormatter:
             # Assertions
             mock_formatter.assert_called_once()
             mock_external_dependencies[
-                "app.dynamic_func.json_post"
+                "app.dynamic_func.sdjwtFormatter"
             ].assert_called_once_with(
-                "http://formatter/formatter/sd-jwt",
-                {
-                    "country": "PT",
+                PID={
                     "credential_metadata": mock_formatter_cred,
-                    "scope": mock_scope,
-                    "device_publickey": self.MOCK_DEVICE_KEY,
                     "data": mock_formatter_data,
+                    "device_publickey": self.MOCK_DEVICE_KEY,
                 },
+                country="PT",
+                scope=mock_scope,
+                session_id=self.MOCK_SESSION_ID,
             )
-            assert result == mock_sd_jwt
+            assert result == mock_credential
 
     def test_dc_sd_jwt_error(self, mock_external_dependencies):
-        """Tests the dc+sd-jwt format flow when json_post returns an error."""
-        mock_external_dependencies[
-            "app.dynamic_func.json_post"
-        ].return_value.json.return_value = {
-            "error_code": 1,
-            "error_message": "Post failed",
-        }
-        
-        mock_external_dependencies[
-            "app.dynamic_func.CONFIGURATION"
-        ]["service_url"] = "http://formatter"
+        """Tests that an error raised by sdjwtFormatter propagates to the caller."""
+        mock_external_dependencies["app.dynamic_func.sdjwtFormatter"].side_effect = (
+            ValueError("Post failed")
+        )
 
         # Mock formatter return
         mock_formatter_data = {"sdjwt_attr": "value"}
@@ -236,16 +223,14 @@ class TestDynamicFormatter:
             "app.dynamic_func.formatter",
             return_value=(mock_formatter_data, mock_formatter_cred),
         ):
-            result = dynamic_formatter(
-                format="dc+sd-jwt",
-                scope="eu.europa.ec.eudi.pid.1",
-                form_data=self.MOCK_FORM_DATA,
-                device_publickey=self.MOCK_DEVICE_KEY,
-                session_id=self.MOCK_SESSION_ID,
-            )
-
-            # Assertions
-            assert result == "Error"
+            with pytest.raises(ValueError, match="Post failed"):
+                dynamic_formatter(
+                    format="dc+sd-jwt",
+                    scope="eu.europa.ec.eudi.pid.1",
+                    form_data=self.MOCK_FORM_DATA,
+                    device_publickey=self.MOCK_DEVICE_KEY,
+                    session_id=self.MOCK_SESSION_ID,
+                )
 
 
 # --- Test `formatter` ---

@@ -66,7 +66,12 @@ class TestOid4vpRouteSuccess:
                 "test_frontend": {"url": "https://frontend.com"}
             }
         },
-        "oid4vp_scheme": "haip-vp://"
+        "oid4vp_scheme": "haip-vp://",
+        "intended_use_id": "test-intended-use-id"
+    })
+    @patch("app.oid4vp_func.CONFIGURATION", { # oid4vp_verifier_requests reads its own module-level binding
+        "dynamic_presentation_url": "https://example.com/",
+        "intended_use_id": "test-intended-use-id"
     })
     @patch("app.route_oid4vp.post_redirect_with_payload")
     @patch("app.route_oid4vp.segno.make")
