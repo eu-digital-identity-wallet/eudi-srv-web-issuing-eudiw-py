@@ -706,6 +706,19 @@ class TestOid4vpCall:
             assert revocation_id not in mock_revoc_req
 
 
+class TestOid4vpCallBadFormInput:
+    """Bad form input should get a 400, not a 500."""
+
+    def test_unknown_credential(self, client, mock_config, mock_oidc_metadata):
+        """A credential that is not in the metadata: 400."""
+        response = client.post(
+            "/revocation/oid4vp_call",
+            data={"not_a_credential": "on", "proceed": "true"},
+        )
+
+        assert response.status_code == 400
+
+
 class TestEdgeCases:
     """Test edge cases and error conditions."""
 

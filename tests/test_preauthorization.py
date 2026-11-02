@@ -335,6 +335,28 @@ class TestFormAuthorizeGenerate:
         assert call_args == mock_session_manager.get_session.return_value.user_data
 
 
+class TestPreauthBadFormInput:
+    """Bad form input should get a 400, not a 500."""
+
+    def test_form_authorize_generate_without_user_id(self, client):
+        """No user_id in the form: 400."""
+        response = client.post("/form_authorize_generate", data={})
+
+        assert response.status_code == 400
+
+    def test_preauth_form_with_bad_date(self, client):
+        """effective_from_date that is not YYYY-MM-DD: 400."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session_id"
+
+        response = client.post(
+            "/preauth_form",
+            data={"name": "John Doe", "effective_from_date": "01/02/2024", "proceed": "true"},
+        )
+
+        assert response.status_code == 400
+
+
 class TestCredentialOfferReq2:
     """Test the /credentialOfferReq2 route."""
 

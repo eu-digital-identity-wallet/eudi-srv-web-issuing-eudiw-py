@@ -33,6 +33,7 @@ from urllib.parse import urlencode
 from uuid import uuid4
 from flask import (
     Blueprint,
+    abort,
     redirect,
     render_template,
     request,
@@ -807,7 +808,10 @@ def form_formatter(form_data: dict) -> dict:
     # Handle date formatting first, as it's a simple key-value replacement
     if "effective_from_date" in form_data:
         date_part = form_data["effective_from_date"].split("T")[0]
-        dt = datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        try:
+            dt = datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            abort(400, description="Invalid effective_from_date")
         rfc3339_string = dt.isoformat().replace("+00:00", "Z")
         form_data.update({"effective_from_date": rfc3339_string})
 

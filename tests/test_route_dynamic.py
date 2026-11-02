@@ -2426,3 +2426,27 @@ class TestDynamicFormProceed:
             patch.stopall()
         assert resp.status_code != 500
         assert resp.data == b"redirected"
+
+
+class TestDynamicFormBadDate:
+    """effective_from_date that is not YYYY-MM-DD should get a 400, not a 500."""
+
+    @pytest.fixture
+    def client(self):
+        app = Flask(__name__)
+        app.secret_key = "test_secret"
+        app.register_blueprint(dynamic)
+        return app.test_client()
+
+    def test_form_with_bad_date(self, client):
+        """Bad date in the form: 400."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "sid123"
+        session_mgr = MagicMock()
+        session_mgr.get_session.return_value = MagicMock(frontend_id="frontend1")
+        with patch("app.route_dynamic.session_manager", session_mgr):
+            resp = client.post(
+                "/dynamic/form",
+                data={"family_name": "Doe", "effective_from_date": "not-a-date", "proceed": "Submit"},
+            )
+        assert resp.status_code == 400

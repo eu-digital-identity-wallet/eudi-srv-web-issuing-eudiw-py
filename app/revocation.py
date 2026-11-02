@@ -113,6 +113,8 @@ def oid4vp_call():
     query_id_counter = 0
 
     for credential_requested in form:
+        if credential_requested not in credentialsSupported:
+            abort(400, description="Unknown credential")
         credential_config = credentialsSupported[credential_requested]
         credential_metadata = credential_config["credential_metadata"]
         credential_format = credential_config["format"]

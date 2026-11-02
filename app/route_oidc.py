@@ -43,6 +43,7 @@ import segno
 from flask import (
     Blueprint,
     Response,
+    abort,
     jsonify,
     request,
     session,
@@ -1458,6 +1459,8 @@ def credentialOffer():
     credential_offer_URI = request.form.get("credential_offer_URI")
 
     if "proceed" in form_keys:
+        if "credential_offer_URI" not in form_keys or "Authorization Code Grant" not in form_keys:
+            abort(400, description="Missing credential offer fields")
         form = list(form_keys)
         form.remove("proceed")
         form.remove("credential_offer_URI")
@@ -1545,10 +1548,12 @@ def credentialOffer():
                         "qrcode": qr_img_base64,
                     },
                 )
+        else:
+            abort(400, description="Unknown credential")
 
     else:
         if "frontend_id" in session:
-            redirect(
+            return redirect(
                 f"{CONFIGURATION['service_url']}/credential_offer_choice?frontend_id={session['frontend_id']}"
             )
         else:
@@ -1557,6 +1562,8 @@ def credentialOffer():
 
 @oidc.route("/credential-offer-reference/<string:reference_id>", methods=["GET"])
 def offer_reference(reference_id):
+    if reference_id not in credential_offer_references:
+        abort(404)
     return credential_offer_references[reference_id]["credential_offer"]
 
 

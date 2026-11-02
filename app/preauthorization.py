@@ -27,6 +27,7 @@ import json
 import random
 from flask import (
     Blueprint,
+    abort,
     render_template,
     request,
     session,
@@ -145,9 +146,12 @@ def preauth_form():
     logger.info(f"form_data: {form_data}")
 
     if "effective_from_date" in form_data:
-        dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(
-            tzinfo=timezone.utc
-        )
+        try:
+            dt = datetime.strptime(form_data["effective_from_date"], "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError:
+            abort(400, description="Invalid effective_from_date")
         rfc3339_string = dt.isoformat().replace("+00:00", "Z")
         form_data.update({"effective_from_date": rfc3339_string})
 
@@ -186,9 +190,7 @@ def preauth_form():
 @preauth.route("/form_authorize_generate", methods=["GET", "POST"])
 def form_authorize_generate():
 
-    form_data = request.form.to_dict()
-
-    user_id = form_data["user_id"]
+    user_id = request.form["user_id"]
     # data = form_dynamic_data[user_id]
 
     current_session = session_manager.get_session(user_id)

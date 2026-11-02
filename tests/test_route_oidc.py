@@ -893,6 +893,91 @@ class TestOfferReference:
         assert response.json == test_offer
 
 
+class TestCredentialOfferBadInput:
+    """Bad input on /credential_offer and /credential-offer-reference should not end in a 500."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        metadata = {
+            "credential_configurations_supported": {
+                "eu.europa.ec.eudi.pid_mdoc": {
+                    "format": "mso_mdoc",
+                    "credential_metadata": {"display": [{"name": "PID"}]},
+                }
+            }
+        }
+        config = {
+            "service_url": "https://test.issuer.dev",
+            "wallet_tester_url": "https://test.wallet.dev",
+            "expiry": {"form": 10},
+            "frontend": {
+                "default": "test_frontend",
+                "frontends_config": {"test_frontend": {"url": "https://frontend.example.com"}},
+            },
+        }
+        with patch.dict("app.route_oidc.oidc_metadata", metadata, clear=True), patch(
+            "app.route_oidc.CONFIGURATION", config
+        ), patch(
+            "app.route_oidc.post_redirect_with_payload", return_value="redirected"
+        ) as self.post_redirect:
+            yield
+
+    def test_missing_offer_fields(self, client):
+        """No credential_offer_URI or grant choice: 400."""
+        response = client.post(
+            "/credential_offer",
+            data={"eu.europa.ec.eudi.pid_mdoc": "on", "proceed": "Submit"},
+        )
+
+        assert response.status_code == 400
+
+    def test_unknown_credential(self, client):
+        """A credential that is not in the metadata: 400."""
+        response = client.post(
+            "/credential_offer",
+            data={
+                "not_a_credential": "on",
+                "credential_offer_URI": "openid-credential-offer://",
+                "Authorization Code Grant": "auth_code",
+                "proceed": "Submit",
+            },
+        )
+
+        assert response.status_code == 400
+
+    def test_valid_offer_still_works(self, client):
+        """A normal submit still builds the offer like before."""
+        response = client.post(
+            "/credential_offer",
+            data={
+                "eu.europa.ec.eudi.pid_mdoc": "on",
+                "credential_offer_URI": "openid-credential-offer://",
+                "Authorization Code Grant": "auth_code",
+                "proceed": "Submit",
+            },
+        )
+
+        assert response.status_code == 200
+        payload = self.post_redirect.call_args.kwargs["data_payload"]
+        assert payload["url_data"].startswith("openid-credential-offer://credential_offer?")
+
+    def test_get_with_frontend_id_redirects(self, client):
+        """Opening /credential_offer with a frontend_id in the session redirects to the choice page."""
+        with client.session_transaction() as sess:
+            sess["frontend_id"] = "test_frontend"
+
+        response = client.get("/credential_offer")
+
+        assert response.status_code == 302
+        assert response.location.endswith("/credential_offer_choice?frontend_id=test_frontend")
+
+    def test_unknown_offer_reference(self, client):
+        """A reference that does not exist: 404."""
+        response = client.get("/credential-offer-reference/does-not-exist")
+
+        assert response.status_code == 404
+
+
 class TestBranchCoverage:
     """Additional tests for branch coverage"""
 
