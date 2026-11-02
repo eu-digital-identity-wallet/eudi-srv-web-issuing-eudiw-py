@@ -1161,7 +1161,8 @@ def Dynamic_form():
 
     # form_data = request.form.to_dict()
 
-    form_data.pop("proceed")
+    # "proceed" is the submit button, so a client can leave it out.
+    form_data.pop("proceed", None)
 
     cleaned_data = form_formatter(form_data)
 
