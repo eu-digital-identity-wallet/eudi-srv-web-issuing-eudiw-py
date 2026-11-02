@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libjpeg62-turbo \
     zlib1g \
+    libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy compiled packages from builder
