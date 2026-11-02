@@ -908,3 +908,76 @@ class TestCompleteCodeCoverage:
         user_data = call_args[1]["user_data"]
 
         assert user_data == {"name": "Alice"}
+
+
+class TestPreauthFormProceed:
+    """The "proceed" field is the submit button.
+    Sending the form without it should still work."""
+
+    @pytest.fixture
+    def client(self):
+        app = Flask(__name__)
+        app.secret_key = "test_secret"
+        app.register_blueprint(preauth)
+        return app.test_client()
+
+    def _patches(self):
+        session_mgr = MagicMock()
+        session_mgr.get_session.return_value = MagicMock(frontend_id="frontend1")
+        self.form_formatter = MagicMock(side_effect=lambda d: d)
+        return [
+            patch("app.preauthorization.session_manager", session_mgr),
+            patch("app.preauthorization.form_formatter", self.form_formatter),
+            patch("app.preauthorization.presentation_formatter", return_value={}),
+            patch(
+                "app.preauthorization.post_redirect_with_payload",
+                return_value=b"redirected",
+            ),
+            patch.dict(
+                "app.preauthorization.CONFIGURATION",
+                {
+                    "service_url": "https://service.test",
+                    "frontend": {
+                        "frontends_config": {"frontend1": {"url": "https://frontend.test"}}
+                    },
+                },
+            ),
+        ]
+
+    def test_form_without_proceed_does_not_500(self, client):
+        """Form sent without "proceed": still works."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "sid123"
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post(
+                "/preauth_form",
+                data={"family_name": "Doe", "given_name": "Jane"},
+            )
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
+        self.form_formatter.assert_called_once_with(
+            {"family_name": "Doe", "given_name": "Jane"}
+        )
+
+    def test_form_with_proceed_still_works(self, client):
+        """Form sent with "proceed": works like before."""
+        with client.session_transaction() as sess:
+            sess["session_id"] = "sid123"
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post(
+                "/preauth_form",
+                data={"family_name": "Doe", "given_name": "Jane", "proceed": "Submit"},
+            )
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
+        self.form_formatter.assert_called_once_with(
+            {"family_name": "Doe", "given_name": "Jane"}
+        )

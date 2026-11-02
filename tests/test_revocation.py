@@ -1168,3 +1168,94 @@ class TestOid4vpGet:
 
             assert mock_status_sdjwt.called
             assert mock_status_mdoc.called
+
+
+class TestOid4vpCallProceed:
+    """The "proceed" field is the submit button.
+    Sending the form without it should still work."""
+
+    EXPECTED_DCQL = {
+        "credentials": [
+            {
+                "id": "query_0",
+                "format": "dc+sd-jwt",
+                "claims": [{"path": ["given_name"]}],
+                "meta": {"vct_values": ["urn:test:pid"]},
+            }
+        ]
+    }
+
+    @pytest.fixture
+    def client(self):
+        from flask import Flask
+
+        app = Flask(__name__)
+        app.secret_key = "test_secret"
+        app.register_blueprint(revocation.revocation)
+        return app.test_client()
+
+    def _patches(self):
+        verifier_response = {
+            "client_id": "verifier",
+            "request_uri": "https://verifier.test/r",
+            "transaction_id": "tx123",
+        }
+        self.verifier = Mock(return_value=(verifier_response, verifier_response))
+        return [
+            patch(
+                "app.revocation.oidc_metadata",
+                {
+                    "credential_configurations_supported": {
+                        "test_pid": {
+                            "format": "dc+sd-jwt",
+                            "vct": "urn:test:pid",
+                            "credential_metadata": {"claims": [{"path": ["given_name"]}]},
+                        }
+                    }
+                },
+            ),
+            patch("app.revocation.oid4vp_verifier_requests", self.verifier),
+            patch(
+                "app.revocation.post_redirect_with_payload",
+                return_value=b"redirected",
+            ),
+            patch.dict(
+                "app.revocation.CONFIGURATION",
+                {
+                    "service_url": "https://service.test",
+                    "dynamic_presentation_url": "https://verifier.test/presentation",
+                    "oid4vp_scheme": "openid4vp://",
+                    "frontend": {
+                        "default": "frontend1",
+                        "frontends_config": {"frontend1": {"url": "https://frontend.test"}},
+                    },
+                },
+            ),
+        ]
+
+    def test_call_without_proceed_does_not_500(self, client):
+        """Form sent without "proceed": still works."""
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post("/revocation/oid4vp_call", data={"test_pid": "test_pid"})
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
+        assert self.verifier.call_args[0][0] == self.EXPECTED_DCQL
+
+    def test_call_with_proceed_still_works(self, client):
+        """Form sent with "proceed": works like before."""
+        for p in self._patches():
+            p.start()
+        try:
+            resp = client.post(
+                "/revocation/oid4vp_call",
+                data={"test_pid": "test_pid", "proceed": "Submit"},
+            )
+        finally:
+            patch.stopall()
+        assert resp.status_code != 500
+        assert resp.data == b"redirected"
+        assert self.verifier.call_args[0][0] == self.EXPECTED_DCQL

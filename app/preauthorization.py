@@ -157,7 +157,7 @@ def preauth_form():
 
     logger.info(f"session_id: {session_id}")
 
-    form_data.pop("proceed")
+    form_data.pop("proceed", None)
 
     cleaned_data = form_formatter(form_data)
 

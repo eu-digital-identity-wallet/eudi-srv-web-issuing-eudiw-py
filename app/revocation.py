@@ -103,7 +103,8 @@ def oid4vp_call():
     credentialsSupported = oidc_metadata["credential_configurations_supported"]
     form_keys = request.form.keys()
     form = list(form_keys)
-    form.remove("proceed")
+    if "proceed" in form:
+        form.remove("proceed")
     session_id = str(uuid.uuid4())
     session["session_id"] = session_id
 
