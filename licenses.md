@@ -22,7 +22,6 @@
 | pillow                    | 10.2.0    | Historical Permission Notice and Disclaimer (HPND)  | https://github.com/python-pillow/Pillow/                       | https://github.com/python-pillow/Pillow/blob/main/LICENSE|
 | segno                     | 1.6.1     | BSD 3-Clause License                                | https://github.com/heuer/segno/                                | https://github.com/heuer/segno/blob/master/LICENSE|
 | qrcode-artistic           | 3.0.2     | BSD 3-Clause License                                | https://github.com/heuer/qrcode-artistic/                      | https://github.com/heuer/qrcode-artistic/blob/master/LICENSE|
-| gunicorn                  | 22.0.0    | MIT License                                         | https://github.com/benoitc/gunicorn/                           | https://github.com/benoitc/gunicorn/blob/master/LICENSE|
 | pymdoccbor                | 0.5.4     | Apache Software License 2.0                         | https://github.com/peppelinux/pyMDL-MDOC/                       | https://github.com/IdentityPython/pyMDOC-CBOR/blob/main/LICENSE|
 | sd-jwt                    | 0.10.4    | Apache Software License 2.0                         | https://github.com/openwallet-foundation-labs/sd-jwt-python/    | https://github.com/openwallet-foundation-labs/sd-jwt-python/blob/main/LICENSE|
 | idpyoidc                  | 3.0.0     | Apache Software License 2.0                             | https://github.com/IdentityPython/idpy-oidc/                   | https://github.com/IdentityPython/idpy-oidc/blob/main/LICENSE|

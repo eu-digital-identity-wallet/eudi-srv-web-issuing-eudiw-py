@@ -118,6 +118,17 @@ class TestDynamicFlows:
         assert page.call_args.kwargs["data_payload"]["redirect_url"] == "https://backend.test/dynamic/redirect_wallet"
         assert "signature_usual_mark" in page.call_args.kwargs["data_payload"]["image_attributes"]
 
+    def test_form_submission_without_proceed(self, client):
+        # "proceed" is the submit button, so a client can leave it out (upstream #178).
+        with patch.object(dynamic_routes.session_manager, "get_session", return_value=_session()), patch.object(
+            dynamic_routes.session_manager, "update_user_data"
+        ), patch.object(dynamic_routes, "presentation_formatter", return_value={}), patch.object(
+            dynamic_routes, "post_redirect_with_payload", return_value="consent page"
+        ):
+            response = client.post("/dynamic/form", data={"family_name": "Doe"})
+
+        assert response.status_code == 200 and response.data == b"consent page"
+
 
 class TestGetPidOid4vp:
     def _get(self, client, session, query="?presentation_id=abc", verifier_status=200, vp_error=(False, "")):
