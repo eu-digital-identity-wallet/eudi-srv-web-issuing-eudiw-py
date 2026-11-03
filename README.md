@@ -122,6 +122,16 @@ Information and guides on the revocation service can be found in the following [
 ### J. Can an external service create a credential offer?
 Yes, please see how in [Credential Offer Endpoint](api_docs/credential_offer_create.md)
 
+### K. How do I run the tests?
+Install the test dependencies and run pytest from the repository root:
+
+```shell
+pip install -r requirements-dev.txt
+pytest
+```
+
+The tests use an in-memory configuration (`tests/conftest.py` sets the variables of `.env.test`), so no configuration file, database or other service is needed.
+
 ## How to contribute
 
 We welcome contributions to this project. To ensure that the process is smooth for everyone

@@ -129,6 +129,24 @@ class TestDynamicFlows:
 
         assert response.status_code == 200 and response.data == b"consent page"
 
+    @pytest.mark.parametrize(
+        "form",
+        [
+            {"effective_from_date": "garbage"},
+            {"a": "x", "a[0]": "y"},
+            {"a[0]": "x", "a[0][b]": "y"},
+        ],
+    )
+    def test_malformed_form_is_rejected(self, client, form):
+        # Client input must give 400, not 500 (upstream #178).
+        with patch.object(dynamic_routes.session_manager, "get_session", return_value=_session()), patch.object(
+            dynamic_routes.session_manager, "update_user_data"
+        ) as store:
+            response = client.post("/dynamic/form", data=form)
+
+        assert response.status_code == 400
+        store.assert_not_called()
+
 
 class TestGetPidOid4vp:
     def _get(self, client, session, query="?presentation_id=abc", verifier_status=200, vp_error=(False, "")):

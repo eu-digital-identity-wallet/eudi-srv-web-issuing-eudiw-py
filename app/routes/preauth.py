@@ -82,16 +82,18 @@ def _authorization_details(credential_ids: list) -> list:
     return [{"type": "openid_credential", "credential_configuration_id": cid} for cid in credential_ids]
 
 
-def request_preauth_token(scope: str) -> str:
+def request_preauth_token(scope: str, frontend_id: Optional[str] = None) -> str:
     """Obtains a pre-authorized code and creates the matching issuance session.
 
     Args:
         scope: Space separated credential configuration ids.
+        frontend_id: Frontend whose offer it is (default: ``frontend.default``).
 
     Returns:
         The new session id (assigned by the authorization server).
     """
-    response = generate_preauth_code(scope)
+    frontend_id = frontend_id or CONFIGURATION["frontend"]["default"]
+    response = generate_preauth_code(scope, frontend_id)
     session_id = response.get("session_id")
     logger.info(f", Session ID: {safe(session_id, 64)}, Pre-authorized code obtained for scope {safe(scope, 200)}")
     session_manager.add_session(
@@ -100,6 +102,7 @@ def request_preauth_token(scope: str) -> str:
         scope=scope,
         tx_code=response.get("tx_code"),
         country="AV" if scope in AGE_VERIFICATION_SCOPES else "FC",
+        frontend_id=frontend_id,
     )
     return session_id
 
@@ -152,14 +155,11 @@ def preauthRed() -> Union[str, Tuple[str, int]]:
     if credential_list is None:
         logger.warning(f"/preauth rejected: invalid credentials_id {safe(request.values.get('credentials_id'), 200)}")
         return "Invalid or missing credentials_id", HTTPStatus.BAD_REQUEST
-    session_id = request_preauth_token(scope=" ".join(credential_list))
+    session_id = request_preauth_token(scope=" ".join(credential_list), frontend_id=session.get("frontend_id"))
     session["session_id"] = session_id
 
     authorization_details = _authorization_details(credential_list)
     session_manager.update_authorization_details(session_id=session_id, authorization_details=authorization_details)
-    session_manager.update_frontend_id(
-        session_id=session_id, frontend_id=session.get("frontend_id") or CONFIGURATION["frontend"]["default"]
-    )
 
     credentials_requested = requested_credential_ids(authorization_details)
     session_manager.update_credentials_requested(session_id=session_id, credentials_requested=credentials_requested)

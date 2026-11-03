@@ -111,6 +111,17 @@ class TestLoadConfig:
             config.load_config(str(partial))
 
 
+@pytest.mark.parametrize("frontend_id", ["fe/1", "fe.1", "fe 1", "fé"])
+def test_frontend_id_must_be_a_path_segment(config_files, frontend_id):
+    # The id ends the frontend's authorization server issuer: <base_url>/<id>.
+    data = yaml.safe_load(config_files.read_text())
+    frontends = data["frontend"]["frontends_config"]
+    frontends[frontend_id] = frontends.pop("fe1")
+    config_files.write_text(yaml.safe_dump(data))
+    with pytest.raises(RuntimeError, match="may only contain letters, digits"):
+        config.load_config(str(config_files))
+
+
 class TestRegistrationCertificate:
     JWT = "eyJ0eXAiOiJyYy13cnArand0In0.eyJuYW1lIjoiSXNzdWVyIn0.c2ln"
 

@@ -628,9 +628,12 @@ def auth_choice() -> HandlerResult:
 
     session_id = claims["session_id"]
     scope = claims.get("scope")
+    # The frontend whose issuer the wallet used; the authorization server
+    # always names it.
     frontend_id = claims.get("frontend_id")
     if frontend_id not in (CONFIGURATION["frontend"].get("frontends_config") or {}):
-        frontend_id = CONFIGURATION["frontend"]["default"]
+        logger.warning(f", Session ID: {session_id}, auth_choice rejected: unknown frontend {safe(frontend_id, 64)}")
+        return jsonify({"error": "invalid_request", "error_description": "Unknown frontend"}), 400
 
     if session_manager.get_session(session_id) is not None and session.get("session_id") != session_id:
         logger.warning(f", Session ID: {session_id}, auth_choice rejected: session already bound to another browser")

@@ -26,16 +26,12 @@ do at start-up:
 * ``credential_configurations_supported`` and ``credential_request_encryption``
   come from the backend metadata, the former optionally filtered by the
   frontend's ``credentials_supported`` list;
-* the OAuth authorization server metadata is a copy of the OpenID
-  configuration, as the frontend has always served it;
-* template URLs on ``<template domain>/oidc`` point to the authorization
-  server (``oauth_url``), all other template URLs to the backend
-  (``service_url``);
-* ``credential_issuer``, the ``issuer`` of the OpenID and OAuth
-  authorization server metadata, the PAR endpoint and the display logo
-  point to the frontend's own URL (the credential issuer is its own
-  authorization server: RFC 8414 requires ``issuer`` to match the URL the
-  metadata is served under);
+* template URLs point to the backend (``service_url``);
+* ``credential_issuer`` and the display logo point to the frontend's own URL;
+* ``authorization_servers`` names the frontend's own issuer at the
+  authorization server, ``<authorization_server.base_url>/<frontend_id>``
+  (OpenID4VCI 1.0 section 12.2.4): wallets read that server's metadata
+  there, and the path tells it which frontend a request belongs to;
 * ``issuer_info`` carries the frontend's own registration certificate;
 * the SD-JWT VC issuer metadata (``/.well-known/jwt-vc-issuer``) has the
   frontend URL as ``issuer`` (the ``iss`` of the SD-JWT VCs it issues) and
@@ -45,8 +41,6 @@ Per-frontend configuration keys:
     url (required): Public URL of the frontend (the credential issuer identifier).
     credentials_supported (optional): List of configuration ids, or ``"*"`` /
         absent for all.
-    oauth_url (optional): Public authorization server URL; defaults to
-        ``authorization_server.base_url``.
     registration_certificate_path (optional): Text file holding the
         frontend's registration certificate (``rc-wrp+jwt``), published as
         ``issuer_info`` in the unsigned and signed metadata.
@@ -84,14 +78,10 @@ class FrontendMetadata:
 
     Attributes:
         openid_credential_issuer: ``/.well-known/openid-credential-issuer``.
-        openid_configuration: ``/.well-known/openid-configuration``.
-        oauth_authorization_server: ``/.well-known/oauth-authorization-server``.
         jwt_vc_issuer: ``/.well-known/jwt-vc-issuer`` (SD-JWT VC issuer metadata).
     """
 
     openid_credential_issuer: Dict[str, Any]
-    openid_configuration: Dict[str, Any]
-    oauth_authorization_server: Dict[str, Any]
     jwt_vc_issuer: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Dict[str, Any]]:
@@ -231,6 +221,18 @@ def _sd_jwt_signing_jwks() -> Dict[str, Any]:
     return {"keys": keys}
 
 
+def authorization_server_issuer(frontend_id: str) -> str:
+    """The frontend's issuer at the authorization server.
+
+    Args:
+        frontend_id: Frontend identifier.
+
+    Returns:
+        ``<authorization_server.base_url>/<frontend_id>``.
+    """
+    return f"{CONFIGURATION['authorization_server']['base_url'].rstrip('/')}/{frontend_id}"
+
+
 def build_frontend_metadata(frontend_id: str) -> FrontendMetadata:
     """Builds the unsigned metadata documents of a frontend.
 
@@ -246,7 +248,6 @@ def build_frontend_metadata(frontend_id: str) -> FrontendMetadata:
     frontend = _frontend(frontend_id)
     frontend_url = frontend["url"]
     backend_url = CONFIGURATION["service_url"]
-    oauth_url = frontend.get("oauth_url") or CONFIGURATION["authorization_server"]["base_url"]
 
     issuer_metadata = _template("metadata_config.json")
     issuer_metadata["credential_configurations_supported"] = _supported_credentials(
@@ -257,16 +258,10 @@ def build_frontend_metadata(frontend_id: str) -> FrontendMetadata:
             issuer_metadata[field] = copy.deepcopy(oidc_metadata_clean[field])
 
     template_domain = issuer_metadata["credential_issuer"]
-
-    openid_configuration = replace_domain(_template("openid-configuration.json"), f"{template_domain}/oidc", oauth_url)
     issuer_metadata = replace_domain(issuer_metadata, template_domain, backend_url)
 
-    openid_configuration["issuer"] = frontend_url
-    openid_configuration["pushed_authorization_request_endpoint"] = f"{frontend_url}/pushed_authorization"
-    # Wallets read this document first (RFC 8414), so it carries everything
-    # openid-configuration does (PAR, DPoP, wallet attestation...).
-    oauth_authorization_server = copy.deepcopy(openid_configuration)
     issuer_metadata["credential_issuer"] = frontend_url
+    issuer_metadata["authorization_servers"] = [authorization_server_issuer(frontend_id)]
     issuer_metadata["display"][0]["logo"]["uri"] = f"{frontend_url}/ic-logo.png"
     if frontend.get("registration_certificate"):
         issuer_metadata["issuer_info"] = [
@@ -275,8 +270,6 @@ def build_frontend_metadata(frontend_id: str) -> FrontendMetadata:
 
     return FrontendMetadata(
         openid_credential_issuer=issuer_metadata,
-        openid_configuration=openid_configuration,
-        oauth_authorization_server=oauth_authorization_server,
         # Must be identical to the iss of the SD-JWT VCs (formatters.credential_issuer_url).
         jwt_vc_issuer={"issuer": frontend_url, "jwks": _sd_jwt_signing_jwks()},
     )

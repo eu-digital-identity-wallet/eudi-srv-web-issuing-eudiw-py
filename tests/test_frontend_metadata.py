@@ -96,15 +96,10 @@ def client():
     return app.test_client()
 
 
-def _frontend_reference(service_url, backend_url, oauth_url, credentials_supported_cfg, backend_data):
+def _frontend_reference(service_url, backend_url, credentials_supported_cfg, backend_data):
     """Reference copy of the frontend's former ``setup_metadata`` (domain logic)."""
-
-    def load(name):
-        with open(TEMPLATE_DIR / name) as f:
-            return json.load(f)
-
-    openid_metadata = load("openid-configuration.json")
-    oidc_metadata = load("metadata_config.json")
+    with open(TEMPLATE_DIR / "metadata_config.json") as f:
+        oidc_metadata = json.load(f)
 
     credentials_supported = backend_data.get("credential_configurations_supported", {})
     if credentials_supported_cfg and credentials_supported_cfg != ["*"] and credentials_supported_cfg != "*":
@@ -116,15 +111,10 @@ def _frontend_reference(service_url, backend_url, oauth_url, credentials_support
         oidc_metadata["credential_request_encryption"] = backend_data["credential_request_encryption"]
 
     old_domain = oidc_metadata["credential_issuer"]
-    openid_metadata = replace_domain(openid_metadata, f"{old_domain}/oidc", oauth_url)
     oidc_metadata = replace_domain(oidc_metadata, old_domain, backend_url)
-
-    openid_metadata["issuer"] = service_url
-    openid_metadata["pushed_authorization_request_endpoint"] = f"{service_url}/pushed_authorization"
     oidc_metadata["credential_issuer"] = service_url
     oidc_metadata["display"][0]["logo"]["uri"] = f"{service_url}/ic-logo.png"
-    # The former frontend served openid_metadata as oauth-authorization-server.
-    return oidc_metadata, openid_metadata, copy.deepcopy(openid_metadata)
+    return oidc_metadata
 
 
 class TestBuildFrontendMetadata:
@@ -134,31 +124,27 @@ class TestBuildFrontendMetadata:
         with patch_configuration(_config(signing_material, **overrides)):
             documents = build_frontend_metadata(FRONTEND_ID)
 
-        oidc, openid, oauth = _frontend_reference(
-            FRONTEND_URL, BACKEND_URL, AUTH_URL, credentials_supported, copy.deepcopy(BACKEND_CLEAN_METADATA)
-        )
+        oidc = _frontend_reference(FRONTEND_URL, BACKEND_URL, credentials_supported, copy.deepcopy(BACKEND_CLEAN_METADATA))
+        oidc["authorization_servers"] = [f"{AUTH_URL}/{FRONTEND_ID}"]
         assert documents.openid_credential_issuer == oidc
-        assert documents.openid_configuration == openid
-        assert documents.oauth_authorization_server == oauth
 
-    def test_oauth_authorization_server(self, config):
-        oauth = build_frontend_metadata(FRONTEND_ID).oauth_authorization_server
+    def test_authorization_servers_is_the_frontends_issuer(self, config):
+        # One issuer per frontend at the authorization server (OpenID4VCI 1.0
+        # section 12.2.4); its metadata comes from that server, not from here.
+        documents = build_frontend_metadata(FRONTEND_ID)
+        assert documents.openid_credential_issuer["authorization_servers"] == [f"{AUTH_URL}/{FRONTEND_ID}"]
+        assert set(documents.to_dict()) == {"openid_credential_issuer", "jwt_vc_issuer"}
 
-        assert oauth["issuer"] == FRONTEND_URL
-        assert oauth["authorization_endpoint"] == f"{AUTH_URL}/authorization"
-        assert oauth["token_endpoint"] == f"{AUTH_URL}/token"
-        assert oauth["jwks_uri"] == f"{AUTH_URL}/static/jwks.json"
-        assert not any(isinstance(v, str) and f"{BACKEND_URL}/oidc" in v for v in oauth.values())
-        assert oauth["pushed_authorization_request_endpoint"] == f"{FRONTEND_URL}/pushed_authorization"
-        assert "dpop_signing_alg_values_supported" in oauth
-        assert "attest_jwt_client_auth" in oauth["token_endpoint_auth_methods_supported"]
+    def test_authorization_servers_without_trailing_slash(self, signing_material):
+        config = _config(signing_material)
+        config["authorization_server"]["base_url"] = AUTH_URL + "/"
+        with patch_configuration(config):
+            issuer = build_frontend_metadata(FRONTEND_ID).openid_credential_issuer
+        assert issuer["authorization_servers"] == [f"{AUTH_URL}/{FRONTEND_ID}"]
 
-    def test_oauth_authorization_server_follows_oauth_url(self, signing_material):
-        with patch_configuration(_config(signing_material, oauth_url="https://as.test")):
-            oauth = build_frontend_metadata(FRONTEND_ID).oauth_authorization_server
-
-        assert oauth["issuer"] == FRONTEND_URL
-        assert oauth["token_endpoint"] == "https://as.test/token"
+    def test_no_public_client_method_anywhere(self, config):
+        # Frontend #14: "public" is not an OAuth client authentication method.
+        assert '"public"' not in json.dumps(build_frontend_metadata(FRONTEND_ID).to_dict())
 
     def test_key_fields(self, config):
         documents = build_frontend_metadata(FRONTEND_ID)
@@ -173,22 +159,11 @@ class TestBuildFrontendMetadata:
         assert set(issuer["credential_configurations_supported"]) == set(
             BACKEND_CLEAN_METADATA["credential_configurations_supported"]
         )
-        assert documents.openid_configuration["issuer"] == FRONTEND_URL
-        assert documents.openid_configuration["token_endpoint"] == f"{AUTH_URL}/token"
-        assert documents.openid_configuration["pushed_authorization_request_endpoint"] == (
-            f"{FRONTEND_URL}/pushed_authorization"
-        )
-        assert documents.oauth_authorization_server["token_endpoint"] == f"{AUTH_URL}/token"
 
     def test_credentials_filter(self, signing_material):
         with patch_configuration(_config(signing_material, credentials_supported=["eu.europa.ec.eudi.mdl_mdoc"])):
             issuer = build_frontend_metadata(FRONTEND_ID).openid_credential_issuer
         assert list(issuer["credential_configurations_supported"]) == ["eu.europa.ec.eudi.mdl_mdoc"]
-
-    def test_oauth_url_override(self, signing_material):
-        with patch_configuration(_config(signing_material, oauth_url="https://public-as.test")):
-            openid = build_frontend_metadata(FRONTEND_ID).openid_configuration
-        assert openid["authorization_endpoint"] == "https://public-as.test/authorization"
 
     def test_templates_and_backend_state_not_mutated(self, config):
         first = build_frontend_metadata(FRONTEND_ID)
@@ -224,7 +199,7 @@ class TestRegistrationCertificate:
             documents = build_frontend_metadata(FRONTEND_ID)
 
         assert documents.openid_credential_issuer["issuer_info"] == self.ISSUER_INFO
-        assert "issuer_info" not in documents.openid_configuration
+        assert "issuer_info" not in documents.jwt_vc_issuer
 
     def test_signed_metadata(self, signing_material):
         with patch_configuration(_config(signing_material, registration_certificate=REGISTRATION_CERT)):
@@ -336,12 +311,7 @@ class TestEndpoints:
 
         assert response.status_code == 200
         body = response.get_json()
-        assert set(body) == {
-            "openid_credential_issuer",
-            "openid_configuration",
-            "oauth_authorization_server",
-            "jwt_vc_issuer",
-        }
+        assert set(body) == {"openid_credential_issuer", "jwt_vc_issuer"}
         assert body["openid_credential_issuer"]["credential_issuer"] == FRONTEND_URL
         assert body["jwt_vc_issuer"] == {"issuer": FRONTEND_URL, "jwks": {"keys": []}}
 

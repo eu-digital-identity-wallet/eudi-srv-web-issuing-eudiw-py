@@ -2,11 +2,12 @@
 
 | Workflow | Runs on | Secrets | What it does |
 |---|---|---|---|
+| `tests.yml` | push, pull request, manual | none | Runs the unit tests (`pytest`). |
 | `semgrep.yml` | push, pull request, manual | none | Semgrep with the rules in `.semgrep/` (tests excluded). |
 | `sonar.yml` | push, pull request, manual | `SONAR_TOKEN` | Runs the tests with coverage, then SonarCloud analysis. Fails early with a clear message if `SONAR_TOKEN` is missing. |
 | `gitleaks.yml` | push, manual | none | Gitleaks secret scan of the full history with `gitleaks/gitleaks.toml`; report uploaded as an artifact (non-blocking). |
 | `dependencycheck.yml` | push, manual | none | OWASP Dependency-Check (SCA); HTML report uploaded as an artifact. |
-| `pipeline.yml` | push to dev/preprod/main, `v*` tags, manual | `GHCR_KEY` | Builds the Docker image (amd64 + arm64) and pushes it to `ghcr.io`. |
+| `pipeline.yml` | push to `main` and `branch-*`, `v*` tags, manual | `GHCR_KEY` | Builds the Docker image (amd64 + arm64) and pushes it to `ghcr.io`. |
 
 ## One-time setup
 
@@ -19,4 +20,4 @@
    - `SONAR_TOKEN`: a SonarCloud token (My Account > Security) for the project above.
    - `GHCR_KEY`: a GitHub token with `write:packages`, used by `pipeline.yml` to push the image to ghcr.io.
 
-`semgrep.yml`, `gitleaks.yml`, `dependencycheck.yml` need no secrets. `GITHUB_TOKEN` is provided by GitHub automatically.
+`tests.yml`, `semgrep.yml`, `gitleaks.yml`, `dependencycheck.yml` need no secrets. `GITHUB_TOKEN` is provided by GitHub automatically.

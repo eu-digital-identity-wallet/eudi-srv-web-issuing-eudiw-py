@@ -90,23 +90,28 @@ def _set_nested(target: Dict[str, Any], key: str, value: Any) -> None:
         value: Value to store.
 
     Raises:
-        InvalidFormError: If a list index is too large.
+        InvalidFormError: If a list index is too large, or the key conflicts
+            with another one (``a`` and ``a[0]``, ``a[0]`` and ``a[0][b]``).
     """
     parts = _KEY_PARTS.findall(key)
     if not parts:
         raise InvalidFormError("Form key without an attribute name")
     current: Any = target
     for part, next_part in zip(parts[:-1], parts[1:]):
-        if part.isdigit():
+        if part.isdigit() and isinstance(current, list):
             current = current[_list_slot(current, part, dict)]
-        else:
+        elif isinstance(current, dict):
             current = current.setdefault(part, [] if next_part.isdigit() else {})
+        else:
+            raise InvalidFormError(f"Form key {key!r} conflicts with another field")
 
     final_key = parts[-1]
     if final_key.isdigit() and isinstance(current, list):
         current[_list_slot(current, final_key, lambda: None)] = value
-    else:
+    elif isinstance(current, dict):
         current[final_key] = value
+    else:
+        raise InvalidFormError(f"Form key {key!r} conflicts with another field")
 
 
 def _list_slot(items: List[Any], part: str, filler: Any) -> int:
@@ -209,9 +214,15 @@ def form_formatter(form_data: Dict[str, Any], issuing_country: str) -> Dict[str,
 
     Returns:
         The nested, normalized user data (with ``issuing_country``).
+
+    Raises:
+        InvalidFormError: If a field is malformed (bad date, conflicting keys).
     """
     if "effective_from_date" in form_data:
-        form_data["effective_from_date"] = to_rfc3339(form_data["effective_from_date"])
+        try:
+            form_data["effective_from_date"] = to_rfc3339(form_data["effective_from_date"])
+        except (AttributeError, TypeError, ValueError) as e:
+            raise InvalidFormError("effective_from_date is not a YYYY-MM-DD date") from e
 
     cleaned_data: Dict[str, Any] = {}
     # Sorted so parent structures (capacities[0]) are created before children.

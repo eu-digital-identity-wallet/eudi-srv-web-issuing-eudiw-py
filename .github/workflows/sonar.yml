@@ -50,7 +50,7 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Run tests and generate coverage.xml
         run: |
-          env $(grep -v '^#' .env.test | xargs) pytest --cov=app --cov-config=pyproject.toml --cov-report=xml:coverage.xml
+          pytest --cov=app --cov-config=pyproject.toml --cov-report=xml:coverage.xml
           coverage report
       - name: setup projectkey
         run: echo "PROJECTKEY=${{ github.repository_owner}}_$(echo ${{ github.repository }} | sed 's/.*\///')" >> "$GITHUB_ENV"

@@ -576,6 +576,7 @@ class TestSessionFixation:
         claims = {
             "session_id": "as-session",
             "authorization_details": [{"type": "openid_credential", "credential_configuration_id": "pid"}],
+            "frontend_id": CONFIG["frontend"]["default"],
             "aud": ["eudiw-issuer-backend"],
             "iat": int(time.time()),
             "exp": int(time.time()) + 300,
@@ -642,8 +643,9 @@ class TestSessionFixation:
         config = {"authorization_server": {"base_url": "https://as.test", "api_key": "as-key"}}
         with patch_configuration(config), patch.object(auth_server.requests, "request") as http:
             http.return_value.json.return_value = {"session_id": "s"}
-            auth_server.generate_preauth_code("pid")
+            auth_server.generate_preauth_code("pid", "fe")
         assert http.call_args.kwargs["headers"]["X-Api-Key"] == "as-key"
+        assert http.call_args.kwargs["data"] == {"scope": "pid", "frontend_id": "fe"}
         http.return_value.raise_for_status.assert_called_once()
 
 

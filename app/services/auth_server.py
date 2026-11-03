@@ -87,11 +87,13 @@ def introspect(bearer_token: str) -> requests.Response:
     )
 
 
-def generate_preauth_code(scope: str) -> Dict[str, Any]:
+def generate_preauth_code(scope: str, frontend_id: str) -> Dict[str, Any]:
     """Asks the authorization server for a pre-authorized code.
 
     Args:
         scope: Space separated credential configuration ids.
+        frontend_id: Frontend whose offer it is: the wallet redeems the code
+            at that frontend's issuer.
 
     Returns:
         JSON with ``preauth_code``, ``session_id`` and ``tx_code``.
@@ -104,7 +106,7 @@ def generate_preauth_code(scope: str) -> Dict[str, Any]:
         "POST",
         f"{authorization_server_url()}/preauth_generate",
         headers={**_FORM_HEADERS, "X-Api-Key": str(api_key or "")},
-        data={"scope": scope},
+        data={"scope": scope, "frontend_id": frontend_id},
         timeout=DEFAULT_TIMEOUT,
     )
     response.raise_for_status()

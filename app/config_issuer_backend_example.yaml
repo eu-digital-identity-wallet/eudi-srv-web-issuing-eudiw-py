@@ -18,6 +18,8 @@ variables:
   backend_url: "https://backend.issuer.eudiw.dev"
   # Public URL of the default frontend.
   frontend_url: "https://issuer.eudiw.dev"
+  # Public URL of the authorization server (its issuer, without a path).
+  as_url: "https://as.eudiw.dev"
   # Token status list service (revocation).
   status_list_url: "https://issuer.eudiw.dev/token_status_list"
   # Folder of the issuer keys (privKey/) and certificates (cert/).
@@ -137,7 +139,10 @@ frontend:
   default: "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
 
   # One entry per frontend, keyed by its frontend_id (the same value as
-  # frontend_id in that frontend's configuration).
+  # frontend_id in that frontend's configuration, and one of the authorization
+  # server's `frontends`). Ids: letters, digits, "_" and "-". The frontend's
+  # metadata names <authorization_server.base_url>/<frontend_id> as its
+  # authorization server.
   frontends_config:
     "5d725b3c-6d42-448e-8bfd-1eff1fcf152d":
       # Public URL of the frontend: the credential issuer identifier, so the
@@ -192,32 +197,30 @@ frontend:
         - "eu.europa.ec.eudi.learning_credential_vc_sd_jwt"
         - "eu.europa.ec.eudi.aamva_mdl_mdoc"
         - "org.iso.7367.2.1.mVC_mdoc"
-      # Optional: public authorization server URL used in this frontend's
-      # openid-configuration (defaults to authorization_server.base_url).
-      # oauth_url: "${frontend_url}/oidc"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION
 # ============================================================================
 
 authorization_server:
-  # Base URL of the authorization server. Required. Default oauth_url of the
-  # frontends' metadata and base of the default jwks_uri.
-  base_url: "${backend_url}/oidc"
+  # Public URL of the authorization server: its op.server_info.issuer. Required.
+  # Each frontend's authorization_servers is <base_url>/<frontend_id>; also the
+  # base of the default jwks_uri and of the calls below.
+  base_url: "${as_url}"
   # Authorization server page the browser returns to once the user is
   # authenticated (country / form flows). Required.
-  user_verify_endpoint: "${frontend_url}/oidc/verify/user"
+  user_verify_endpoint: "${as_url}/verify/user"
   # Sent in the X-Api-Key header to /preauth_generate; must match
   # backend_api_key in the authorization server configuration.
   api_key: ""  # SECRET
   # Keys that verify the session_token the authorization server passes to
   # /auth_choice (default: <base_url>/static/jwks.json). jwks_path reads a
   # local JWKS file instead.
-  # jwks_uri: "${backend_url}/oidc/static/jwks.json"
+  # jwks_uri: "${as_url}/static/jwks.json"
   # jwks_path: "/etc/eudiw/authorization_server_jwks.json"
   # Expected iss of the session_token (the authorization server issuer);
   # checked when set.
-  # issuer: "${frontend_url}/oidc"
+  # issuer: "${as_url}"
 
 # ============================================================================
 # EXTERNAL SERVICES CONFIGURATION

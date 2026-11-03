@@ -195,6 +195,7 @@ class TestAuthChoice:
             query = {
                     "token": "test-token",
                     "session_id": "test-session",
+                    "frontend_id": "5d725b3c-6d42-448e-8bfd-1eff1fcf152d",
                     "scope": "openid eu.europa.ec.eudi.pid_mdoc",
                 }
             with patch("app.routes.oidc.verify_session_token", return_value={k: v for k, v in query.items() if k != "token"}):
@@ -224,6 +225,7 @@ class TestAuthChoice:
             query = {
                     "token": "test-token",
                     "session_id": "test-session",
+                    "frontend_id": "5d725b3c-6d42-448e-8bfd-1eff1fcf152d",
                     "authorization_details": json.dumps(auth_details),
                 }
             with patch("app.routes.oidc.verify_session_token", return_value={k: v for k, v in query.items() if k != "token"}):
@@ -1036,13 +1038,23 @@ class TestAuthChoiceFlow:
                     "token": "test",
                     "session_id": "test-session",
                     "scope": "openid eu.europa.ec.eudi.pid_mdoc",
-                    "frontend_id": "test-frontend",
+                    "frontend_id": "test_frontend",
                 }
             with patch("app.routes.oidc.verify_session_token", return_value={k: v for k, v in query.items() if k != "token"}):
                 response = client.get("/auth_choice", query_string={"token": query["token"], "session_token": "signed"})
 
             # Should handle the request
             assert response.status_code in [200, 302, 307]
+
+    def test_auth_choice_unknown_frontend_is_refused(self, client, mock_session_manager, mock_cfgservice):
+        """The authorization server always names the frontend; an unknown one is not replaced by the default."""
+        mock_session_manager.get_session.return_value = None
+        claims = {"session_id": "test-session", "scope": "eu.europa.ec.eudi.pid_mdoc", "frontend_id": "unknown"}
+        with patch("app.routes.oidc.verify_session_token", return_value=claims):
+            response = client.get("/auth_choice", query_string={"token": "t", "session_token": "signed"})
+        assert response.status_code == 400
+        assert response.get_json()["error_description"] == "Unknown frontend"
+        mock_session_manager.add_session.assert_not_called()
 
     def test_auth_method_choice_shows_the_choice_again(self, client, mock_session_manager):
         """The PID login page's Back reopens the choice from the browser session."""

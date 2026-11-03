@@ -144,9 +144,9 @@ class TestPreauthRed:
 
         # Assert
         assert response.status_code == 302
-        mock_request_token.assert_called_once_with(scope="credential_1 credential_2")
+        # No frontend in the browser session: request_preauth_token uses the default.
+        mock_request_token.assert_called_once_with(scope="credential_1 credential_2", frontend_id=None)
         mock_session_manager.update_authorization_details.assert_called_once()
-        mock_session_manager.update_frontend_id.assert_called_once()
         mock_session_manager.update_credentials_requested.assert_called_once()
         mock_post_redirect.assert_called_once()
 
@@ -312,6 +312,26 @@ class TestPreauthForm:
         assert user_data["effective_from_date"] == "2024-01-01T00:00:00Z"
         assert user_data["name"] == "John Doe"
         assert user_data["issuing_country"] == "FC"
+
+    @pytest.mark.parametrize(
+        "form",
+        [
+            {"effective_from_date": "garbage"},
+            {"a": "x", "a[0]": "y"},
+            {"a[0]": "x", "a[0][b]": "y"},
+        ],
+    )
+    def test_preauth_form_malformed(self, client, mock_session_manager, mock_configuration, form):
+        """Malformed client input gives 400, not 500 (upstream #178)."""
+        mock_session_manager.get_session.return_value.country = "FC"
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session_id"
+
+        response = client.post("/preauth_form", data=form)
+
+        assert response.status_code == 400
+        mock_session_manager.update_user_data.assert_not_called()
 
 
 class TestFormAuthorizeGenerate:
@@ -508,7 +528,7 @@ class TestRequestPreauthToken:
             "POST",
             expected_url,
             headers={"Content-Type": "application/x-www-form-urlencoded", "X-Api-Key": ""},
-            data={"scope": "credential_1 credential_2"},
+            data={"scope": "credential_1 credential_2", "frontend_id": mock_cfg["frontend"]["default"]},
             timeout=30,
         )
         mock_session_manager.add_session.assert_called_once_with(
@@ -517,6 +537,7 @@ class TestRequestPreauthToken:
             scope="credential_1 credential_2",
             tx_code="12345",
             country="FC",
+            frontend_id=mock_cfg["frontend"]["default"],
         )
 
     @patch("app.services.auth_server.requests.request")
@@ -536,7 +557,7 @@ class TestRequestPreauthToken:
 
         assert result == "test_id"
         call_args = mock_requests.call_args
-        assert call_args[1]["data"] == {"scope": ""}
+        assert call_args[1]["data"] == {"scope": "", "frontend_id": "default"}
 
     @patch("app.services.auth_server.requests.request")
     def test_request_preauth_token_with_special_chars(
@@ -839,7 +860,6 @@ class TestCompleteCodeCoverage:
 
         # Verify all update methods were called
         assert mock_session_manager.update_authorization_details.called
-        assert mock_session_manager.update_frontend_id.called
         assert mock_session_manager.update_credentials_requested.called
 
     @patch("app.routes.preauth.form_formatter")

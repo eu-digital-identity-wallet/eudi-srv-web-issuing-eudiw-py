@@ -1,8 +1,15 @@
 """Shared pytest fixtures."""
 
-import pytest
+import os
 
-from config_helpers import set_configuration
+# The .env.test environment, set before any app module is imported, so a plain
+# `pytest` runs like CI (upstream #185). Values already set are kept.
+os.environ.setdefault("MOCK_CONFIGURATION", "true")
+os.environ.setdefault("EUDIW_TEST_ENV", "true")
+
+import pytest  # noqa: E402
+
+from config_helpers import set_configuration  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

@@ -136,8 +136,8 @@ def frontend_metadata(frontend_id: str) -> Tuple[Response, int]:
         frontend_id: Frontend identifier (``frontend.frontends_config`` key).
 
     Returns:
-        ``({"openid_credential_issuer", "openid_configuration",
-        "oauth_authorization_server", "jwt_vc_issuer"}, 200)`` or ``404`` for an unknown frontend.
+        ``({"openid_credential_issuer", "jwt_vc_issuer"}, 200)`` or ``404``
+        for an unknown frontend.
     """
     logger.debug(f"Unsigned metadata requested for frontend {safe(frontend_id, 64)}")
     try:

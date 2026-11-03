@@ -329,6 +329,8 @@ _06 Oct 2026_
 - `GET /auth_method_choice` shows the authentication choice again for the current session.
 - Revoking a credential revokes every instance issued with it in the same session.
 - `expiry.cleanup_interval` (minutes, default 60): a scheduler purges expired offers, revocation requests and sessions; `/nonce` did it on every call.
+- `tests.yml`: the unit tests run on every push and pull request, without secrets (upstream #185).
+- Each frontend's credential issuer metadata has `authorization_servers`: its own issuer at the authorization server, `<authorization_server.base_url>/<frontend_id>` (OpenID4VCI 1.0 §12.2.4).
 
 ### Changed
 - Each `c_nonce` is single use; a bad one gets `invalid_nonce` (was `invalid_proof`).
@@ -339,7 +341,10 @@ _06 Oct 2026_
 - The test-environment defaults need `EUDIW_TEST_ENV=true`; `CI` and `SONARCLOUD` no longer enable them.
 - Key attestations must carry `key_storage_status` with `exp` and a status list reference (TS3 2.3.2 / 2.4.1).
 - SD-JWT VCs use the frontend URL as `iss` instead of `service_url`.
-- A frontend's `oauth-authorization-server` metadata is a copy of its `openid-configuration` (RFC 8414).
+- `GET /metadata/<frontend_id>` no longer returns `openid_configuration` and `oauth_authorization_server`: wallets read the authorization server's own metadata. `frontends_config.<id>.oauth_url` is removed.
+- `/preauth_generate` is called with the offer's `frontend_id`.
+- `/auth_choice` refuses a `session_token` without a known `frontend_id`; it used the default frontend.
+- Frontend ids may only contain letters, digits, `_` and `-`.
 - Credential offers and revocation are limited to the credentials the frontend publishes.
 - Access token errors carry a `WWW-Authenticate` challenge (RFC 6750 §3, RFC 9449 §7.1).
 - A credential the access token does not cover gets 403 `insufficient_scope` (OpenID4VCI 1.0 §8.3.1.1).
@@ -350,8 +355,8 @@ _06 Oct 2026_
 - `display_authorization` payloads carry `image_attributes`.
 - The PID `portrait` and `picture` are one field on the attribute form.
 - `verify_jwt_with_x5c` reads `typ` from the verified token (SonarCloud).
-- Test for `/dynamic/form` posted without `proceed` (upstream #178).
 - `pipeline.yml` runs on `main` and `branch-*` instead of `dev`, `preprod` and `main`.
+- Plain `pytest` runs the tests; sourcing `.env.test` is no longer needed (upstream #185).
 
 ### Fixed
 - Key attestations without `iat` / `exp`, too old or with another `typ` were accepted.
@@ -365,6 +370,7 @@ _06 Oct 2026_
 - Wallet clocks slightly ahead got proofs and DPoP rejected; 60 s skew is allowed.
 - An offer by `credential_offer_uri` could be fetched repeatedly, even after expiry.
 - A malformed WIA `client_status` caused a 500.
+- `/dynamic/form` and `/preauth_form` returned 500 without `proceed`, with a bad `effective_from_date` or with conflicting keys such as `a` and `a[0]` (upstream #178).
 - PID `sex` was issued as a string (PID Rulebook).
 - SD-JWT VC `picture` was issued as base64url instead of a data URL (PID Rulebook §4.1).
 - The seafarer `issuing_authority_logo` was shown in the wrong encoding.

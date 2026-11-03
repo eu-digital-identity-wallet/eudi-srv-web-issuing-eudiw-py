@@ -242,7 +242,7 @@ class TestDeferredAndNotification:
 class TestAuthChoice:
     def _get(self, client, **params):
         """Calls /auth_choice; the session claims stand in for a verified session_token."""
-        claims = {"session_id": "s1", **params}
+        claims = {"session_id": "s1", "frontend_id": "fe", **params}
         with patch.object(oidc_routes, "verify_session_token", return_value=claims):
             return client.get("/auth_choice?" + urllib.parse.urlencode({"token": "t", "session_token": "signed"}))
 

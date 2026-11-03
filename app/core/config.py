@@ -46,6 +46,8 @@ DEFAULT_CONFIG_PATH = "/etc/issuer_config/config_issuer_backend.yaml"
 
 #: ``${name}`` placeholder of a value defined in the ``variables`` section.
 _PLACEHOLDER = re.compile(r"\$\{([A-Za-z0-9_]+)\}")
+#: Frontend ids are a path segment of the frontend's authorization server issuer.
+FRONTEND_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def _substitute(text: str, variables: dict[str, str]) -> str:
@@ -185,9 +187,14 @@ def process_config(config: dict[str, Any]) -> dict[str, Any]:
     Raises:
         OSError: If a referenced key or certificate file cannot be read.
         KeyError: If a mandatory section is missing.
-        RuntimeError: If a registration certificate is not a JWT.
+        RuntimeError: If a registration certificate is not a JWT, or a
+            frontend id is not a plain URL path segment.
     """
     for frontend_id, frontend in config["frontend"]["frontends_config"].items():
+        # The id is the last path segment of the frontend's issuer at the
+        # authorization server (<authorization_server.base_url>/<id>).
+        if not isinstance(frontend_id, str) or not FRONTEND_ID_PATTERN.match(frontend_id):
+            raise RuntimeError(f"Frontend id {frontend_id!r} may only contain letters, digits, '_' and '-'")
         frontend["metadata_signing_key"] = _load_file(frontend["metadata_signing_key_path"])
         frontend["metadata_access_certificate"] = _load_file(
             frontend["metadata_access_certificate_path"]
