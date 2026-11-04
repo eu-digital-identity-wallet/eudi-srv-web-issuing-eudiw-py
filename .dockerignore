@@ -9,3 +9,7 @@ venv
 .env
 *.md
 tests/
+# Key material must never be committed or baked into images
+app/private/
+*.key
+*.pem

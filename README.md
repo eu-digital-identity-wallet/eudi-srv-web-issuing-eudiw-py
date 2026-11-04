@@ -91,11 +91,13 @@ Please see detailed instructions in [api_docs/add_credential.md](api_docs/add_cr
 
 ### C. Can I use my IACA certificate with the EUDIW Issuer?
 
-Yes. You must copy your IACA trusted certificate(s) (in PEM format) to the `trusted_CAs_path` folder (see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml)). If you don't have an IACA certificate, we provide an example test IACA certificate for the country Luxembourg (LU) - see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/IACA-token](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/IACA-token).
+Yes. You must copy your IACA trusted certificate(s) (in PEM format) to the `trusted_CAs_path` folder. If you don't have an IACA certificate, we provide an example test IACA certificate for the country Luxembourg (LU) in [api_docs/test_tokens/IACA-token](api_docs/test_tokens/IACA-token).
+
+See `trusted_CAs_path` in [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml).
 
 ### D. Can I use my Document Signer private key and certificate with the EUDIW Issuer?
 
-Yes. Please see *countries* configuration exemple in [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/blob/main/app/config_issuer_backend_example.yaml). If you don't have Document Signer private key and certificate, we provide  test private DS keys and certificates, for country Luxembourg (LU) in P12 format - see [github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/DS-token](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens/DS-token) -.
+Yes. Set `keys._default` (`private_key_path`, `private_key_password` and `certificate_path`) of the country in the `countries` section of [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml). If you don't have Document Signer private key and certificate, we provide  test private DS keys and certificates, for country Luxembourg (LU) in P12 format, in [api_docs/test_tokens/DS-token](api_docs/test_tokens/DS-token).
 
 ### E. How can I create a credential offer to issue a credential?
 
@@ -105,17 +107,23 @@ Please see detailed instructions in [api_docs/credential_offer.md](https://githu
 
 Yes. Please see how in [api_docs/pre-authorized.md](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-frontend-eudiw-py/blob/main/api_docs/pre-authorized.md).
 
-### H. Can I run the issuer in a Docker container?
+### G. Can I run the issuer in a Docker container?
 
 Yes. Please see how in [Install Docker](install.md#6-docker).
 
-### I. Where can I find reference revocation service information.
+### H. Where can I find reference revocation service information.
 
 Information and guides on the revocation service can be found in the following [repository](https://github.com/eu-digital-identity-wallet/eudi-srv-statuslist-py).
 
-### J. Can an external service create a credential offer?
+### I. How do I run the tests?
+Install the test dependencies and run pytest from the repository root:
 
-Yes, please see how in [Credential Offer Endpoint](api_docs/credential_offer_create.md)
+```shell
+pip install -r requirements-dev.txt
+pytest
+```
+
+The tests use an in-memory configuration (`tests/conftest.py` sets the variables of `.env.test`), so no configuration file, database or other service is needed.
 
 ## How to contribute
 

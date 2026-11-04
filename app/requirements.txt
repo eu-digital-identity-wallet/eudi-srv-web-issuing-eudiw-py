@@ -1,33 +1,34 @@
-git+https://github.com/wbond/oscrypto.git@d5f3437#egg=oscrypto
-Flask-Cors==6.0.2
-requests==2.33.0
-jwcrypto==1.5.6
-cbor2==5.4.6
-pytz==2026.1
+# Runtime dependencies, pinned to the newest mutually compatible releases
+# (resolved for Python 3.13; see REFACTORING.md "Dependencies").
+#
+# cbor2 stays on 5.x: pycose 1.1 cannot decode COSE messages with cbor2 6
+# (tagged arrays are decoded as tuples).
+
+# OpenSSL 3 fix for oscrypto (needed by certvalidator <- pycose / cwt); no release contains it yet.
+oscrypto @ git+https://github.com/wbond/oscrypto.git@76bfdcb7285d856c44f8d0fbafe0ecca1c6d2f8b
+
+# Web framework
 flask==3.1.3
-pyignite==0.6.1
-tinyec==0.4.0
-pycryptodome==3.23.0
-cbor_diag==1.0.2
-validators==0.34.0
+werkzeug==3.1.9
+Flask-Cors==6.0.5
+Flask-Limiter==4.1.1
 Flask-Session==0.8.0
-jsonschema==4.26.0
-werkzeug==3.1.6
-pycose==1.0.1
-cwt==2.3.2
-pyjwt==2.12.1
-schedule==1.2.1
-pillow==11.0.0
-segno==1.6.1
-qrcode-artistic==3.0.2
-Authlib==1.6.9
-concurrent-log-handler==0.9.29
-python-dotenv==1.2.2
-pytest
-pytest-cov
+requests==2.34.2
+python-dotenv==1.2.4
 PyYAML==6.0.3
-psycopg==3.3.4
-psycopg_pool==3.3.1
+concurrent-log-handler==0.9.29
+
+# Credential formats, COSE / JOSE
+pymdoccbor @ git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git@main
+sd-jwt @ git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1
+cbor2==5.9.0
+pycose==1.1.0
+cryptography==50.0.2
+pyjwt==2.15.1
+jwcrypto==1.6.1
+segno==1.6.6
+
+# Persistence and scheduling
+psycopg==3.3.6
+psycopg_pool==3.3.3
 apscheduler==3.11.3
-git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git
-git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1

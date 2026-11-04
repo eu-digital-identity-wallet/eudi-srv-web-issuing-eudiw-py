@@ -1,0 +1,78 @@
+# Regression guard for the issue classes fixed in the 2026-10 security reviews.
+# Run: semgrep --config .semgrep/ --error
+# Silence a reviewed finding with "# nosemgrep: <rule-id>" and a reason.
+rules:
+  - id: log-request-data-unsanitised
+    message: >-
+      Request data is logged as-is: CR/LF can forge log lines and secrets end up
+      in logs. Wrap it with safe(...) / redact(...).
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: $LOG.$M(..., <... flask.request.$ATTR ...>, ...)
+          - pattern: $LOG.$M(..., <... request.$ATTR ...>, ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(debug|info|warning|error|exception|critical)$
+      - metavariable-regex:
+          metavariable: $ATTR
+          regex: ^(args|form|path|full_path|url|data|headers|values|json|get_json|cookies)$
+      - pattern-not: $LOG.$M(..., <... safe(...) ...>, ...)
+      - pattern-not: $LOG.$M(..., <... redact(...) ...>, ...)
+      - pattern-not: $LOG.$M(..., <... sanitize(...) ...>, ...)
+
+  - id: api-key-request-follows-redirects
+    message: >-
+      A request carrying an API key follows redirects: requests only strips
+      Authorization on a cross-host redirect, so X-Api-Key would be sent to the
+      new host. Pass allow_redirects=False.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: 'requests.$M(..., headers={..., "X-Api-Key": $K, ...}, ...)'
+          - pattern: 'requests.$M(..., headers={..., "x-api-key": $K, ...}, ...)'
+      - pattern-not: requests.$M(..., allow_redirects=False, ...)
+
+  - id: flask-run-all-interfaces
+    message: "Binding a hard-coded 0.0.0.0 exposes the service on every network; make it configurable."
+    severity: WARNING
+    languages: [python]
+    pattern: $APP.run(..., host="0.0.0.0", ...)
+
+  - id: jwt-signature-not-verified
+    message: "A JWT is decoded without verifying its signature."
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: 'jwt.decode(..., options={..., "verify_signature": False, ...}, ...)'
+      - pattern: jwt.decode(..., verify=False, ...)
+
+  - id: non-cryptographic-random
+    message: "random is predictable; use secrets for salts, codes, nonces and orderings."
+    severity: WARNING
+    languages: [python]
+    paths:
+      exclude: ["tests/", "test_*.py", "*_test.py"]
+    pattern-either:
+      - pattern: random.$F(...)
+      - pattern: import random
+
+  - id: redirect-to-request-data
+    message: "Redirect target taken from the request (open redirect); check it against an allowlist."
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: flask.redirect(<... flask.request.$A ...>, ...)
+      - pattern: redirect(<... request.$A ...>, ...)
+
+  - id: jinja-safe-filter
+    message: "|safe disables autoescaping; only tojson|safe in a quoted attribute is acceptable."
+    severity: WARNING
+    languages: [generic]
+    paths:
+      include: ["*.html", "*.jinja2", "*.j2"]
+    patterns:
+      - pattern-regex: \|\s*safe\b
+      - pattern-not-regex: tojson\s*\|\s*safe

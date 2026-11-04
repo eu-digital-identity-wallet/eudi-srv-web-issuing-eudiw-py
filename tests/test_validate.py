@@ -56,7 +56,7 @@ class TestValidateMandatoryArgs:
         args = ImmutableMultiDict({"arg1": "value1", "arg2": "value2"})
         mandlist = ["arg1", "arg2"]
 
-        from app.validate import validate_mandatory_args
+        from app.utils.validation import validate_mandatory_args
 
         result, missing = validate_mandatory_args(args, mandlist)
         assert result is True
@@ -67,7 +67,7 @@ class TestValidateMandatoryArgs:
         args = ImmutableMultiDict({"arg1": "value1"})
         mandlist = ["arg1", "arg2"]
 
-        from app.validate import validate_mandatory_args
+        from app.utils.validation import validate_mandatory_args
 
         result, missing = validate_mandatory_args(args, mandlist)
         assert result is False
@@ -78,7 +78,7 @@ class TestValidateMandatoryArgs:
         args = ImmutableMultiDict({})
         mandlist = ["arg1", "arg2"]
 
-        from app.validate import validate_mandatory_args
+        from app.utils.validation import validate_mandatory_args
 
         result, missing = validate_mandatory_args(args, mandlist)
         assert result is False
@@ -88,28 +88,6 @@ class TestValidateMandatoryArgs:
 # ============================================================================
 # IS_VALID_PEM_PUBLIC_KEY TESTS
 # ============================================================================
-
-
-class TestIsValidPemPublicKey:
-    """Tests for is_valid_pem_public_key function"""
-
-    def test_valid_pem_public_key(self, valid_rsa_key):
-        """Valid PEM key returns True"""
-        from app.validate import is_valid_pem_public_key
-
-        assert is_valid_pem_public_key(valid_rsa_key) is True
-
-    def test_invalid_pem_public_key(self, invalid_pem_key):
-        """Invalid PEM key returns False"""
-        from app.validate import is_valid_pem_public_key
-
-        assert is_valid_pem_public_key(invalid_pem_key) is False
-
-    def test_empty_pem_key(self):
-        """Empty PEM returns False"""
-        from app.validate import is_valid_pem_public_key
-
-        assert is_valid_pem_public_key(b"") is False
 
 
 # ============================================================================
@@ -122,30 +100,30 @@ class TestValidateDateFormat:
 
     def test_valid_date_format(self):
         """Correct format YYYY-MM-DD returns True"""
-        from app.validate import validate_date_format
+        from app.utils.validation import validate_date_format
 
         assert validate_date_format("2025-10-27") is True
 
     def test_invalid_date_format_wrong_order(self):
         """Wrong order returns False"""
-        from app.validate import validate_date_format
+        from app.utils.validation import validate_date_format
 
         assert validate_date_format("27-10-2025") is False
 
     def test_invalid_date_format_slashes(self):
         """Wrong separator returns False"""
-        from app.validate import validate_date_format
+        from app.utils.validation import validate_date_format
 
         assert validate_date_format("2025/10/27") is False
 
     def test_invalid_date_format_non_date(self):
         """Non-date string returns False"""
-        from app.validate import validate_date_format
+        from app.utils.validation import validate_date_format
 
         assert validate_date_format("invalid") is False
 
     def test_empty_date(self):
         """Empty string returns False"""
-        from app.validate import validate_date_format
+        from app.utils.validation import validate_date_format
 
         assert validate_date_format("") is False

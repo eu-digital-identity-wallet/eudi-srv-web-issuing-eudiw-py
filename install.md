@@ -67,7 +67,7 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
     ```
 
 
-5. Install Flask, gunicorn and other dependencies in virtual environment
+5. Install Flask and other dependencies in the virtual environment
 
     ```shell
     pip install -r app/requirements.txt
@@ -103,10 +103,10 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
 
 7. Setup configuration
 
-   -  Copy ```app/config_issuer_backend_example.yaml``` to ```etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
+   -  Copy [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml) to ```/etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
 
    ```shell
-   cp app/config_issuer_backend_example.yaml etc/issuer_config/config_issuer_backend.yaml
+   cp app/config_issuer_backend_example.yaml /etc/issuer_config/config_issuer_backend.yaml
    ```
 
    Configuration location can be changed using environment variable ISSUER_CONFIG_PATH
@@ -120,6 +120,28 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
    
    - **`status_validator`** — URL for the service where revocation/validity status of Referenced Tokens can be checked against a Token Status List
      - `url`: endpoint of the Status Validator service
+     - `enabled`: `false` skips the status checks
+
+   - **Secrets and API keys** — no defaults; endpoints whose key is unset answer 503.
+     - `secret_key`: Flask session cookie key, at least 32 random characters (or the `FLASK_SECRET_KEY` environment variable)
+     - `backend_api_key`: the frontends read their metadata with it
+     - `admin_api_key`: `GET /logs`, `GET /admin/sessions/client_status`, `POST /metadata/metadata_signer`; never give it to a frontend
+     - `frontend.frontends_config.<frontend_id>.payload_key`: optional, at least 32 characters, the same value as the frontend's `payload_key`; signs the payloads posted to the frontend's `/display_*` pages (`payload_jwt`)
+
+   - **Trust anchors**
+     - `trusted_CAs_path`: folder of trusted CA certificates (`*.pem`)
+     - `trusted_CAs_paths.{key_attestation, offer_request, pid_signer}`: optional per-purpose folders; a purpose left out uses `trusted_CAs_path`
+
+   - **Optional limits and checks** (defaults in brackets)
+     - `proof_validation.require_nonce` [`true`]: proofs must carry a `c_nonce` (missing: `invalid_proof`; unknown, expired or reused: `invalid_nonce`)
+     - `proof_validation.single_use_nonce` [`true`]: a `c_nonce` is accepted once; `false` lets a wallet reuse it until it expires
+     - `proof_validation.key_attestation_max_age_seconds` [`86400`]
+     - `rate_limiting.{enabled [true], trusted_proxies [0], storage_uri ["memory://"], limits}`: per-client limits on sensitive endpoints (429 when exceeded)
+     - `max_content_length` [`1048576`]: largest request body in bytes (413 above)
+     - `session_file_threshold` [`10000`]: server-side browser session files kept
+     - `test_features.{form_countries, passport_age_verification, tx_code_in_offer, credential_offer_request}` [all `false`]: demo-only features that accept self-asserted data
+
+   Every key is described in [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml).
 
 8. Install Authorization Server
     - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
@@ -264,14 +286,19 @@ This guide provides step-by-step instructions for deploying the **EUDIW Issuer**
     * **Customize the configuration:** Review and modify the local `docker-compose.yml` file to align with your specific deployment requirements (e.g., exposed ports, service names, volumes).
     * *Reference file:* [docker-compose.yml](./docker-compose.yml)
 
-3. Set Up Environment Variables
+3. Set Up configuration file
 
-    Service parameters and sensitive settings are managed through an environment file.
+    Service parameters and sensitive settings are managed through a configuration file.
 
-    * **Create the environment file:** We recommend copying the example file to create your local configuration.
+    * **Create the configuration file:** Copy the example file to the path mounted in `docker-compose.yml`.
 
-    * **Update variables:** Edit the newly created `app/.env` file with your specific settings and credentials.
-        * *Reference example:* [.env example](./app/.env.example)
+        ```
+        cp app/config_issuer_backend_example.yaml /etc/issuer_config/config_issuer_backend.yaml
+        ```
+
+    * **Update variables:** Edit `/etc/issuer_config/config_issuer_backend.yaml` with your specific settings; every setting is commented.
+        * *Reference example:* [config_issuer_backend_example.yaml](./app/config_issuer_backend_example.yaml)
+        * The `*_path` values must point to the key and certificate folders mounted in `docker-compose.yml`.
 
 
 4. Pull the Docker Image
@@ -280,7 +307,7 @@ This guide provides step-by-step instructions for deploying the **EUDIW Issuer**
     docker compose pull
     ```
 
-5. Run the 
+5. Run the service
 
     Start the EUDIW Issuer backend in detached mode (runs in the background):
 

@@ -283,7 +283,9 @@ This claim allows for two nested claims, a place_of_work and a no_fixed_place.
 
 ## 2. Service Configuration
 
-In the service configuration file (```app/app_config/config_service.py```), you need to configure the issuing authority, organization and validity of the credential.
+> **Note:** issuer settings now live in the YAML configuration file (`ISSUER_CONFIG_PATH`, loaded by `app/core/config.py`) and in each credential's `issuer_config` block under `app/metadata_config/credentials_supported/`. Static constants are in `app/core/constants.py`.
+
+You need to configure the issuing authority, organization and validity of the credential.
 
 - Add a new entry to config_doctype (using the doctype of the credential as key)
 
@@ -337,7 +339,7 @@ dynamic_issuing = {
 
 ## 3. Configuration of Countries supported by the EUDIW Issuer
 
-Located in ```app/app_config/config_countries.py```, this configuration file contains configuration data related to the countries supported by the PID Issuer, and the credentials supported by each country.
+Located in the `countries` section of the YAML configuration file (`ISSUER_CONFIG_PATH`), this configuration contains configuration data related to the countries supported by the PID Issuer, and the credentials supported by each country.
 
 For example, to add the loyalty credential to the `formCountry`, you need to add the loyalty credential id (defined in the metadata) to the `supported_credentials` of the `formCountry`.
 

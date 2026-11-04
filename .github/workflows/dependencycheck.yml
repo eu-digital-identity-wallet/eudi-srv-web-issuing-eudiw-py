@@ -1,3 +1,6 @@
+# Software composition analysis (SCA): OWASP Dependency-Check scans the dependencies
+# for known vulnerabilities and uploads an HTML report as a build artifact.
+# Runs on every push and on manual dispatch. Needs secrets: none.
 name: SCA - Dependency-Check
 on:
   push:
@@ -8,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
       - name: Depcheck Action - SCA
-        uses: dependency-check/Dependency-Check_Action@main
+        uses: dependency-check/Dependency-Check_Action@1e54355a8b4c8abaa8cc7d0b70aa655a3bb15a6c # main, 2026-10
         id: Depcheck
         with:
           project: '${{ github.repository }}'
@@ -23,7 +26,7 @@ jobs:
             --enableRetired
             --enableExperimental
       - name: Upload results - SCA
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
            name: Depcheck report
            path: ${{github.workspace}}/reports

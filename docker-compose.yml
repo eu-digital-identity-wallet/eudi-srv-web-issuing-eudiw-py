@@ -1,13 +1,21 @@
 services:
   issuer_backend:
     image: ghcr.io/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py:latest
+    # host:container; the container listens on 5000.
     ports:
       - "5000:5000"
+    # Read-only key, certificate and configuration mounts: the paths must match
+    # the *_path values in config_issuer_backend.yaml (private keys are
+    # secrets). The log mount must hold the directory of logging.backend_path.
+    # The configuration is read from /etc/issuer_config/config_issuer_backend.yaml
+    # (ISSUER_CONFIG_PATH default).
     volumes:
-      - /etc/eudiw/pid-issuer-dev/cert/:/etc/eudiw/pid-issuer-dev/cert/:ro
-      - /etc/eudiw/pid-issuer-dev/privKey/:/etc/eudiw/pid-issuer-dev/privKey/:ro
-      - /tmp/log_dev:/tmp/log_dev
+      - /etc/eudiw/pid-issuer/cert/:/etc/eudiw/pid-issuer/cert/:ro
+      - /etc/eudiw/pid-issuer/privKey/:/etc/eudiw/pid-issuer/privKey/:ro
+      - /tmp/log:/tmp/log
       - /etc/issuer_config/config_issuer_backend.yaml:/etc/issuer_config/config_issuer_backend.yaml:ro
+    # Lets the container reach services on the Docker host (e.g. PostgreSQL)
+    # as host.docker.internal.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

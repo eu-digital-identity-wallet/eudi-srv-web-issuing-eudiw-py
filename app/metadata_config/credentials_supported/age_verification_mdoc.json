@@ -13,7 +13,9 @@
       "proof_types_supported":{
          "jwt":{
             "proof_signing_alg_values_supported":[
-               "ES256"
+               "ES256",
+               "ES384",
+               "ES512"
             ],
             "key_attestations_required":{
                "key_storage":[
@@ -27,7 +29,9 @@
          },
          "attestation":{
             "proof_signing_alg_values_supported":[
-               "ES256"
+               "ES256",
+               "ES384",
+               "ES512"
             ],
             "key_attestations_required":{
                "key_storage":[

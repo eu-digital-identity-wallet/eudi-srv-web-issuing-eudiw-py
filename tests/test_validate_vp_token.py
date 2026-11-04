@@ -20,9 +20,10 @@ import base64
 import cbor2
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
+from cryptography import x509
 from pycose.headers import X5chain
 
-from app.validate_vp_token import validate_vp_token, validate_certificate
+from app.services.vp_validation import validate_vp_token, validate_certificate
 
 
 class TestValidateVpToken:
@@ -47,9 +48,9 @@ class TestValidateVpToken:
         data = {"vp_token": {"query_0": [encoded[:-2]]}}  # corrupted padding
 
         with patch(
-            "app.validate_vp_token.cbor2.decoder.loads",
+            "app.services.vp_validation.cbor2.loads",
             side_effect=ValueError("bad b64"),
-        ), patch("app.validate_vp_token.validate_certificate", return_value=(True, "")):
+        ), patch("app.services.vp_validation.validate_certificate", return_value=(True, "")):
             with pytest.raises(ValueError, match="bad b64"):
                 validate_vp_token(data, credentials_requested=[])
 
@@ -61,11 +62,11 @@ class TestValidateVpToken:
         assert result == (True, "Status invalid:1")
 
     def test_vp_token_calls_validate_certificate(self):
-        mdoc_cbor = {"status": 0, "documents": [{}]}
+        mdoc_cbor = {"status": 0, "documents": [{"docType": "eu.europa.ec.eudi.pid.1"}]}
         encoded = base64.urlsafe_b64encode(cbor2.dumps(mdoc_cbor)).decode()
         data = {"vp_token": {"query_0": [encoded]}}
         with patch(
-            "app.validate_vp_token.validate_certificate", return_value=(True, "")
+            "app.services.vp_validation.validate_certificate", return_value=(True, "")
         ) as mock_val:
             result = validate_vp_token(data, credentials_requested=[])
         mock_val.assert_called_once()
@@ -90,14 +91,16 @@ class TestValidateCertificate:
         mock_cert.signature = b"sig"
         mock_cert.tbs_certificate_bytes = b"bytes"
         mock_cert.signature_hash_algorithm = MagicMock()
+        # A document signer without basicConstraints / keyUsage / EKU.
+        mock_cert.extensions.get_extension_for_class.side_effect = x509.ExtensionNotFound("absent", None)
         return mock_cert
 
-    @patch("app.validate_vp_token.trusted_CAs", {})
+    @patch.dict("app.core.state.trusted_CAs", {}, clear=True)
     def test_certificate_not_trusted(self):
         mock_cert = self.make_mock_cert("Fake CA")
         mdoc = {"issuerSigned": {"issuerAuth": b"auth"}}
-        with patch("app.validate_vp_token.Sign1Message.decode") as mock_decode, patch(
-            "app.validate_vp_token.x509.load_der_x509_certificate",
+        with patch("app.services.vp_validation.Sign1Message.decode") as mock_decode, patch(
+            "app.services.vp_validation.x509.load_der_x509_certificate",
             return_value=mock_cert,
         ):
             message = MagicMock()
@@ -109,15 +112,17 @@ class TestValidateCertificate:
             result = validate_certificate(mdoc)
         assert result == (False, "Certificate wasn't emitted by a Trusted CA ")
 
-    @patch(
-        "app.validate_vp_token.trusted_CAs",
+    @patch.dict(
+        "app.core.state.trusted_CAs",
         {
             "Fake CA": {
+                "certificate": MagicMock(),
                 "public_key": MagicMock(),
                 "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
                 "not_valid_after": datetime.now(timezone.utc) + timedelta(days=1),
             }
         },
+        clear=True,
     )
     def test_certificate_expired(self):
         mock_cert = self.make_mock_cert()
@@ -125,10 +130,10 @@ class TestValidateCertificate:
             "issuerSigned": {"issuerAuth": b"auth", "nameSpaces": {"ns": []}},
             "docType": "PID",
         }
-        with patch("app.validate_vp_token.Sign1Message.decode") as mock_decode, patch(
-            "app.validate_vp_token.x509.load_der_x509_certificate",
+        with patch("app.services.vp_validation.Sign1Message.decode") as mock_decode, patch(
+            "app.services.vp_validation.x509.load_der_x509_certificate",
             return_value=mock_cert,
-        ), patch("app.validate_vp_token.datetime") as mock_datetime:
+        ), patch("app.services.vp_validation.datetime") as mock_datetime:
             message = MagicMock()
             message.payload = cbor2.dumps(
                 cbor2.CBORTag(
@@ -160,15 +165,17 @@ class TestValidateCertificate:
             result = validate_certificate(mdoc)
         assert result == (False, "Certificate not valid")
 
-    @patch(
-        "app.validate_vp_token.trusted_CAs",
+    @patch.dict(
+        "app.core.state.trusted_CAs",
         {
             "Fake CA": {
+                "certificate": MagicMock(),
                 "public_key": MagicMock(),
                 "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
                 "not_valid_after": datetime.now(timezone.utc) + timedelta(days=1),
             }
         },
+        clear=True,
     )
     def test_valid_certificate_success(self):
         mock_cert = self.make_mock_cert()
@@ -176,9 +183,12 @@ class TestValidateCertificate:
             "issuerSigned": {"issuerAuth": b"auth", "nameSpaces": {"ns": []}},
             "docType": "PID",
         }
-        with patch("app.validate_vp_token.Sign1Message.decode") as mock_decode, patch(
-            "app.validate_vp_token.x509.load_der_x509_certificate",
+        with patch("app.services.vp_validation.Sign1Message.decode") as mock_decode, patch(
+            "app.services.vp_validation.x509.load_der_x509_certificate",
             return_value=mock_cert,
+        ), patch(
+            "app.services.vp_validation.certificate_validity",
+            return_value=(datetime.now(timezone.utc) - timedelta(days=10), datetime.now(timezone.utc) + timedelta(days=10)),
         ):
             message = MagicMock()
             message.payload = cbor2.dumps(
@@ -211,7 +221,7 @@ class TestValidateCertificate:
     def test_decode_failure(self):
         """If Sign1Message.decode fails, the exception should propagate."""
         with patch(
-            "app.validate_vp_token.Sign1Message.decode",
+            "app.services.vp_validation.Sign1Message.decode",
             side_effect=ValueError("decode fail"),
         ):
             with pytest.raises(ValueError, match="decode fail"):
@@ -222,18 +232,20 @@ class TestValidateCertificate:
         mock_cert.public_key().public_numbers().x.to_bytes.side_effect = TypeError(
             "bad type"
         )
-        with patch("app.validate_vp_token.Sign1Message.decode") as mock_decode, patch(
-            "app.validate_vp_token.x509.load_der_x509_certificate",
+        with patch("app.services.vp_validation.Sign1Message.decode") as mock_decode, patch(
+            "app.services.vp_validation.x509.load_der_x509_certificate",
             return_value=mock_cert,
-        ), patch(
-            "app.validate_vp_token.trusted_CAs",
+        ), patch.dict(
+            "app.core.state.trusted_CAs",
             {
                 "Fake CA": {
+                    "certificate": MagicMock(),
                     "public_key": MagicMock(),
                     "not_valid_before": datetime.now(timezone.utc),
                     "not_valid_after": datetime.now(timezone.utc) + timedelta(days=1),
                 }
             },
+            clear=True,
         ):
             message = MagicMock()
             message.payload = b"payload"

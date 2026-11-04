@@ -1,22 +1,36 @@
-import pytest
+###############################################################################
+# Copyright (c) 2026 European Commission
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+###############################################################################
+"""Shared pytest fixtures."""
+
+import os
+
+# The .env.test environment, set before any app module is imported, so a plain
+# `pytest` runs like CI (upstream #185). Values already set are kept.
+os.environ.setdefault("MOCK_CONFIGURATION", "true")
+os.environ.setdefault("EUDIW_TEST_ENV", "true")
+
+import pytest  # noqa: E402
+
+from config_helpers import set_configuration  # noqa: E402
+
 
 @pytest.fixture(autouse=True)
 def mock_configuration(monkeypatch):
-    
-    config = {
-        "service_url": "https://service.test"
-    }
-    
-    monkeypatch.setattr("app.CONFIGURATION", config)
-    monkeypatch.setattr("app.dynamic_func.CONFIGURATION", config)
-    monkeypatch.setattr("app.formatter_func.CONFIGURATION", config)
-    monkeypatch.setattr("app.misc.CONFIGURATION", config)
-    monkeypatch.setattr("app.preauthorization.CONFIGURATION", config)
-    monkeypatch.setattr("app.revocation.CONFIGURATION", config)
-    monkeypatch.setattr("app.route_dynamic.CONFIGURATION", config)
-    monkeypatch.setattr("app.route_formatter.CONFIGURATION", config)
-    monkeypatch.setattr("app.route_oid4vp.CONFIGURATION", config)
-    monkeypatch.setattr("app.route_oidc.CONFIGURATION", config)
-    monkeypatch.setattr("app.signed_metadata.CONFIGURATION", config)
-    
+    """Gives every test a minimal configuration in all app modules."""
+    config = {"service_url": "https://service.test"}
+    set_configuration(monkeypatch, config)
     yield config

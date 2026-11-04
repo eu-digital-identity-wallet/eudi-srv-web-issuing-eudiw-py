@@ -19,7 +19,23 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from flask import Flask, json
-from app import redirect_func as rf
+from app.utils import http as rf
+from config_helpers import set_configuration
+
+
+@pytest.fixture(autouse=True)
+def frontends(monkeypatch):
+    """Configures the frontends the POST-redirect may target."""
+    set_configuration(
+        monkeypatch,
+        {
+            "service_url": "https://service.test",
+            "frontend": {
+                "default": "wallet",
+                "frontends_config": {"wallet": {"url": "https://wallet.com"}, "ex": {"url": "https://example.com/fe"}},
+            },
+        },
+    )
 
 
 @pytest.fixture
@@ -38,29 +54,7 @@ class TestRedirectFunc:
         assert result.startswith(url)
         assert "a=1" in result and "b=2" in result
 
-    @patch("app.redirect_func.requests.post")
-    def test_json_post_success(self, mock_post):
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_post.return_value = mock_resp
-
-        url = "http://example.com"
-        payload = {"key": "value"}
-        resp = rf.json_post(url, payload)
-        mock_post.assert_called_once_with(
-            url, json=payload, headers={"Content-Type": "application/json"}
-        )
-        assert resp.status_code == 200
-
-    @patch("app.redirect_func.requests.post", side_effect=Exception("fail"))
-    def test_json_post_exception(self, mock_post):
-        url = "http://example.com"
-        payload = {"key": "value"}
-        with pytest.raises(Exception) as excinfo:
-            rf.json_post(url, payload)
-        assert "fail" in str(excinfo.value)
-
-    @patch("app.redirect_func.render_template_string")
+    @patch("app.utils.http.render_template_string")
     def test_post_redirect_with_payload(self, mock_render):
         target_url = "https://wallet.com/callback"
         payload = {"key": "value"}
@@ -87,7 +81,7 @@ class TestRedirectFunc:
     # ---------------------------
     # Test post_redirect_with_payload edge cases
     # ---------------------------
-    @patch("app.redirect_func.render_template_string")
+    @patch("app.utils.http.render_template_string")
     def test_post_redirect_empty_payload(self, mock_render):
         target_url = "https://wallet.com/callback"
         payload = {}
@@ -101,7 +95,7 @@ class TestRedirectFunc:
     # -----------------------------
     # post_redirect_with_payload empty string payload
     # -----------------------------
-    @patch("app.redirect_func.render_template_string")
+    @patch("app.utils.http.render_template_string")
     def test_post_redirect_with_payload_empty_string(self, mock_render):
         target_url = "https://example.com"
         payload = {"key": ""}
@@ -109,3 +103,44 @@ class TestRedirectFunc:
         args, kwargs = mock_render.call_args
         decoded_payload = json.loads(kwargs["data"])
         assert decoded_payload["key"] == ""
+
+
+class TestAutoSubmitEscaping:
+    """The payload is escaped (pentest INJ-VULN-01..03 / XSS-VULN-05)."""
+
+    @pytest.mark.parametrize(
+        "value", ["'><script>alert(document.cookie)</script>", '"><img src=x onerror=alert(1)>', "a&b<c>"]
+    )
+    def test_payload_cannot_break_out_of_the_attribute(self, app, value):
+        with app.test_request_context():
+            html = rf.post_redirect_with_payload("https://wallet.com/display", {"session_id": value})
+        assert "<script>alert" not in html and "<img" not in html
+        assert html.count("<script>") == 1
+        value_attr = html.split('name="payload" value="')[1].split('"')[0]
+        assert "<" not in value_attr and ">" not in value_attr and "'" not in value_attr
+
+    def test_payload_round_trips_through_the_attribute(self, app):
+        import html as html_lib
+
+        payload = {"session_id": "x'\"<>&", "n": 1}
+        with app.test_request_context():
+            page = rf.post_redirect_with_payload("https://wallet.com/display", payload)
+        value_attr = page.split('name="payload" value="')[1].split('"')[0]
+        assert json.loads(html_lib.unescape(value_attr)) == payload
+
+    @pytest.mark.parametrize(
+        "target", ["https://attacker.test/x", "javascript:alert(1)", "https://wallet.com.attacker.test/", ""]
+    )
+    def test_target_must_be_a_frontend(self, app, target):
+        with app.test_request_context(), pytest.raises(ValueError):
+            rf.post_redirect_with_payload(target, {})
+
+    def test_script_hash_matches_inline_script(self, app):
+        import base64
+        import hashlib
+
+        with app.test_request_context():
+            page = rf.post_redirect_with_payload("https://example.com/fe/page", {})
+        script = page.split("<script>")[1].split("</script>")[0]
+        digest = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
+        assert rf.AUTO_SUBMIT_SCRIPT_HASH == f"'sha256-{digest}'"
