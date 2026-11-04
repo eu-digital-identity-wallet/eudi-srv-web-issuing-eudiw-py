@@ -103,10 +103,10 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
 
 7. Setup configuration
 
-   -  Copy ```app/config_issuer_backend_example.yaml``` to ```etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
+   -  Copy [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml) to ```/etc/issuer_config/config_issuer_backend.yaml``` and modify variables.
 
    ```shell
-   cp app/config_issuer_backend_example.yaml etc/issuer_config/config_issuer_backend.yaml
+   cp app/config_issuer_backend_example.yaml /etc/issuer_config/config_issuer_backend.yaml
    ```
 
    Configuration location can be changed using environment variable ISSUER_CONFIG_PATH
@@ -141,7 +141,7 @@ To run the EUDIW Issuer, please follow these simple steps (some of which may hav
      - `session_file_threshold` [`10000`]: server-side browser session files kept
      - `test_features.{form_countries, passport_age_verification, tx_code_in_offer, credential_offer_request}` [all `false`]: demo-only features that accept self-asserted data
 
-   Every key is described in `app/config_issuer_backend_example.yaml`.
+   Every key is described in [app/config_issuer_backend_example.yaml](app/config_issuer_backend_example.yaml).
 
 8. Install Authorization Server
     - Install the service according to [Issuer Authorization Server](https://github.com/eu-digital-identity-wallet/eudi-srv-issuer-oidc-py/blob/main/install.md)
@@ -286,14 +286,19 @@ This guide provides step-by-step instructions for deploying the **EUDIW Issuer**
     * **Customize the configuration:** Review and modify the local `docker-compose.yml` file to align with your specific deployment requirements (e.g., exposed ports, service names, volumes).
     * *Reference file:* [docker-compose.yml](./docker-compose.yml)
 
-3. Set Up Environment Variables
+3. Set Up configuration file
 
-    Service parameters and sensitive settings are managed through an environment file.
+    Service parameters and sensitive settings are managed through a configuration file.
 
-    * **Create the environment file:** We recommend copying the example file to create your local configuration.
+    * **Create the configuration file:** Copy the example file to the path mounted in `docker-compose.yml`.
 
-    * **Update variables:** Edit the newly created `app/.env` file with your specific settings and credentials.
-        * *Reference example:* [.env example](./app/.env.example)
+        ```
+        cp app/config_issuer_backend_example.yaml /etc/issuer_config/config_issuer_backend.yaml
+        ```
+
+    * **Update variables:** Edit `/etc/issuer_config/config_issuer_backend.yaml` with your specific settings; every setting is commented.
+        * *Reference example:* [config_issuer_backend_example.yaml](./app/config_issuer_backend_example.yaml)
+        * The `*_path` values must point to the key and certificate folders mounted in `docker-compose.yml`.
 
 
 4. Pull the Docker Image
@@ -302,7 +307,7 @@ This guide provides step-by-step instructions for deploying the **EUDIW Issuer**
     docker compose pull
     ```
 
-5. Run the 
+5. Run the service
 
     Start the EUDIW Issuer backend in detached mode (runs in the background):
 

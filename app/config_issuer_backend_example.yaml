@@ -23,7 +23,7 @@ variables:
   # Token status list service (revocation).
   status_list_url: "https://issuer.eudiw.dev/token_status_list"
   # Folder of the issuer keys (privKey/) and certificates (cert/).
-  eudiw_dir: "/etc/eudiw/pid-issuer-dev"
+  eudiw_dir: "/etc/eudiw/pid-issuer"
   keys_dir: "${eudiw_dir}/privKey"
   certs_dir: "${eudiw_dir}/cert"
 
@@ -295,7 +295,7 @@ postgres:
 # log file, also searched by GET /logs. log_level (default "INFO"): DEBUG,
 # INFO, WARNING, ERROR or CRITICAL.
 logging:
-  backend_path: "/tmp/log_prod/logs.log"
+  backend_path: "/tmp/log/logs.log"
   log_level: "INFO"
 
 # ============================================================================

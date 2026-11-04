@@ -10,9 +10,9 @@ services:
     # The configuration is read from /etc/issuer_config/config_issuer_backend.yaml
     # (ISSUER_CONFIG_PATH default).
     volumes:
-      - /etc/eudiw/pid-issuer-dev/cert/:/etc/eudiw/pid-issuer-dev/cert/:ro
-      - /etc/eudiw/pid-issuer-dev/privKey/:/etc/eudiw/pid-issuer-dev/privKey/:ro
-      - /tmp/log_dev:/tmp/log_dev
+      - /etc/eudiw/pid-issuer/cert/:/etc/eudiw/pid-issuer/cert/:ro
+      - /etc/eudiw/pid-issuer/privKey/:/etc/eudiw/pid-issuer/privKey/:ro
+      - /tmp/log:/tmp/log
       - /etc/issuer_config/config_issuer_backend.yaml:/etc/issuer_config/config_issuer_backend.yaml:ro
     # Lets the container reach services on the Docker host (e.g. PostgreSQL)
     # as host.docker.internal.

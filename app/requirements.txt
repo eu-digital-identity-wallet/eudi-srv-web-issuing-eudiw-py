@@ -19,8 +19,7 @@ PyYAML==6.0.3
 concurrent-log-handler==0.9.29
 
 # Credential formats, COSE / JOSE
-# niscy-eudiw fork 0.6.0 (fail-closed verifier, no cwt). TODO: pin to the commit once pushed.
-pymdoccbor @ git+https://github.com/niscy-eudiw/pyMDOC-CBOR.git@branch-refractoring
+pymdoccbor @ git+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR.git@main
 sd-jwt @ git+https://github.com/openwallet-foundation-labs/sd-jwt-python.git@v0.10.4-1
 cbor2==5.9.0
 pycose==1.1.0

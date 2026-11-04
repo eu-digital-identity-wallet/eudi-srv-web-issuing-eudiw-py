@@ -293,7 +293,7 @@ _06 Oct 2026_
 - The Docker image runs as an unprivileged user (UID 10001) and only copies `app/`.
 - CI: SonarCloud runs on `pull_request` instead of `pull_request_target` (fork PR code ran with repository secrets) and actions are pinned to commit SHAs.
 - Removed the `/formatter/cbor` and `/formatter/sd-jwt` routes, which signed caller-supplied data with the issuer keys; issuance calls the formatters directly.
-- Dependencies: pyMDOC-CBOR moves to the niscy-eudiw fork 0.6.0, which no longer caps its dependencies through `cwt`, so `cryptography` goes from 41.0.7 (2023, missing later security fixes) to 50.0.2, with `cbor2` 5.9.0, `pycose` 1.1.0 and `jwcrypto` 1.6.1. `cwt` and `cbor_diag` are no longer installed. The fork also fixes batch-issued mdocs whose nested dates (e.g. mDL `driving_privileges`) were tagged twice, and brainpool device keys written with the wrong COSE curve identifier.
+- Dependencies: pyMDOC-CBOR 0.6.0 no longer caps its dependencies through `cwt`, so `cryptography` goes from 41.0.7 (2023, missing later security fixes) to 50.0.2, with `cbor2` 5.9.0, `pycose` 1.1.0 and `jwcrypto` 1.6.1. `cwt` and `cbor_diag` are no longer installed. pyMDOC-CBOR 0.6.0 also fixes batch-issued mdocs whose nested dates (e.g. mDL `driving_privileges`) were tagged twice, and brainpool device keys written with the wrong COSE curve identifier.
 
 ### Fixed
 - Reflected XSS in the auto-submit page: the payload was rendered unescaped inside a single-quoted attribute.
@@ -311,7 +311,21 @@ _06 Oct 2026_
 - Log lines escape line breaks in every request-supplied or externally received value (log injection).
 - A browser request without an active issuance session (expired, or already handed back to the wallet) gets 400 instead of a 500.
 
-## [Unreleased]
+## [0.10.0]
+
+_07 Oct 2026_
+
+### Added
+- JWT Registration certificate support
+
+## [0.10.1]
+
+_30 Oct 2026_
+
+### Added
+- Update test PID Issuer certificates and cryptographic keys (available in [https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens)) to comply with the applicable CIR and ETSI requirements
+
+## [0.11.0]
 
 ### Added
 - `admin_api_key` guards `GET /logs`, `GET /admin/sessions/client_status` and `POST /metadata/metadata_signer`; `backend_api_key` only reads frontend metadata.
@@ -357,6 +371,9 @@ _06 Oct 2026_
 - `verify_jwt_with_x5c` reads `typ` from the verified token (SonarCloud).
 - `pipeline.yml` runs on `main` and `branch-*` instead of `dev`, `preprod` and `main`.
 - Plain `pytest` runs the tests; sourcing `.env.test` is no longer needed (upstream #185).
+- The key folder in the image, `docker-compose.yml` and the example configuration is `/etc/eudiw/pid-issuer` (was `pid-issuer-dev`).
+- The log folder in the image, `docker-compose.yml` and the example configuration is `/tmp/log` (was `/tmp/log_dev` and `/tmp/log_prod`, so the compose mount missed the example log file).
+- pyMDOC-CBOR is installed from the eu-digital-identity-wallet `main` branch.
 
 ### Fixed
 - Key attestations without `iat` / `exp`, too old or with another `typ` were accepted.
@@ -377,3 +394,5 @@ _06 Oct 2026_
 - `gitleaks/gitleaks.toml` failed to load, so the secret scan never ran.
 - The Docker image did not start without `libpq5`.
 - `install.md` and `licenses.md` listed gunicorn, which is not a dependency.
+- `install.md`: the Docker steps linked a missing `.env.example` instead of the example configuration.
+- `README.md` linked a missing `api_docs/configuration.md` and `api_docs/credential_offer_create.md`.
