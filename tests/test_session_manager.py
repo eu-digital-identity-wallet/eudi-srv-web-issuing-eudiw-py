@@ -18,7 +18,7 @@
 ###############################################################################
 import pytest
 from datetime import datetime, timedelta, timezone
-from app.session_manager import Session, SessionManager
+from app.repositories.session_store import Session, SessionManager
 
 # Assuming Session and SessionManager are correctly imported
 
@@ -83,7 +83,7 @@ class TestSessionManagerCore:
         session = manager.add_session(session_id="s1")
         assert session.session_id == "s1"
         assert manager.get_session("s1") is session
-        assert manager.get_active_sessions_count() == 1
+        assert len(manager._sessions) == 1
 
     def test_add_session_all_attributes(self, manager):
         """Test adding a session with all optional fields."""
@@ -216,7 +216,7 @@ class TestSessionManagerExpirationAndCleanup:
         # s1 removed, s2 still exists
         assert manager.get_session("expired_s1") is None
         assert manager.get_session("active_s2") is s2
-        assert manager.get_active_sessions_count() == 1
+        assert len(manager._sessions) == 1
 
 
 # -------------------------------

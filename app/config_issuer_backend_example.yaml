@@ -1,17 +1,132 @@
 # config_issuer_backend.yaml - COMPLETE CONFIGURATION
 # ⚠️ IMPORTANT: This file contains SECRETS - DO NOT commit to git!
 # Add to .gitignore: config_issuer_backend.yaml, config_issuer_backend.*.yaml
+#
+# Read from ISSUER_CONFIG_PATH (default /etc/issuer_config/config_issuer_backend.yaml).
+# Keys shown commented out are optional; their default is the value shown.
+# Every *_path key is read at start-up: the file must exist and be readable.
+
+# ============================================================================
+# VARIABLES
+# ============================================================================
+# Values repeated across this file. Any string value below may use ${name},
+# e.g. "${keys_dir}/PID-DS-0002_PT.pem"; a variable may use the variables
+# defined before it. Using an undefined variable fails at start-up. Change
+# these to move the whole configuration to another environment.
+variables:
+  # Public URL of this backend (service_url, identity provider redirects).
+  backend_url: "https://backend.issuer.eudiw.dev"
+  # Public URL of the default frontend.
+  frontend_url: "https://issuer.eudiw.dev"
+  # Public URL of the authorization server (its issuer, without a path).
+  as_url: "https://as.eudiw.dev"
+  # Token status list service (revocation).
+  status_list_url: "https://issuer.eudiw.dev/token_status_list"
+  # Folder of the issuer keys (privKey/) and certificates (cert/).
+  eudiw_dir: "/etc/eudiw/pid-issuer"
+  keys_dir: "${eudiw_dir}/privKey"
+  certs_dir: "${eudiw_dir}/cert"
 
 # ============================================================================
 # SERVICE CONFIGURATION
 # ============================================================================
-service_url: "https://backend.issuer.eudiw.dev"
+# Public base URL of this backend, no trailing slash. Required. Issuer and
+# audience of the c_nonces and base of the redirect / callback URLs.
+service_url: "${backend_url}"
 
+# Base URL of the wallet tester; the offer and pre-authorized pages link to
+# <wallet_tester_url>/credential_offer and /redirect_preauth. Required.
 wallet_tester_url: "https://tester.issuer.eudiw.dev"
 
+# Browser origins allowed to call the backend cross-origin (with cookies), in
+# addition to the URLs of the configured frontends. List of origins; default
+# none. Browser form POSTs (CSRF check) are accepted from these origins, the
+# frontends and service_url; other Origin / Referer values get 403.
+# cors_allowed_origins: ["https://tester.issuer.eudiw.dev"]
+
+# SameSite attribute of the session cookie: "None" (default), "Lax" or
+# "Strict". "None" is needed when frontends live on another site than the
+# backend; use "Lax" when they share the same site.
+# session_cookie_samesite: "None"
+
+# Proof of possession checks at /credential. Proofs must be signed and
+# address the frontend URL (aud).
+#   require_nonce (default true): proofs must carry a c_nonce from /nonce.
+#     A proof without one gets invalid_proof; an unknown, expired or reused
+#     one gets invalid_nonce. Only disable it for wallets that cannot fetch one.
+#   single_use_nonce (default true): a c_nonce is accepted by one credential
+#     request only. false: a valid nonce can be reused until it expires (1 h),
+#     as OpenID4VCI 1.0 allows; the used-nonce store is then not consulted.
+#   key_attestation_max_age_seconds (default 86400): key attestations need
+#     iat and exp, and iat may be at most this many seconds old.
+# proof_validation:
+#   require_nonce: true
+#   single_use_nonce: true
+#   key_attestation_max_age_seconds: 86400
+
+# Largest request body in bytes (larger requests get 413; default 1 MiB) and
+# the number of server-side browser session files kept (default 10000).
+# max_content_length: 1048576
+# session_file_threshold: 10000
+
+# API keys other EUDIW services send in the X-Api-Key header. Endpoints whose
+# key is not set answer 503. No default. Use two different random values.
+# backend_api_key: the frontends read their metadata with it
+#   (GET /metadata/<frontend_id> and /metadata/<frontend_id>/signed).
+# admin_api_key: administrative endpoints, never given to a frontend:
+#   GET /logs, GET /admin/sessions/client_status, POST /metadata/metadata_signer.
+backend_api_key: "change-me"  # SECRET
+admin_api_key: "change-me"  # SECRET
+
+# Key that signs the Flask session cookie. Required: start-up fails when it is
+# missing, a known placeholder or shorter than 32 characters. Generate one with
+#   python -c "import secrets; print(secrets.token_hex(32))"
+# It can also come from the FLASK_SECRET_KEY environment variable.
+secret_key: ""  # SECRET
+
+# Per-client rate limits (429 when exceeded) on the endpoints that sign,
+# issue or look up data; see app/core/rate_limit.py for the defaults.
+#   enabled (default true): false turns rate limiting off.
+#   trusted_proxies (default 0): reverse proxies whose X-Forwarded-For is
+#     trusted. Behind nginx keep 1, or every user shares the proxy's address
+#     (and limit).
+#   storage_uri (default "memory://"): use a shared one (e.g. redis://) when
+#     running several workers.
+#   limits: {Flask endpoint: "N per second|minute|hour|day"} overrides.
+rate_limiting:
+  enabled: true
+  trusted_proxies: 1
+  # storage_uri: "memory://"
+  # limits:
+  #   oidc.credential: "60 per minute"
+
+# Test-only features for a demo issuer. Each one lets users obtain credentials
+# with self-asserted data, so all are off (default false) unless set to true.
+#   form_countries: offer the form countries (FC, AV, AV2): the user types the
+#     attributes, including through the /preauth form flow. The form after a
+#     verified PID login works without it.
+#   passport_age_verification: issue the passport age verification credential
+#     with age_over_18 = true and no identity check.
+#   tx_code_in_offer: put the tx_code value inside the offer returned by
+#     /credentialOfferReq2 (the offer and its QR code then carry both factors).
+#     Off: the response is {"credential_offer", "tx_code"}.
+#   credential_offer_request: enable /credentialOfferReq2, where any trusted
+#     signer chooses the credential type (PID included) and its data.
+#     Off: the endpoint answers 403.
+# test_features:
+#   form_countries: false
+#   passport_age_verification: false
+#   tx_code_in_offer: false
+#   credential_offer_request: false
+
+# Token status list service (revocation).
+#   take_url / set_url: endpoints that reserve and update status list entries.
+#   api_key: sent to that service. SECRET.
+#   enabled: true adds a status list entry to issued credentials (needed to
+#     revoke them); false issues credentials without one.
 revocation:
-  take_url: "https://issuer.eudiw.dev/token_status_list/take"
-  set_url: https://issuer.eudiw.dev/token_status_list/set
+  take_url: "${status_list_url}/take"
+  set_url: "${status_list_url}/set"
   api_key: "secret"  # SECRET
   enabled: true
 
@@ -19,53 +134,152 @@ revocation:
 # FRONTEND CONFIGURATION
 # ============================================================================
 frontend:
+  # Frontend id used when a request or session names none. Required; must be
+  # a key of frontends_config.
   default: "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
 
+  # One entry per frontend, keyed by its frontend_id (the same value as
+  # frontend_id in that frontend's configuration, and one of the authorization
+  # server's `frontends`). Ids: letters, digits, "_" and "-". The frontend's
+  # metadata names <authorization_server.base_url>/<frontend_id> as its
+  # authorization server.
   frontends_config:
     "5d725b3c-6d42-448e-8bfd-1eff1fcf152d":
-      url: "https://issuer.eudiw.dev"
-      metadata_signing_key_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/PID-DS-03.key"
-      metadata_access_certificate_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/PID-DS-03.crt"
+      # Public URL of the frontend: the credential issuer identifier, so the
+      # expected aud of proofs. Browser origin allowed by CORS / CSRF checks.
+      # It is also the iss of SD-JWT VCs: verifiers fetch the signing keys from
+      # <host>/.well-known/jwt-vc-issuer<path>, so a URL with a path needs a
+      # reverse-proxy rewrite to the frontend's /.well-known/jwt-vc-issuer.
+      url: "${frontend_url}"
+      # Private key (PEM) and certificate that sign this frontend's
+      # signed_metadata. The key is a SECRET; password is null when the key
+      # is not encrypted (SECRET when set).
+      metadata_signing_key_path: "${keys_dir}/PID-DS-03.key"
+      metadata_access_certificate_path: "${certs_dir}/PID-DS-03.crt"
       metadata_signing_key_password: null
-      # Registration certificate (JWT) advertised in the credential issuer metadata "issuer_info". Optional (null to disable).
-      registration_certificate_path: "/home/pid.issuer/pidprovider/dev/eudi-srv-web-issuing-eudiw-py/app/private/registration_cert.jwt"
+      # Registration certificate (rc-wrp+jwt) of this frontend, published as
+      # issuer_info in its unsigned and signed credential issuer metadata.
+      # Optional; a text file holding the JWT. Start-up fails if it is not a JWT.
+      # registration_certificate_path: "${certs_dir}/PID-Issuer-WRPRC.jwt"
+      # Shared secret (at least 32 characters) that signs the payloads the
+      # backend posts to this frontend's /display_* pages (payload_jwt, HS256).
+      # Without it the payloads are posted unsigned and a warning is logged.
+      # payload_key: ""  # SECRET
+      # Optional: restrict the credentials this frontend advertises ("*" or
+      # absent = all credential configurations the backend supports).
+      credentials_supported:
+        - "org.iso.18013.5.1.reservation_mdoc"
+        - "eu.europa.ec.eudi.cor_mdoc"
+        - "eu.europa.ec.eudi.diploma_vc_sd_jwt"
+        - "eu.europa.ec.eudi.ehic_sd_jwt_vc"
+        - "eu.europa.ec.eudi.ehic_mdoc"
+        - "eu.europa.ec.eudi.employee_mdoc"
+        - "eu.europa.ec.eudi.hiid_sd_jwt_vc"
+        - "eu.europa.ec.eudi.hiid_mdoc"
+        - "eu.europa.ec.eudi.iban_sd_jwt_vc"
+        - "eu.europa.ec.eudi.iban_mdoc"
+        - "eu.europa.ec.eudi.loyalty_mdoc"
+        - "eu.europa.ec.eudi.mdl_mdoc"
+        - "eu.europa.ec.eudi.msisdn_sd_jwt_vc"
+        - "eu.europa.ec.eudi.msisdn_mdoc"
+        - "eu.europa.ec.eudi.pda1_sd_jwt_vc"
+        - "eu.europa.ec.eudi.pda1_mdoc"
+        - "eu.europa.ec.eudi.photoid"
+        - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+        - "eu.europa.ec.eudi.pid_mdoc_deferred"
+        - "eu.europa.ec.eudi.pid_mdoc"
+        - "eu.europa.ec.eudi.por_sd_jwt_vc"
+        - "eu.europa.ec.eudi.por_mdoc"
+        - "eu.europa.ec.eudi.seafarer_mdoc"
+        - "eu.europa.ec.eudi.tax_sd_jwt_vc"
+        - "eu.europa.ec.eudi.tax_mdoc"
+        - "eu.europa.ec.eudi.tax_residency_vc_sd_jwt"
+        - "eu.europa.ec.eudi.learning_credential_vc_sd_jwt"
+        - "eu.europa.ec.eudi.aamva_mdl_mdoc"
+        - "org.iso.7367.2.1.mVC_mdoc"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION
 # ============================================================================
 
 authorization_server:
-  base_url: "https://backend.issuer.eudiw.dev/oidc"
-  user_verify_endpoint: "https://issuer.eudiw.dev/oidc/verify/user"
+  # Public URL of the authorization server: its op.server_info.issuer. Required.
+  # Each frontend's authorization_servers is <base_url>/<frontend_id>; also the
+  # base of the default jwks_uri and of the calls below.
+  base_url: "${as_url}"
+  # Authorization server page the browser returns to once the user is
+  # authenticated (country / form flows). Required.
+  user_verify_endpoint: "${as_url}/verify/user"
+  # Sent in the X-Api-Key header to /preauth_generate; must match
+  # backend_api_key in the authorization server configuration.
+  api_key: ""  # SECRET
+  # Keys that verify the session_token the authorization server passes to
+  # /auth_choice (default: <base_url>/static/jwks.json). jwks_path reads a
+  # local JWKS file instead.
+  # jwks_uri: "${as_url}/static/jwks.json"
+  # jwks_path: "/etc/eudiw/authorization_server_jwks.json"
+  # Expected iss of the session_token (the authorization server issuer);
+  # checked when set.
+  # issuer: "${as_url}"
 
 # ============================================================================
 # EXTERNAL SERVICES CONFIGURATION
 # ============================================================================
-#verifier url for oid4vp request generation, available at https://github.com/eu-digital-identity-wallet/eudi-srv-verifier-endpoint
+# Verifier endpoint that creates the OID4VP requests of the PID login
+# (https://github.com/eu-digital-identity-wallet/eudi-srv-verifier-endpoint).
+# Required; its host also goes into the wallet link.
 dynamic_presentation_url: "https://verifier-backend.eudiw.dev/ui/presentations"
-# at least one of 'intended_use_id' or 'registration_certificate_jwt' must be defined
+# Identify this issuer to the verifier: at least one of 'intended_use_id' or
+# 'registration_certificate_jwt' must be defined (PID login fails otherwise).
 intended_use_id:
 registration_certificate_jwt:
 
 # WUA trust validator url, available at https://github.com/eu-digital-identity-wallet/eudi-srv-trust-validator
+# When enabled, x5c chains are checked by the trust validator first. Its
+# "trusted: false" answer is final; only when it is unreachable or disabled
+# are the chains checked against the local trusted CAs (trusted_CAs_paths /
+# trusted_CAs_path).
+# url: validator endpoint. enabled (default false when the section is absent):
+# true sends the chains to it.
 trust_validator:
   url: "https://trust-validator.eudiw.dev/trust"
   enabled: true
+  # Optional verificationContext overrides (see the trust validator OpenAPI
+  # VerificationContext enum). "useCase" is only needed for "Custom".
+  # contexts:
+  #   key_attestation: "WalletProviderAttestation"
+  #   credential_offer_request: "WalletRelyingPartyAccessCertificate"
+  # use_cases:
+  #   key_attestation: "my-use-case"
 
+# Status validator (Token Status List checks of the WIA and key attestations,
+# at /credential and in the nightly sweep). url and enabled are required;
+# enabled: false skips the checks.
 status_validator:
   url: "https://status-validator.issuer.eudiw.dev/status"
   enabled: true
+  # Context the status validator passes to the trust validator for the WIA /
+  # key attestation status list signer. Credential requests whose WIA / KA
+  # status cannot be verified are rejected.
+  # validation_context: "WalletOrKeyStorageStatus"
 
 # ============================================================================
 # SCHEMA CONFIGURATION
 # ============================================================================
+# URI scheme prefix of the OID4VP wallet links (PID login), e.g.
+# "openid4vp://", "eudi-openid4vp://" or "haip-vp://". Required.
 oid4vp_scheme: "haip-vp://"
 
+# URI scheme prefix of the credential offer links and QR codes, e.g.
+# "openid-credential-offer://" or "haip-vci://". Required.
 credential_offer_scheme: "haip-vci://"
 
 # ============================================================================
 # POSTGRES CONFIGURATION
 # ============================================================================
+# Database of the WIA / key attestation status records the nightly sweep
+# checks. Required (not used in the test environment). port defaults to
+# 5432; password is a SECRET.
 postgres:
   host: "localhost"
   port: 5432
@@ -76,31 +290,61 @@ postgres:
 # ============================================================================
 # LOGGING
 # ============================================================================
+# backend_path: log file of this service (its directory is created).
+# Required. authorization_server_path (optional): the authorization server's
+# log file, also searched by GET /logs. log_level (default "INFO"): DEBUG,
+# INFO, WARNING, ERROR or CRITICAL.
 logging:
-  backend_path: "/tmp/log_prod/logs.log"
+  backend_path: "/tmp/log/logs.log"
   log_level: "INFO"
 
 # ============================================================================
 # EXPIRY TIMES (minutes)
 # ============================================================================
+# revocation_code, form and session are required. revocation_code: a
+# pending revocation request; form: a stored credential offer reference;
+# session: an issuance session. cleanup_interval (optional, default 60):
+# how often expired entries of all three are removed from memory.
 expiry:
   revocation_code: 60
   form: 60
   session: 60
+  cleanup_interval: 60
 
 # ============================================================================
 # KEY PATHS
 # ============================================================================
+# Both required, both SECRETS (private keys, PEM).
+# nonce_path: RSA key the c_nonces are encrypted to (RSA-OAEP); only this
+#   issuer can read them back.
+# credential_request_path: key wallets encrypt credential requests to; the
+#   public key advertised in the metadata is derived from it.
 keys:
-  nonce_path: "/etc/eudiw/pid-issuer-dev/privKey/nonce_rsa2048.pem" # Private key that signs the nonce at the nonce enpoint.
-  credential_request_path: "/etc/eudiw/pid-issuer-dev/privKey/credential_request.pem" # Private key used for credential request encryption. Metadata advertised public key is automatically generated from this private key.
+  nonce_path: "${keys_dir}/nonce_rsa2048.pem" # Private key that signs the nonce at the nonce enpoint.
+  credential_request_path: "${keys_dir}/credential_request.pem" # Private key used for credential request encryption. Metadata advertised public key is automatically generated from this private key.
 
-# Path to trusted CA certificates, used to validate VP_Tokens
-trusted_CAs_path: "/etc/eudiw/pid-issuer-dev/cert/"
+# Path to trusted CA certificates (*.pem): the trust anchors of PID document
+# signers (PID login), key attestations and /credentialOfferReq2 signers.
+# Required outside the test environment.
+trusted_CAs_path: "${certs_dir}/"
+# Optional separate trust anchors per purpose; a purpose left out uses
+# trusted_CAs_path. Recommended, so that e.g. a wallet provider CA cannot
+# anchor a PID document signer.
+# trusted_CAs_paths:
+#   key_attestation: "/etc/eudiw/trust/wallet-providers/"
+#   offer_request: "/etc/eudiw/trust/offer-requesters/"
+#   pid_signer: "/etc/eudiw/trust/pid-providers/"
 
 # ============================================================================
 # CREDENTIALS AUTHENTICATION METHODS CONFIGURATION
 # ============================================================================
+# Which credential configuration ids users may obtain through each
+# authentication method. Both lists required. A request is offered a method
+# only when every requested credential is in its list; an id in neither list
+# cannot be offered.
+#   PID_login: the user presents a PID from their wallet (OID4VP).
+#   country_selection: the user picks a country (eIDAS node, national
+#     identity provider or form country) from the countries section.
 credential_auth_methods:
   PID_login:
     - eu.europa.ec.eudi.pseudonym_over18_mdoc
@@ -152,6 +396,27 @@ credential_auth_methods:
 # Currently only _default is supported for both keys and custom_modifiers
 # Eventually keys will be separated by frontend and custom_modifiers per credential_configuration_id
 # Connection types supported: oauth or openid
+#
+# One entry per country code:
+#   name: label shown on the country selection page.
+#   keys._default: document signer of the credentials issued for this
+#     country: private_key_path (SECRET), private_key_password (null when the
+#     key is not encrypted; SECRET when set) and certificate_path (DER).
+#   issuing_country: ISO 3166-1 alpha-2 code written as issuing_country
+#     (default: the entry's code). Required when the code is not a country
+#     (FC, AV, AV2); must match the countryName of the document signer.
+#   un_distinguishing_sign: UN distinguishing sign put in mDLs; required when
+#     the country issues an mDL.
+#   supported_credential_ids: credential configuration ids it can issue.
+#   custom_modifiers._default: {identity provider attribute: credential
+#     attribute} renames applied to the user data the provider returns.
+#   connection_type: "oauth" or "openid" for an external identity provider;
+#     absent for form countries (the user types the data).
+#   auth: identity provider client settings: base_url, redirect_uri (this
+#     backend's /dynamic/redirect), scope, response_type, client_id,
+#     client_secret (SECRET), and optional authorization_headers /
+#     token_endpoint_headers sent to the userinfo / token endpoints
+#     (grant_type is not read: always authorization_code).
 
 countries:
   EU:
@@ -160,16 +425,22 @@ countries:
     # Keys and certificates
     keys:
       _default:
-        private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_EU.pem"
+        private_key_path: "${keys_dir}/PID-DS-0002_EU.pem"
         private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_EU_cert.der"
+        certificate_path: "${certs_dir}/PID-DS-0002_EU_cert.der"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
       - "eu.europa.ec.eudi.pid_vc_sd_jwt"
       - "eu.europa.ec.eudi.pid_mdoc_deferred"
 
-    custom_modifiers:
+    # The eIDAS node countries (EU, CZ, NL, LU) reuse these settings through
+    # the YAML anchors &eidas_node_modifiers / &eidas_node_auth. To change one
+    # value for one country only, merge and override, e.g.
+    #   auth:
+    #     <<: *eidas_node_auth
+    #     client_id: "other"
+    custom_modifiers: &eidas_node_modifiers
       _default:
         family_name: "CurrentFamilyName"
         given_name: "CurrentGivenName"
@@ -177,23 +448,27 @@ countries:
 
     connection_type: "oauth"
 
-    auth:
+    auth: &eidas_node_auth
       base_url: "https://eidas.projj.eu"
-      redirect_uri: "https://backend.issuer.eudiw.dev/dynamic/redirect"
+      redirect_uri: "${backend_url}/dynamic/redirect"
       scope: "profile"
       response_type: "code"
       client_id: "example"
-      client_secret: "example"
+      client_secret: "example"  # SECRET
 
   FC:
     name: "FormEU"
     keys:
       _default:
-        private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_UT.pem"
+        private_key_path: "${keys_dir}/PID-DS-0002_LU.pem"
         private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_UT_cert.der"
+        certificate_path: "${certs_dir}/PID-DS-0002_LU_cert.der"
 
-    un_distinguishing_sign: "FC"
+    # FC is not an ISO 3166-1 country: credentials carry LU (Luxembourg) as
+    # issuing_country, matching the countryName of the document signer
+    # certificate above (C=LU, ISO/IEC 18013-5).
+    issuing_country: "LU"
+    un_distinguishing_sign: "LU"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
@@ -225,15 +500,14 @@ countries:
       - "eu.europa.ec.eudi.pid_mdoc_deferred"
       - "eu.europa.ec.eudi.learning_credential_vc_sd_jwt"
 
-
   PT:
     name: "Portugal"
 
     keys:
       _default:
-        private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_PT.pem"
+        private_key_path: "${keys_dir}/PID-DS-0002_PT.pem"
         private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_PT_cert.der"
+        certificate_path: "${certs_dir}/PID-DS-0002_PT_cert.der"
 
     un_distinguishing_sign: "P"
 
@@ -253,20 +527,20 @@ countries:
 
     auth:
       base_url: "https://country-connector.ageverification.dev"
-      redirect_uri: "https://backend.issuer.eudiw.dev/dynamic/redirect"
+      redirect_uri: "${backend_url}/dynamic/redirect"
       scope: "profile"
       response_type: "code"
       client_id: "example"
-      client_secret: "example"
+      client_secret: "example"  # SECRET
 
   EE:
     name: "Estonia"
 
     keys:
       _default:
-        private_key_path: "/etc/eudiw/pid-issuer-dev/privKey/PID-DS-0002_EE.pem"
+        private_key_path: "${keys_dir}/PID-DS-0002_EE.pem"
         private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/cert/PID-DS-0002_EE_cert.der"
+        certificate_path: "${certs_dir}/PID-DS-0002_EE_cert.der"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
@@ -281,7 +555,7 @@ countries:
       response_type: "code"
       grant_type: "authorization_code"
       client_id: "eu_europa_ec_eudiw_pid_provider_1_ppr"
-      client_secret: "Basic example=="
+      client_secret: "Basic example=="  # SECRET
       authorization_headers: {"Host": "tara-test.ria.ee"}
       token_endpoint_headers: {"Host": "tara-test.ria.ee", "Content-Type": "application/x-www-form-urlencoded"}
 
@@ -290,3 +564,89 @@ countries:
         family_name: "CurrentFamilyName"
         given_name: "CurrentGivenName"
         birth_date: "date_of_birth"
+
+  CZ:
+    name: "Czechia"
+
+    keys:
+      _default:
+        private_key_path: "${keys_dir}/PID-DS-0002_CZ.pem"
+        private_key_password: null
+        certificate_path: "${certs_dir}/PID-DS-0002_CZ_cert.der"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.pid_mdoc"
+      - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+
+    custom_modifiers: *eidas_node_modifiers
+    connection_type: "oauth"
+    auth: *eidas_node_auth
+
+  NL:
+    name: "Netherlands"
+
+    keys:
+      _default:
+        private_key_path: "${keys_dir}/PID-DS-0002_NL.pem"
+        private_key_password: null
+        certificate_path: "${certs_dir}/PID-DS-0002_NL_cert.der"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.pid_mdoc"
+      - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+
+    custom_modifiers: *eidas_node_modifiers
+    connection_type: "oauth"
+    auth: *eidas_node_auth
+
+  LU:
+    name: "Luxembourg"
+
+    keys:
+      _default:
+        private_key_path: "${keys_dir}/PID-DS-0002_LU.pem"
+        private_key_password: null
+        certificate_path: "${certs_dir}/PID-DS-0002_LU_cert.der"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.pid_mdoc"
+      - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+
+    custom_modifiers: *eidas_node_modifiers
+    connection_type: "oauth"
+    auth: *eidas_node_auth
+
+  # Age verification form countries (test_features.form_countries). AV and
+  # AV2 are not ISO 3166-1 countries: like FC, they sign with the LU document
+  # signer and write LU as issuing_country / un_distinguishing_sign.
+  AV:
+    name: "Trusted Issuer"
+
+    keys:
+      _default:
+        private_key_path: "${keys_dir}/PID-DS-0002_LU.pem"
+        private_key_password: null
+        certificate_path: "${certs_dir}/PID-DS-0002_LU_cert.der"
+
+    issuing_country: "LU"
+    un_distinguishing_sign: "LU"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.age_verification_mdoc"
+      - "eu.europa.ec.eudi.age_verification_mdoc_passport"
+
+  AV2:
+    name: "Non-Trusted Issuer"
+
+    keys:
+      _default:
+        private_key_path: "${keys_dir}/PID-DS-0002_LU.pem"
+        private_key_password: null
+        certificate_path: "${certs_dir}/PID-DS-0002_LU_cert.der"
+
+    issuing_country: "LU"
+    un_distinguishing_sign: "LU"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.age_verification_mdoc"
+      - "eu.europa.ec.eudi.pid_mdoc"

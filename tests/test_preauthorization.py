@@ -17,22 +17,18 @@
 ###############################################################################
 
 import pytest
+from pki_helpers import ca_entry, make_cert, x5c
+from cryptography.hazmat.primitives.asymmetric import ec
+import jwt
 import json
+import time
 import base64
 import io
 from unittest.mock import Mock, patch, MagicMock, call
 from datetime import datetime, timezone
 from flask import Flask, session
 
-from app.preauthorization import (
-    preauth,
-    preauthRed,
-    preauth_form,
-    form_authorize_generate,
-    generate_offer,
-    credentialOfferReq2,
-    request_preauth_token,
-)
+from app.routes.preauth import preauth, preauthRed, preauth_form, form_authorize_generate, generate_offer, credentialOfferReq2, request_preauth_token
 
 
 @pytest.fixture
@@ -54,7 +50,7 @@ def client(app):
 @pytest.fixture
 def mock_session_manager():
     """Mock the session_manager module."""
-    with patch("app.preauthorization.session_manager") as mock:
+    with patch("app.routes.preauth.session_manager") as mock:
         mock_session = Mock()
         mock_session.frontend_id = "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
         mock_session.credentials_requested = ["credential_1", "credential_2"]
@@ -70,6 +66,14 @@ def mock_session_manager():
         mock.update_user_data.return_value = None
 
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def supported_credentials():
+    """Credential ids the /preauth tests request (credentials_id is validated)."""
+    ids = ["credential_1", "credential_2", "single_credential", "c1", "c2", "cred_1"]
+    with patch.dict("app.core.state.oidc_metadata", {"credential_configurations_supported": {i: {} for i in ids}}):
+        yield
 
 
 @pytest.fixture
@@ -92,20 +96,21 @@ def mock_configuration():
         "authorization_server": {
             "base_url": "http://127.0.0.1:6005"
         },
-        "credential_offer_scheme": "haip-vci://"
+        "credential_offer_scheme": "haip-vci://",
+        "test_features": {"form_countries": True, "tx_code_in_offer": True, "credential_offer_request": True},
     }
     
-    with patch.dict("app.preauthorization.CONFIGURATION", mock_cfg):
+    with patch.dict("app.routes.preauth.CONFIGURATION", mock_cfg):
         yield mock_cfg
 
 
 class TestPreauthRed:
     """Test the /preauth route."""
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_red_success(
         self,
         mock_post_redirect,
@@ -135,13 +140,13 @@ class TestPreauthRed:
         with client.session_transaction() as sess:
             sess["credential_offer_URI"] = "openid-credential-offer://"
 
-        response = client.get('/preauth?credentials_id=["credential_1","credential_2"]')
+        response = client.post('/preauth?credentials_id=["credential_1","credential_2"]')
 
         # Assert
         assert response.status_code == 302
-        mock_request_token.assert_called_once_with(scope="credential_1 credential_2")
+        # No frontend in the browser session: request_preauth_token uses the default.
+        mock_request_token.assert_called_once_with(scope="credential_1 credential_2", frontend_id=None)
         mock_session_manager.update_authorization_details.assert_called_once()
-        mock_session_manager.update_frontend_id.assert_called_once()
         mock_session_manager.update_credentials_requested.assert_called_once()
         mock_post_redirect.assert_called_once()
 
@@ -152,10 +157,10 @@ class TestPreauthRed:
         assert auth_details[0]["type"] == "openid_credential"
         assert auth_details[0]["credential_configuration_id"] == "credential_1"
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_red_empty_credentials(
         self,
         mock_post_redirect,
@@ -166,7 +171,7 @@ class TestPreauthRed:
         mock_session_manager,
         mock_configuration,
     ):
-        """Test preauth with empty credentials list."""
+        """An empty credentials list is invalid input: no pre-authorized code is requested."""
         from flask import Response
 
         mock_request_token.return_value = "test_session_id"
@@ -177,15 +182,15 @@ class TestPreauthRed:
         with client.session_transaction() as sess:
             sess["credential_offer_URI"] = "openid-credential-offer://"
 
-        response = client.get("/preauth?credentials_id=[]")
+        response = client.post("/preauth?credentials_id=[]")
 
-        mock_request_token.assert_called_once_with(scope="")
-        assert response.status_code == 302
+        mock_request_token.assert_not_called()
+        assert response.status_code == 400
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_red_filters_optional_attributes(
         self,
         mock_post_redirect,
@@ -211,7 +216,7 @@ class TestPreauthRed:
         with client.session_transaction() as sess:
             sess["credential_offer_URI"] = "openid-credential-offer://"
 
-        response = client.get('/preauth?credentials_id=["credential_1"]')
+        response = client.post('/preauth?credentials_id=["credential_1"]')
 
         # Check that optional attributes don't include mandatory ones
         call_args = mock_post_redirect.call_args[1]["data_payload"]
@@ -224,9 +229,9 @@ class TestPreauthRed:
 class TestPreauthForm:
     """Test the /preauth_form route."""
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.form_formatter")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_form_success(
         self,
         mock_post_redirect,
@@ -267,27 +272,26 @@ class TestPreauthForm:
         call_args = mock_form_formatter.call_args[0][0]
         assert "proceed" not in call_args
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_form_with_date(
         self,
         mock_post_redirect,
         mock_pres_formatter,
-        mock_form_formatter,
         client,
         mock_session_manager,
         mock_configuration,
     ):
-        """Test form submission with date conversion."""
+        """Test form submission with date conversion.
+
+        The RFC 3339 conversion now happens inside the (real) form_formatter,
+        so the converted value is checked in the stored user data.
+        """
         from flask import Response
 
-        mock_form_formatter.return_value = {
-            "name": "John Doe",
-            "effective_from_date": "2024-01-01T00:00:00Z",
-        }
         mock_pres_formatter.return_value = {"formatted": "data"}
         mock_post_redirect.return_value = Response("redirect", status=302)
+        mock_session_manager.get_session.return_value.country = "FC"
 
         with client.session_transaction() as sess:
             sess["session_id"] = "test_session_id"
@@ -301,17 +305,39 @@ class TestPreauthForm:
             },
         )
 
-        # Verify form_formatter was called with converted date
-        call_args = mock_form_formatter.call_args[0][0]
-        assert "effective_from_date" in call_args
-        assert call_args["effective_from_date"].endswith("Z")
-        assert "T00:00:00Z" in call_args["effective_from_date"]
+        assert response.status_code == 302
+        user_data = mock_session_manager.update_user_data.call_args.kwargs["user_data"]
+        assert "effective_from_date" in user_data
+        assert user_data["effective_from_date"].endswith("Z")
+        assert user_data["effective_from_date"] == "2024-01-01T00:00:00Z"
+        assert user_data["name"] == "John Doe"
+        assert user_data["issuing_country"] == "FC"
+
+    @pytest.mark.parametrize(
+        "form",
+        [
+            {"effective_from_date": "garbage"},
+            {"a": "x", "a[0]": "y"},
+            {"a[0]": "x", "a[0][b]": "y"},
+        ],
+    )
+    def test_preauth_form_malformed(self, client, mock_session_manager, mock_configuration, form):
+        """Malformed client input gives 400, not 500 (upstream #178)."""
+        mock_session_manager.get_session.return_value.country = "FC"
+
+        with client.session_transaction() as sess:
+            sess["session_id"] = "test_session_id"
+
+        response = client.post("/preauth_form", data=form)
+
+        assert response.status_code == 400
+        mock_session_manager.update_user_data.assert_not_called()
 
 
 class TestFormAuthorizeGenerate:
     """Test the /form_authorize_generate route."""
 
-    @patch("app.preauthorization.generate_offer")
+    @patch("app.routes.preauth.generate_offer")
     def test_form_authorize_generate_success(
         self, mock_generate_offer, client, mock_session_manager, mock_configuration
     ):
@@ -335,10 +361,30 @@ class TestFormAuthorizeGenerate:
         assert call_args == mock_session_manager.get_session.return_value.user_data
 
 
+
+@pytest.fixture
+def trusted_request_signer():
+    """Treats any request JWT as signed by a trusted certificate.
+
+    Used by tests about payload handling; trust itself is covered by
+    TestCredentialOfferReq2Trust and tests/test_trust.py.
+    """
+    def decode(token, **kwargs):
+        payload = token.split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        # A verified request always carries exp and iat (required_claims).
+        claims.setdefault("iat", int(time.time()))
+        claims.setdefault("exp", claims["iat"] + 300)
+        return claims
+
+    with patch("app.routes.preauth.verify_jwt_with_x5c", side_effect=decode) as verify:
+        yield verify
+
 class TestCredentialOfferReq2:
     """Test the /credentialOfferReq2 route."""
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_success(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -380,7 +426,8 @@ class TestCredentialOfferReq2:
         mock_session_manager.update_authorization_details.assert_called_once()
         mock_session_manager.update_user_data.assert_called_once()
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_multiple_credentials(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -422,7 +469,8 @@ class TestCredentialOfferReq2:
         assert "credential_1" in response_data["credential_configuration_ids"]
         assert "credential_2" in response_data["credential_configuration_ids"]
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_with_padding(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -451,7 +499,7 @@ class TestCredentialOfferReq2:
 class TestRequestPreauthToken:
     """Test the request_preauth_token function."""
 
-    @patch("app.preauthorization.requests.request")
+    @patch("app.services.auth_server.requests.request")
     def test_request_preauth_token_success(
         self, mock_requests, mock_session_manager, mock_configuration
     ):
@@ -479,8 +527,9 @@ class TestRequestPreauthToken:
         mock_requests.assert_called_once_with(
             "POST",
             expected_url,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data="scope=credential_1 credential_2",
+            headers={"Content-Type": "application/x-www-form-urlencoded", "X-Api-Key": ""},
+            data={"scope": "credential_1 credential_2", "frontend_id": mock_cfg["frontend"]["default"]},
+            timeout=30,
         )
         mock_session_manager.add_session.assert_called_once_with(
             session_id="test_session_id",
@@ -488,9 +537,10 @@ class TestRequestPreauthToken:
             scope="credential_1 credential_2",
             tx_code="12345",
             country="FC",
+            frontend_id=mock_cfg["frontend"]["default"],
         )
 
-    @patch("app.preauthorization.requests.request")
+    @patch("app.services.auth_server.requests.request")
     def test_request_preauth_token_empty_scope(
         self, mock_requests, mock_session_manager, mock_configuration
     ):
@@ -507,9 +557,9 @@ class TestRequestPreauthToken:
 
         assert result == "test_id"
         call_args = mock_requests.call_args
-        assert "scope=" in call_args[1]["data"]
+        assert call_args[1]["data"] == {"scope": "", "frontend_id": "default"}
 
-    @patch("app.preauthorization.requests.request")
+    @patch("app.services.auth_server.requests.request")
     def test_request_preauth_token_with_special_chars(
         self, mock_requests, mock_session_manager, mock_configuration
     ):
@@ -531,10 +581,10 @@ class TestRequestPreauthToken:
 class TestIntegration:
     """Integration tests for the preauth flow."""
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
-    @patch("app.preauthorization.generate_offer")
+    @patch("app.routes.preauth.form_formatter")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
+    @patch("app.routes.preauth.generate_offer")
     def test_form_to_offer_flow(
         self,
         mock_generate_offer,
@@ -577,10 +627,10 @@ class TestIntegration:
 class TestEdgeCases:
     """Test edge cases and error scenarios."""
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_with_vct_credentials(
         self,
         mock_post_redirect,
@@ -616,12 +666,12 @@ class TestEdgeCases:
             mock_update_auth_details
         )
 
-        response = client.get('/preauth?credentials_id=["credential_1"]')
+        response = client.post('/preauth?credentials_id=["credential_1"]')
         assert response.status_code == 302
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.form_formatter")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_form_without_date_field(
         self,
         mock_post_redirect,
@@ -650,7 +700,8 @@ class TestEdgeCases:
         call_args = mock_form_formatter.call_args[0][0]
         assert "effective_from_date" not in call_args
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_includes_tx_code_value(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -686,10 +737,10 @@ class TestEdgeCases:
         assert grants["tx_code"]["length"] == 5
         assert grants["tx_code"]["input_mode"] == "numeric"
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_with_single_credential(
         self,
         mock_post_redirect,
@@ -711,7 +762,7 @@ class TestEdgeCases:
         with client.session_transaction() as sess:
             sess["credential_offer_URI"] = "openid-credential-offer://"
 
-        response = client.get('/preauth?credentials_id=["single_credential"]')
+        response = client.post('/preauth?credentials_id=["single_credential"]')
 
         assert response.status_code == 302
 
@@ -721,10 +772,10 @@ class TestEdgeCases:
         assert len(creds) == 1
         assert "single_credential" in creds
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
-    @patch("app.preauthorization.logger")
+    @patch("app.routes.preauth.form_formatter")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
+    @patch("app.routes.preauth.logger")
     def test_preauth_form_logs_data(
         self,
         mock_logger,
@@ -735,7 +786,7 @@ class TestEdgeCases:
         mock_session_manager,
         mock_configuration,
     ):
-        """Test that preauth_form logs form data."""
+        """preauth_form logs a milestone at INFO and only field names at DEBUG, never values."""
         from flask import Response
 
         mock_form_formatter.return_value = {"data": "test"}
@@ -745,16 +796,15 @@ class TestEdgeCases:
         with client.session_transaction() as sess:
             sess["session_id"] = "test_session_id"
 
-        response = client.post(
-            "/preauth_form", data={"field": "value", "proceed": "yes"}
-        )
+        client.post("/preauth_form", data={"family_name": "Secret-Name", "proceed": "yes"})
 
-        # Verify logger was called
-        mock_cfg = mock_configuration
-        assert mock_logger.info.called
-        assert mock_logger.info.call_count >= 2
+        info_lines = [str(c.args[0]) for c in mock_logger.info.call_args_list]
+        debug_lines = [str(c.args[0]) for c in mock_logger.debug.call_args_list]
+        assert any("Pre-authorized attribute form submitted" in line for line in info_lines)
+        assert any("family_name" in line for line in debug_lines)
+        assert not any("Secret-Name" in line for line in info_lines + debug_lines)
 
-    @patch("app.preauthorization.requests.request")
+    @patch("app.services.auth_server.requests.request")
     def test_request_preauth_token_returns_all_values(
         self, mock_requests, mock_session_manager, mock_configuration
     ):
@@ -781,10 +831,10 @@ class TestEdgeCases:
 class TestCompleteCodeCoverage:
     """Additional tests to ensure 100% code coverage."""
 
-    @patch("app.preauthorization.request_preauth_token")
-    @patch("app.preauthorization.getAttributesForm")
-    @patch("app.preauthorization.getAttributesForm2")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.request_preauth_token")
+    @patch("app.routes.preauth.getAttributesForm")
+    @patch("app.routes.preauth.getAttributesForm2")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_updates_all_session_fields(
         self,
         mock_post_redirect,
@@ -806,16 +856,15 @@ class TestCompleteCodeCoverage:
         with client.session_transaction() as sess:
             sess["credential_offer_URI"] = "openid-credential-offer://"
 
-        response = client.get('/preauth?credentials_id=["c1","c2"]')
+        response = client.post('/preauth?credentials_id=["c1","c2"]')
 
         # Verify all update methods were called
         assert mock_session_manager.update_authorization_details.called
-        assert mock_session_manager.update_frontend_id.called
         assert mock_session_manager.update_credentials_requested.called
 
-    @patch("app.preauthorization.form_formatter")
-    @patch("app.preauthorization.presentation_formatter")
-    @patch("app.preauthorization.post_redirect_with_payload")
+    @patch("app.routes.preauth.form_formatter")
+    @patch("app.routes.preauth.presentation_formatter")
+    @patch("app.routes.preauth.post_redirect_with_payload")
     def test_preauth_form_removes_proceed_before_formatting(
         self,
         mock_post_redirect,
@@ -846,7 +895,8 @@ class TestCompleteCodeCoverage:
         assert "field1" in call_args
         assert "field2" in call_args
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_constructs_authorization_details(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -879,7 +929,8 @@ class TestCompleteCodeCoverage:
         assert auth_details[0]["credential_configuration_id"] == "id1"
         assert auth_details[1]["credential_configuration_id"] == "id2"
 
-    @patch("app.preauthorization.request_preauth_token")
+    @pytest.mark.usefixtures("trusted_request_signer")
+    @patch("app.routes.preauth.request_preauth_token")
     def test_credential_offer_req2_extracts_data_from_first_credential(
         self, mock_request_token, client, mock_session_manager, mock_configuration
     ):
@@ -908,3 +959,127 @@ class TestCompleteCodeCoverage:
         user_data = call_args[1]["user_data"]
 
         assert user_data == {"name": "Alice"}
+
+
+class TestCredentialOfferReq2Trust:
+    """credentialOfferReq2 only accepts requests signed by a trusted certificate."""
+
+    PAYLOAD = {
+        "credentials": [{"credential_configuration_id": "cred_1", "data": {"name": "Test"}}],
+        "iat": int(time.time()),
+        "exp": int(time.time()) + 300,
+    }
+
+    @pytest.fixture
+    def pki(self):
+        root_key = ec.generate_private_key(ec.SECP256R1())
+        leaf_key = ec.generate_private_key(ec.SECP256R1())
+        other_key = ec.generate_private_key(ec.SECP256R1())
+        root = make_cert("Root CA", "Root CA", root_key.public_key(), root_key, ca=True)
+        return {
+            "root": root,
+            "leaf": make_cert("Requester", "Root CA", leaf_key.public_key(), root_key, ca=False),
+            "untrusted": make_cert("Requester", "Other CA", leaf_key.public_key(), other_key, ca=False),
+            "leaf_key": leaf_key,
+            "other_key": other_key,
+        }
+
+    @pytest.fixture(autouse=True)
+    def trusted_store(self, pki):
+        with patch.dict("app.core.state.trusted_CAs", {pki["root"].subject: ca_entry(pki["root"])}, clear=True):
+            yield
+
+    @pytest.fixture
+    def preauth_token(self):
+        with patch("app.routes.preauth.request_preauth_token", return_value="test_session_id") as mock:
+            yield mock
+
+    def _post(self, client, token):
+        return client.post("/credentialOfferReq2", data={"request": token})
+
+    def test_trusted_signer_accepted(self, client, mock_session_manager, mock_configuration, pki, preauth_token):
+        token = jwt.encode(self.PAYLOAD, pki["leaf_key"], algorithm="ES256", headers={"x5c": x5c(pki["leaf"])})
+
+        response = self._post(client, token)
+
+        assert response.status_code == 200
+        assert response.get_json()["credential_configuration_ids"] == ["cred_1"]
+        preauth_token.assert_called_once_with(scope="cred_1")
+
+    def test_untrusted_signer_rejected(self, client, mock_session_manager, mock_configuration, pki, preauth_token):
+        token = jwt.encode(self.PAYLOAD, pki["leaf_key"], algorithm="ES256", headers={"x5c": x5c(pki["untrusted"])})
+
+        response = self._post(client, token)
+
+        assert response.status_code == 401
+        assert response.get_json()["error_description"] == "Untrusted request signer"
+        preauth_token.assert_not_called()
+
+    def test_signature_not_matching_certificate_rejected(
+        self, client, mock_session_manager, mock_configuration, pki, preauth_token
+    ):
+        token = jwt.encode(self.PAYLOAD, pki["other_key"], algorithm="ES256", headers={"x5c": x5c(pki["leaf"])})
+
+        response = self._post(client, token)
+
+        assert response.status_code == 401
+        assert response.get_json()["error_description"] == "Invalid request JWT signature"
+        preauth_token.assert_not_called()
+
+    def test_unsigned_token_without_x5c_rejected(
+        self, client, mock_session_manager, mock_configuration, pki, preauth_token
+    ):
+        token = jwt.encode(self.PAYLOAD, "shared-secret", algorithm="HS256")
+
+        response = self._post(client, token)
+
+        assert response.status_code == 400
+        preauth_token.assert_not_called()
+
+    def test_missing_request_rejected(self, client, mock_session_manager, mock_configuration, preauth_token):
+        response = client.post("/credentialOfferReq2", data={})
+
+        assert response.status_code == 400
+        assert response.get_json()["error_description"] == "Missing request JWT"
+
+    def test_trust_validator_context(self, client, mock_session_manager, mock_configuration, pki, preauth_token):
+        token = jwt.encode(self.PAYLOAD, pki["leaf_key"], algorithm="ES256", headers={"x5c": x5c(pki["leaf"])})
+        with patch("app.routes.preauth.verify_jwt_with_x5c", return_value=self.PAYLOAD) as verify:
+            self._post(client, token)
+
+        assert verify.call_args.kwargs["verification_context"] == "WalletRelyingPartyAccessCertificate"
+
+
+class TestGenerateOfferMode:
+    """Pre-authorized offers honour the offer form's credential_offer_mode (#70)."""
+
+    @pytest.mark.parametrize("mode", [None, "by_value", "unknown"])
+    def test_by_value(self, app, mock_session_manager, mock_configuration, mode):
+        from app.repositories import offer_store
+
+        with app.test_request_context(), patch.dict(offer_store.credential_offer_references, {}, clear=True), patch(
+            "app.routes.preauth.post_redirect_with_payload", return_value="page"
+        ) as page:
+            session.update(session_id="s1", credential_offer_URI="openid-credential-offer://", credential_offer_mode=mode)
+            generate_offer({})
+            assert offer_store.credential_offer_references == {}
+
+        assert "credential_offer=" in page.call_args.kwargs["data_payload"]["url_data"]
+
+    def test_by_reference(self, app, mock_session_manager, mock_configuration):
+        from urllib.parse import parse_qs, urlsplit
+
+        from app.repositories import offer_store
+
+        with app.test_request_context(), patch.dict(offer_store.credential_offer_references, {}, clear=True), patch(
+            "app.routes.preauth.post_redirect_with_payload", return_value="page"
+        ) as page:
+            session.update(session_id="s1", credential_offer_URI="openid-credential-offer://", credential_offer_mode="by_reference")
+            generate_offer({})
+            (reference_id, entry), = offer_store.credential_offer_references.items()
+
+        payload = page.call_args.kwargs["data_payload"]
+        [reference_url] = parse_qs(urlsplit(payload["url_data"]).query)["credential_offer_uri"]
+        assert reference_url.endswith(f"/credential-offer-reference/{reference_id}")
+        assert entry["credential_offer"] == payload["credential_offer"]
+        assert entry["credential_offer"]["grants"]

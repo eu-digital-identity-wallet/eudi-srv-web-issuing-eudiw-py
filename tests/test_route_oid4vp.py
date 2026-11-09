@@ -21,7 +21,8 @@ import base64
 import pytest
 from unittest.mock import patch, MagicMock
 from flask import Flask, session
-from app.route_oid4vp import oid4vp
+from app.routes.oid4vp import oid4vp
+from config_helpers import patch_configuration
 
 
 # --- Fixtures ---
@@ -44,6 +45,7 @@ def mock_session_data():
     mock = MagicMock()
     mock.frontend_id = "test_frontend"
     mock.oid4vp_transaction_id = "tx123"
+    mock.oid4vp_cross_device_id = "validID123"
     mock.credentials_requested = ["eu.europa.ec.eudi.pid_mdoc"]
     mock.authorization_details = (
         [{"credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc"}],
@@ -54,10 +56,10 @@ def mock_session_data():
 
 # --- Test Classes ---
 class TestOid4vpRouteSuccess:
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.session_manager.update_oid4vp_transaction_id")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.routes.oid4vp.session_manager.update_oid4vp_presentation")
+    @patch("app.services.oid4vp.requests.request")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -66,11 +68,12 @@ class TestOid4vpRouteSuccess:
                 "test_frontend": {"url": "https://frontend.com"}
             }
         },
-        "oid4vp_scheme": "haip-vp://"
+        "oid4vp_scheme": "haip-vp://",
+        "intended_use_id": "test_intended_use",
     })
-    @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.segno.make")
-    @patch("app.route_oid4vp.oidc_metadata")
+    @patch("app.routes.oid4vp.post_redirect_with_payload")
+    @patch("app.utils.qr.segno.make")
+    @patch("app.routes.oid4vp.oidc_metadata")
     def test_openid4vp_success(
         self,
         mock_oidc_metadata,
@@ -96,7 +99,7 @@ class TestOid4vpRouteSuccess:
                     "format": "mso_mdoc",
                     "doctype": "eu.europa.ec.eudi.pid.1",
                     "credential_metadata": {
-                        "claims": [{"path": ["family_name"]}, {"path": ["given_name"]}]
+                        "claims": [{"path": ["family_name"], "mandatory": True}, {"path": ["given_name"]}]
                     },
                 }
             }
@@ -128,9 +131,19 @@ class TestOid4vpRouteSuccess:
 
         resp = client.get("/oid4vp")
         assert resp.data == b"REDIRECT_CALLED"
-        mock_update_tx.assert_called_once_with(
-            session_id="123", oid4vp_transaction_id="txY"
-        )
+        mock_update_tx.assert_called_once()
+        stored = mock_update_tx.call_args.kwargs
+        assert stored["session_id"] == "123" and stored["same_device_id"] == "txY"
+        assert stored["cross_device_id"] == mock_response_cross["transaction_id"]
+        # A fresh random nonce, sent to the verifier in both requests.
+        assert len(stored["nonce"]) >= 43
+        for call in mock_requests.call_args_list:
+            body = json.loads(call.kwargs["data"])
+            assert body["nonce"] == stored["nonce"]
+            # Only the mandatory PID claims are requested.
+            assert body["dcql_query"]["credentials"][0]["claims"] == [
+                {"path": ["family_name"], "intent_to_retain": False}
+            ]
         mock_segno.assert_called_once()
 
 
@@ -144,14 +157,17 @@ class TestOid4vpRouteSessionError:
 
 
 class TestOid4vpRouteRequestError:
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.cfgservice")
-    @patch("app.route_oid4vp.oidc_metadata")
+    @patch("app.services.oid4vp.requests.request")
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch_configuration({
+        "service_url": "https://service.com/",
+        "dynamic_presentation_url": "https://example.com/",
+        "intended_use_id": "test_intended_use",
+    })
+    @patch("app.routes.oid4vp.oidc_metadata")
     def test_requests_fail(
         self,
         mock_oidc_metadata,
-        mock_cfgservice,
         mock_get_session,
         mock_requests,
         client,
@@ -161,7 +177,6 @@ class TestOid4vpRouteRequestError:
             sess["session_id"] = "123"
 
         mock_get_session.return_value = mock_session_data
-        mock_cfgservice.dynamic_presentation_url = "https://example.com/"
 
         # Mock oidc_metadata
         mock_oidc_metadata.__getitem__ = MagicMock(
@@ -181,13 +196,13 @@ class TestOid4vpRouteRequestError:
 
 
 class TestGetPidOid4vp:
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.session_manager.update_country")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.validate_vp_token")
-    @patch("app.route_oid4vp.cbor2elems")
-    @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.routes.oid4vp.session_manager.update_country")
+    @patch("app.services.oid4vp.requests.request")
+    @patch("app.routes.oid4vp.validate_vp_token")
+    @patch("app.routes.oid4vp.cbor2elems")
+    @patch("app.routes.oid4vp.post_redirect_with_payload")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -197,8 +212,8 @@ class TestGetPidOid4vp:
             }
         }
     })
-    @patch("app.route_oid4vp.getAttributesForm")
-    @patch("app.route_oid4vp.getAttributesForm2")
+    @patch("app.routes.oid4vp.getAttributesForm")
+    @patch("app.routes.oid4vp.getAttributesForm2")
     def test_same_device_flow(
         self,
         mock_getAttributesForm2,
@@ -255,8 +270,8 @@ class TestGetPidOid4vp:
         # Will likely raise KeyError or ValueError; depending on production error handling
         assert resp.status_code == 500
 
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.requests.request")
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.services.oid4vp.requests.request")
     def test_invalid_presentation_id(
         self, mock_requests, mock_get_session, client, mock_session_data
     ):
@@ -266,18 +281,19 @@ class TestGetPidOid4vp:
         mock_get_session.return_value = mock_session_data
 
         resp = client.get("/getpidoid4vp?presentation_id=invalid*id")
-        # Invalid format
-        assert resp.status_code == 500
+        # Invalid format: rejected before the verifier is called
+        assert resp.status_code == 400
+        mock_requests.assert_not_called()
 
 
 class TestGetPidOid4vpAdditional:
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.session_manager.update_country")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.validate_vp_token")
-    @patch("app.route_oid4vp.cbor2elems")
-    @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.routes.oid4vp.session_manager.update_country")
+    @patch("app.services.oid4vp.requests.request")
+    @patch("app.routes.oid4vp.validate_vp_token")
+    @patch("app.routes.oid4vp.cbor2elems")
+    @patch("app.routes.oid4vp.post_redirect_with_payload")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -287,8 +303,8 @@ class TestGetPidOid4vpAdditional:
             }
         }
     })
-    @patch("app.route_oid4vp.getAttributesForm")
-    @patch("app.route_oid4vp.getAttributesForm2")
+    @patch("app.routes.oid4vp.getAttributesForm")
+    @patch("app.routes.oid4vp.getAttributesForm2")
     def test_cross_device_flow(
         self,
         mock_getAttributesForm2,
@@ -330,13 +346,13 @@ class TestGetPidOid4vpAdditional:
         mock_requests.assert_called()
         mock_post_redirect.assert_called_once()
 
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.session_manager.update_country")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.validate_vp_token")
-    @patch("app.route_oid4vp.cbor2elems")
-    @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.routes.oid4vp.session_manager.update_country")
+    @patch("app.services.oid4vp.requests.request")
+    @patch("app.routes.oid4vp.validate_vp_token")
+    @patch("app.routes.oid4vp.cbor2elems")
+    @patch("app.routes.oid4vp.post_redirect_with_payload")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -346,8 +362,8 @@ class TestGetPidOid4vpAdditional:
             }
         }
     })
-    @patch("app.route_oid4vp.getAttributesForm")
-    @patch("app.route_oid4vp.getAttributesForm2")
+    @patch("app.routes.oid4vp.getAttributesForm")
+    @patch("app.routes.oid4vp.getAttributesForm2")
     def test_non_age_over18_flow(
         self,
         mock_getAttributesForm2,
@@ -385,9 +401,9 @@ class TestGetPidOid4vpAdditional:
         assert resp.data == b"REDIRECT_CALLED"
         mock_post_redirect.assert_called_once()
 
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.services.oid4vp.requests.request")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -397,7 +413,7 @@ class TestGetPidOid4vpAdditional:
             }
         }
     })
-    @patch("app.route_oid4vp.validate_vp_token")
+    @patch("app.routes.oid4vp.validate_vp_token")
     def test_vp_token_invalid(
         self,
         mock_validate_vp_token,
@@ -424,9 +440,9 @@ class TestGetPidOid4vpAdditional:
         with pytest.raises(ValueError):
             client.get("/getpidoid4vp?response_code=resp123&session_id=123")
 
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.services.oid4vp.requests.request")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -452,13 +468,13 @@ class TestGetPidOid4vpAdditional:
         assert resp.status_code == 400
         assert b"500" in resp.data
 
-    @patch("app.route_oid4vp.session_manager.get_session")
-    @patch("app.route_oid4vp.session_manager.update_country")
-    @patch("app.route_oid4vp.requests.request")
-    @patch("app.route_oid4vp.validate_vp_token")
-    @patch("app.route_oid4vp.cbor2elems")
-    @patch("app.route_oid4vp.post_redirect_with_payload")
-    @patch("app.route_oid4vp.CONFIGURATION", { # Mock configuration
+    @patch("app.routes.oid4vp.session_manager.get_session")
+    @patch("app.routes.oid4vp.session_manager.update_country")
+    @patch("app.services.oid4vp.requests.request")
+    @patch("app.routes.oid4vp.validate_vp_token")
+    @patch("app.routes.oid4vp.cbor2elems")
+    @patch("app.routes.oid4vp.post_redirect_with_payload")
+    @patch_configuration({  # Mock configuration (all modules)
         "service_url": "https://service.com/",
         "dynamic_presentation_url": "https://example.com/",
         "frontend": {
@@ -468,8 +484,8 @@ class TestGetPidOid4vpAdditional:
             }
         }
     })
-    @patch("app.route_oid4vp.getAttributesForm")
-    @patch("app.route_oid4vp.getAttributesForm2")
+    @patch("app.routes.oid4vp.getAttributesForm")
+    @patch("app.routes.oid4vp.getAttributesForm2")
     def test_authorization_details_age_over18(
         self,
         mock_getAttributesForm2,

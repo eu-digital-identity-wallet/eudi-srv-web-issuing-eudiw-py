@@ -740,6 +740,7 @@ keywords = [
 
 [[rules]]
 description = "Env Var"
+id = "env-var"
 regex = '''(?i)(apikey|secret|api|password|pass)=[0-9a-zA-Z-_.{}]{4,120}'''
 secretGroup = 1
 keywords = [

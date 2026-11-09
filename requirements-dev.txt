@@ -1,0 +1,4 @@
+# Test / development dependencies (not installed in the production image)
+-r app/requirements.txt
+pytest==9.1.1
+pytest-cov==7.1.0

@@ -16,8 +16,9 @@
 #
 ###############################################################################
 import pytest
-from app.app_config.config_service import ConfService
-import app
+from app.core.constants import ConfService
+from app.core import config as app_config
+from config_helpers import set_configuration
 
 
 @pytest.fixture(autouse=True)
@@ -50,25 +51,18 @@ def mock_configuration(monkeypatch):
         "dynamic_presentation_url": "https://verifier-backend.service.test"
     }
     
-    monkeypatch.setattr("app.CONFIGURATION", config)
+    set_configuration(monkeypatch, config)
+    return config
 
 
 def test_default_service_urls():
     """Test that default URLs are correctly set when env vars are not provided."""
-    conf = app.CONFIGURATION
+    conf = app_config.CONFIGURATION
     assert conf['service_url'] == "https://backend.issuer.eudiw.dev"
     assert conf['wallet_tester_url'] == "https://tester.issuer.eudiw.dev"
     assert conf['revocation']['take_url'].endswith("/token_status_list/take")
     assert conf['revocation']['set_url'].endswith("/token_status_list/set")
     assert conf['dynamic_presentation_url'].startswith("https://verifier-backend.service.test")
-
-
-def test_registered_claims_keys_exist():
-    """Ensure important registered claims are correctly mapped."""
-    claims = ConfService.Registered_claims
-    assert "birth_date" in claims
-    assert "resident_address" in claims
-    assert claims["email_address"] == "email"
 
 
 def test_error_list_contains_known_codes():

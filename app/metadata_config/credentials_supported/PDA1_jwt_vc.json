@@ -4,6 +4,8 @@
       "scope":"eu.europa.ec.eudi.pda1_sd_jwt_vc",
       "cryptographic_binding_methods_supported":[
          "jwk",
+         "did:jwk",
+         "did:key",
          "cose_key"
       ],
       "credential_signing_alg_values_supported":[
@@ -12,7 +14,9 @@
       "proof_types_supported":{
          "jwt":{
             "proof_signing_alg_values_supported":[
-               "ES256"
+               "ES256",
+               "ES384",
+               "ES512"
             ],
             "key_attestations_required":{
                "key_storage":[
@@ -26,7 +30,9 @@
          },
          "attestation":{
             "proof_signing_alg_values_supported":[
-               "ES256"
+               "ES256",
+               "ES384",
+               "ES512"
             ],
             "key_attestations_required":{
                "key_storage":[

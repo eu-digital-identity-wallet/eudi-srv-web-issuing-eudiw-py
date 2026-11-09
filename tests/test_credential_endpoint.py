@@ -20,8 +20,16 @@ import json
 import uuid
 from unittest.mock import Mock, patch, MagicMock
 from flask import Flask, jsonify, make_response
-from app.route_oidc import oidc
+from app.routes.oidc import oidc
 
+
+
+@pytest.fixture(autouse=True)
+def _credential_types_authorized():
+    """These tests cover other parts of /credential; the authorization check
+    of the requested credential type is tested in test_security_regressions."""
+    with patch("app.routes.oidc.require_authorized_configuration"):
+        yield
 
 @pytest.fixture
 def app():
@@ -42,25 +50,28 @@ def client(app):
 @pytest.fixture
 def mock_dependencies():
     """Mock all external dependencies"""
-    with patch("app.route_oidc.cfgservice") as mock_cfg, patch(
-        "app.route_oidc.decrypt_jwe_credential_request"
+    with patch(
+        "app.routes.oidc.persist_client_status"
+    ) as mock_persist, patch(
+        "app.routes.oidc.decrypt_jwe_credential_request"
     ) as mock_decrypt, patch(
-        "app.route_oidc.verify_introspection"
+        "app.routes.oidc.verify_introspection"
     ) as mock_introspection, patch(
-        "app.route_oidc.verify_credential_request"
+        "app.routes.oidc.verify_credential_request"
     ) as mock_verify_request, patch(
-        "app.route_oidc.session_manager"
+        "app.routes.oidc.session_manager"
     ) as mock_session, patch(
-        "app.route_oidc.generate_credentials"
+        "app.routes.oidc.generate_credentials"
     ) as mock_generate, patch(
-        "app.route_oidc.encrypt_response"
+        "app.routes.oidc.encrypt_response"
     ) as mock_encrypt:
 
-        # Setup default mock behaviors
-        mock_cfg.app_logger = Mock()
+        # Setup default mock behaviors: _finish re-fetches the session and
+        # persists its client_status when present.
+        mock_session.get_session.return_value = Mock(client_status=None)
 
         yield {
-            "cfgservice": mock_cfg,
+            "persist_client_status": mock_persist,
             "decrypt_jwe": mock_decrypt,
             "introspection": mock_introspection,
             "verify_request": mock_verify_request,
@@ -88,7 +99,7 @@ class TestCredentialEndpoint:
             },
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -131,16 +142,16 @@ class TestCredentialEndpoint:
                     "e": "AQAB",
                     "use": "enc",
                     "kid": "TnZdnKa6J2CNWVqiXfeA0cTncNEUpW1aUz7sjLGT3KM",
-                    "alg": "RSA1_5",
+                    "alg": "RSA-OAEP",
                     "n": "vb0jIdYbhIWgUguleNnycccu1O3of20BghIllQ9jjaa8QQNQaVN3KkRk6-YoeOz6PUfEtlZPBSQ3qmXndX3f1JPQ3m1hRor6oWs7oBzAndKbKAPtgnLl5iOMcQDW0K6OmIJJnrtrx6zTZCjcoJhdN063ZeUhmeQ5-K5kF0Ka9ZSdmqvTwpYmSTTbxrVtIJvq-LxqxPEb1a_cMVcZ4VahO5GCh8bGBcw0Rity9JGGxUo2m2c1e5cyqn5nN5tnHh0A17qinxlWg65CeOv9LTrEp4inf4ymlneyoNzhugdRqf5aS_3lLL-R4aQOxsm1nhB0JMpHKf23YRuNDT945GWP0w",
                 },
-                "alg": "RSA1_5",
+                "alg": "RSA-OAEP",
                 "enc": "A256GCM",
             },
         }
 
         mock_dependencies["decrypt_jwe"].return_value = decrypted_request
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = decrypted_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -196,9 +207,11 @@ class TestCredentialEndpoint:
             },
         )
 
+        # RFC 6750 section 3.1: no credentials -> 401 challenge without an error code.
         assert response.status_code == 401
         data = json.loads(response.data)
-        assert data["error"] == "invalid_request"
+        assert "error" not in data
+        assert response.headers["WWW-Authenticate"].startswith("Bearer")
 
     def test_invalid_authorization_header_format(self, client, mock_dependencies):
         """Test request with invalid Authorization header format"""
@@ -208,9 +221,11 @@ class TestCredentialEndpoint:
             headers={"Authorization": "Basic invalid"},
         )
 
+        # RFC 6750 section 3.1: an unsupported scheme is treated like no credentials.
         assert response.status_code == 401
         data = json.loads(response.data)
-        assert "invalid_token" in data["error"]
+        assert "error" not in data
+        assert "WWW-Authenticate" in response.headers
 
     def test_authorization_header_without_token(self, client, mock_dependencies):
         """Test request with Authorization header but no token"""
@@ -229,7 +244,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "jwt_vc_json"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -262,10 +277,10 @@ class TestCredentialEndpoint:
     def test_credential_request_verification_failure(self, client, mock_dependencies):
         """Test when credential request verification fails"""
         session_id = "test-session-123"
-        error_response = ({"error": "invalid_credential_request"}, 400)
+        from app.core.errors import OAuthEndpointError
 
-        mock_dependencies["introspection"].return_value = session_id
-        mock_dependencies["verify_request"].return_value = error_response
+        mock_dependencies["introspection"].return_value = (session_id, None)
+        mock_dependencies["verify_request"].side_effect = OAuthEndpointError("invalid_credential_request")
 
         response = client.post(
             "/credential",
@@ -282,7 +297,7 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "mso_mdoc"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"error": "Pending"}
         mock_dependencies["session_manager"].get_session.return_value = {}
@@ -306,7 +321,7 @@ class TestCredentialEndpoint:
             "credential_configuration_id": "eu.europa.ec.eudi.pid_mdoc_deferred"
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"credential": "test"}
         mock_dependencies["session_manager"].get_session.return_value = {}
@@ -336,10 +351,10 @@ class TestCredentialEndpoint:
                     "e": "AQAB",
                     "use": "enc",
                     "kid": "TnZdnKa6J2CNWVqiXfeA0cTncNEUpW1aUz7sjLGT3KM",
-                    "alg": "RSA1_5",
+                    "alg": "RSA-OAEP",
                     "n": "vb0jIdYbhIWgUguleNnycccu1O3of20BghIllQ9jjaa8QQNQaVN3KkRk6-YoeOz6PUfEtlZPBSQ3qmXndX3f1JPQ3m1hRor6oWs7oBzAndKbKAPtgnLl5iOMcQDW0K6OmIJJnrtrx6zTZCjcoJhdN063ZeUhmeQ5-K5kF0Ka9ZSdmqvTwpYmSTTbxrVtIJvq-LxqxPEb1a_cMVcZ4VahO5GCh8bGBcw0Rity9JGGxUo2m2c1e5cyqn5nN5tnHh0A17qinxlWg65CeOv9LTrEp4inf4ymlneyoNzhugdRqf5aS_3lLL-R4aQOxsm1nhB0JMpHKf23YRuNDT945GWP0w",
                 },
-                "alg": "RSA1_5",
+                "alg": "RSA-OAEP",
                 "enc": "A256GCM",
             },
         }
@@ -349,7 +364,7 @@ class TestCredentialEndpoint:
                 b"encrypted_response", 200, {"Content-Type": "application/jwt"}
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -381,10 +396,10 @@ class TestCredentialEndpoint:
                     "e": "AQAB",
                     "use": "enc",
                     "kid": "TnZdnKa6J2CNWVqiXfeA0cTncNEUpW1aUz7sjLGT3KM",
-                    "alg": "RSA1_5",
+                    "alg": "RSA-OAEP",
                     "n": "vb0jIdYbhIWgUguleNnycccu1O3of20BghIllQ9jjaa8QQNQaVN3KkRk6-YoeOz6PUfEtlZPBSQ3qmXndX3f1JPQ3m1hRor6oWs7oBzAndKbKAPtgnLl5iOMcQDW0K6OmIJJnrtrx6zTZCjcoJhdN063ZeUhmeQ5-K5kF0Ka9ZSdmqvTwpYmSTTbxrVtIJvq-LxqxPEb1a_cMVcZ4VahO5GCh8bGBcw0Rity9JGGxUo2m2c1e5cyqn5nN5tnHh0A17qinxlWg65CeOv9LTrEp4inf4ymlneyoNzhugdRqf5aS_3lLL-R4aQOxsm1nhB0JMpHKf23YRuNDT945GWP0w",
                 },
-                "alg": "RSA1_5",
+                "alg": "RSA-OAEP",
                 "enc": "A256GCM",
             },
         }
@@ -394,7 +409,7 @@ class TestCredentialEndpoint:
                 b"encrypted_response", 200, {"Content-Type": "application/jwt"}
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {"error": "Pending"}
         mock_dependencies["encrypt_response"].return_value = mock_response
@@ -420,14 +435,14 @@ class TestCredentialEndpoint:
             mock_response = make_response(
                 jsonify(
                     {
-                        "error": "invalid_credential_response_encryption",
+                        "error": "invalid_encryption_parameters",
                         "error_description": "Missing alg field in credential_response_encryption.",
                     }
                 ),
                 400,
             )
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
@@ -467,14 +482,14 @@ class TestCredentialEndpoint:
         session_id = "test-session-123"
         credential_request = {"format": "jwt_vc_json"}
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
         }
         mock_dependencies["session_manager"].get_session.return_value = {}
 
-        with patch("app.route_oidc.uuid.uuid4") as mock_uuid:
+        with patch("app.routes.oidc.uuid.uuid4") as mock_uuid:
             mock_uuid.return_value = uuid.UUID("12345678-1234-5678-1234-567812345678")
 
             response = client.post(
@@ -507,14 +522,14 @@ class TestIntegrationScenarios:
             },
         }
 
-        mock_dependencies["introspection"].return_value = session_id
+        mock_dependencies["introspection"].return_value = (session_id, None)
         mock_dependencies["verify_request"].return_value = credential_request
         mock_dependencies["generate_credentials"].return_value = {
             "credentials": [{"credential": "test_credential"}]
         }
-        mock_dependencies["session_manager"].get_session.return_value = {
-            "user_id": "user123"
-        }
+        mock_dependencies["session_manager"].get_session.return_value = Mock(
+            user_id="user123", client_status=None
+        )
 
         response = client.post(
             "/credential",

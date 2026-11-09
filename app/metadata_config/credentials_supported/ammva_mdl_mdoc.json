@@ -13,7 +13,9 @@
       "proof_types_supported":{
          "jwt":{
             "proof_signing_alg_values_supported":[
-               "ES256"
+               "ES256",
+               "ES384",
+               "ES512"
             ]
          }
       },

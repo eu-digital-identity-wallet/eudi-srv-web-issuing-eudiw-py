@@ -220,6 +220,8 @@ yarn-error.log*
 package-lock.json
 
 .vscode/**
+# Key material must never be committed
+app/private/
 
 # macOS Finder metadata
 .DS_Store

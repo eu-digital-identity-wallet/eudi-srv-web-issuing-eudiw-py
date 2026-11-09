@@ -265,8 +265,134 @@ _14 Aug 2026_
 ### Fixed
 - Fixed invalid `validUntil` timestamp format in the issuance of some mso_mdoc credentials.
 
+## [0.9.9]
+
+_06 Oct 2026_
+
+### Added
+- `GET /metadata/<frontend_id>` and `GET /metadata/<frontend_id>/signed` (API key protected): the backend builds each frontend's metadata, so frontends no longer assemble and sign it themselves.
+- `test_features` configuration (`form_countries`, `passport_age_verification`, `tx_code_in_offer`), all off by default: these demo flows issue credentials from self-asserted data.
+- `secret_key` configuration: the session cookie signing key; start-up fails when it is missing, a placeholder or shorter than 32 characters, because a known key lets anyone forge sessions.
+- `authorization_server.api_key`, `jwks_uri`, `jwks_path` and `issuer` configuration, used to call the authorization server and to verify its `session_token`.
+- Per-client rate limits (`rate_limiting`, Flask-Limiter) on the endpoints that issue, sign or look up data, with `trusted_proxies` for deployments behind nginx: no endpoint was throttled.
+- DPoP proof verification on `/credential`, `/deferred_credential` and `/notification` when introspection reports `cnf.jkt`, so a DPoP-bound token can no longer be replayed as a bearer token.
+- Regression tests replaying each finding of the 2026-07 security assessments (`tests/test_security_regressions.py`).
+
+### Changed
+- `/auth_choice` takes the session id, scope and authorization details only from the `session_token` signed by the authorization server, and refuses a session already bound to another browser: query parameters allowed session fixation.
+- `/credentialOfferReq2` returns `{"credential_offer", "tx_code"}` and the offer no longer contains the tx_code (unless `tx_code_in_offer`), since the tx_code is a second factor delivered out of band; the request JWT must carry `exp` and `iat` (lifetime at most 1 h).
+- OID4VP presentation requests use a random nonce per presentation instead of a fixed value, which allowed replaying recorded presentations.
+- `/credential` only issues the credential configurations the access token was authorized for.
+- `/logs` only accepts a session UUID and matches it as a whole token: a substring returned every user's log lines.
+- `/revocation/revoke` only accepts the identifier issued to the same browser session, and checks its expiry.
+- `metadata_signer` no longer lets the metadata override `sub`, `iat`, `iss`, `exp`, `nbf`, `aud` or `jti`, and no longer returns internal error details; an unknown frontend gets 404.
+- x5c-signed JWTs (key attestations, offer requests) only accept asymmetric algorithms by default, and intermediate certificates must be CAs.
+- Responses carry a Content-Security-Policy and `Referrer-Policy`; the auto-submit page only posts to configured frontends.
+- The browser session is cleared when the user is handed back to the wallet.
+- Placeholder `backend_api_key` values (`change-me`) are treated as unset.
+- The Docker image runs as an unprivileged user (UID 10001) and only copies `app/`.
+- CI: SonarCloud runs on `pull_request` instead of `pull_request_target` (fork PR code ran with repository secrets) and actions are pinned to commit SHAs.
+- Removed the `/formatter/cbor` and `/formatter/sd-jwt` routes, which signed caller-supplied data with the issuer keys; issuance calls the formatters directly.
+- Dependencies: pyMDOC-CBOR 0.6.0 no longer caps its dependencies through `cwt`, so `cryptography` goes from 41.0.7 (2023, missing later security fixes) to 50.0.2, with `cbor2` 5.9.0, `pycose` 1.1.0 and `jwcrypto` 1.6.1. `cwt` and `cbor_diag` are no longer installed. pyMDOC-CBOR 0.6.0 also fixes batch-issued mdocs whose nested dates (e.g. mDL `driving_privileges`) were tagged twice, and brainpool device keys written with the wrong COSE curve identifier.
+
+### Fixed
+- Reflected XSS in the auto-submit page: the payload was rendered unescaped inside a single-quoted attribute.
+- `credential_offer_URI` is validated, so it cannot inject script-capable URLs.
+- `/getpidoid4vp` and the revocation flow fetched any `presentation_id`, exposing other users' presentations; it must now belong to the caller's session.
+- PID presentations must contain exactly one PID document, and the document signer certificate's validity is checked.
+- The attribute form cannot change values read from a verified PID.
+- `/form_authorize_generate` used a posted `user_id` instead of the browser session.
+- `/dynamic/redirect` checks a random, single-use OAuth `state`; the OpenID connectors used the session id as state.
+- Huge list indices in form field names no longer allocate unbounded memory.
+- SD-JWT issuance no longer reseeds Python's global random generator with a constant.
+- `Session.__repr__` masks codes, tokens and personal data.
+- Requests with only `credential_identifier` no longer fail with a server error.
+- The WIA `client_status` claim is read from the access token only after its signature is verified with the authorization server keys.
+- Log lines escape line breaks in every request-supplied or externally received value (log injection).
+- A browser request without an active issuance session (expired, or already handed back to the wallet) gets 400 instead of a 500.
+
 ## [0.10.0]
 
 _07 Oct 2026_
+
 ### Added
 - JWT Registration certificate support
+
+## [0.10.1]
+
+_30 Oct 2026_
+
+### Added
+- Update test PID Issuer certificates and cryptographic keys (available in [https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens](https://github.com/eu-digital-identity-wallet/eudi-srv-web-issuing-eudiw-py/tree/main/api_docs/test_tokens)) to comply with the applicable CIR and ETSI requirements
+
+## [0.11.0]
+
+### Added
+- `admin_api_key` guards `GET /logs`, `GET /admin/sessions/client_status` and `POST /metadata/metadata_signer`; `backend_api_key` only reads frontend metadata.
+- `trusted_CAs_paths.{key_attestation, offer_request, pid_signer}`: optional per-purpose trust anchors.
+- `frontends_config.<id>.payload_key`: display payloads also carry `payload_jwt`, an HS256 JWT valid for 5 minutes.
+- `max_content_length` (default 1 MiB), `session_file_threshold` (default 10000) and `proof_validation.key_attestation_max_age_seconds` (default 24 h).
+- `proof_validation.single_use_nonce` (default `true`; OpenID4VCI 1.0 §13.8).
+- `variables`: configuration strings may use `${name}`.
+- `frontends_config.<id>.registration_certificate_path`: published as the frontend's `issuer_info`.
+- `countries.<code>.issuing_country` (default: the entry's code); `FC`, `AV` and `AV2` use `LU`.
+- `GET /metadata/<frontend_id>` returns `jwt_vc_issuer` for the frontend's `/.well-known/jwt-vc-issuer`; SD-JWT VCs carry a `kid`.
+- JWT proofs may name the holder key with a `did:jwk` or `did:key` `kid` (OpenID4VCI 1.0 appendix F.1).
+- ES384 and ES512 proofs and key attestations (TS3 2.6).
+- `credential_offer_mode=by_reference`: offers by `credential_offer_uri` (OpenID4VCI 1.0 §4.1.3).
+- `GET /auth_method_choice` shows the authentication choice again for the current session.
+- Revoking a credential revokes every instance issued with it in the same session.
+- `expiry.cleanup_interval` (minutes, default 60): a scheduler purges expired offers, revocation requests and sessions; `/nonce` did it on every call.
+- `tests.yml`: the unit tests run on every push and pull request, without secrets (upstream #185).
+- Each frontend's credential issuer metadata has `authorization_servers`: its own issuer at the authorization server, `<authorization_server.base_url>/<frontend_id>` (OpenID4VCI 1.0 §12.2.4).
+
+### Changed
+- Each `c_nonce` is single use; a bad one gets `invalid_nonce` (was `invalid_proof`).
+- More proofs than the batch size are rejected before verification.
+- A trust validator `trusted: false` answer is final.
+- Signer and `x5c` certificates must have the right CA, key usage and PID EKU profile.
+- `/preauth` and `/preauth_form` are POST-only.
+- The test-environment defaults need `EUDIW_TEST_ENV=true`; `CI` and `SONARCLOUD` no longer enable them.
+- Key attestations must carry `key_storage_status` with `exp` and a status list reference (TS3 2.3.2 / 2.4.1).
+- SD-JWT VCs use the frontend URL as `iss` instead of `service_url`.
+- `GET /metadata/<frontend_id>` no longer returns `openid_configuration` and `oauth_authorization_server`: wallets read the authorization server's own metadata. `frontends_config.<id>.oauth_url` is removed.
+- `/preauth_generate` is called with the offer's `frontend_id`.
+- `/auth_choice` refuses a `session_token` without a known `frontend_id`; it used the default frontend.
+- Frontend ids may only contain letters, digits, `_` and `-`.
+- Credential offers and revocation are limited to the credentials the frontend publishes.
+- Access token errors carry a `WWW-Authenticate` challenge (RFC 6750 §3, RFC 9449 §7.1).
+- A credential the access token does not cover gets 403 `insufficient_scope` (OpenID4VCI 1.0 §8.3.1.1).
+- Ambiguous credential requests (`credential_identifier` with `credential_configuration_id`, `proof` with `proofs`) are rejected.
+- Credential error bodies contain only `error` and `error_description` (OpenID4VCI 1.0 §8.3.1.2).
+- `/deferred_credential` and `/notification` check the access token first and return spec error codes (OpenID4VCI 1.0 §9.1, §11.3).
+- The OID4VP PID login requests only mandatory claims; revocation requests one.
+- `display_authorization` payloads carry `image_attributes`.
+- The PID `portrait` and `picture` are one field on the attribute form.
+- `verify_jwt_with_x5c` reads `typ` from the verified token (SonarCloud).
+- `pipeline.yml` runs on `main` and `branch-*` instead of `dev`, `preprod` and `main`.
+- Plain `pytest` runs the tests; sourcing `.env.test` is no longer needed (upstream #185).
+- The key folder in the image, `docker-compose.yml` and the example configuration is `/etc/eudiw/pid-issuer` (was `pid-issuer-dev`).
+- The log folder in the image, `docker-compose.yml` and the example configuration is `/tmp/log` (was `/tmp/log_dev` and `/tmp/log_prod`, so the compose mount missed the example log file).
+- pyMDOC-CBOR is installed from the eu-digital-identity-wallet `main` branch.
+
+### Fixed
+- Key attestations without `iat` / `exp`, too old or with another `typ` were accepted.
+- Bad `credential_response_encryption` was rejected only after signing; it gets 400 `invalid_encryption_parameters` first.
+- `/preauth` without a valid `credentials_id` returned 500.
+- Log messages could forge log records; CR / LF are escaped.
+- `/logs` reported `successful` from forgeable log text.
+- `/notification` accepted any `notification_id`.
+- `GET /credential_offer_choice` created a session for any `frontend_id`.
+- `FC`, `AV` and `AV2` credentials had an `issuing_country` that did not match the signer certificate.
+- Wallet clocks slightly ahead got proofs and DPoP rejected; 60 s skew is allowed.
+- An offer by `credential_offer_uri` could be fetched repeatedly, even after expiry.
+- A malformed WIA `client_status` caused a 500.
+- `/dynamic/form` and `/preauth_form` returned 500 without `proceed`, with a bad `effective_from_date` or with conflicting keys such as `a` and `a[0]` (upstream #178).
+- PID `sex` was issued as a string (PID Rulebook).
+- SD-JWT VC `picture` was issued as base64url instead of a data URL (PID Rulebook §4.1).
+- The seafarer `issuing_authority_logo` was shown in the wrong encoding.
+- `gitleaks/gitleaks.toml` failed to load, so the secret scan never ran.
+- The Docker image did not start without `libpq5`.
+- `install.md` and `licenses.md` listed gunicorn, which is not a dependency.
+- `install.md`: the Docker steps linked a missing `.env.example` instead of the example configuration.
+- `README.md` linked a missing `api_docs/configuration.md` and `api_docs/credential_offer_create.md`.

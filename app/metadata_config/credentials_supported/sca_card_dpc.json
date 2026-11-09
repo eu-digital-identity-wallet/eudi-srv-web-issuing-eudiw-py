@@ -1,7 +1,7 @@
 {
    "eu.webuildconsortium.sca.card_dpc_sd_jwt":{
       "format":"dc+sd-jwt",
-      "vct":"https://demo.eudiw.grnet.gr/issuer/credentials/sca/card-dpc/1.0",
+      "vct":"https://webuildconsortium.eu/sca/sca-card-dpc/1.0",
       "scope":"eu.webuildconsortium.sca.card_dpc_sd_jwt",
       "cryptographic_binding_methods_supported":[
          "jwk"
