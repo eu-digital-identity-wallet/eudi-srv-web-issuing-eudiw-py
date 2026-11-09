@@ -5,8 +5,9 @@
 # over it and passes the result to compose, which mounts it at
 # /app/config_issuer_backend.yaml. Nothing is written to the box.
 #
-# Safe to commit: the two real secrets, STATUSLIST_API_KEY and DATABASE_PASSWORD,
-# are placeholders filled from repository secrets. The `client_secret: "example"`
+# Safe to commit: the secrets (STATUSLIST_API_KEY, DATABASE_PASSWORD,
+# ISSUER_SECRET_KEY, ISSUER_BACKEND_API_KEY, ISSUER_ADMIN_API_KEY and
+# OIDC_BACKEND_API_KEY) are placeholders filled from repository secrets. The `client_secret: "example"`
 # values below are upstream's own placeholders for eIDAS node connections we do
 # not use; they would become secrets if those are ever enabled.
 
@@ -16,6 +17,26 @@
 service_url: "${ISSUER_PUBLIC_URL}"
 
 wallet_tester_url: "${ISSUER_PUBLIC_URL}"
+
+# Signs the Flask session cookie. Required since 0.11.0, at least 32 characters.
+secret_key: "${ISSUER_SECRET_KEY}"
+
+# X-Api-Key of the frontend, which loads its metadata with it (the frontend's
+# own backend_api_key, the same ISSUER_BACKEND_API_KEY secret in its repository),
+# and of the administrative endpoints. Unset, those endpoints answer 503.
+backend_api_key: "${ISSUER_BACKEND_API_KEY}"
+admin_api_key: "${ISSUER_ADMIN_API_KEY}"
+
+# Behind one reverse proxy, nginx-proxy: trust its X-Forwarded-For, or every
+# user shares the proxy's address and its rate limit.
+rate_limiting:
+  enabled: true
+  trusted_proxies: 1
+
+# The demo issues through the form countries (FC): the user types the
+# attributes. Off by default since 0.11.0.
+test_features:
+  form_countries: true
 
 revocation:
   take_url: "${STATUSLIST_PUBLIC_URL}/token_status_list/take"
@@ -27,10 +48,10 @@ revocation:
 # FRONTEND CONFIGURATION
 # ============================================================================
 frontend:
-  default: "5d725b3c-6d42-448e-8bfd-1eff1fcf152d"
+  default: "${FRONTEND_ID}"
 
   frontends_config:
-    "5d725b3c-6d42-448e-8bfd-1eff1fcf152d":
+    "${FRONTEND_ID}":
       url: "${FRONTEND_PUBLIC_URL}"
       # Upstream's example points these at a path on its own dev machine.
       # From pki-init: the registrar's WRPAC when the deploy provides one,
@@ -38,19 +59,29 @@ frontend:
       metadata_signing_key_path: "/etc/eudiw/pid-issuer-dev/wrp/signing.key"
       metadata_access_certificate_path: "/etc/eudiw/pid-issuer-dev/wrp/signing.pem"
       metadata_signing_key_password: null
-      # The registrar's WRPRC, published as issuer_info. Empty when the deploy
-      # provides none, and the app then leaves issuer_info out.
-      registration_certificate_path: "/etc/eudiw/pid-issuer-dev/wrp/registration.jwt"
+      # The registrar's WRPRC, published as issuer_info. The deploy leaves this
+      # empty when it provides no WRPRC: 0.11.0 refuses to start on an empty
+      # file, but skips an empty path.
+      registration_certificate_path: "${WRP_REGISTRATION_CERT_PATH}"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION
 # ============================================================================
 
 authorization_server:
+  # The authorization server's issuer. The frontend's metadata names
+  # <base_url>/<frontend id> as its authorization server.
   base_url: "${OIDC_PUBLIC_URL}"
+  # In-network, for /introspection, /preauth_generate and the keys that verify
+  # the session_token. With the path: the server serves under it.
   internal_url: "${OIDC_INTERNAL_URL}"
   # Public: the issuer redirects the browser here after the form.
   user_verify_endpoint: "${OIDC_PUBLIC_URL}/verify/user"
+  # The authorization server's backend_api_key, sent as X-Api-Key.
+  api_key: "${OIDC_BACKEND_API_KEY}"
+  # No `issuer`: the session_token passed to /auth_choice is checked against
+  # the server's keys (<internal_url>/static/jwks.json), and its iss may be the
+  # frontend's own issuer rather than base_url.
 
 # ============================================================================
 # EXTERNAL SERVICES CONFIGURATION
@@ -94,7 +125,7 @@ postgres:
 # LOGGING
 # ============================================================================
 logging:
-  backend_path: "/tmp/log_prod/logs.log"
+  backend_path: "/tmp/log/logs.log"
   log_level: "INFO"
 
 # ============================================================================
@@ -104,6 +135,7 @@ expiry:
   revocation_code: 60
   form: 60
   session: 60
+  cleanup_interval: 60
 
 # ============================================================================
 # KEY PATHS
@@ -114,6 +146,13 @@ keys:
 
 # Path to trusted CA certificates, used to validate VP_Tokens
 trusted_CAs_path: "/etc/eudiw/pid-issuer-dev/cert/"
+# Since 0.11.0 key attestations are checked against local trust anchors when
+# the trust validator is off, as it is here, and almost every credential
+# requires one (key_attestations_required). Their anchor is the wallet
+# provider's certificate, which compose mounts here; cert/ holds GRNET's IACA,
+# which anchors PIDs presented back, and must not anchor key attestations.
+trusted_CAs_paths:
+  key_attestation: "/etc/eudiw/trust/wallet-providers/"
 
 # ============================================================================
 # CREDENTIALS AUTHENTICATION METHODS CONFIGURATION
@@ -176,9 +215,8 @@ credential_auth_methods:
 # Currently only _default is supported for both keys and custom_modifiers
 # Eventually keys will be separated by frontend and custom_modifiers per credential_configuration_id
 #
-# Every country signs with GRNET's document signer, except SD-JWT VC PIDs when
-# the deploy provides pid_sd_jwt: GRNET's WE BUILD-onboarded certificate, the one
-# on the Commission's PID providers list (pki-init.sh lays it out in ds-pid/).
+# Every country signs with GRNET's document signer, GRNET PID Provider DS 01,
+# whose IACA is on the Commission's PID providers list.
 # Connection types supported: oauth or openid
 
 countries:
@@ -191,11 +229,6 @@ countries:
         private_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.der"
-      pid_sd_jwt:
-        optional: true
-        private_key_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.key"
-        private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.der"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
@@ -225,13 +258,11 @@ countries:
         private_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.der"
-      pid_sd_jwt:
-        optional: true
-        private_key_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.key"
-        private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.der"
 
-    un_distinguishing_sign: "FC"
+    # FC is not a country: since 0.11.0 credentials carry issuing_country,
+    # which must match the document signer's countryName (C=GR).
+    issuing_country: "GR"
+    un_distinguishing_sign: "GR"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"
@@ -275,11 +306,6 @@ countries:
         private_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.der"
-      pid_sd_jwt:
-        optional: true
-        private_key_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.key"
-        private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.der"
 
     un_distinguishing_sign: "P"
 
@@ -313,11 +339,6 @@ countries:
         private_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
         private_key_password: null
         certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.der"
-      pid_sd_jwt:
-        optional: true
-        private_key_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.key"
-        private_key_password: null
-        certificate_path: "/etc/eudiw/pid-issuer-dev/ds-pid/signing.der"
 
     supported_credential_ids:
       - "eu.europa.ec.eudi.pid_mdoc"

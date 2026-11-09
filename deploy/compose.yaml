@@ -1,6 +1,6 @@
 # The PID issuer, its authorization server, and their Postgres.
 # See deploy/README.md. Use the Deploy workflow, not compose directly: both
-# configs are rendered before compose runs.
+# configs are rendered from their templates before compose runs.
 #
 # proxy-net belongs to eudi-srv-wallet-provider and must be up first.
 
@@ -40,22 +40,23 @@ services:
       VIRTUAL_HOST: ${ISSUER_HOST:?set in stack.env}
       VIRTUAL_PORT: "5000"
       VIRTUAL_PATH: ${OIDC_PATH:?set in stack.env}
-      # Strips the prefix: the app serves at its own root.
-      VIRTUAL_DEST: /
+      # No VIRTUAL_DEST, so the prefix is passed on, not stripped: since 0.10.0
+      # the server serves every route under the path of its domain
+      # (/issuer/oidc/...). The RFC 8414 discovery URLs sit at the host root,
+      # /.well-known/<service>/issuer/oidc/<frontend id>; the edge in
+      # eudi-srv-wallet-provider routes those here.
       LETSENCRYPT_HOST: ${ISSUER_HOST}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:?set in stack.env}
       # Unused by the app: a new wallet provider certificate changes it, so
       # compose recreates the server.
       WALLET_PROVIDER_CERT_SHA256: ${WALLET_PROVIDER_CERT_SHA256:?set by the deploy workflow}
-    # /app exists in the image, /etc/issuer_config does not.
-    command: ["python3", "server.py", "/app/authorization_config.json"]
+      # Likewise for a new config: compose does not recreate a container when
+      # only a config's content changes.
+      OIDC_CONFIG_SHA256: ${OIDC_CONFIG_SHA256:?set by the deploy workflow}
+    # The image's CMD reads its config from here; the image ships none.
     configs:
       - source: oidc-config
-        target: /app/authorization_config.json
-      # Over the shipped copy, which names upstream's host: the well-known
-      # routes send this file as-is and config.json never reaches it.
-      - source: oidc-metadata
-        target: /app/openid-configuration.json
+        target: /etc/issuer_config/authorization_config.yaml
       # The trusted wallet attester, in trusted_attesters_path. Only used when
       # the config names no wallet providers list.
       - source: wallet-provider-cert
@@ -63,6 +64,11 @@ services:
       # The CAs the wallet providers list must be signed under (lote_signer_ca_path).
       - source: ec-lote-signer-cas
         target: /etc/eudiw/pid-issuer-dev/oidc_lote/ec-lote-signer-cas.pem
+    volumes:
+      # The server's keys, generated on first start. Named, so a redeploy keeps
+      # them: new keys would invalidate outstanding tokens and the session_token
+      # the issuer verifies.
+      - oidc-private:/app/private
     networks:
       # The alias is what OIDC_INTERNAL_URL dials.
       proxy-net:
@@ -74,6 +80,9 @@ services:
     image: ${ISSUER_IMAGE:?set by the deploy workflow}
     container_name: eudiw-issuer-pki-init
     restart: "no"
+    # The image runs as an unprivileged user since 0.11.0, and the volume's
+    # files belong to root.
+    user: "0"
     # base64 so compose does not interpolate the script's shell variables.
     # deploy/pki-init.sh is the source; the deploy workflow encodes it.
     entrypoint: ["/bin/sh", "-c"]
@@ -84,16 +93,12 @@ services:
       # Document signer and IACA certificates; the key is the ds-key secret.
       DS_CERT_PEM: ${DS_CERT_PEM:?from WEBUILD/pki/leaves/pid-ds-gr-01/pid-ds-gr-01.crt, see deploy/README.md}
       IACA_PEM: ${IACA_PEM:?from WEBUILD/pki/ca/root-ca-grnet.pem, see deploy/README.md}
-      # Optional PID SD-JWT signer, the WE BUILD-onboarded certificate; the key is
-      # the pid-sd-jwt-key secret. Empty: the document signer signs everything.
-      PID_SD_JWT_CERT_PEM: ${PID_SD_JWT_CERT_PEM:-}
       # Optional registrar WRPAC and WRPRC; the WRPAC key is the wrp-access-key
       # secret. Empty: the document signer signs the metadata, no issuer_info.
       WRP_ACCESS_CERT_PEM: ${WRP_ACCESS_CERT_PEM:-}
       WRP_REGISTRATION_CERT: ${WRP_REGISTRATION_CERT:-}
     secrets:
       - ds-key
-      - pid-sd-jwt-key
       - wrp-access-key
     volumes:
       - pki:/etc/eudiw/pid-issuer-dev
@@ -125,9 +130,16 @@ services:
       # Likewise for the metadata signer and issuer_info: the issuer reads both at
       # startup, so a change must recreate it.
       WRP_SHA256: ${WRP_SHA256:-}
+      # And for a new config.
+      ISSUER_CONFIG_SHA256: ${ISSUER_CONFIG_SHA256:?set by the deploy workflow}
+      # And for a new wallet provider certificate, the key attestations' anchor.
+      WALLET_PROVIDER_CERT_SHA256: ${WALLET_PROVIDER_CERT_SHA256}
     configs:
       - source: issuer-config
         target: /app/config_issuer_backend.yaml
+      # The trust anchor of key attestations (trusted_CAs_paths.key_attestation).
+      - source: wallet-provider-cert
+        target: /etc/eudiw/trust/wallet-providers/wallet-provider.pem
     volumes:
       # Named: the generated keys must survive a redeploy, and the issuer's
       # published JWK is derived from credential_request.pem.
@@ -200,17 +212,9 @@ configs:
   issuer-config:
     content: ${ISSUER_CONFIG:?rendered by the deploy workflow}
 
-  # Rendered by deploy/render-oidc-config.py from the OIDC image's own config.
+  # Rendered from deploy/authorization_config.yaml.template.
   oidc-config:
-    content: |
-      ${OIDC_CONFIG_JSON:?run deploy/render-oidc-config.py, see deploy/README.md}
-
-  # Rendered by deploy/render-oidc-metadata.py from the OIDC image's own copy.
-  # Only changes with the image or OIDC_PUBLIC_URL, and either of those changes
-  # the service too, so compose's not-recreating-on-content-change is moot here.
-  oidc-metadata:
-    content: |
-      ${OIDC_METADATA_JSON:?run deploy/render-oidc-metadata.py, see deploy/README.md}
+    content: ${OIDC_CONFIG:?rendered by the deploy workflow}
 
   # Stock nginx serves .pem as application/x-x509-ca-cert. RFC 2585 names
   # application/pkix-crl for a DER CRL, and strict clients check.
@@ -239,17 +243,15 @@ secrets:
   # Document signer key. A secret, so `docker inspect` does not show it.
   ds-key:
     environment: DS_KEY_PEM
-  # PID SD-JWT signer key. PID_SD_JWT_KEY_PEM must be set, empty if there is
-  # none: compose refuses a secret whose variable is unset.
-  pid-sd-jwt-key:
-    environment: PID_SD_JWT_KEY_PEM
   # Registrar WRPAC key, for the signed metadata. WRP_ACCESS_KEY_PEM must be set,
-  # empty if there is none, as above.
+  # empty if there is none: compose refuses a secret whose variable is unset.
   wrp-access-key:
     environment: WRP_ACCESS_KEY_PEM
 
 volumes:
   pki:
+  # The OIDC server's generated keys.
+  oidc-private:
   # Attestation status, created by the issuer at startup.
   postgres-data:
 

@@ -1,0 +1,308 @@
+# Template for the authorization server's configuration, rendered at deploy
+# time and mounted at /etc/issuer_config/authorization_config.yaml, where the
+# image's CMD reads it (eudi-srv-issuer-oidc-py 0.10.0 ships no config).
+#
+# Upstream's config.yaml (grnet/eudi-srv-issuer-oidc-py), unchanged except for
+# the values marked "GRNET:". The Deploy workflow runs envsubst over it with
+# deploy/stack.env and the repository secrets; see deploy/README.md. Safe to
+# commit: the one secret, backend_api_key, is a placeholder.
+#
+# Authorization server configuration (OpenID4VCI / OAuth 2.0).
+#
+# Start with:  python3 server.py config.yaml   (a .json file with the same
+# keys also works). "{domain}" and "{port}" in any value are replaced by the
+# `domain` and `port` settings below.
+
+# Python logging (logging.config.dictConfig format).
+logging:
+  version: 1
+  disable_existing_loggers: false
+  root:
+    handlers: [console, file]
+    level: INFO                         # DEBUG logs request summaries (secrets are redacted)
+  loggers:
+    idp:
+      level: INFO
+  handlers:
+    console:
+      class: logging.StreamHandler
+      stream: ext://sys.stdout
+      formatter: default
+    file:
+      class: logging.FileHandler
+      filename: /tmp/oidc_log/logs.log   # the folder must exist and be writable
+      formatter: default
+  formatters:
+    default:
+      format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+
+port: 5000                              # value for "{port}"
+# GRNET: under the issuer's hostname, so every route is served under /issuer/oidc
+domain: ${OIDC_DOMAIN}                    # value for "{domain}": public host (and path, if any) of this server
+server_name: "{domain}"
+base_url: ${OIDC_PUBLIC_URL}          # public URL of this server
+# The issuer frontends (the ids of the issuer backend's frontend.frontends_config).
+# This server is the authorization server of each, with its own issuer
+# <op.server_info.issuer>/<frontend id>, e.g. https://as.eudiw.dev/<id>,
+# which the backend publishes in that frontend's authorization_servers.
+# Ids: letters, digits, "_" and "-".
+# GRNET: our one frontend, frontend.default in the issuer config.
+frontends:
+  - ${FRONTEND_ID}
+# Issuer backend page the user's browser is sent to after the authorization
+# request (it receives a signed session_token).
+authorization_redirect_url: ${ISSUER_PUBLIC_URL}/auth_choice
+# Secret shared with the issuer backend (its authorization_server.api_key).
+# It must send it as X-Api-Key to /preauth_generate and /introspection.
+# Placeholders such as "change-me" count as unset: those endpoints then answer 503.
+# GRNET: the OIDC_BACKEND_API_KEY repository secret, also the issuer's
+# authorization_server.api_key.
+backend_api_key: "${OIDC_BACKEND_API_KEY}"
+
+# Per-client rate limits on /token, /pushed_authorization, /authorization and
+# /verify/user (Flask-Limiter, in memory).
+rate_limiting:
+  enabled: true
+  # Number of reverse proxies (nginx, a platform ingress) in front of this
+  # server whose X-Forwarded-For, -Proto and -Host are trusted (1 behind one
+  # proxy). 0 when clients connect directly. Applies with rate limiting off too.
+  trusted_proxies: 1
+  # Addresses (as seen after trusted_proxies) of services that relay wallet
+  # requests and name the wallet in X-Forwarded-For. Their requests are limited
+  # per wallet; without this, every relayed request shares one limit. Only
+  # these peers can choose the limit key.
+  forwarders: []
+
+# Minutes between two removals of expired authorization requests, redeemed
+# authentication tokens and unredeemed pushed requests from memory (default 60).
+cleanup_interval: 60
+
+# --- OpenID4VCI options -------------------------------------------------------
+# OpenID4VCI 1.0 RECOMMENDS these but does not require them. They are on by
+# default; switch one off only to test wallets without the feature. A feature
+# that is switched off but used anyway by a wallet is still fully checked.
+
+# Only pushed authorization requests (PAR, RFC 9126) are accepted; a plain
+# /authorization request without request_uri gets 400.
+require_pushed_authorization_requests: true
+# /token needs a DPoP proof (RFC 9449); without it, tokens would be bearer tokens.
+require_dpop: true
+# Wallets authenticate with a wallet attestation (WIA) at PAR and /token.
+# false also lets them act as public clients.
+require_wallet_attestation: true
+# PKCE is set under op.server_info.add_ons.pkce below.
+
+op:
+  server_info:
+    add_ons:
+      # PKCE (RFC 7636).
+      pkce:
+        function: idpyoidc.server.oauth2.add_on.pkce.add_support
+        kwargs:
+          essential: true                  # false: requests without code_challenge are accepted
+          code_challenge_methods: [S256]   # methods accepted when a code_challenge is sent
+      # DPoP (RFC 9449) proofs at the token endpoint.
+      dpop:
+        function: idpyoidc.server.oauth2.add_on.dpop.add_support
+        kwargs:
+          # Asymmetric signature algorithms accepted for DPoP proofs. A proof's
+          # "htu" must be the token or pushed authorization endpoint of one of
+          # the frontends' issuers (derived from `frontends`).
+          dpop_signing_alg_values_supported: [RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512]
+
+    # Which tokens a grant can produce, and their lifetimes (seconds).
+    authz:
+      class: idpyoidc.server.authz.AuthzHandling
+      kwargs:
+        grant_config:
+          usage_rules:
+            authorization_code:
+              supports_minting: [access_token, refresh_token]
+              max_usage: 1                 # a code is redeemed once
+              expires_in: 3600
+            access_token:
+              expires_in: 300
+            refresh_token:
+              supports_minting: [access_token, refresh_token]
+              expires_in: 604800           # one week: wallets re-issue credentials with it
+          expires_in: 2592000              # lifetime of the grant itself (30 days)
+
+    # User authentication: hands the browser to the issuer backend, which
+    # authenticates the user and returns through /verify/user.
+    authentication:
+      user:
+        acr: urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword
+        class: idpyoidc.server.user_authn.user.EudiwIssuer
+        # kwargs:
+        #   token_lifetime: 1800           # seconds the user has to finish at the backend
+
+    # Values advertised to clients.
+    preference:
+      subject_types_supported: [public, pairwise]
+      grant_types_supported:
+        - authorization_code
+        - implicit
+        - urn:ietf:params:oauth:grant-type:jwt-bearer
+        - refresh_token
+      request_object_signing_alg_values_supported:
+        [RS256, RS384, RS512, ES256, ES384, ES512, HS256, HS384, HS512, PS256, PS384, PS512]
+
+    claims_interface:
+      class: idpyoidc.server.session.claims.ClaimsInterface
+      kwargs: {}
+
+    # Session cookies. Their symmetric keys are generated on first start into
+    # private_path (keep the folder private and persistent).
+    cookie_handler:
+      class: idpyoidc.server.cookie_handler.CookieHandler
+      kwargs:
+        keys:
+          private_path: private/cookie_jwks.json
+          key_defs:
+            - {type: OCT, use: [enc], kid: enc}
+            - {type: OCT, use: [sig], kid: sig}
+          read_only: false               # false: create the keys when missing
+        name:
+          session: oidc_op
+          register: oidc_op_rp
+          session_management: sman
+
+    # Protocol endpoints. "path" is relative to base_url; client_authn_method
+    # null means the endpoint takes no client authentication.
+    endpoint:
+      webfinger:
+        path: .well-known/webfinger
+        class: idpyoidc.server.oidc.discovery.Discovery
+        kwargs:
+          client_authn_method: null
+      provider_info:
+        path: .well-known/openid-configuration
+        class: idpyoidc.server.oidc.provider_config.ProviderConfiguration
+        kwargs:
+          client_authn_method: null
+      # Not routed publicly: used internally to register a wallet's redirect URI.
+      registration:
+        path: registration
+        class: idpyoidc.server.oidc.registration.Registration
+        kwargs:
+          client_authn_method: null
+          client_secret_expiration_time: 432000
+      # Token introspection for the issuer backend (protected by backend_api_key).
+      introspection:
+        path: introspection
+        class: idpyoidc.server.oauth2.introspection.Introspection
+        kwargs:
+          client_authn_method: null
+          release: [username]            # claims returned besides the standard ones
+      authorization:
+        path: authorization
+        class: idpyoidc.server.oidc.authorization.Authorization
+        kwargs:
+          client_authn_method: null
+          claims_parameter_supported: true
+          request_parameter_supported: true
+          request_uri_parameter_supported: null
+          response_types_supported: [code, token, id_token, code token, code id_token, id_token token, code id_token token, none]
+          response_modes_supported: [query, fragment, form_post]
+      token:
+        path: token
+        class: idpyoidc.server.oidc.token.Token
+        kwargs:
+          # Overridden by require_wallet_attestation at start-up.
+          client_authn_method: [wallet_attestation]
+          # Wallet provider certificates (*.pem) trusted for wallet attestations.
+          # Used only without trust_validator_url: with it, the validator alone
+          # decides, and an unreachable validator fails the request.
+          # GRNET: the wallet provider's certificate, which compose mounts here.
+          # Only used when no wallet providers list is configured.
+          trusted_attesters_path: /etc/eudiw/pid-issuer-dev/oidc_trusted_attesters
+          # GRNET: wallet attestations are trusted through the Commission's wallet
+          # providers list (ETSI TS 119 602), signed under the CAs compose mounts
+          # at lote_signer_ca_path, rather than EU's trust validator, which does
+          # not know our wallet provider. Needs GRNET's idpy-oidc (grnet branch).
+          # WALLET_PROVIDERS_LOTE_URL in deploy/stack.env; a deploy can replace
+          # it, e.g. with the list's _empty copy for the testbed's negative cases.
+          wallet_providers_lote_url: ${WALLET_PROVIDERS_LOTE_URL}
+          lote_signer_ca_path: /etc/eudiw/pid-issuer-dev/oidc_lote/ec-lote-signer-cas.pem
+          # Trust validator (checks the attestation's x5c chain) and status
+          # list validator (checks the attestation is not revoked).
+          # GRNET: both off. The trust validator is replaced by the list above;
+          # EU's status validator rejects our status list's signer.
+          trust_validator_url: null
+          status_validator_url: null
+          # Status validator context for the status list behind the WIA's
+          # client_status (wallet provider lists, not PID lists).
+          status_validation_context: WalletOrKeyStorageStatus
+      pushed_authorization:
+        path: pushed_authorization
+        class: idpyoidc.server.oauth2.pushed_authorization.PushedAuthorization
+        kwargs:
+          # Overridden by require_wallet_attestation at start-up.
+          client_authn_method: [wallet_attestation]
+
+    # Outgoing HTTP requests: verify TLS certificates.
+    httpc_params:
+      verify: true
+
+    # Base of the frontends' issuers (<issuer>/<frontend id>) and issuer of the
+    # session tokens handed to the issuer backend. Every route is served under
+    # its path, if it has one (https://host/oidc -> /oidc/...). A trailing
+    # slash is ignored.
+    issuer: "https://{domain}"
+
+    # Signing keys of this server, generated on first start into private_path.
+    # The public keys are written to public_path and served at uri_path.
+    keys:
+      private_path: private/jwks.json
+      key_defs:
+        - {type: RSA, use: [sig]}
+        - {type: EC, crv: P-256, use: [sig]}
+      public_path: static/jwks.json
+      read_only: false
+      uri_path: static/jwks.json
+
+    template_dir: templates
+
+    # Codes and tokens. Lifetimes in seconds.
+    token_handler_args:
+      # Symmetric keys encrypting authorization codes and refresh tokens.
+      jwks_def:
+        private_path: private/token_jwks.json
+        key_defs:
+          - {type: oct, bytes: 24, use: [enc], kid: code}
+          - {type: oct, bytes: 24, use: [enc], kid: refresh}
+        read_only: false
+      code:
+        kwargs:
+          lifetime: 600
+      token:
+        class: idpyoidc.server.token.jwt_token.JWTToken
+        kwargs:
+          lifetime: 3600
+          add_claims: [email, email_verified, phone_number, phone_number_verified]
+          add_claims_by_scope: true
+          aud: ["https://example.org/appl"]
+      refresh:
+        class: idpyoidc.server.token.jwt_token.JWTToken
+        kwargs:
+          lifetime: 604800                 # the authz usage_rules expires_in takes precedence
+          aud: ["https://example.org/appl"]
+      id_token:
+        class: idpyoidc.server.token.id_token.IDToken
+        kwargs:
+          base_claims:
+            email: {essential: true}
+            email_verified: {essential: true}
+
+    # Source of user claims (the issuer backend holds the attributes).
+    userinfo:
+      class: idpyoidc.server.user_info.UserInfo
+
+# Built-in web server (development; production runs the same app in a container).
+webserver:
+  host: 0.0.0.0                         # listen address: 0.0.0.0 in containers, 127.0.0.1 otherwise
+  ca_bundle: null
+  verify_user: false
+  port: 5000
+  domain: "{domain}"
+  debug: false                          # never true in production

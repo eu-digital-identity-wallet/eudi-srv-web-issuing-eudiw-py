@@ -28,14 +28,20 @@ on:
         description: 'OIDC image tag, e.g. sha-4887aaa0... (grnet/eudi-srv-issuer-oidc-py)'
         required: true
         type: string
-      # Compose does not recreate a container when only a config's content
-      # changes, so a config-only fix is deployed but not picked up. Tick this
-      # when the change is to stack.env or either config template.
+      # Both configs carry a hash of their content in the environment, so a
+      # change to stack.env or either template recreates its container anyway.
+      # This is for anything else, e.g. a new WRPRC or wallet provider.
       force_recreate:
         description: 'Recreate containers even if the image tag is unchanged'
         required: false
         default: false
         type: boolean
+      # Empty: WALLET_PROVIDERS_LOTE_URL in deploy/stack.env, the Commission's
+      # list. For the testbed's negative cases, its _empty copy.
+      wallet_providers_lote_url:
+        description: 'Wallet providers list for wallet attestations (default: deploy/stack.env)'
+        required: false
+        type: string
 
 concurrency:
   group: deploy
@@ -140,27 +146,6 @@ jobs:
             exit 1
           fi
 
-      # Reads config.json out of the OIDC image and merges the deploy overrides
-      # over it, so upstream's 355 other lines are used as shipped. Runs locally
-      # against the registry, not on the box.
-      - name: Render the OIDC config
-        id: oidc
-        run: |
-          set -euo pipefail
-          docker pull -q "${{ steps.image.outputs.oidc }}"
-          {
-            echo 'json<<OIDC_EOF'
-            DOCKER_HOST= ./deploy/render-oidc-config.py "${{ steps.image.outputs.oidc }}"
-            echo 'OIDC_EOF'
-          } >> "$GITHUB_OUTPUT"
-          # The server's published metadata, which config.json does not reach.
-          set -a; . deploy/stack.env; set +a
-          {
-            echo 'metadata<<OIDC_EOF'
-            DOCKER_HOST= ./deploy/render-oidc-metadata.py "${{ steps.image.outputs.oidc }}" "$OIDC_PUBLIC_URL"
-            echo 'OIDC_EOF'
-          } >> "$GITHUB_OUTPUT"
-
       # Compose interpolates ${...} client-side, here on the runner, and sends
       # the daemon an already-expanded spec. The values only have to exist in
       # this step's environment; nothing is written to disk on the box.
@@ -168,10 +153,16 @@ jobs:
         env:
           ISSUER_IMAGE: ${{ steps.image.outputs.issuer }}
           OIDC_IMAGE: ${{ steps.image.outputs.oidc }}
-          OIDC_CONFIG_JSON: ${{ steps.oidc.outputs.json }}
-          OIDC_METADATA_JSON: ${{ steps.oidc.outputs.metadata }}
+          LOTE_URL_INPUT: ${{ inputs.wallet_providers_lote_url }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           STATUSLIST_API_KEY: ${{ secrets.STATUSLIST_API_KEY }}
+          # Since 0.11.0 (issuer) and 0.10.0 (OIDC server). ISSUER_BACKEND_API_KEY
+          # is also the frontend's backend_api_key, a secret in its repository;
+          # OIDC_BACKEND_API_KEY is shared by the issuer and the OIDC server.
+          ISSUER_SECRET_KEY: ${{ secrets.ISSUER_SECRET_KEY }}
+          ISSUER_BACKEND_API_KEY: ${{ secrets.ISSUER_BACKEND_API_KEY }}
+          ISSUER_ADMIN_API_KEY: ${{ secrets.ISSUER_ADMIN_API_KEY }}
+          OIDC_BACKEND_API_KEY: ${{ secrets.OIDC_BACKEND_API_KEY }}
           # Variables, not secrets: both are public, and a variable can be read
           # back and compared with WEBUILD/pki. Set with `gh variable set`.
           CRL_PEM: ${{ vars.CRL_PEM }}
@@ -179,11 +170,6 @@ jobs:
           # Document signer: public certificate, secret key.
           DS_CERT_PEM: ${{ vars.DS_CERT_PEM }}
           DS_KEY_PEM: ${{ secrets.DS_KEY_PEM }}
-          # Optional PID SD-JWT signer, GRNET's WE BUILD-onboarded certificate
-          # (WEBUILD/pki/webuild-onboarded). Both empty when not set, which
-          # compose accepts; the document signer then signs everything.
-          PID_SD_JWT_CERT_PEM: ${{ vars.PID_SD_JWT_CERT_PEM }}
-          PID_SD_JWT_KEY_PEM: ${{ secrets.PID_SD_JWT_KEY_PEM }}
           # Optional registrar WRPAC (signs the metadata) and WRPRC (issuer_info),
           # from WEBUILD/pki/registrar/issuer. Empty: the document signer signs
           # the metadata and there is no issuer_info.
@@ -228,21 +214,6 @@ jobs:
           DS_CERT_SHA256=$(openssl x509 -noout -fingerprint -sha256 <<< "$DS_CERT_PEM" | cut -d= -f2)
           export DS_CERT_SHA256
 
-          # The PID SD-JWT signer, if set, must come with its own key.
-          if [[ -n "${PID_SD_JWT_CERT_PEM:-}" ]]; then
-            if [[ -z "${PID_SD_JWT_KEY_PEM:-}" ]]; then
-              echo "::error::PID_SD_JWT_CERT_PEM is set but the secret PID_SD_JWT_KEY_PEM is not"
-              exit 1
-            fi
-            if [[ "$(openssl pkey -pubout <<< "$PID_SD_JWT_KEY_PEM")" != "$(openssl x509 -noout -pubkey <<< "$PID_SD_JWT_CERT_PEM")" ]]; then
-              echo "::error::PID_SD_JWT_KEY_PEM is not the key of PID_SD_JWT_CERT_PEM"
-              exit 1
-            fi
-            echo "PID SD-JWT signer $(openssl x509 -noout -subject -enddate <<< "$PID_SD_JWT_CERT_PEM" | tr '\n' ' ')"
-          else
-            echo "no PID SD-JWT signer; the document signer signs every credential"
-          fi
-
           # The WRPAC, if set, must come with its own key.
           if [[ -n "${WRP_ACCESS_CERT_PEM:-}" ]]; then
             if [[ -z "${WRP_ACCESS_KEY_PEM:-}" ]]; then
@@ -259,33 +230,57 @@ jobs:
           fi
           WRP_SHA256=$(printf '%s|%s' "${WRP_ACCESS_CERT_PEM:-}" "${WRP_REGISTRATION_CERT:-}" | sha256sum | cut -c1-64)
           export WRP_SHA256
+          # pki-init writes the WRPRC only when there is one, and 0.11.0 refuses
+          # to start on an empty file, so the path is left empty without one.
+          WRP_REGISTRATION_CERT_PATH=""
+          if [[ -n "${WRP_REGISTRATION_CERT:-}" ]]; then
+            WRP_REGISTRATION_CERT_PATH=/etc/eudiw/pid-issuer-dev/wrp/registration.jwt
+          fi
+          export WRP_REGISTRATION_CERT_PATH
 
           # Decoded and run by the pki-init container. Encoded so compose does
           # not interpolate the shell variables inside the script.
           PKI_INIT_B64=$(base64 -w0 < deploy/pki-init.sh)
           export PKI_INIT_B64
 
-          # The issuer config, substituted here rather than in the container.
-          # stack.env holds the URLs the template substitutes. Sourced because
+          for k in DATABASE_PASSWORD STATUSLIST_API_KEY ISSUER_SECRET_KEY ISSUER_BACKEND_API_KEY ISSUER_ADMIN_API_KEY OIDC_BACKEND_API_KEY; do
+            if [[ -z "${!k:-}" ]]; then
+              echo "::error::repository secret $k is not set; see deploy/README.md"
+              exit 1
+            fi
+          done
+          # The issuer refuses a shorter session key.
+          if (( ${#ISSUER_SECRET_KEY} < 32 )); then
+            echo "::error::ISSUER_SECRET_KEY is shorter than 32 characters"
+            exit 1
+          fi
+
+          # Both configs, substituted here rather than in the containers.
+          # stack.env holds the URLs the templates substitute. Sourced because
           # envsubst reads the environment, not COMPOSE_ENV_FILES.
           set -a
           . deploy/stack.env
           set +a
           export DATABASE_NAME="${DATABASE_NAME:-eudiw_issuer}"
           export DATABASE_USER="${DATABASE_USER:-postgres}"
-          ISSUER_CONFIG=$(envsubst < deploy/config_issuer_backend.yaml.template)
-          export ISSUER_CONFIG
-          if printf '%s' "$ISSUER_CONFIG" | grep -q '\${'; then
-            echo "::error::unsubstituted variables remain in the issuer config"
-            printf '%s' "$ISSUER_CONFIG" | grep -n '\${'
-            exit 1
+          if [[ -n "${LOTE_URL_INPUT:-}" ]]; then
+            WALLET_PROVIDERS_LOTE_URL="$LOTE_URL_INPUT"
           fi
-          for k in DATABASE_PASSWORD STATUSLIST_API_KEY; do
-            if [[ -z "${!k:-}" ]]; then
-              echo "::error::$k is not set; see deploy/README.md"
+          echo "wallet providers list $WALLET_PROVIDERS_LOTE_URL"
+          ISSUER_CONFIG=$(envsubst < deploy/config_issuer_backend.yaml.template)
+          OIDC_CONFIG=$(envsubst < deploy/authorization_config.yaml.template)
+          for name in ISSUER_CONFIG OIDC_CONFIG; do
+            if printf '%s' "${!name}" | grep -q '\${'; then
+              echo "::error::unsubstituted variables remain in $name"
+              printf '%s' "${!name}" | grep -n '\${'
               exit 1
             fi
           done
+          # Compose does not recreate a container when only a config changes,
+          # but it does when its environment does.
+          ISSUER_CONFIG_SHA256=$(printf '%s' "$ISSUER_CONFIG" | sha256sum | cut -c1-64)
+          OIDC_CONFIG_SHA256=$(printf '%s' "$OIDC_CONFIG" | sha256sum | cut -c1-64)
+          export ISSUER_CONFIG OIDC_CONFIG ISSUER_CONFIG_SHA256 OIDC_CONFIG_SHA256
 
           # The wallet provider's certificate, trusted for wallet attestations.
           if ! WALLET_PROVIDER_CERT_PEM=$(curl -sf --max-time 15 "$WALLET_PROVIDER_JWKS_URL" \
@@ -417,9 +412,15 @@ jobs:
           }
 
           echo "── routing ──"
-          check /issuer/.well-known/openid-credential-issuer 200
-          oidc_path=$(grep -E '^OIDC_PATH=' deploy/stack.env | cut -d= -f2)
-          check "${oidc_path}.well-known/openid-configuration" 200
+          # The backend publishes no metadata of its own since 0.11.0; the
+          # frontend loads it with the API key. 401 without one: routed, up,
+          # and backend_api_key is set (503 if not).
+          check "/issuer/metadata/${FRONTEND_ID}" 401
+          # The authorization server, at the frontend's own issuer, both under
+          # its path and at the RFC 8414 location on the host root (the edge's
+          # discovery rules in eudi-srv-wallet-provider).
+          check "${OIDC_PATH}${FRONTEND_ID}/.well-known/oauth-authorization-server" 200
+          check "/.well-known/oauth-authorization-server${OIDC_PATH%/}/${FRONTEND_ID}" 200
           # Taking new paths on this hostname must not shadow what is already on it.
           check /wallet-provider/jwks 200
           check /token_status_list/swagger/ 200
@@ -447,7 +448,7 @@ jobs:
               | docker exec -i eudiw-issuer python3 -c '
           import base64, sys, jwt
           from cryptography import x509
-          issuer, expected, wrprc = sys.argv[1], base64.b64decode(sys.argv[2]), sys.argv[3]
+          issuer, expected, wrprc, as_issuer = sys.argv[1], base64.b64decode(sys.argv[2]), sys.argv[3], sys.argv[4]
           token = sys.stdin.read().strip()
           header = jwt.get_unverified_header(token)
           leaf = base64.b64decode(header["x5c"][0])
@@ -461,6 +462,9 @@ jobs:
           sub, ci = claims.get("sub"), claims.get("credential_issuer")
           if sub != issuer or ci != issuer:
               errs.append(f"sub {sub}, credential_issuer {ci}, expected {issuer}")
+          servers = claims.get("authorization_servers")
+          if servers != [as_issuer]:
+              errs.append(f"authorization_servers {servers}, expected [{as_issuer}]")
           info = [i.get("data") for i in claims.get("issuer_info") or []]
           if wrprc and info != [wrprc]:
               errs.append("issuer_info is not the WRPRC")
@@ -468,7 +472,7 @@ jobs:
               errs.append("issuer_info present, but no WRPRC was deployed")
           print("; ".join(errs) if errs else f"{alg}, sub {sub}, issuer_info {len(info)}")
           sys.exit(1 if errs else 0)
-          ' "$frontend" "$(openssl x509 -outform DER <<< "$MD_CERT_PEM" | base64 -w0)" "${WRP_REGISTRATION_CERT:-}" 2>&1); then
+          ' "$frontend" "$(openssl x509 -outform DER <<< "$MD_CERT_PEM" | base64 -w0)" "${WRP_REGISTRATION_CERT:-}" "${OIDC_PUBLIC_URL}/${FRONTEND_ID}" 2>&1); then
             echo "  ok   $out, x5c is $(openssl x509 -noout -subject <<< "$MD_CERT_PEM")"
           else
             echo "  FAIL $(printf '%s' "$out" | tail -1)"
