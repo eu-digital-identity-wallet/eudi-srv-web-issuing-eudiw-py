@@ -26,13 +26,20 @@
         "token": {
           "kwargs": {
             "_comment": [
-              "Wallet attestations: trust the wallet provider's certificate,",
-              "mounted by compose, instead of EU's trust validator, which does",
-              "not know it. Revocation is off: EU's status validator rejects our",
-              "status list's signer. Both until we run our own validators."
+              "Wallet attestations: trust the wallet providers on the",
+              "Commission's list (ETSI TS 119 602), signed under the CAs that",
+              "compose mounts at lote_signer_ca_path, instead of EU's trust",
+              "validator. The pinned wallet provider certificate, also mounted,",
+              "is only used without the list. render-oidc-config.py replaces",
+              "the list with WALLET_PROVIDERS_LOTE_URL when set, e.g. its",
+              "_empty twin for the Launchpad testbed's negative cases.",
+              "Revocation is off: EU's status validator rejects our status",
+              "list's signer."
             ],
             "trust_validator_url": null,
-            "status_validator_url": null
+            "status_validator_url": null,
+            "wallet_providers_lote_url": "https://development.trust.tech.ec.europa.eu/lists/eudiw/wallet-providers.json",
+            "lote_signer_ca_path": "/etc/eudiw/pid-issuer-dev/oidc_lote/ec-lote-signer-cas.pem"
           }
         }
       },

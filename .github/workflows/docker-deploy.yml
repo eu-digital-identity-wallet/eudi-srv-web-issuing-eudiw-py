@@ -184,6 +184,12 @@ jobs:
           # compose accepts; the document signer then signs everything.
           PID_SD_JWT_CERT_PEM: ${{ vars.PID_SD_JWT_CERT_PEM }}
           PID_SD_JWT_KEY_PEM: ${{ secrets.PID_SD_JWT_KEY_PEM }}
+          # Optional registrar WRPAC (signs the metadata) and WRPRC (issuer_info),
+          # from WEBUILD/pki/registrar/issuer. Empty: the document signer signs
+          # the metadata and there is no issuer_info.
+          WRP_ACCESS_CERT_PEM: ${{ vars.WRP_ACCESS_CERT_PEM }}
+          WRP_ACCESS_KEY_PEM: ${{ secrets.WRP_ACCESS_KEY_PEM }}
+          WRP_REGISTRATION_CERT: ${{ vars.WRP_REGISTRATION_CERT }}
         run: |
           set -euo pipefail
 
@@ -237,6 +243,23 @@ jobs:
             echo "no PID SD-JWT signer; the document signer signs every credential"
           fi
 
+          # The WRPAC, if set, must come with its own key.
+          if [[ -n "${WRP_ACCESS_CERT_PEM:-}" ]]; then
+            if [[ -z "${WRP_ACCESS_KEY_PEM:-}" ]]; then
+              echo "::error::WRP_ACCESS_CERT_PEM is set but the secret WRP_ACCESS_KEY_PEM is not"
+              exit 1
+            fi
+            if [[ "$(openssl pkey -pubout <<< "$WRP_ACCESS_KEY_PEM")" != "$(openssl x509 -noout -pubkey <<< "$WRP_ACCESS_CERT_PEM")" ]]; then
+              echo "::error::WRP_ACCESS_KEY_PEM is not the key of WRP_ACCESS_CERT_PEM"
+              exit 1
+            fi
+            echo "metadata signer (WRPAC) $(openssl x509 -noout -subject -enddate <<< "$WRP_ACCESS_CERT_PEM" | tr '\n' ' ')"
+          else
+            echo "no WRPAC; the document signer signs the metadata"
+          fi
+          WRP_SHA256=$(printf '%s|%s' "${WRP_ACCESS_CERT_PEM:-}" "${WRP_REGISTRATION_CERT:-}" | sha256sum | cut -c1-64)
+          export WRP_SHA256
+
           # Decoded and run by the pki-init container. Encoded so compose does
           # not interpolate the shell variables inside the script.
           PKI_INIT_B64=$(base64 -w0 < deploy/pki-init.sh)
@@ -274,6 +297,10 @@ jobs:
           WALLET_PROVIDER_CERT_SHA256=$(openssl x509 -noout -fingerprint -sha256 <<< "$WALLET_PROVIDER_CERT_PEM" | cut -d= -f2)
           export WALLET_PROVIDER_CERT_PEM WALLET_PROVIDER_CERT_SHA256
 
+          # The CAs the wallet providers list must be signed under.
+          EC_LOTE_SIGNER_CAS_PEM=$(cat deploy/ec-lote-signer-cas.pem)
+          export EC_LOTE_SIGNER_CAS_PEM
+
           export COMPOSE_ENV_FILES=deploy/stack.env
 
           recreate=""
@@ -308,9 +335,13 @@ jobs:
       - name: Verify
         env:
           DS_CERT_PEM: ${{ vars.DS_CERT_PEM }}
+          WRP_ACCESS_CERT_PEM: ${{ vars.WRP_ACCESS_CERT_PEM }}
+          WRP_REGISTRATION_CERT: ${{ vars.WRP_REGISTRATION_CERT }}
         run: |
           set -uo pipefail
           fail=0
+          # The certificate the signed metadata must carry.
+          MD_CERT_PEM="${WRP_ACCESS_CERT_PEM:-$DS_CERT_PEM}"
 
           echo "── containers ──"
           for c in eudiw-issuer-db eudiw-oidc eudiw-issuer eudiw-crl; do
@@ -403,7 +434,8 @@ jobs:
           check "${pki_path}root-ca-grnet.pem" 301 http
 
           echo "── signed metadata ──"
-          # Checked as the wallet does; x5c must be DS_CERT_PEM. PyJWT is in
+          # Checked as the wallet does; x5c must be the WRPAC if set, else
+          # DS_CERT_PEM, and issuer_info must be the WRPRC if set. PyJWT is in
           # the issuer's container.
           frontend=$(grep -E '^FRONTEND_PUBLIC_URL=' deploy/stack.env | cut -d= -f2)
           md_url="https://${host}/.well-known/openid-credential-issuer/${frontend#https://*/}"
@@ -415,7 +447,7 @@ jobs:
               | docker exec -i eudiw-issuer python3 -c '
           import base64, sys, jwt
           from cryptography import x509
-          issuer, expected = sys.argv[1], base64.b64decode(sys.argv[2])
+          issuer, expected, wrprc = sys.argv[1], base64.b64decode(sys.argv[2]), sys.argv[3]
           token = sys.stdin.read().strip()
           header = jwt.get_unverified_header(token)
           leaf = base64.b64decode(header["x5c"][0])
@@ -424,15 +456,20 @@ jobs:
           if typ != "openidvci-issuer-metadata+jwt":
               errs.append(f"typ is {typ}")
           if leaf != expected:
-              errs.append("x5c leaf is not DS_CERT_PEM")
+              errs.append("x5c leaf is not the expected metadata signer")
           claims = jwt.decode(token, x509.load_der_x509_certificate(leaf).public_key(), algorithms=[alg])
           sub, ci = claims.get("sub"), claims.get("credential_issuer")
           if sub != issuer or ci != issuer:
               errs.append(f"sub {sub}, credential_issuer {ci}, expected {issuer}")
-          print("; ".join(errs) if errs else f"{alg}, sub {sub}")
+          info = [i.get("data") for i in claims.get("issuer_info") or []]
+          if wrprc and info != [wrprc]:
+              errs.append("issuer_info is not the WRPRC")
+          if not wrprc and info:
+              errs.append("issuer_info present, but no WRPRC was deployed")
+          print("; ".join(errs) if errs else f"{alg}, sub {sub}, issuer_info {len(info)}")
           sys.exit(1 if errs else 0)
-          ' "$frontend" "$(openssl x509 -outform DER <<< "$DS_CERT_PEM" | base64 -w0)" 2>&1); then
-            echo "  ok   $out, x5c is DS_CERT_PEM"
+          ' "$frontend" "$(openssl x509 -outform DER <<< "$MD_CERT_PEM" | base64 -w0)" "${WRP_REGISTRATION_CERT:-}" 2>&1); then
+            echo "  ok   $out, x5c is $(openssl x509 -noout -subject <<< "$MD_CERT_PEM")"
           else
             echo "  FAIL $(printf '%s' "$out" | tail -1)"
             fail=1

@@ -57,6 +57,39 @@ Nothing keeps `STATUSLIST_API_KEY` in step with the status list's copy. Changing
 one without the other means every credential issuance fails at the revocation
 call.
 
+Optional, for the access and registration certificates below: the variables
+`WRP_ACCESS_CERT_PEM` and `WRP_REGISTRATION_CERT`, and the secret
+`WRP_ACCESS_KEY_PEM`. Unset, the document signer signs the metadata and there
+is no `issuer_info`.
+
+    gh variable set WRP_ACCESS_CERT_PEM   --repo grnet/eudi-srv-web-issuing-eudiw-py < ../pki/registrar/issuer/wrpac.pem
+    gh secret set   WRP_ACCESS_KEY_PEM    --repo grnet/eudi-srv-web-issuing-eudiw-py < ../pki/registrar/issuer/wrpac.key
+    gh variable set WRP_REGISTRATION_CERT --repo grnet/eudi-srv-web-issuing-eudiw-py < ../pki/registrar/issuer/wrprc.jwt
+
+## The access and registration certificates
+
+Wallets check the certificate in the signed metadata's `x5c` against the
+Commission's list of access certificate providers (`wrpac-providers`), and
+read the issuer's registration certificate from `issuer_info`. GRNET's come
+from the EUDI Wallets Launchpad registrar (`itb.registry.serviceproviders.eudiw.dev`):
+the WRPAC `CN=GRNET Issuer, O=GRNET S.A., organizationIdentifier=VATGR-EL094536469`,
+issued by `PID Issuer CA 02` (on the Commission's list and on upstream's), and
+the WRPRC with `sub` `VATGR-EL094536469` and the PID, QEAA, public EAA and
+non-qualified EAA provider entitlements. Both valid to October 2028. Kept in
+`WEBUILD/pki/registrar/issuer/`.
+
+`pki-init` writes them to `wrp/` in the volume, and the config points the
+frontend's metadata key, certificate and `registration_certificate_path` there.
+Without them it copies the document signer into `wrp/` and leaves
+`registration.jwt` empty, which the app reads as no `issuer_info`. The issuer's
+environment carries `WRP_SHA256`, so a change recreates it.
+
+**The WRPRC registers the SD-JWT VC PID only** (`provides_attestations`). A
+wallet that enforces the registration blocks the other credentials from this
+issuer as over-provided: the mdoc PID, the payment card, the mDL. GRNET's wallet
+enforces it only with "Check Registration Certificates" on, which is off by
+default.
+
 ## Routing
 
 Every service shares `demo.eudiw.grnet.gr`, the only hostname that exists, and is

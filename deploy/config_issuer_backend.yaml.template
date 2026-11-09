@@ -33,10 +33,14 @@ frontend:
     "5d725b3c-6d42-448e-8bfd-1eff1fcf152d":
       url: "${FRONTEND_PUBLIC_URL}"
       # Upstream's example points these at a path on its own dev machine.
-      # GRNET's document signer, from pki-init.
-      metadata_signing_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
-      metadata_access_certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.pem"
+      # From pki-init: the registrar's WRPAC when the deploy provides one,
+      # otherwise a copy of GRNET's document signer.
+      metadata_signing_key_path: "/etc/eudiw/pid-issuer-dev/wrp/signing.key"
+      metadata_access_certificate_path: "/etc/eudiw/pid-issuer-dev/wrp/signing.pem"
       metadata_signing_key_password: null
+      # The registrar's WRPRC, published as issuer_info. Empty when the deploy
+      # provides none, and the app then leaves issuer_info out.
+      registration_certificate_path: "/etc/eudiw/pid-issuer-dev/wrp/registration.jwt"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION

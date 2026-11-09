@@ -12,6 +12,7 @@ rather than append: allowed_htu is an allowlist, and appending to upstream's
 would leave eudiw.dev URLs on it.
 """
 import json
+import os
 import subprocess
 import sys
 
@@ -43,7 +44,15 @@ def main():
     with open(f"{here}/oidc-config.patch.json") as f:
         patch = json.load(f)
 
-    print(json.dumps(merge(json.loads(shipped), patch), indent=2))
+    config = merge(json.loads(shipped), patch)
+
+    # The wallet providers list for this deploy, e.g. the _empty twin for the
+    # Launchpad testbed's negative cases; the patch's otherwise.
+    lote_url = os.environ.get("WALLET_PROVIDERS_LOTE_URL")
+    if lote_url:
+        config["op"]["server_info"]["endpoint"]["token"]["kwargs"]["wallet_providers_lote_url"] = lote_url
+
+    print(json.dumps(config, indent=2))
 
 
 if __name__ == "__main__":

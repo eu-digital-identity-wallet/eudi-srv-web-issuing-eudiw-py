@@ -56,9 +56,13 @@ services:
       # routes send this file as-is and config.json never reaches it.
       - source: oidc-metadata
         target: /app/openid-configuration.json
-      # The trusted wallet attester, in trusted_attesters_path.
+      # The trusted wallet attester, in trusted_attesters_path. Only used when
+      # the config names no wallet providers list.
       - source: wallet-provider-cert
         target: /etc/eudiw/pid-issuer-dev/oidc_trusted_attesters/wallet-provider.pem
+      # The CAs the wallet providers list must be signed under (lote_signer_ca_path).
+      - source: ec-lote-signer-cas
+        target: /etc/eudiw/pid-issuer-dev/oidc_lote/ec-lote-signer-cas.pem
     networks:
       # The alias is what OIDC_INTERNAL_URL dials.
       proxy-net:
@@ -83,9 +87,14 @@ services:
       # Optional PID SD-JWT signer, the WE BUILD-onboarded certificate; the key is
       # the pid-sd-jwt-key secret. Empty: the document signer signs everything.
       PID_SD_JWT_CERT_PEM: ${PID_SD_JWT_CERT_PEM:-}
+      # Optional registrar WRPAC and WRPRC; the WRPAC key is the wrp-access-key
+      # secret. Empty: the document signer signs the metadata, no issuer_info.
+      WRP_ACCESS_CERT_PEM: ${WRP_ACCESS_CERT_PEM:-}
+      WRP_REGISTRATION_CERT: ${WRP_REGISTRATION_CERT:-}
     secrets:
       - ds-key
       - pid-sd-jwt-key
+      - wrp-access-key
     volumes:
       - pki:/etc/eudiw/pid-issuer-dev
     networks:
@@ -113,6 +122,9 @@ services:
       ISSUER_CONFIG_PATH: /app/config_issuer_backend.yaml
       # Unused by the app: a new signer changes it, so compose recreates the issuer.
       DS_CERT_SHA256: ${DS_CERT_SHA256:?set by the deploy workflow}
+      # Likewise for the metadata signer and issuer_info: the issuer reads both at
+      # startup, so a change must recreate it.
+      WRP_SHA256: ${WRP_SHA256:-}
     configs:
       - source: issuer-config
         target: /app/config_issuer_backend.yaml
@@ -217,6 +229,12 @@ configs:
   wallet-provider-cert:
     content: ${WALLET_PROVIDER_CERT_PEM:?set by the deploy workflow}
 
+  # The Commission's LoTE signing chain, deploy/ec-lote-signer-cas.pem. Content,
+  # not file: a file config is a bind mount from this machine, which a remote
+  # DOCKER_HOST does not have.
+  ec-lote-signer-cas:
+    content: ${EC_LOTE_SIGNER_CAS_PEM:?from deploy/ec-lote-signer-cas.pem, set by the deploy workflow}
+
 secrets:
   # Document signer key. A secret, so `docker inspect` does not show it.
   ds-key:
@@ -225,6 +243,10 @@ secrets:
   # none: compose refuses a secret whose variable is unset.
   pid-sd-jwt-key:
     environment: PID_SD_JWT_KEY_PEM
+  # Registrar WRPAC key, for the signed metadata. WRP_ACCESS_KEY_PEM must be set,
+  # empty if there is none, as above.
+  wrp-access-key:
+    environment: WRP_ACCESS_KEY_PEM
 
 volumes:
   pki:

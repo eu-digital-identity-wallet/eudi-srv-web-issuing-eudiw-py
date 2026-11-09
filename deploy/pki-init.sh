@@ -100,6 +100,34 @@ else
     echo "pki-init: no PID SD-JWT signer; the document signer signs every credential"
 fi
 
+# Optional: the access certificate (WRPAC) and registration certificate (WRPRC)
+# the Launchpad registrar issued for the issuer. The WRPAC signs the frontend's
+# metadata, which wallets check against the Commission's WRPAC providers list;
+# the WRPRC goes into the metadata as issuer_info. Without a WRPAC the document
+# signer signs the metadata, as before, and registration.jwt is left empty,
+# which the app reads as no issuer_info. Rewritten on every run.
+WRP_DIR="$OUT/wrp"
+WRP_ACCESS_KEY_FILE="${WRP_ACCESS_KEY_FILE:-/run/secrets/wrp-access-key}"
+rm -rf "$WRP_DIR"
+mkdir -p "$WRP_DIR"
+if [ -n "${WRP_ACCESS_CERT_PEM:-}" ] && [ -s "$WRP_ACCESS_KEY_FILE" ]; then
+    printf '%s\n' "$WRP_ACCESS_CERT_PEM" | openssl x509 -out "$WRP_DIR/signing.pem"
+    printf '%s\n' "$(cat "$WRP_ACCESS_KEY_FILE")" > "$WRP_DIR/signing.key"
+    if [ "$(openssl pkey -in "$WRP_DIR/signing.key" -pubout)" != "$(openssl x509 -in "$WRP_DIR/signing.pem" -noout -pubkey)" ]; then
+        echo "pki-init: the WRPAC key does not belong to its certificate" >&2
+        exit 1
+    fi
+    echo "pki-init: metadata signed by WRPAC $(openssl x509 -in "$WRP_DIR/signing.pem" -noout -subject)"
+else
+    cp -f "$DS_DIR/signing.pem" "$DS_DIR/signing.key" "$WRP_DIR/"
+    echo "pki-init: no WRPAC; the document signer signs the metadata"
+fi
+printf '%s' "${WRP_REGISTRATION_CERT:-}" > "$WRP_DIR/registration.jwt"
+if [ -s "$WRP_DIR/registration.jwt" ]; then
+    echo "pki-init: issuer_info carries the WRPRC"
+fi
+chmod 644 "$WRP_DIR"/*
+
 # Trust our IACA for PIDs presented back to the issuer.
 printf '%s\n' "$IACA_PEM" > "$CERT_DIR/root-ca-grnet.pem"
 
