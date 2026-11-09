@@ -63,6 +63,46 @@ frontend:
       # empty when it provides no WRPRC: 0.11.0 refuses to start on an empty
       # file, but skips an empty path.
       registration_certificate_path: "${WRP_REGISTRATION_CERT_PATH}"
+      # The credentials this frontend advertises. Was credentials_supported in
+      # the frontend's own config until 0.11.0; the same list, which leaves out
+      # the AAMVA mDL and the two age verification credentials.
+      credentials_supported:
+        - "org.iso.18013.5.1.reservation_mdoc"
+        - "eu.europa.ec.eudi.cor_mdoc"
+        - "eu.europa.ec.eudi.diploma_vc_sd_jwt"
+        - "eu.europa.ec.eudi.ehic_sd_jwt_vc"
+        - "eu.europa.ec.eudi.ehic_mdoc"
+        - "eu.europa.ec.eudi.employee_mdoc"
+        - "eu.europa.ec.eudi.hiid_sd_jwt_vc"
+        - "eu.europa.ec.eudi.hiid_mdoc"
+        - "eu.europa.ec.eudi.iban_sd_jwt_vc"
+        - "eu.europa.ec.eudi.iban_mdoc"
+        - "eu.europa.ec.eudi.loyalty_mdoc"
+        - "eu.europa.ec.eudi.mdl_mdoc"
+        - "eu.europa.ec.eudi.msisdn_sd_jwt_vc"
+        - "eu.europa.ec.eudi.msisdn_mdoc"
+        - "eu.europa.ec.eudi.pda1_sd_jwt_vc"
+        - "eu.europa.ec.eudi.pda1_mdoc"
+        - "eu.europa.ec.eudi.photoid"
+        - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+        - "eu.europa.ec.eudi.pid_mdoc_deferred"
+        - "eu.europa.ec.eudi.pid_mdoc"
+        - "eu.europa.ec.eudi.por_sd_jwt_vc"
+        - "eu.europa.ec.eudi.por_mdoc"
+        - "eu.europa.ec.eudi.seafarer_mdoc"
+        - "eu.europa.ec.eudi.tax_sd_jwt_vc"
+        - "eu.europa.ec.eudi.tax_mdoc"
+        - "eu.europa.ec.eudi.tax_residency_vc_sd_jwt"
+        - "eu.europa.ec.eudi.learning_credential_vc_sd_jwt"
+        - "org.iso.7367.2.1.mVC_mdoc"
+        - "eu.webuildconsortium.sca.user_mdoc"
+        - "eu.webuildconsortium.sca.card_dpc_sd_jwt"
+        - "eu.webuildconsortium.sca.iban_mdoc"
+        - "eu.webuildconsortium.sca.iban_sd_jwt"
+        - "eu.webuildconsortium.iban_ov_sd_jwt"
+        - "eu.webuildconsortium.eucc_sd_jwt"
+        - "eu.webuildconsortium.ereceipt_sd_jwt"
+        - "eu.webuildconsortium.eu_poa_sd_jwt"
 
 # ============================================================================
 # ISSUER AUTHORIZATION SERVER CONFIGURATION
