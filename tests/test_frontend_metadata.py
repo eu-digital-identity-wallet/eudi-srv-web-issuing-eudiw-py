@@ -176,6 +176,13 @@ class TestBuildFrontendMetadata:
             BACKEND_CLEAN_METADATA["credential_configurations_supported"]
         )
 
+    def test_logo_uri_of_the_frontend(self, signing_material):
+        # GRNET fork: a frontend's own logo, instead of its /ic-logo.png.
+        logo = "https://frontend.test/static/our-logo.png"
+        with patch_configuration(_config(signing_material, logo_uri=logo)):
+            issuer = build_frontend_metadata(FRONTEND_ID).openid_credential_issuer
+        assert issuer["display"][0]["logo"]["uri"] == logo
+
     def test_credentials_filter(self, signing_material):
         with patch_configuration(_config(signing_material, credentials_supported=["eu.europa.ec.eudi.mdl_mdoc"])):
             issuer = build_frontend_metadata(FRONTEND_ID).openid_credential_issuer

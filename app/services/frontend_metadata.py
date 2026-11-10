@@ -262,7 +262,9 @@ def build_frontend_metadata(frontend_id: str) -> FrontendMetadata:
 
     issuer_metadata["credential_issuer"] = frontend_url
     issuer_metadata["authorization_servers"] = [authorization_server_issuer(frontend_id)]
-    issuer_metadata["display"][0]["logo"]["uri"] = f"{frontend_url}/ic-logo.png"
+    # GRNET fork: a frontend may name its own logo (logo_uri); upstream always
+    # publishes the frontend's /ic-logo.png, the EUDI Wallet logo.
+    issuer_metadata["display"][0]["logo"]["uri"] = frontend.get("logo_uri") or f"{frontend_url}/ic-logo.png"
     if frontend.get("registration_certificate"):
         issuer_metadata["issuer_info"] = [
             {"format": "registration_cert", "data": frontend["registration_certificate"]}

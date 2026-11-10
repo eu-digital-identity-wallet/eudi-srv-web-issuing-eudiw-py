@@ -53,6 +53,10 @@ frontend:
   frontends_config:
     "${FRONTEND_ID}":
       url: "${FRONTEND_PUBLIC_URL}"
+      # GRNET fork: the issuer logo the frontend's metadata publishes, which
+      # wallets show beside every credential from this issuer. Without it,
+      # upstream publishes <url>/ic-logo.png, the EUDI Wallet logo.
+      logo_uri: "${FRONTEND_PUBLIC_URL}/static/logo_gov_gr_emblem_tile_beta.png"
       # Upstream's example points these at a path on its own dev machine.
       # From pki-init: the registrar's WRPAC when the deploy provides one,
       # otherwise a copy of GRNET's document signer.
