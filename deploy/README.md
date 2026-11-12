@@ -46,8 +46,9 @@ box by hand. See "The document signer" below.
 | `ISSUER_BACKEND_API_KEY` | `X-Api-Key` the frontend sends to load its metadata (`backend_api_key`). The same value is the frontend repository's secret of the same name. |
 | `ISSUER_ADMIN_API_KEY` | `X-Api-Key` of the administrative endpoints (`/logs`, `/admin/...`, `/metadata/metadata_signer`). Never given to a frontend. |
 | `OIDC_BACKEND_API_KEY` | `X-Api-Key` the issuer sends to the OIDC server's `/introspection` and `/preauth_generate`: the issuer's `authorization_server.api_key` and the OIDC server's `backend_api_key`. |
+| `GR_OIDC_CLIENT_SECRET` | Client secret at the third-party OpenID Connect provider behind the `GR` country (`countries.GR.auth.client_secret`). Optional: the deploy only warns without it, but the GR login then fails. Its base URL and client id are `GR_OIDC_BASE_URL` and `GR_OIDC_CLIENT_ID` in `stack.env`. |
 
-The last four arrived with 0.11.0 (issuer) and 0.10.0 (OIDC server). Generated,
+The four before it arrived with 0.11.0 (issuer) and 0.10.0 (OIDC server). Generated,
 each a different random value:
 
     for s in ISSUER_SECRET_KEY ISSUER_BACKEND_API_KEY ISSUER_ADMIN_API_KEY OIDC_BACKEND_API_KEY; do

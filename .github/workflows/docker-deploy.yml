@@ -163,6 +163,9 @@ jobs:
           ISSUER_BACKEND_API_KEY: ${{ secrets.ISSUER_BACKEND_API_KEY }}
           ISSUER_ADMIN_API_KEY: ${{ secrets.ISSUER_ADMIN_API_KEY }}
           OIDC_BACKEND_API_KEY: ${{ secrets.OIDC_BACKEND_API_KEY }}
+          # Client secret at the OpenID Connect provider of the GR country.
+          # Optional: without it GR is still listed but its login fails.
+          GR_OIDC_CLIENT_SECRET: ${{ secrets.GR_OIDC_CLIENT_SECRET }}
           # Variables, not secrets: both are public, and a variable can be read
           # back and compared with WEBUILD/pki. Set with `gh variable set`.
           CRL_PEM: ${{ vars.CRL_PEM }}
@@ -249,6 +252,9 @@ jobs:
               exit 1
             fi
           done
+          if [[ -z "${GR_OIDC_CLIENT_SECRET:-}" ]]; then
+            echo "::warning::repository secret GR_OIDC_CLIENT_SECRET is not set; PID issuance through the GR identity provider will fail"
+          fi
           # The issuer refuses a shorter session key.
           if (( ${#ISSUER_SECRET_KEY} < 32 )); then
             echo "::error::ISSUER_SECRET_KEY is shorter than 32 characters"

@@ -6,8 +6,9 @@
 # /app/config_issuer_backend.yaml. Nothing is written to the box.
 #
 # Safe to commit: the secrets (STATUSLIST_API_KEY, DATABASE_PASSWORD,
-# ISSUER_SECRET_KEY, ISSUER_BACKEND_API_KEY, ISSUER_ADMIN_API_KEY and
-# OIDC_BACKEND_API_KEY) are placeholders filled from repository secrets. The `client_secret: "example"`
+# ISSUER_SECRET_KEY, ISSUER_BACKEND_API_KEY, ISSUER_ADMIN_API_KEY,
+# OIDC_BACKEND_API_KEY and GR_OIDC_CLIENT_SECRET) are placeholders filled from
+# repository secrets. The `client_secret: "example"`
 # values below are upstream's own placeholders for eIDAS node connections we do
 # not use; they would become secrets if those are ever enabled.
 
@@ -341,6 +342,50 @@ countries:
       - "eu.webuildconsortium.sca.user_mdoc"
       - "eu.webuildconsortium.sca.card_dpc_sd_jwt"
 
+  # A third-party OpenID Connect provider authenticates the user and its
+  # userinfo claims become the PID attributes (app/services/countries.py).
+  # The key is the ISO 3166-1 code: it is written as nationality and
+  # issuing_country, and matches the document signer's countryName (C=GR).
+  #
+  # At the provider: a confidential client that authenticates to the token
+  # endpoint with client_secret_basic, does not require PKCE (the issuer sends
+  # no code_challenge), and has redirect_uri below registered exactly.
+  GR:
+    name: "Greece"
+
+    keys:
+      _default:
+        private_key_path: "/etc/eudiw/pid-issuer-dev/ds/signing.key"
+        private_key_password: null
+        certificate_path: "/etc/eudiw/pid-issuer-dev/ds/signing.der"
+
+    un_distinguishing_sign: "GR"
+
+    supported_credential_ids:
+      - "eu.europa.ec.eudi.pid_mdoc"
+      - "eu.europa.ec.eudi.pid_vc_sd_jwt"
+      - "eu.europa.ec.eudi.pid_mdoc_deferred"
+
+    connection_type: "openid"
+
+    auth:
+      # The provider's issuer, no trailing slash: the issuer reads
+      # <base_url>/.well-known/openid-configuration.
+      base_url: "${GR_OIDC_BASE_URL}"
+      redirect_uri: "${ISSUER_PUBLIC_URL}/dynamic/redirect"
+      # Percent-encoded on purpose: the authorization URL is built by plain
+      # concatenation, so a space would go out raw in the Location header.
+      scope: "openid%20profile"
+      response_type: "code"
+      client_id: "${GR_OIDC_CLIENT_ID}"
+      client_secret: "${GR_OIDC_CLIENT_SECRET}"
+
+    # {PID attribute: userinfo claim}. given_name and family_name already have
+    # the PID's names. place_of_birth has no default for GR in the code, so it
+    # is in the PID only if the provider returns a claim of that name.
+    custom_modifiers:
+      _default:
+        birth_date: "birthdate"
 
   PT:
     name: "Portugal"
